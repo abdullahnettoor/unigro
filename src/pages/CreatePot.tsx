@@ -76,6 +76,7 @@ export function CreatePot() {
                 await updatePot({
                     potId: editPotId,
                     ...formData,
+                    totalSlots: formData.duration, // Ensure totalSlots is updated
                     commission: Number(formData.commission),
                     gracePeriodDays: Number(formData.gracePeriodDays),
                     startDate: new Date(formData.startDate).getTime(),
@@ -84,6 +85,7 @@ export function CreatePot() {
             } else {
                 potId = await createPot({
                     ...formData,
+                    totalSlots: formData.duration, // Map duration to totalSlots
                     commission: Number(formData.commission), // Ensure number
                     gracePeriodDays: Number(formData.gracePeriodDays),
                     startDate: new Date(formData.startDate).getTime(),
@@ -105,7 +107,7 @@ export function CreatePot() {
                 <ChevronLeft size={20} /> Back
             </button>
 
-            <h1 className="text-4xl font-display font-bold mb-2">Create New Pot</h1>
+            <h1 className="text-4xl font-display font-bold mb-2"> {editPotId ? "Edit Pot" : "Create New Pot"}</h1>
             <p className="text-gray-400 mb-8">Set up the financial rules for your community.</p>
 
             <form onSubmit={handleSubmit} className="space-y-8">
@@ -206,23 +208,17 @@ export function CreatePot() {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                                <Calendar size={16} /> {formData.frequency === 'occasional' ? 'Cycles' : 'Duration (Cycles)'}
+                                <Calendar size={16} /> {formData.frequency === 'occasional' ? 'Total Slots (Participants)' : 'Duration (Cycles)'}
                             </label>
-                            {formData.frequency === 'occasional' ? (
-                                <div className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-gray-400 italic">
-                                    Determined by number of members (1:1)
-                                </div>
-                            ) : (
-                                <input
-                                    type="number"
-                                    required
-                                    min={2}
-                                    max={60}
-                                    value={formData.duration}
-                                    onChange={(e) => handleDurationChange(Number(e.target.value))}
-                                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white font-mono focus:outline-none focus:border-[#C1FF72]"
-                                />
-                            )}
+                            <input
+                                type="number"
+                                required
+                                min={2}
+                                max={60}
+                                value={formData.duration}
+                                onChange={(e) => handleDurationChange(Number(e.target.value))}
+                                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white font-mono focus:outline-none focus:border-[#C1FF72]"
+                            />
                         </div>
 
                         <div>
@@ -298,7 +294,7 @@ export function CreatePot() {
                         disabled={isSubmitting}
                         className="bg-[#C1FF72] text-[#1B3022] font-bold px-8 py-3 rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 w-full md:w-auto justify-center"
                     >
-                        {isSubmitting ? "Creating..." : "Create Pot"}
+                        {isSubmitting ? "Saving..." : (editPotId ? "Update Pot" : "Create Pot")}
                     </button>
                 </div>
             </form>

@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+declare const process: any;
+
 /**
  * Stores a user in the database after Clerk authentication.
  * Implements the "Ghost Claim" logic:
@@ -125,42 +127,27 @@ export const updateProfile = mutation({
             .collect();
 
         for (const ghost of ghosts) {
-            if (ghost._id === user._id) continue; // Should not happen, but safety check
+            if (ghost._id === user._id) continue;
 
-            // 1. Migrate Memberships
-            const memberships = await ctx.db
-                .query("members")
+            // 1. Migrate Slots (Ownership)
+            const slots = await ctx.db
+                .query("slots")
                 .withIndex("by_user_pot", (q) => q.eq("userId", ghost._id))
                 .collect();
 
-            for (const membership of memberships) {
-                // Check if current user is already in this pot (edge case)
-                const existingMembership = await ctx.db
-                    .query("members")
-                    .withIndex("by_user_pot", (q) => q.eq("userId", user._id).eq("potId", membership.potId))
-                    .unique();
-
-                if (!existingMembership) {
-                    // Transfer membership to current user
-                    await ctx.db.patch(membership._id, {
-                        userId: user._id,
-                        isGhost: false
-                    });
-                } else {
-                    // Already a member? Just delete the ghost membership
-                    await ctx.db.delete(membership._id);
-                }
+            for (const slot of slots) {
+                // Transfer ownership to current user
+                // In Slot-First, one user can hold multiple slots, so no conflict check needed.
+                await ctx.db.patch(slot._id, {
+                    userId: user._id,
+                    isGhost: false
+                });
             }
 
-            // 2. Migrate Transactions (if any recorded for ghost)
-            const transactions = await ctx.db
-                .query("transactions")
-                .filter((q) => q.eq(q.field("userId"), ghost._id)) // No index on userId alone, scan is okay for small scale
-                .collect();
-
-            for (const tx of transactions) {
-                await ctx.db.patch(tx._id, { userId: user._id });
-            }
+            // 2. Migrate Transactions? 
+            // Transactions are linked to Slot ID. Since we didn't change Slot ID, 
+            // and we updated the Slot's Owner, the transactions are effectively migrated.
+            // (Unless transaction table has userId? No, we removed it).
 
             // 3. Delete Ghost User
             await ctx.db.delete(ghost._id);
@@ -175,7 +162,14 @@ export const isAdmin = query({
 
         const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
         // Ensure to handle whitespace if any in env var
-        const normalizedAdmins = adminEmails.map(e => e.trim());
+        const normalizedAdmins = adminEmails.map((e: string) => e.trim());
         return normalizedAdmins.includes(identity.email || "");
+    },
+});
+
+export const get = query({
+    args: { userId: v.id("users") },
+    handler: async (ctx, args) => {
+        return await ctx.db.get(args.userId);
     },
 });

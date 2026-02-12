@@ -6,11 +6,12 @@ import { Upload, CheckCircle, Clock, AlertCircle, X, Image as ImageIcon, Banknot
 
 interface PaymentModalProps {
     potId: Id<"pots">;
+    slotId: Id<"slots">;
     monthIndex: number;
     onClose: () => void;
 }
 
-export function PaymentModal({ potId, monthIndex, onClose }: PaymentModalProps) {
+export function PaymentModal({ potId, slotId, monthIndex, onClose }: PaymentModalProps) {
     const generateUploadUrl = useMutation(api.transactions.generateUploadUrl);
     const submitPayment = useMutation(api.transactions.submitPayment);
 
@@ -56,6 +57,7 @@ export function PaymentModal({ potId, monthIndex, onClose }: PaymentModalProps) 
 
             await submitPayment({
                 potId,
+                slotId,
                 monthIndex,
                 storageId: storageId as Id<"_storage">,
                 type: "online",
@@ -75,6 +77,7 @@ export function PaymentModal({ potId, monthIndex, onClose }: PaymentModalProps) 
             try {
                 await submitPayment({
                     potId,
+                    slotId,
                     monthIndex,
                     type: "cash",
                     remarks: "Cash payment pending approval",

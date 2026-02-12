@@ -1,7 +1,7 @@
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { SignInButton, UserButton } from "@clerk/clerk-react";
 import { UserSync } from "./components/UserSync";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 import { Dashboard } from "./pages/Dashboard";
 import { CreatePot } from "./pages/CreatePot";
 import { PotDetail } from "./pages/PotDetail";
@@ -35,7 +35,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)]">
       <nav className="border-b border-white/5 bg-[#232931]/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold">GrowPot</h1>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold">GrowPot</h1>
+          </Link>
           <div className="flex items-center gap-4">
             <UserButton afterSignOutUrl="/" />
           </div>

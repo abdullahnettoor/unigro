@@ -11,6 +11,9 @@ export function Dashboard() {
     const user = useQuery(api.users.current);
     const [showVerificationModal, setShowVerificationModal] = useState(false);
 
+    const managedPots = pots?.filter(p => p.foremanId === user?._id) || [];
+    const joinedPots = pots?.filter(p => p.foremanId !== user?._id) || [];
+
     return (
         <div className="max-w-4xl mx-auto py-8 px-4">
 
@@ -57,10 +60,11 @@ export function Dashboard() {
                 </div>
             )}
 
+            {/* Global Header */}
             <header className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-display font-bold">My Pots</h1>
-                    <p className="text-gray-400">Manage your active and pending chit funds.</p>
+                    <h1 className="text-3xl font-display font-bold">My Dashboard</h1>
+                    <p className="text-gray-400">Track your pots, payments, and investments.</p>
                 </div>
                 <Link
                     to="/create"
@@ -71,33 +75,53 @@ export function Dashboard() {
                 </Link>
             </header>
 
-            {!pots ? (
-                // Loading State
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="bg-[#232931]/50 h-40 rounded-2xl animate-pulse border border-white/5" />
-                    ))}
-                </div>
-            ) : pots.length === 0 ? (
-                // Empty State
-                <div className="text-center py-20 border border-dashed border-gray-700 rounded-2xl bg-[#232931]/30">
-                    <h3 className="text-xl font-display mb-2 text-gray-300">No active pots</h3>
-                    <p className="text-gray-500 mb-6">Create your first pot to get started with your community.</p>
-                    <Link
-                        to="/create"
-                        className="inline-block bg-[#232931] border border-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-                    >
-                        Create Pot
-                    </Link>
-                </div>
-            ) : (
-                // List Pots
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {pots.map((pot) => (
-                        <PotCard key={pot._id} pot={pot} currentUserId={user?._id} />
-                    ))}
-                </div>
+            {/* Managed Section - Only show if user manages pots */}
+            {managedPots.length > 0 && (
+                <section className="mb-12">
+                    <header className="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 className="text-2xl font-display font-bold flex items-center gap-3">
+                                Managed by Me
+                                {pots && <span className="bg-white/10 text-sm px-2 py-0.5 rounded-full text-gray-400">{managedPots.length}</span>}
+                            </h2>
+                        </div>
+                    </header>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {managedPots.map((pot) => (
+                            <PotCard key={pot._id} pot={pot} currentUserId={user?._id} />
+                        ))}
+                    </div>
+                </section>
             )}
+
+            {/* Investments Section */}
+            <section>
+                <header className="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 className="text-2xl font-display font-bold flex items-center gap-3">
+                            My Investments
+                            {pots && <span className="bg-white/10 text-sm px-2 py-0.5 rounded-full text-gray-400">{joinedPots.length}</span>}
+                        </h2>
+                    </div>
+                </header>
+
+                {!pots ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {[1, 2].map(i => <div key={i} className="bg-[#232931]/50 h-40 rounded-2xl animate-pulse border border-white/5" />)}
+                    </div>
+                ) : joinedPots.length === 0 ? (
+                    <div className="text-center py-12 border border-dashed border-white/10 rounded-2xl bg-[#232931]/30">
+                        <p className="text-gray-500">You haven't joined any pots yet.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {joinedPots.map((pot) => (
+                            <PotCard key={pot._id} pot={pot} currentUserId={user?._id} />
+                        ))}
+                    </div>
+                )}
+            </section>
 
             {showVerificationModal && (
                 <VerificationModal onClose={() => setShowVerificationModal(false)} />

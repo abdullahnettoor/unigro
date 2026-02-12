@@ -1,16 +1,14 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
 
 export const create = mutation({
     args: {
         title: v.string(),
         description: v.optional(v.string()),
         bankDetails: v.optional(v.string()),
-        drawStrategy: v.optional(
-            v.union(v.literal("RANDOM"), v.literal("MANUAL"), v.literal("FIXED"))
-        ),
+        drawStrategy: v.optional(v.union(v.literal("RANDOM"), v.literal("MANUAL"))),
         totalValue: v.number(),
+        totalSlots: v.number(), // New
         contribution: v.number(),
         frequency: v.union(
             v.literal("monthly"),
@@ -23,6 +21,7 @@ export const create = mutation({
         commission: v.optional(v.number()),
         gracePeriodDays: v.optional(v.number()),
         startDate: v.optional(v.number()),
+        foremanFirst: v.optional(v.boolean()), // New
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -35,15 +34,17 @@ export const create = mutation({
 
         if (!user) throw new Error("User not found");
 
+        // Create Pot
         const potId = await ctx.db.insert("pots", {
             title: args.title,
             foremanId: user._id,
             description: args.description,
             bankDetails: args.bankDetails,
-            drawStrategy: args.drawStrategy || "RANDOM",
+            drawStrategy: args.drawStrategy,
             startDate: args.startDate,
             config: {
                 totalValue: args.totalValue,
+                totalSlots: args.totalSlots,
                 contribution: args.contribution,
                 frequency: args.frequency,
                 duration: args.duration,
@@ -54,146 +55,18 @@ export const create = mutation({
             currentMonth: 0,
         });
 
-        await ctx.db.insert("members", {
-            potId,
-            userId: user._id,
-            isGhost: false,
-        });
-
-        return potId;
-    },
-});
-
-export const addMember = mutation({
-    args: {
-        potId: v.id("pots"),
-        name: v.string(),
-        phone: v.string(),
-    },
-    handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new Error("Unauthorized");
-
-        // 1. Verify Foreman handles? logic skipped for now to allow testing
-
-        // 2. Check if user exists (Ghost or Real)
-        let userId;
-        const existingUser = await ctx.db
-            .query("users")
-            .withIndex("by_phone", (q) => q.eq("phone", args.phone))
-            .unique();
-
-        if (existingUser) {
-            userId = existingUser._id;
-        } else {
-            // Create Ghost User
-            userId = await ctx.db.insert("users", {
-                name: args.name,
-                phone: args.phone,
-                verificationStatus: "UNVERIFIED",
-                // No clerkId, email, pictureUrl
+        // Create Slots (On-Demand: Only create if Foreman First)
+        if (args.foremanFirst) {
+            await ctx.db.insert("slots", {
+                potId,
+                slotNumber: 1,
+                userId: user._id,
+                status: "FILLED",
+                isGhost: false,
             });
         }
 
-        // 3. Add to Pot
-        await ctx.db.insert("members", {
-            potId: args.potId,
-            userId,
-            isGhost: !existingUser?.clerkId, // It's a ghost if no clerkId
-        });
-
-        return userId;
-    },
-});
-
-export const activate = mutation({
-    args: { potId: v.id("pots") },
-    handler: async (ctx, args) => {
-        const pot = await ctx.db.get(args.potId);
-        if (!pot) throw new Error("Pot not found");
-        if (pot.status !== "DRAFT") throw new Error("Pot already active");
-
-        const members = await ctx.db.query("members").withIndex("by_pot", q => q.eq("potId", args.potId)).collect();
-        // if (members.length < 2) throw new Error("Need at least 2 members");
-
-        let duration = pot.config.duration;
-        if (pot.config.frequency === 'occasional') {
-            duration = members.length;
-        }
-
-        await ctx.db.patch(args.potId, {
-            status: "ACTIVE",
-            currentMonth: 1,
-            config: { ...pot.config, duration }
-        });
-    },
-});
-
-export const runDraw = mutation({
-    args: {
-        potId: v.id("pots"),
-        customWinnerId: v.optional(v.id("members")), // For Manual or Override
-    },
-    handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new Error("Unauthorized");
-
-        const pot = await ctx.db.get(args.potId);
-        if (!pot) throw new Error("Pot not found");
-        if (pot.status !== "ACTIVE") throw new Error("Pot is not active");
-
-        // Verify Foreman
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-            .unique();
-
-        if (!user || user._id !== pot.foremanId) throw new Error("Only the Foreman can run the draw");
-
-        // Check if winner already selected for this month
-        const members = await ctx.db
-            .query("members")
-            .withIndex("by_pot", (q) => q.eq("potId", args.potId))
-            .collect();
-
-        const existingWinner = members.find((m) => m.drawOrder === pot.currentMonth);
-        if (existingWinner) throw new Error("Winner already selected for this month");
-
-        const eligibleMembers = members.filter((m) => !m.drawOrder);
-        if (eligibleMembers.length === 0) throw new Error("No eligible members left to win");
-
-        let winnerId: Id<"members">;
-
-        // 1. Manual Override or Manual Strategy
-        if (args.customWinnerId) {
-            const selected = eligibleMembers.find(m => m._id === args.customWinnerId);
-            if (!selected) throw new Error("Selected member is not eligible (already won or not in pot)");
-            winnerId = selected._id;
-        }
-        // 2. Fixed Strategy
-        else if (pot.drawStrategy === "FIXED") {
-            const nextInSequence = eligibleMembers.find(m => m.sequence === pot.currentMonth);
-            if (!nextInSequence) {
-                // Fallback if sequence is broken? Or stricter error?
-                // Let's fallback to finding *any* member with correct sequence, even if not eligible? No, they must be eligible.
-                // If specific sequence member is missing/ineligible, throw error or fallback?
-                // Throwing error prompts Foreman to use Manual Override.
-                throw new Error(`No eligible member found for sequence #${pot.currentMonth}. Use Manual Override.`);
-            }
-            winnerId = nextInSequence._id;
-        }
-        // 3. Random Strategy (Default)
-        else {
-            const randomIndex = Math.floor(Math.random() * eligibleMembers.length);
-            winnerId = eligibleMembers[randomIndex]._id;
-        }
-
-        // Assign drawOrder to winner
-        await ctx.db.patch(winnerId, {
-            drawOrder: pot.currentMonth,
-        });
-
-        return winnerId;
+        return potId;
     },
 });
 
@@ -209,16 +82,32 @@ export const list = query({
 
         if (!user) return [];
 
-        // Find all pots where user is a member
-        const memberships = await ctx.db
-            .query("members")
+        // Find all slots where user is owner
+        const userSlots = await ctx.db
+            .query("slots")
             .withIndex("by_user_pot", (q) => q.eq("userId", user._id))
             .collect();
 
-        const potIds = memberships.map((m) => m.potId);
+        // Also find pots where user is Foreman (even if he has no slots, though unlikely)
+        const foremanPots = await ctx.db
+            .query("pots")
+            .filter(q => q.eq(q.field("foremanId"), user._id))
+            .collect();
 
-        // Efficiently fetch all pots
-        const pots = await Promise.all(potIds.map((id) => ctx.db.get(id)));
+        const potIds = new Set([
+            ...userSlots.map((s) => s.potId),
+            ...foremanPots.map((p) => p._id)
+        ]);
+
+        const pots = await Promise.all([...potIds].map(async (id) => {
+            const pot = await ctx.db.get(id);
+            if (!pot) return null;
+            const foreman = await ctx.db.get(pot.foremanId);
+            return {
+                ...pot,
+                foreman: foreman ? { name: foreman.name } : null
+            };
+        }));
         return pots.filter((p) => p !== null);
     },
 });
@@ -229,36 +118,42 @@ export const get = query({
         const pot = await ctx.db.get(args.potId);
         if (!pot) return null;
 
-        // Fetch members
-        const members = await ctx.db
-            .query("members")
-            .withIndex("by_pot", (q) => q.eq("potId", args.potId))
+        // Fetch slots
+        const slots = await ctx.db
+            .query("slots")
+            .withIndex("by_pot_slotNumber", (q) => q.eq("potId", args.potId))
             .collect();
 
-        // Fetch user details for each member
-        const memberUsers = await Promise.all(
-            members.map(async (m) => {
-                const user = await ctx.db.get(m.userId);
+        // Fetch user details for filled slots
+        const slotsWithUsers = await Promise.all(
+            slots.map(async (slot) => {
+                let user = null;
+                if (slot.userId) {
+                    user = await ctx.db.get(slot.userId);
+                }
                 return {
-                    ...m,
-                    user // Embed user details
+                    ...slot,
+                    user
                 };
             })
         );
 
-        // Fetch Foreman details
         const foreman = await ctx.db.get(pot.foremanId);
 
         return {
             ...pot,
-            members: memberUsers,
-            foreman: foreman ? { name: foreman.name, phone: foreman.phone } : null
+            slots: slotsWithUsers, // Renamed from members
+            foreman: foreman ? { name: foreman.name, phone: foreman.phone, _id: foreman._id } : null
         };
     },
 });
-// 6. Request to Join Pot
-export const requestJoin = mutation({
-    args: { potId: v.id("pots") },
+
+// Join Pot (Self-service - On Demand Slots)
+export const join = mutation({
+    args: {
+        potId: v.id("pots"),
+        slotCount: v.optional(v.number()), // Default 1
+    },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) throw new Error("Unauthorized");
@@ -267,118 +162,55 @@ export const requestJoin = mutation({
             .query("users")
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
-
         if (!user) throw new Error("User not found");
 
         const pot = await ctx.db.get(args.potId);
         if (!pot) throw new Error("Pot not found");
 
-        // Check if already member or requested
-        // Check if already requested (allow multiple ACTIVE, but prevent spamming REQUESTS)
-        const memberships = await ctx.db
-            .query("members")
-            .withIndex("by_user_pot", (q) => q.eq("userId", user._id).eq("potId", args.potId))
+        const count = args.slotCount || 1;
+
+        // Find available slot numbers
+        const existingSlots = await ctx.db
+            .query("slots")
+            .withIndex("by_pot_slotNumber", q => q.eq("potId", args.potId))
             .collect();
 
-        const pendingRequest = memberships.find(m => m.status === "REQUESTED");
-        if (pendingRequest) throw new Error("Join request already pending");
+        const usedNumbers = new Set(existingSlots.map(s => s.slotNumber));
+        const availableNumbers = [];
 
-        // Allow joining again even if already ACTIVE (Multi-Slot support)
+        for (let i = 1; i <= pot.config.totalSlots; i++) {
+            if (!usedNumbers.has(i)) {
+                availableNumbers.push(i);
+            }
+            if (availableNumbers.length === count) break;
+        }
 
-        await ctx.db.insert("members", {
-            potId: args.potId,
-            userId: user._id,
-            isGhost: false,
-            status: "REQUESTED",
-        });
+        if (availableNumbers.length < count) {
+            throw new Error(`Only ${availableNumbers.length} slots available, requested ${count}`);
+        }
+
+        // Create Slots
+        for (const num of availableNumbers) {
+            await ctx.db.insert("slots", {
+                potId: args.potId,
+                slotNumber: num,
+                userId: user._id,
+                status: "FILLED",
+                isGhost: false
+            });
+        }
+
+        return availableNumbers[0]; // Return first assigned slot number
     },
 });
 
-// 7. Approve Join Request
-export const approveJoin = mutation({
-    args: { memberId: v.id("members") },
-    handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new Error("Unauthorized");
-
-        const membership = await ctx.db.get(args.memberId);
-        if (!membership) throw new Error("Request not found");
-
-        const pot = await ctx.db.get(membership.potId);
-        if (!pot) throw new Error("Pot not found");
-
-        // Verify Foreman
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-            .unique();
-
-        if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can approve requests");
-
-        await ctx.db.patch(args.memberId, { status: "ACTIVE" });
-    },
-});
-
-// 8. Reject Join Request
-export const rejectJoin = mutation({
-    args: { memberId: v.id("members") },
-    handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new Error("Unauthorized");
-
-        const membership = await ctx.db.get(args.memberId);
-        if (!membership) throw new Error("Request not found");
-
-        const pot = await ctx.db.get(membership.potId);
-        if (!pot) throw new Error("Pot not found");
-
-        // Verify Foreman
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-            .unique();
-
-        if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can reject requests");
-
-        await ctx.db.delete(args.memberId); // Or set status REJECTED if we want history
-    },
-});
-
-// 9. Update Member (e.g. set sequence)
-export const updateMember = mutation({
-    args: {
-        memberId: v.id("members"),
-        sequence: v.optional(v.number()),
-    },
-    handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new Error("Unauthorized");
-
-        const membership = await ctx.db.get(args.memberId);
-        if (!membership) throw new Error("Member not found");
-
-        const pot = await ctx.db.get(membership.potId);
-        if (!pot) throw new Error("Pot not found");
-
-        // Verify Foreman
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-            .unique();
-
-        if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can update members");
-
-        await ctx.db.patch(args.memberId, {
-            sequence: args.sequence,
-        });
-    },
-});
-
-// 10. Override Winner (Swapping / Post-Draw Edit)
-export const overrideWinner = mutation({
+// Foreman adds a participant (Ghost or Real) to a slot
+export const assignSlot = mutation({
     args: {
         potId: v.id("pots"),
-        newWinnerId: v.id("members"),
+        slotNumber: v.number(),
+        name: v.string(),
+        phone: v.string(),
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -387,38 +219,158 @@ export const overrideWinner = mutation({
         const pot = await ctx.db.get(args.potId);
         if (!pot) throw new Error("Pot not found");
 
-        // Verify Foreman
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+        const foreman = await ctx.db.query("users").withIndex("by_clerkId", q => q.eq("clerkId", identity.subject)).unique();
+        if (!foreman || foreman._id !== pot.foremanId) throw new Error("Only Foreman can assign slots");
+
+        // Find Slot (might not exist in On-Demand)
+        let slot = await ctx.db
+            .query("slots")
+            .withIndex("by_pot_slotNumber", q => q.eq("potId", args.potId).eq("slotNumber", args.slotNumber))
             .unique();
 
-        if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can override winners");
-
-        // Verify New Winner
-        const newWinner = await ctx.db.get(args.newWinnerId);
-        if (!newWinner || newWinner.potId !== pot._id) throw new Error("Invalid member");
-
-        // Find Current Winner for this cycle (if any)
-        const currentWinner = await ctx.db
-            .query("members")
-            .withIndex("by_pot", (q) => q.eq("potId", pot._id))
-            .filter((q) => q.eq(q.field("drawOrder"), pot.currentMonth))
-            .unique();
-
-        if (currentWinner) {
-            // Remove win from current winner
-            await ctx.db.patch(currentWinner._id, { drawOrder: undefined });
+        if (slot) {
+            if (slot.status !== "OPEN") throw new Error("Slot already filled");
         }
 
-        // Assign to new winner
-        await ctx.db.patch(newWinner._id, {
-            drawOrder: pot.currentMonth,
+        // Find or Create User
+        let userId;
+        const existingUser = await ctx.db.query("users").withIndex("by_phone", q => q.eq("phone", args.phone)).unique();
+        let isGhost = true;
+
+        if (existingUser) {
+            userId = existingUser._id;
+            isGhost = !existingUser.clerkId;
+        } else {
+            userId = await ctx.db.insert("users", {
+                name: args.name,
+                phone: args.phone,
+                verificationStatus: "UNVERIFIED",
+            });
+        }
+
+        if (slot) {
+            // Update existing OPEN slot
+            await ctx.db.patch(slot._id, {
+                userId,
+                status: "FILLED",
+                isGhost
+            });
+        } else {
+            // Create new slot
+            if (args.slotNumber > pot.config.totalSlots) throw new Error("Slot number exceeds total slots");
+
+            await ctx.db.insert("slots", {
+                potId: args.potId,
+                slotNumber: args.slotNumber,
+                userId,
+                status: "FILLED",
+                isGhost
+            });
+        }
+    }
+});
+
+// Foreman removes a slot (Draft only)
+export const deleteSlot = mutation({
+    args: {
+        potId: v.id("pots"),
+        slotNumber: v.number(),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const pot = await ctx.db.get(args.potId);
+        if (!pot) throw new Error("Pot not found");
+
+        // Allow deleting in DRAFT. (Maybe Active too if we handle refunds? For now Draft only)
+        if (pot.status !== "DRAFT") throw new Error("Can only delete slots in Draft mode");
+
+        const foreman = await ctx.db.query("users").withIndex("by_clerkId", q => q.eq("clerkId", identity.subject)).unique();
+        if (!foreman || foreman._id !== pot.foremanId) throw new Error("Only Foreman can delete slots");
+
+        const slot = await ctx.db
+            .query("slots")
+            .withIndex("by_pot_slotNumber", q => q.eq("potId", args.potId).eq("slotNumber", args.slotNumber))
+            .unique();
+
+        if (!slot) throw new Error("Slot not found");
+
+        await ctx.db.delete(slot._id);
+    }
+});
+
+export const runDraw = mutation({
+    args: {
+        potId: v.id("pots"),
+        customWinnerSlotNumber: v.optional(v.number()), // Manual override
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const pot = await ctx.db.get(args.potId);
+        if (!pot) throw new Error("Pot not found");
+        if (pot.status !== "ACTIVE") throw new Error("Pot is not active");
+
+        const foreman = await ctx.db.query("users").withIndex("by_clerkId", q => q.eq("clerkId", identity.subject)).unique();
+        if (!foreman || foreman._id !== pot.foremanId) throw new Error("Only Foreman can run draw");
+
+        // Validate winner provided if Manual? 
+        // We simplified Draw Strategy to "Slot Logic".
+        // Let's assume Random unless customWinner provided.
+
+        const slots = await ctx.db
+            .query("slots")
+            .withIndex("by_pot_slotNumber", q => q.eq("potId", args.potId))
+            .collect();
+
+        // Elgible: Filled, Has User, No Draw Order
+        const eligibleSlots = slots.filter(s => s.status === "FILLED" && s.userId && !s.drawOrder);
+
+        if (eligibleSlots.length === 0) throw new Error("No eligible slots left");
+
+        let winningSlot;
+
+        if (args.customWinnerSlotNumber) {
+            winningSlot = eligibleSlots.find(s => s.slotNumber === args.customWinnerSlotNumber);
+            if (!winningSlot) throw new Error("Selected slot is not eligible");
+        } else {
+            // Random
+            const randIndex = Math.floor(Math.random() * eligibleSlots.length);
+            winningSlot = eligibleSlots[randIndex];
+        }
+
+        // Apply Win
+        await ctx.db.patch(winningSlot._id, {
+            drawOrder: pot.currentMonth
+        });
+
+        return winningSlot.slotNumber;
+    },
+});
+
+export const activate = mutation({
+    args: { potId: v.id("pots") },
+    handler: async (ctx, args) => {
+        const pot = await ctx.db.get(args.potId);
+        if (!pot) throw new Error("Pot not found");
+        if (pot.status !== "DRAFT") throw new Error("Pot already active");
+
+        // Verify all slots filled?
+        // "ACTIVE: Only possible when 100% of Slots are filled." (Architecture V3)
+        const slots = await ctx.db.query("slots").withIndex("by_pot", q => q.eq("potId", args.potId)).collect();
+        const emptySlots = slots.filter(s => s.status === "OPEN");
+        if (emptySlots.length > 0) throw new Error(`Cannot activate: ${emptySlots.length} slots are still OPEN.`);
+
+        await ctx.db.patch(args.potId, {
+            status: "ACTIVE",
+            currentMonth: 1,
+            // duration update needed?
         });
     },
 });
 
-// 11. Advance Cycle (For Occasional Pots)
 export const advanceCycle = mutation({
     args: {
         potId: v.id("pots"),
@@ -431,62 +383,29 @@ export const advanceCycle = mutation({
         const pot = await ctx.db.get(args.potId);
         if (!pot) throw new Error("Pot not found");
 
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+        const user = await ctx.db.query("users").withIndex("by_clerkId", q => q.eq("clerkId", identity.subject)).unique();
+        if (!user || user._id !== pot.foremanId) throw new Error("Unauthorized");
+
+        // Validate winner exists for current month
+        const winner = await ctx.db
+            .query("slots")
+            .withIndex("by_pot", q => q.eq("potId", args.potId))
+            .filter(q => q.eq(q.field("drawOrder"), pot.currentMonth))
             .unique();
 
-        if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can advance the cycle");
+        if (!winner) throw new Error("No winner selected for current cycle");
 
-        // Validate that a winner exists for the current month
-        const members = await ctx.db
-            .query("members")
-            .withIndex("by_pot", (q) => q.eq("potId", args.potId))
-            .filter((q) => q.eq(q.field("drawOrder"), pot.currentMonth))
-            .collect();
-
-        if (members.length === 0) throw new Error("Cannot advance cycle: No winner selected for current round");
-
-        const isLastRound = pot.currentMonth >= pot.config.duration;
+        const isLast = pot.currentMonth >= pot.config.duration;
 
         await ctx.db.patch(args.potId, {
             currentMonth: pot.currentMonth + 1,
             nextDrawDate: args.nextDrawDate,
-            status: isLastRound ? "COMPLETED" : "ACTIVE"
+            status: isLast ? "COMPLETED" : "ACTIVE"
         });
-    },
-});
-
-// 12. Archive Pot (Foreman Only)
-export const archive = mutation({
-    args: { potId: v.id("pots") },
-    handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new Error("Unauthorized");
-
-        const pot = await ctx.db.get(args.potId);
-        if (!pot) throw new Error("Pot not found");
-
-        const user = await ctx.db
-            .query("users")
-            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
-            .unique();
-
-        if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can archive");
-
-        if (pot.status !== "COMPLETED") throw new Error("Pot must be COMPLETED before archiving");
-
-        // Verify Payouts - Check if all winners have been paid?
-        // Let's settle for checking if *current* payouts are done, or maybe just allow it with a warning.
-        // For strictness: Check if we have 'payout' transactions for every cycle? 
-        // That might be too heavy. Let's just trust the Foreman for now or check strictly.
-        // Strict: Get all winners. Check if they have a 'payout' transaction.
-
-        await ctx.db.patch(args.potId, { status: "ARCHIVED" });
     }
 });
 
-// 12. Update Pot (Edit Draft)
+// Update Pot (Edit Draft)
 export const updatePot = mutation({
     args: {
         potId: v.id("pots"),
@@ -496,11 +415,13 @@ export const updatePot = mutation({
         startDate: v.optional(v.number()),
         // Full config support for Draft edits
         totalValue: v.optional(v.number()),
+        totalSlots: v.optional(v.number()), // Added
         contribution: v.optional(v.number()),
         frequency: v.optional(v.string()),
         duration: v.optional(v.number()),
         commission: v.optional(v.number()),
         gracePeriodDays: v.optional(v.number()),
+        drawStrategy: v.optional(v.union(v.literal("RANDOM"), v.literal("MANUAL"))),
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -520,6 +441,7 @@ export const updatePot = mutation({
             // Allow full update
             const configUpdates: any = {};
             if (args.totalValue) configUpdates.totalValue = args.totalValue;
+            if (args.totalSlots) configUpdates.totalSlots = args.totalSlots; // Update totalSlots
             if (args.contribution) configUpdates.contribution = args.contribution;
             // Validate frequency literal
             if (args.frequency && ["monthly", "weekly", "biweekly", "quarterly", "occasional"].includes(args.frequency)) {
@@ -533,6 +455,7 @@ export const updatePot = mutation({
                 title: args.title ?? pot.title,
                 description: args.description ?? pot.description,
                 bankDetails: args.bankDetails ?? pot.bankDetails,
+                drawStrategy: args.drawStrategy ?? pot.drawStrategy,
                 startDate: args.startDate ?? pot.startDate,
                 config: { ...pot.config, ...configUpdates },
             });
@@ -542,10 +465,9 @@ export const updatePot = mutation({
                 title: args.title ?? pot.title,
                 description: args.description ?? pot.description,
                 bankDetails: args.bankDetails ?? pot.bankDetails,
+                drawStrategy: args.drawStrategy ?? pot.drawStrategy,
                 // Ignored: startDate, config updates
             });
         }
     }
 });
-
-

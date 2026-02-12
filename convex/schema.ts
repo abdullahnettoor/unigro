@@ -25,15 +25,14 @@ export default defineSchema({
     pots: defineTable({
         title: v.string(),
         foremanId: v.id("users"),
-        description: v.optional(v.string()), // New: Pot rules/welcome
-        bankDetails: v.optional(v.string()), // New: UPI/Bank info
-        drawStrategy: v.optional(
-            v.union(v.literal("RANDOM"), v.literal("MANUAL"), v.literal("FIXED"))
-        ), // Default RANDOM
-        startDate: v.optional(v.number()), // Epoch timestamp
-        nextDrawDate: v.optional(v.number()), // Explicit next draw date (for occasional)
+        description: v.optional(v.string()),
+        bankDetails: v.optional(v.string()),
+        drawStrategy: v.optional(v.union(v.literal("RANDOM"), v.literal("MANUAL"))), // Restored
+        startDate: v.optional(v.number()),
+        nextDrawDate: v.optional(v.number()),
         config: v.object({
             totalValue: v.number(),
+            totalSlots: v.number(), // New: Explicit Slot Count
             contribution: v.number(),
             frequency: v.union(
                 v.literal("monthly"),
@@ -42,29 +41,31 @@ export default defineSchema({
                 v.literal("quarterly"),
                 v.literal("occasional")
             ),
-            duration: v.number(), // periods (months/weeks)
-            commission: v.optional(v.number()), // New: Percentage (0-100)
-            gracePeriodDays: v.optional(v.number()), // New: Buffer between Due Date and Draw Date
+            duration: v.number(),
+            commission: v.optional(v.number()),
+            gracePeriodDays: v.optional(v.number()),
         }),
         status: v.union(v.literal("DRAFT"), v.literal("ACTIVE"), v.literal("COMPLETED"), v.literal("ARCHIVED")),
         currentMonth: v.number(),
     }),
 
-    members: defineTable({
+    slots: defineTable({
         potId: v.id("pots"),
-        userId: v.id("users"),
-        drawOrder: v.optional(v.number()),
+        slotNumber: v.number(), // 1 to N
+        userId: v.optional(v.id("users")), // Null = Open Slot
+        status: v.union(v.literal("OPEN"), v.literal("RESERVED"), v.literal("FILLED")),
         isGhost: v.boolean(),
-        status: v.optional(v.union(v.literal("ACTIVE"), v.literal("REQUESTED"), v.literal("REJECTED"))),
-        share: v.optional(v.number()), // Future-proof: Default 1.0 (Full share)
-        sequence: v.optional(v.number()), // For FIXED strategy
+        // Billing & Winnings
+        drawOrder: v.optional(v.number()), // Cycle specific winner
     })
         .index("by_pot", ["potId"])
-        .index("by_user_pot", ["userId", "potId"]),
+        .index("by_user", ["userId"]) // For listing pots by user
+        .index("by_user_pot", ["userId", "potId"])
+        .index("by_pot_slotNumber", ["potId", "slotNumber"]),
 
     transactions: defineTable({
         potId: v.id("pots"),
-        userId: v.id("users"),
+        slotId: v.id("slots"),
         monthIndex: v.number(),
         status: v.union(v.literal("UNPAID"), v.literal("PENDING"), v.literal("PAID")),
         type: v.optional(v.union(v.literal("cash"), v.literal("online"), v.literal("payout"))),

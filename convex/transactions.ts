@@ -7,10 +7,10 @@ export const generateUploadUrl = mutation(async (ctx) => {
 });
 
 // 2. Submit Payment (Member)
-// 2. Submit Payment (Member) - Optional Proof
 export const submitPayment = mutation({
     args: {
         potId: v.id("pots"),
+        slotId: v.id("slots"), // Changed from userId context
         monthIndex: v.number(),
         storageId: v.optional(v.id("_storage")),
         remarks: v.optional(v.string()),
@@ -27,11 +27,17 @@ export const submitPayment = mutation({
 
         if (!user) throw new Error("User not found");
 
+        // Verify ownership of slot
+        const slot = await ctx.db.get(args.slotId);
+        if (!slot) throw new Error("Slot not found");
+        if (slot.userId !== user._id) throw new Error("You do not own this slot");
+        if (slot.potId !== args.potId) throw new Error("Slot does not belong to this pot");
+
         // Check if transaction exists
         const existingTx = await ctx.db
             .query("transactions")
             .withIndex("by_pot_month", (q) => q.eq("potId", args.potId).eq("monthIndex", args.monthIndex))
-            .filter((q) => q.eq(q.field("userId"), user._id))
+            .filter((q) => q.eq(q.field("slotId"), args.slotId))
             .unique();
 
         let proofUrl = undefined;
@@ -51,7 +57,7 @@ export const submitPayment = mutation({
         } else {
             await ctx.db.insert("transactions", {
                 potId: args.potId,
-                userId: user._id,
+                slotId: args.slotId,
                 monthIndex: args.monthIndex,
                 ...data,
             });
@@ -63,7 +69,7 @@ export const submitPayment = mutation({
 export const recordCashPayment = mutation({
     args: {
         potId: v.id("pots"),
-        userId: v.id("users"),
+        slotId: v.id("slots"),
         monthIndex: v.number(),
     },
     handler: async (ctx, args) => {
@@ -85,7 +91,7 @@ export const recordCashPayment = mutation({
         const existingTx = await ctx.db
             .query("transactions")
             .withIndex("by_pot_month", (q) => q.eq("potId", args.potId).eq("monthIndex", args.monthIndex))
-            .filter((q) => q.eq(q.field("userId"), args.userId))
+            .filter((q) => q.eq(q.field("slotId"), args.slotId))
             .unique();
 
         if (existingTx) {
@@ -96,7 +102,7 @@ export const recordCashPayment = mutation({
         } else {
             await ctx.db.insert("transactions", {
                 potId: args.potId,
-                userId: args.userId,
+                slotId: args.slotId,
                 monthIndex: args.monthIndex,
                 status: "PAID",
                 remarks: "Cash Payment Recorded by Foreman",
@@ -134,7 +140,7 @@ export const approvePayment = mutation({
 export const recordPayout = mutation({
     args: {
         potId: v.id("pots"),
-        userId: v.id("users"), // The winner
+        slotId: v.id("slots"), // The winner slot
         monthIndex: v.number(),
         amount: v.number(),
         notes: v.optional(v.string())
@@ -156,7 +162,7 @@ export const recordPayout = mutation({
         // Record as a transaction of type 'payout'
         await ctx.db.insert("transactions", {
             potId: args.potId,
-            userId: args.userId,
+            slotId: args.slotId,
             monthIndex: args.monthIndex,
             status: "PAID",
             type: "payout",
@@ -174,10 +180,17 @@ export const list = query({
             .withIndex("by_pot_month", (q) => q.eq("potId", args.potId))
             .collect();
 
-        // Enrich with User details
+        // Enrich with Slot and User details
         const enriched = await Promise.all(transactions.map(async (tx) => {
-            const user = await ctx.db.get(tx.userId);
-            return { ...tx, user };
+            let slot = null;
+            let user = null;
+            if (tx.slotId) {
+                slot = await ctx.db.get(tx.slotId);
+                if (slot && slot.userId) {
+                    user = await ctx.db.get(slot.userId);
+                }
+            }
+            return { ...tx, slot, user };
         }));
 
         return enriched;

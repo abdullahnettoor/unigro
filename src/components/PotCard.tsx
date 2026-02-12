@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import type { Doc } from "../../convex/_generated/dataModel";
 
 interface PotCardProps {
-    pot: Doc<"pots">;
+    pot: Doc<"pots"> & { foreman?: { name: string } | null };
     currentUserId?: string;
 }
 
-export function PotCard({ pot }: PotCardProps) {
+export function PotCard({ pot, currentUserId }: PotCardProps) {
     const isDraft = pot.status === "DRAFT";
+    const isForeman = currentUserId && pot.foremanId === currentUserId;
 
     return (
         <Link to={`/pot/${pot._id}`} className="block">
@@ -27,9 +28,9 @@ export function PotCard({ pot }: PotCardProps) {
                     <h3 className="text-xl font-bold font-display text-white mb-1 group-hover:text-[#C1FF72] transition-colors truncate">
                         {pot.title}
                     </h3>
-                    <p className="text-gray-500 text-xs mb-6">
-                        Managed by Foreman
-                    </p>
+                    <div className="text-gray-500 text-xs mb-6 flex items-center gap-1">
+                        Managed by <span className="text-gray-300 font-medium truncate max-w-[150px]">{isForeman ? "You" : (pot.foreman?.name || "Foreman")}</span>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4">
