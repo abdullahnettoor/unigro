@@ -9,15 +9,24 @@ export function AdminDashboard() {
 
     // Track loading state for each request
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [rejectingId, setRejectingId] = useState<string | null>(null);
+    const [rejectionNote, setRejectionNote] = useState("");
 
     const handleReview = async (userId: any, status: "VERIFIED" | "REJECTED") => {
+        if (status === "REJECTED" && rejectingId !== userId) {
+            setRejectingId(userId);
+            setRejectionNote("");
+            return;
+        }
+
         setActionLoading(userId);
         try {
             await reviewVerification({
                 userId,
                 status,
-                notes: status === "REJECTED" ? "Document unclear or invalid" : undefined
+                notes: status === "REJECTED" ? rejectionNote : undefined
             });
+            setRejectingId(null);
         } catch (err) {
             console.error(err);
             alert("Failed to update status");
@@ -87,22 +96,51 @@ export function AdminDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4 mt-6">
-                                    <button
-                                        onClick={() => handleReview(req._id, "REJECTED")}
-                                        disabled={actionLoading === req._id}
-                                        className="flex-1 bg-red-500/10 text-red-400 border border-red-500/20 py-3 rounded-xl font-bold hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                                    >
-                                        <X size={18} /> Reject
-                                    </button>
-                                    <button
-                                        onClick={() => handleReview(req._id, "VERIFIED")}
-                                        disabled={actionLoading === req._id}
-                                        className="flex-1 bg-[#C1FF72] text-[#1B3022] py-3 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
-                                    >
-                                        {actionLoading === req._id ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
-                                        Approve
-                                    </button>
+                                <div className="mt-6">
+                                    {rejectingId === req._id ? (
+                                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <textarea
+                                                value={rejectionNote}
+                                                onChange={(e) => setRejectionNote(e.target.value)}
+                                                placeholder="Reason for rejection..."
+                                                className="w-full bg-black/20 border border-red-500/30 rounded-lg p-3 text-sm focus:border-red-500 outline-none text-white h-24 resize-none"
+                                            />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setRejectingId(null)}
+                                                    className="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg font-bold text-sm"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={() => handleReview(req._id, "REJECTED")}
+                                                    disabled={!rejectionNote.trim() || actionLoading === req._id}
+                                                    className="flex-1 bg-red-500 text-white hover:bg-red-600 py-2 rounded-lg font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                                                >
+                                                    {actionLoading === req._id && <Loader2 className="animate-spin" size={14} />}
+                                                    Confirm Reject
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-4">
+                                            <button
+                                                onClick={() => handleReview(req._id, "REJECTED")}
+                                                disabled={actionLoading === req._id}
+                                                className="flex-1 bg-red-500/10 text-red-400 border border-red-500/20 py-3 rounded-xl font-bold hover:bg-red-500/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                            >
+                                                <X size={18} /> Reject
+                                            </button>
+                                            <button
+                                                onClick={() => handleReview(req._id, "VERIFIED")}
+                                                disabled={actionLoading === req._id}
+                                                className="flex-1 bg-[#C1FF72] text-[#1B3022] py-3 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
+                                            >
+                                                {actionLoading === req._id ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
+                                                Approve
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

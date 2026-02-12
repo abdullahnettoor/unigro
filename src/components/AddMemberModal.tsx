@@ -41,7 +41,8 @@ export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProp
             onClose();
         } catch (err: any) {
             console.error(err);
-            setError("Failed to add member. Please try again.");
+            const msg = err.message.includes("Verified") ? "You must be a Verified User to invite members." : "Failed to add member.";
+            alert(msg);
             setIsSubmitting(false);
         }
     };

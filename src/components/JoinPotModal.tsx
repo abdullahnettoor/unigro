@@ -25,9 +25,10 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
         try {
             await joinPot({ potId, slotCount: selectedSlotCount });
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert("Failed to join pot");
+            const msg = error.message.includes("unverified") ? "Cannot join: Pot Foreman is unverified." : "Failed to join pot.";
+            alert(msg);
         } finally {
             setIsSubmitting(false);
         }

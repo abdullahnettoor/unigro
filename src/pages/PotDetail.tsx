@@ -101,7 +101,14 @@ export function PotDetail() {
     const handleActivate = async () => {
         if (availableCount > 0) return alert(`Cannot activate: ${availableCount} slots are still empty.`);
         if (confirm("Are you sure? Financial rules will be locked.")) {
-            await activatePot({ potId: pot._id });
+            try {
+                await activatePot({ potId: pot._id });
+            } catch (error: any) {
+                console.error(error);
+                // Extract useful message from Convex error
+                const msg = error.message.includes("Verified") ? "You must be a Verified User to activate a pot." : "Failed to activate pot.";
+                alert(msg);
+            }
         }
     };
 
@@ -157,6 +164,14 @@ export function PotDetail() {
                             </span>
                         </div>
                         <ForemanDisplay foremanId={pot.foremanId} />
+                        {pot.foreman?.verificationStatus !== "VERIFIED" && (
+                            <div className="mt-3 bg-yellow-500/10 border border-yellow-500/20 text-yellow-200 text-xs px-3 py-2 rounded-lg flex items-center gap-2">
+                                <ShieldAlert size={14} className="text-yellow-500" />
+                                <span>
+                                    <strong>Caution:</strong> Foreman is Unverified.
+                                </span>
+                            </div>
+                        )}
                     </div>
 
 

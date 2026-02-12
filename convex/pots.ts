@@ -143,7 +143,12 @@ export const get = query({
         return {
             ...pot,
             slots: slotsWithUsers, // Renamed from members
-            foreman: foreman ? { name: foreman.name, phone: foreman.phone, _id: foreman._id } : null
+            foreman: foreman ? {
+                name: foreman.name,
+                phone: foreman.phone,
+                _id: foreman._id,
+                verificationStatus: foreman.verificationStatus
+            } : null
         };
     },
 });
@@ -166,6 +171,12 @@ export const join = mutation({
 
         const pot = await ctx.db.get(args.potId);
         if (!pot) throw new Error("Pot not found");
+
+        // Verify Foreman Status
+        const foreman = await ctx.db.get(pot.foremanId);
+        if (!foreman || foreman.verificationStatus !== "VERIFIED") {
+            throw new Error("Cannot join: Pot Foreman is unverified.");
+        }
 
         const count = args.slotCount || 1;
 
@@ -221,6 +232,10 @@ export const assignSlot = mutation({
 
         const foreman = await ctx.db.query("users").withIndex("by_clerkId", q => q.eq("clerkId", identity.subject)).unique();
         if (!foreman || foreman._id !== pot.foremanId) throw new Error("Only Foreman can assign slots");
+
+        if (foreman.verificationStatus !== "VERIFIED") {
+            throw new Error("You must be a Verified User to invite members.");
+        }
 
         // Find Slot (might not exist in On-Demand)
         let slot = await ctx.db
@@ -356,6 +371,12 @@ export const activate = mutation({
         const pot = await ctx.db.get(args.potId);
         if (!pot) throw new Error("Pot not found");
         if (pot.status !== "DRAFT") throw new Error("Pot already active");
+
+        // Verify Foreman is verified
+        const foreman = await ctx.db.get(pot.foremanId);
+        if (!foreman || foreman.verificationStatus !== "VERIFIED") {
+            throw new Error("You must be a Verified User to activate a pot.");
+        }
 
         // Verify all slots filled?
         // "ACTIVE: Only possible when 100% of Slots are filled." (Architecture V3)

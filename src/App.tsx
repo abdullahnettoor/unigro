@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 import { Dashboard } from "./pages/Dashboard";
 import { CreatePot } from "./pages/CreatePot";
 import { PotDetail } from "./pages/PotDetail";
+import { Profile } from "./pages/Profile";
 import { ProfileModal } from "./components/ProfileModal";
 import { PWAPrompt } from "./components/PWAPrompt";
 import { AdminDashboard } from "./pages/AdminDashboard";
@@ -39,6 +40,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             <h1 className="text-2xl font-[family-name:var(--font-display)] font-bold">GrowPot</h1>
           </Link>
           <div className="flex items-center gap-4">
+            <Link to="/profile" className="text-sm font-bold text-gray-400 hover:text-white transition-colors">
+              My Identity
+            </Link>
             <UserButton afterSignOutUrl="/" />
           </div>
         </div>
@@ -80,6 +84,7 @@ function App() {
         <MainLayout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/create" element={<CreatePot />} />
             <Route path="/pot/:potId" element={<PotDetail />} />
             <Route
