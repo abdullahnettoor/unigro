@@ -130,6 +130,41 @@ export const approvePayment = mutation({
     },
 });
 
+// 4. Record Payout (Foreman -> Winner)
+export const recordPayout = mutation({
+    args: {
+        potId: v.id("pots"),
+        userId: v.id("users"), // The winner
+        monthIndex: v.number(),
+        amount: v.number(),
+        notes: v.optional(v.string())
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const pot = await ctx.db.get(args.potId);
+        if (!pot) throw new Error("Pot not found");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can record payouts");
+
+        // Record as a transaction of type 'payout'
+        await ctx.db.insert("transactions", {
+            potId: args.potId,
+            userId: args.userId,
+            monthIndex: args.monthIndex,
+            status: "PAID",
+            type: "payout",
+            remarks: args.notes || "Winner Payout",
+        });
+    }
+});
+
 // 4. List Transactions for a Pot (Grouped logic handled in frontend or flat list here)
 export const list = query({
     args: { potId: v.id("pots") },

@@ -58,7 +58,7 @@ export const store = mutation({
                     name: identity.name || ghostUser.name, // Prefer real name over ghost name? Or vice versa? Using Real name.
                     pictureUrl: identity.pictureUrl,
                     email: identity.email,
-                    isVerified: ghostUser.isVerified, // Keep existing verification status if any
+                    verificationStatus: ghostUser.verificationStatus, // Keep existing verification status if any
                 });
                 return ghostUser._id;
             }
@@ -73,7 +73,7 @@ export const store = mutation({
             pictureUrl: identity.pictureUrl,
             email: identity.email,
             phone: phoneNumber || "", // Empty string if not provided, but PRD says mandatory.
-            isVerified: false,
+            verificationStatus: "UNVERIFIED",
         });
 
         return newUserId;
@@ -165,5 +165,17 @@ export const updateProfile = mutation({
             // 3. Delete Ghost User
             await ctx.db.delete(ghost._id);
         }
+    },
+});
+
+export const isAdmin = query({
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return false;
+
+        const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+        // Ensure to handle whitespace if any in env var
+        const normalizedAdmins = adminEmails.map(e => e.trim());
+        return normalizedAdmins.includes(identity.email || "");
     },
 });

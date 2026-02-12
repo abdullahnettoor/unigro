@@ -7,6 +7,8 @@ import { CreatePot } from "./pages/CreatePot";
 import { PotDetail } from "./pages/PotDetail";
 import { ProfileModal } from "./components/ProfileModal";
 import { PWAPrompt } from "./components/PWAPrompt";
+import { AdminDashboard } from "./pages/AdminDashboard";
+import { AdminRoute } from "./components/AdminRoute";
 
 function Landing() {
   return (
@@ -78,6 +80,14 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/create" element={<CreatePot />} />
             <Route path="/pot/:potId" element={<PotDetail />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </MainLayout>
