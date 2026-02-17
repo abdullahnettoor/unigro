@@ -56,7 +56,7 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="absolute z-10 w-32 h-32 rounded-full bg-gradient-to-br from-[#FFD700] to-[#E07A5F] shadow-[0_0_50px_rgba(224,122,95,0.4)] flex flex-col items-center justify-center text-[#1B3022] p-4 text-center"
+                className="absolute z-10 w-32 h-32 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--accent-secondary)] shadow-[0_0_50px_rgb(var(--accent-glow)/0.35)] flex flex-col items-center justify-center text-[var(--text-on-accent)] p-4 text-center"
             >
                 <span className="text-[10px] font-bold tracking-widest uppercase opacity-80">Cycle {currentMonthIndex}</span>
                 <span className="text-2xl font-display font-bold leading-none">₹{pot.config.totalValue.toLocaleString()}</span>
@@ -84,31 +84,31 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
                     >
                         {/* Planet Body */}
                         {isOpen ? (
-                            <div className="w-full h-full rounded-full border border-dashed border-white/30 bg-white/5 flex items-center justify-center text-[10px] text-gray-500 hover:border-[#C1FF72] hover:text-[#C1FF72] transition-colors">
+                            <div className="w-full h-full rounded-full border border-dashed border-[var(--border-subtle)] bg-[var(--surface-deep)]/60 flex items-center justify-center text-[10px] text-[var(--text-muted)] hover:border-[var(--accent-vivid)] hover:text-[var(--accent-vivid)] transition-colors">
                                 {slot.slotNumber}
                             </div>
                         ) : (
-                            <div className={`w-full h-full rounded-full border-2 overflow-hidden bg-[#232931] relative ${isWinner ? "border-[#FFD700] shadow-[0_0_20px_#FFD700]" : "border-white/20 group-hover:border-[#C1FF72]"
+                            <div className={`w-full h-full rounded-full border-2 overflow-hidden bg-[var(--surface-elevated)] relative ${isWinner ? "border-[var(--gold)] shadow-[0_0_20px_var(--gold)]" : "border-[var(--border-subtle)] group-hover:border-[var(--accent-vivid)]"
                                 } transition-colors`}>
                                 {slot.user?.pictureUrl ? (
                                     <img src={slot.user.pictureUrl} alt={slot.user.name} className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-700 text-xs font-bold text-gray-400">
+                                    <div className="w-full h-full flex items-center justify-center bg-[var(--surface-deep)] text-xs font-bold text-[var(--text-muted)]">
                                         {slot.user?.name?.charAt(0) || slot.slotNumber}
                                     </div>
                                 )}
 
                                 {/* Status Indicator Dot */}
                                 {isWinner && (
-                                    <div className="absolute top-0 right-0 w-3 h-3 bg-[#FFD700] rounded-full border border-[#232931]" />
+                                    <div className="absolute top-0 right-0 w-3 h-3 bg-[var(--gold)] rounded-full border border-[var(--surface-elevated)]" />
                                 )}
                             </div>
                         )}
 
                         {/* Tooltip on Hover */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/80 text-[var(--text-primary)] text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                             {isOpen ? `Slot #${slot.slotNumber}: OPEN` : `Slot #${slot.slotNumber}: ${slot.user?.name}`}
-                            {isWinner && <span className="text-[#FFD700] block text-[9px] font-bold">WINNER</span>}
+                            {isWinner && <span className="text-[var(--gold)] block text-[9px] font-bold">WINNER</span>}
                         </div>
                     </motion.div>
                 );

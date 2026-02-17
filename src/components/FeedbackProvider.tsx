@@ -44,21 +44,21 @@ function Toasts({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: stri
           key={t.id}
           className={`rounded-xl border px-4 py-3 shadow-2xl backdrop-blur-md ${
             t.variant === "success"
-              ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-100"
+              ? "border-[var(--success)]/30 bg-[var(--success)]/10 text-[var(--success)]"
               : t.variant === "error"
-                ? "border-red-400/30 bg-red-500/10 text-red-100"
-                : "border-white/10 bg-[#232931]/95 text-gray-100"
+                ? "border-[var(--danger)]/30 bg-[var(--danger)]/10 text-[var(--danger)]"
+                : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 text-[var(--text-primary)]"
           }`}
           role="status"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-sm font-semibold">{t.title}</div>
-              {t.message && <div className="mt-1 text-xs text-gray-200/80">{t.message}</div>}
+              {t.message && <div className="mt-1 text-xs text-[var(--text-primary)]/80">{t.message}</div>}
             </div>
             <button
               onClick={() => onDismiss(t.id)}
-              className="text-xs text-gray-300 hover:text-white"
+              className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               aria-label="Dismiss"
             >
               Close
@@ -85,13 +85,13 @@ function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 p-3 sm:items-center sm:p-4">
-      <div className="w-full rounded-t-2xl border border-white/10 bg-[#1a1f26] p-6 sm:max-w-md sm:rounded-2xl">
-        <h3 className="text-lg font-semibold text-white">{options.title}</h3>
-        {options.message && <p className="mt-2 text-sm text-gray-400">{options.message}</p>}
+      <div className="w-full rounded-t-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 sm:max-w-md sm:rounded-2xl">
+        <h3 className="text-lg font-semibold text-[var(--text-primary)]">{options.title}</h3>
+        {options.message && <p className="mt-2 text-sm text-[var(--text-muted)]">{options.message}</p>}
         <div className="mt-6 flex gap-2">
           <button
             onClick={onCancel}
-            className="flex-1 rounded-xl bg-gray-800 py-2.5 text-sm font-semibold text-white hover:bg-gray-700"
+            className="flex-1 rounded-xl bg-[var(--surface-deep)] py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-deep)]"
           >
             {options.cancelText || "Cancel"}
           </button>
@@ -99,8 +99,8 @@ function ConfirmDialog({
             onClick={onConfirm}
             className={`flex-1 rounded-xl py-2.5 text-sm font-semibold ${
               options.danger
-                ? "bg-red-500 text-white hover:bg-red-600"
-                : "bg-[#C1FF72] text-[#1B3022] hover:opacity-90"
+                ? "bg-[var(--danger)] text-[var(--text-on-accent)] hover:bg-[var(--danger)]/90"
+                : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
             }`}
           >
             {options.confirmText || "Confirm"}

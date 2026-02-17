@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Upload, AlertCircle, Clock, ShieldCheck, FileText, Smartphone, Mail, X, Loader2 } from "lucide-react";
+import { getThemePreference, setThemePreference, type ThemePreference } from "../lib/theme";
 
 export function Profile() {
     const user = useQuery(api.users.current);
@@ -13,9 +14,10 @@ export function Profile() {
     const [idType, setIdType] = useState("Aadhaar");
     const [idNumber, setIdNumber] = useState("");
     const [error, setError] = useState("");
+    const [themePref, setThemePref] = useState<ThemePreference>(() => getThemePreference());
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    if (!user) return <div className="min-h-screen grid place-items-center"><Loader2 className="animate-spin text-[#C1FF72]" /></div>;
+    if (!user) return <div className="min-h-screen grid place-items-center"><Loader2 className="animate-spin text-[var(--accent-vivid)]" /></div>;
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
@@ -70,10 +72,10 @@ export function Profile() {
     };
 
     const statusConfig = {
-        UNVERIFIED: { color: "text-gray-400", bg: "bg-gray-400/10", border: "border-gray-400/20", icon: AlertCircle, label: "Unverified" },
-        PENDING: { color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20", icon: Clock, label: "Verification Pending" },
-        VERIFIED: { color: "text-[#C1FF72]", bg: "bg-[#C1FF72]/10", border: "border-[#C1FF72]/20", icon: ShieldCheck, label: "Verified Identity" },
-        REJECTED: { color: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20", icon: X, label: "Verification Rejected" },
+        UNVERIFIED: { color: "text-[var(--text-muted)]", bg: "bg-[var(--surface-deep)]/60", border: "border-[var(--border-subtle)]", icon: AlertCircle, label: "Unverified" },
+        PENDING: { color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10", border: "border-[var(--warning)]/20", icon: Clock, label: "Verification Pending" },
+        VERIFIED: { color: "text-[var(--success)]", bg: "bg-[var(--accent-vivid)]/10", border: "border-[var(--accent-vivid)]/20", icon: ShieldCheck, label: "Verified Identity" },
+        REJECTED: { color: "text-[var(--danger)]", bg: "bg-[var(--danger)]/10", border: "border-[var(--danger)]/20", icon: X, label: "Verification Rejected" },
     };
 
     const status = (user.verificationStatus as keyof typeof statusConfig) || "UNVERIFIED";
@@ -83,17 +85,17 @@ export function Profile() {
     return (
         <div className="max-w-3xl mx-auto py-12 px-4">
             <h1 className="text-3xl font-display font-bold mb-2">My Profile</h1>
-            <p className="text-gray-400 mb-8">Manage your identity and trust settings.</p>
+            <p className="text-[var(--text-muted)] mb-8">Manage your identity and trust settings.</p>
 
             {/* Profile Header */}
-            <div className="bg-[#232931]/50 border border-white/5 rounded-2xl p-6 mb-8 flex items-center gap-6">
-                <img src={user.pictureUrl} alt={user.name} className="w-20 h-20 rounded-full border-2 border-white/10" />
+            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-6 mb-6 flex items-center gap-6">
+                <img src={user.pictureUrl} alt={user.name} className="w-20 h-20 rounded-full border-2 border-[var(--border-subtle)]" />
                 <div className="flex-1">
                     <h2 className="text-2xl font-bold flex items-center gap-2">
                         {user.name}
-                        {status === "VERIFIED" && <ShieldCheck className="text-[#C1FF72]" size={20} />}
+                        {status === "VERIFIED" && <ShieldCheck className="text-[var(--accent-vivid)]" size={20} />}
                     </h2>
-                    <div className="flex gap-4 mt-2 text-sm text-gray-400">
+                    <div className="flex gap-4 mt-2 text-sm text-[var(--text-muted)]">
                         <span className="flex items-center gap-1"><Mail size={14} /> {user.email}</span>
                         {user.phone && <span className="flex items-center gap-1"><Smartphone size={14} /> {user.phone}</span>}
                     </div>
@@ -104,18 +106,46 @@ export function Profile() {
                 </div>
             </div>
 
+            <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6 mb-8">
+                <h3 className="text-lg font-bold mb-2">Appearance</h3>
+                <p className="text-sm text-[var(--text-muted)] mb-4">Choose how GrowPot looks on this device.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[
+                        { id: "system", label: "System Default" },
+                        { id: "dark", label: "Dark" },
+                        { id: "light", label: "Light" },
+                    ].map((opt) => (
+                        <button
+                            key={opt.id}
+                            onClick={() => {
+                                const next = opt.id as ThemePreference;
+                                setThemePref(next);
+                                setThemePreference(next);
+                            }}
+                            aria-pressed={themePref === opt.id}
+                            className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${themePref === opt.id
+                                ? "border-[var(--accent-vivid)]/40 bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)]"
+                                : "border-[var(--border-subtle)] bg-[var(--surface-deep)]/40 text-[var(--text-primary)] hover:bg-[var(--surface-deep)]"
+                                }`}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            </section>
+
             {/* Verification Section */}
             {(status === "UNVERIFIED" || status === "REJECTED") && (
-                <section className="bg-[#232931] border border-white/5 rounded-2xl p-8">
+                <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-8">
                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <ShieldCheck className="text-[#C1FF72]" /> Verify Identity
+                        <ShieldCheck className="text-[var(--accent-vivid)]" /> Verify Identity
                     </h3>
-                    <p className="text-gray-400 mb-6 max-w-xl">
+                    <p className="text-[var(--text-muted)] mb-6 max-w-xl">
                         To join higher-value pots and build trust with Foremen, please upload a Government ID (Aadhaar, PAN, or Driving License).
                     </p>
 
                     {status === "REJECTED" && user.adminNotes && (
-                        <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl mb-6 text-red-300 text-sm">
+                        <div className="bg-[var(--danger)]/10 border border-[var(--danger)]/20 p-4 rounded-xl mb-6 text-[var(--danger)] text-sm">
                             <strong>Reason for Rejection:</strong> {user.adminNotes}
                         </div>
                     )}
@@ -123,11 +153,11 @@ export function Profile() {
                     <form onSubmit={handleSubmit} className="space-y-6 max-w-lg">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs uppercase text-gray-500 font-bold mb-2">ID Type</label>
+                                <label className="block text-xs uppercase text-[var(--text-muted)] font-bold mb-2">ID Type</label>
                                 <select
                                     value={idType}
                                     onChange={(e) => setIdType(e.target.value)}
-                                    className="w-full bg-[#1a1f26] border border-white/10 rounded-xl p-3 text-white focus:border-[#C1FF72] outline-none"
+                                    className="w-full bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-xl p-3 text-[var(--text-primary)] focus:border-[var(--accent-vivid)] outline-none"
                                 >
                                     <option value="Aadhaar">Aadhaar Card</option>
                                     <option value="PAN">PAN Card</option>
@@ -135,7 +165,7 @@ export function Profile() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs uppercase text-gray-500 font-bold mb-2">ID Number</label>
+                                <label className="block text-xs uppercase text-[var(--text-muted)] font-bold mb-2">ID Number</label>
                                 <input
                                     type="text"
                                     value={idNumber}
@@ -149,29 +179,29 @@ export function Profile() {
                                         setIdNumber(val);
                                     }}
                                     placeholder={idType === "Aadhaar" ? "123412341234" : "ABCDE1234F"}
-                                    className="w-full bg-[#1a1f26] border border-white/10 rounded-xl p-3 text-white focus:border-[#C1FF72] outline-none"
+                                    className="w-full bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-xl p-3 text-[var(--text-primary)] focus:border-[var(--accent-vivid)] outline-none"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-xs uppercase text-gray-500 font-bold mb-2">Upload Document</label>
+                            <label className="block text-xs uppercase text-[var(--text-muted)] font-bold mb-2">Upload Document</label>
                             <div
                                 onClick={() => fileInputRef.current?.click()}
-                                className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors ${file ? "border-[#C1FF72]/50 bg-[#C1FF72]/5" : "border-gray-600 hover:border-gray-500 hover:bg-white/5"
+                                className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors ${file ? "border-[var(--accent-vivid)]/50 bg-[var(--accent-vivid)]/5" : "border-[var(--border-subtle)] hover:border-[var(--accent-vivid)]/50 hover:bg-[var(--surface-deep)]/30"
                                     }`}
                             >
                                 {file ? (
                                     <>
-                                        <FileText className="text-[#C1FF72] mb-2" size={32} />
-                                        <span className="text-sm font-mono text-white truncate max-w-full">{file.name}</span>
-                                        <span className="text-xs text-gray-400 mt-1">Click to change</span>
+                                        <FileText className="text-[var(--accent-vivid)] mb-2" size={32} />
+                                        <span className="text-sm font-mono text-[var(--text-primary)] truncate max-w-full">{file.name}</span>
+                                        <span className="text-xs text-[var(--text-muted)] mt-1">Click to change</span>
                                     </>
                                 ) : (
                                     <>
-                                        <Upload className="text-gray-400 mb-2" size={32} />
-                                        <span className="text-sm text-gray-400">Tap to upload ID photo</span>
-                                        <span className="text-xs text-gray-500 mt-1">Max 5MB</span>
+                                        <Upload className="text-[var(--text-muted)] mb-2" size={32} />
+                                        <span className="text-sm text-[var(--text-muted)]">Tap to upload ID photo</span>
+                                        <span className="text-xs text-[var(--text-muted)] mt-1">Max 5MB</span>
                                     </>
                                 )}
                                 <input
@@ -184,13 +214,13 @@ export function Profile() {
                             </div>
                         </div>
 
-                        {error && <p className="text-red-400 text-sm">{error}</p>}
+                        {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
 
                         <button
                             type="submit"
                             disabled={isUploading}
-                            className="w-full bg-[#C1FF72] text-[#1B3022] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
-                        >
+                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+                    >
                             {isUploading ? "Uploading..." : "Submit for Verification"}
                         </button>
                     </form>
@@ -198,12 +228,12 @@ export function Profile() {
             )}
 
             {status === "PENDING" && (
-                <div className="bg-[#232931] border border-white/5 rounded-2xl p-12 text-center">
-                    <div className="w-16 h-16 bg-yellow-400/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Clock size={32} className="text-yellow-400" />
+                <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-12 text-center">
+                    <div className="w-16 h-16 bg-[var(--warning)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Clock size={32} className="text-[var(--warning)]" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">Verification in Progress</h3>
-                    <p className="text-gray-400 max-w-md mx-auto">
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Verification in Progress</h3>
+                    <p className="text-[var(--text-muted)] max-w-md mx-auto">
                         Your documents have been submitted and are under review. This usually takes 24-48 hours.
                     </p>
                 </div>

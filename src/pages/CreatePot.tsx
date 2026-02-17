@@ -102,36 +102,36 @@ export function CreatePot() {
         <div className="max-w-3xl mx-auto py-8 px-4 pb-20">
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center text-gray-400 hover:text-white mb-6 transition-colors"
+                className="flex items-center text-[var(--text-muted)] hover:text-[var(--text-primary)] mb-6 transition-colors"
             >
                 <ChevronLeft size={20} /> Back
             </button>
 
             <h1 className="text-4xl font-display font-bold mb-2"> {editPotId ? "Edit Pot" : "Create New Pot"}</h1>
-            <p className="text-gray-400 mb-8">Set up the financial rules for your community.</p>
+            <p className="text-[var(--text-muted)] mb-8">Set up the financial rules for your community.</p>
 
             <form onSubmit={handleSubmit} className="space-y-8">
 
                 {/* Section 1: Basic Details */}
-                <div className="bg-[#232931]/50 border border-white/5 p-6 rounded-2xl space-y-6">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <FileText className="text-[#C1FF72]" size={20} /> Basic Details
+                <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] p-6 rounded-2xl space-y-6">
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                        <FileText className="text-[var(--accent-vivid)]" size={20} /> Basic Details
                     </h3>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2">Pot Name</label>
+                        <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Pot Name</label>
                         <input
                             type="text"
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             placeholder="e.g. Office Colleagues 2024"
-                            className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#C1FF72] transition-colors"
+                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)] transition-colors"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                        <label className="block text-sm font-medium text-[var(--text-muted)] mb-2 flex items-center gap-2">
                             <Calendar size={16} /> Start Date
                         </label>
                         <input
@@ -139,23 +139,23 @@ export function CreatePot() {
                             required
                             value={formData.startDate}
                             onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#C1FF72] transition-colors"
+                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)] transition-colors"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2">Description / Rules (Optional)</label>
+                        <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Description / Rules (Optional)</label>
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="Welcome message, rules about delays, etc."
                             rows={3}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#C1FF72] transition-colors resize-none"
+                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)] transition-colors resize-none"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                        <label className="block text-sm font-medium text-[var(--text-muted)] mb-2 flex items-center gap-2">
                             <Landmark size={16} /> Bank Details / UPI (Optional)
                         </label>
                         <textarea
@@ -163,26 +163,26 @@ export function CreatePot() {
                             onChange={(e) => setFormData({ ...formData, bankDetails: e.target.value })}
                             placeholder="e.g. UPI: name@okhdfcbank, Account: 1234567890"
                             rows={2}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#C1FF72] transition-colors resize-none font-mono text-sm"
+                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)] transition-colors resize-none font-mono text-sm"
                         />
                     </div>
                 </div>
 
                 {/* Section 2: Financial Config */}
-                <div className="bg-[#232931]/50 border border-white/5 p-6 rounded-2xl space-y-6">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <Coins className="text-[#C1FF72]" size={20} /> Financial Configuration
+                <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] p-6 rounded-2xl space-y-6">
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                        <Coins className="text-[var(--accent-vivid)]" size={20} /> Financial Configuration
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2 flex items-center gap-2">
                                 <Clock size={16} /> Frequency
                             </label>
                             <select
                                 value={formData.frequency}
                                 onChange={(e) => setFormData({ ...formData, frequency: e.target.value as any })}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#C1FF72]"
+                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]"
                             >
                                 <option value="monthly">Monthly</option>
                                 <option value="weekly">Weekly</option>
@@ -193,7 +193,7 @@ export function CreatePot() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2 flex items-center gap-2">
                                 <Coins size={16} /> Total Pool Value (₹)
                             </label>
                             <input
@@ -202,12 +202,12 @@ export function CreatePot() {
                                 min={1000}
                                 value={formData.totalValue}
                                 onChange={(e) => handleTotalChange(Number(e.target.value))}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white font-mono focus:outline-none focus:border-[#C1FF72]"
+                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--accent-vivid)]"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2 flex items-center gap-2">
                                 <Calendar size={16} /> {formData.frequency === 'occasional' ? 'Total Slots (Participants)' : 'Duration (Cycles)'}
                             </label>
                             <input
@@ -217,12 +217,12 @@ export function CreatePot() {
                                 max={60}
                                 value={formData.duration}
                                 onChange={(e) => handleDurationChange(Number(e.target.value))}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white font-mono focus:outline-none focus:border-[#C1FF72]"
+                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--accent-vivid)]"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2 flex items-center gap-2">
                                 <Percent size={16} /> Foreman Commission (%)
                             </label>
                             <input
@@ -231,57 +231,57 @@ export function CreatePot() {
                                 max={50}
                                 value={formData.commission}
                                 onChange={(e) => setFormData({ ...formData, commission: Number(e.target.value) })}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white font-mono focus:outline-none focus:border-[#C1FF72]"
+                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--accent-vivid)]"
                             />
                         </div>
                     </div>
 
                     {/* Calculated Contribution */}
-                    <div className="bg-[#C1FF72]/10 border border-[#C1FF72]/20 p-4 rounded-xl flex justify-between items-center">
+                    <div className="bg-[var(--accent-vivid)]/10 border border-[var(--accent-vivid)]/20 p-4 rounded-xl flex justify-between items-center">
                         <div>
-                            <span className="text-sm text-[#C1FF72] uppercase font-bold text-xs tracking-wider">Per Member Contribution</span>
-                            <div className="text-2xl font-mono font-bold text-white">₹{formData.contribution.toLocaleString()}</div>
+                            <span className="text-sm text-[var(--accent-vivid)] uppercase font-bold text-xs tracking-wider">Per Member Contribution</span>
+                            <div className="text-2xl font-mono font-bold text-[var(--text-primary)]">₹{formData.contribution.toLocaleString()}</div>
                         </div>
-                        <div className="text-right text-xs text-gray-400">
+                        <div className="text-right text-xs text-[var(--text-muted)]">
                             per {formData.frequency}<br />for {formData.frequency === 'occasional' ? 'all members' : `${formData.duration} cycles`}
                         </div>
                     </div>
                 </div>
 
                 {/* Section 3: Operational Settings */}
-                <div className="bg-[#232931]/50 border border-white/5 p-6 rounded-2xl space-y-6">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <Clock className="text-[#C1FF72]" size={20} /> Operational Settings
+                <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] p-6 rounded-2xl space-y-6">
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                        <Clock className="text-[var(--accent-vivid)]" size={20} /> Operational Settings
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2">Draw Strategy</label>
+                            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Draw Strategy</label>
                             <select
                                 value={formData.drawStrategy}
                                 onChange={(e) => setFormData({ ...formData, drawStrategy: e.target.value as any })}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#C1FF72]"
+                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]"
                             >
                                 <option value="RANDOM">Random (Lucky Draw)</option>
                                 <option value="MANUAL">Manual Select (Foreman Decides)</option>
                             </select>
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-[var(--text-muted)] mt-2">
                                 {formData.drawStrategy === "RANDOM" && "System randomly picks a winner from eligible members."}
                                 {formData.drawStrategy === "MANUAL" && "Foreman manually selects the winner (e.g., for bidding or need-based)."}
                             </p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-2">Payment Grace Period (Days)</label>
+                            <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Payment Grace Period (Days)</label>
                             <input
                                 type="number"
                                 min={0}
                                 max={30}
                                 value={formData.gracePeriodDays}
                                 onChange={(e) => setFormData({ ...formData, gracePeriodDays: Number(e.target.value) })}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white font-mono focus:outline-none focus:border-[#C1FF72]"
+                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--accent-vivid)]"
                             />
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-[var(--text-muted)] mt-2">
                                 Days between Payment Due Date and the Draw Date.
                             </p>
                         </div>
@@ -292,7 +292,7 @@ export function CreatePot() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-[#C1FF72] text-[#1B3022] font-bold px-8 py-3 rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 w-full md:w-auto justify-center"
+                        className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-8 py-3 rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 w-full md:w-auto justify-center"
                     >
                         {isSubmitting ? "Saving..." : (editPotId ? "Update Pot" : "Create Pot")}
                     </button>

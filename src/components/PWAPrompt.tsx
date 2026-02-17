@@ -59,19 +59,19 @@ export function PWAPrompt() {
 
     return (
         <div className="fixed inset-x-3 bottom-3 z-50 animate-in slide-in-from-bottom-5 sm:inset-x-auto sm:right-4 sm:bottom-4">
-            <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-[#232931]/95 p-4 shadow-2xl sm:max-w-sm">
-                <div className="rounded-lg bg-[#C1FF72]/10 p-2 text-[#C1FF72]">
+            <div className="flex items-start gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-4 shadow-2xl sm:max-w-sm">
+                <div className="rounded-lg bg-[var(--accent-vivid)]/10 p-2 text-[var(--accent-vivid)]">
                     <Download size={20} />
                 </div>
                 <div className="flex-1">
-                    <h3 className="font-bold text-white text-sm mb-1">
+                    <h3 className="font-bold text-[var(--text-primary)] text-sm mb-1">
                         {needRefresh
                             ? "New content available"
                             : offlineReady
                                 ? "App ready to work offline"
                                 : "Install GrowPot"}
                     </h3>
-                    <p className="text-gray-400 text-xs mb-3">
+                    <p className="text-[var(--text-muted)] text-xs mb-3">
                         {needRefresh
                             ? "A new version of GrowPot is available. Update now to get the latest features."
                             : offlineReady
@@ -84,7 +84,7 @@ export function PWAPrompt() {
                     {needRefresh && (
                         <button
                             onClick={() => updateServiceWorker(true)}
-                            className="w-full rounded-lg bg-[#C1FF72] px-3 py-2 text-sm font-bold text-[#1B3022] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"
+                            className="w-full rounded-lg bg-[var(--accent-vivid)] px-3 py-2 text-sm font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"
                         >
                             Update Now
                         </button>
@@ -98,13 +98,13 @@ export function PWAPrompt() {
                                 track("pwa_install_prompt_result", { outcome: result.outcome });
                                 setDeferredPrompt(null);
                             }}
-                            className="w-full rounded-lg bg-[#C1FF72] px-3 py-2 text-sm font-bold text-[#1B3022] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"
+                            className="w-full rounded-lg bg-[var(--accent-vivid)] px-3 py-2 text-sm font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"
                         >
                             Install App
                         </button>
                     )}
                 </div>
-                <button onClick={close} className="text-gray-500 hover:text-white">
+                <button onClick={close} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                     <X size={16} />
                 </button>
             </div>

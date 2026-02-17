@@ -4,6 +4,9 @@ import './index.css'
 import App from './App.tsx'
 import { ConvexClientProvider } from './providers/ConvexClientProvider'
 import { FeedbackProvider } from './components/FeedbackProvider'
+import { initTheme } from './lib/theme'
+
+initTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

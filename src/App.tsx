@@ -23,7 +23,7 @@ function Landing() {
       </p>
       <div className="mx-auto flex max-w-xs justify-center gap-4 sm:max-w-none">
         <SignInButton mode="modal">
-          <button className="w-full rounded-full bg-[var(--accent-vivid)] px-8 py-3 text-base font-bold text-[var(--bg-app)] transition-opacity hover:opacity-90 sm:w-auto sm:text-lg">
+          <button className="w-full rounded-full bg-[var(--accent-vivid)] px-8 py-3 text-base font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-lg">
             Get Started
           </button>
         </SignInButton>
@@ -37,11 +37,11 @@ function BottomNav() {
   const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-white/10 bg-[#232931]/95 p-2 shadow-2xl backdrop-blur-md sm:hidden">
+    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-2 shadow-2xl backdrop-blur-md sm:hidden">
       <div className="grid grid-cols-3 gap-2">
         <Link
           to="/"
-          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/") ? "bg-[#C1FF72]/15 text-[#C1FF72]" : "text-gray-300 hover:text-white"}`}
+          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
           aria-current={isActive("/") ? "page" : undefined}
         >
           <Home size={18} />
@@ -49,7 +49,7 @@ function BottomNav() {
         </Link>
         <Link
           to="/create"
-          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/create") ? "bg-[#C1FF72]/15 text-[#C1FF72]" : "text-gray-300 hover:text-white"}`}
+          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/create") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
           aria-current={isActive("/create") ? "page" : undefined}
         >
           <PlusCircle size={18} />
@@ -57,7 +57,7 @@ function BottomNav() {
         </Link>
         <Link
           to="/profile"
-          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/profile") ? "bg-[#C1FF72]/15 text-[#C1FF72]" : "text-gray-300 hover:text-white"}`}
+          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/profile") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
           aria-current={isActive("/profile") ? "page" : undefined}
         >
           <User size={18} />
@@ -71,13 +71,13 @@ function BottomNav() {
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)] pb-24 sm:pb-0">
-      <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#232931]/80 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <Link to="/" className="transition-opacity hover:opacity-80">
             <h1 className="text-xl font-[family-name:var(--font-display)] font-bold sm:text-2xl">GrowPot</h1>
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
-            <Link to="/profile" className="text-sm font-bold text-gray-300 transition-colors hover:text-white">
+            <Link to="/profile" className="text-sm font-bold text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]">
               My Identity
             </Link>
             <UserButton afterSignOutUrl="/" />
@@ -95,13 +95,13 @@ function App() {
     <BrowserRouter>
       <PWAPrompt />
       <AuthLoading>
-        <div className="min-h-screen grid place-items-center bg-[#1B3022]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C1FF72]"></div>
+        <div className="min-h-screen grid place-items-center bg-[var(--bg-app)]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-vivid)]"></div>
         </div>
       </AuthLoading>
 
       <Unauthenticated>
-        <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#284433_0%,_#1B3022_48%,_#15281D_100%)] px-4 py-6 text-[var(--text-primary)] sm:px-6 sm:py-8">
+        <main className="min-h-screen bg-[var(--hero-gradient)] px-4 py-6 text-[var(--text-primary)] sm:px-6 sm:py-8">
           <header className="mb-8 flex flex-col items-start gap-4 sm:mb-12 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-3xl font-[family-name:var(--font-display)] font-bold sm:text-4xl">GrowPot</h1>
@@ -109,7 +109,7 @@ function App() {
             </div>
             <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
               <SignInButton mode="modal">
-                <button className="w-full rounded-full bg-[var(--accent-vivid)] px-6 py-2.5 font-bold text-[var(--bg-app)] transition-opacity hover:opacity-90 sm:w-auto">
+                <button className="w-full rounded-full bg-[var(--accent-vivid)] px-6 py-2.5 font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto">
                   Sign In
                 </button>
               </SignInButton>

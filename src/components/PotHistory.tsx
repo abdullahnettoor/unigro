@@ -20,13 +20,13 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, onPay }: PotH
     return (
         <section className="mt-12">
             <h3 className="text-xl font-display font-bold flex items-center gap-2 mb-6">
-                <Clock className="text-[#C1FF72]" /> Pot History
+                <Clock className="text-[var(--accent-vivid)]" /> Pot History
             </h3>
 
-            <div className="bg-[#232931]/50 border border-white/5 rounded-2xl overflow-hidden">
+            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-white/5 text-gray-400 font-mono text-xs uppercase">
+                        <thead className="bg-[var(--surface-deep)]/60 text-[var(--text-muted)] font-mono text-xs uppercase">
                             <tr>
                                 <th className="p-4 whitespace-nowrap">Cycle</th>
                                 <th className="p-4 whitespace-nowrap">Status</th>
@@ -35,7 +35,7 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, onPay }: PotH
                                 <th className="p-4 whitespace-nowrap text-right">My Payment</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-[var(--border-subtle)]">
                             {cycles.map((cycle) => {
                                 const isCurrent = cycle === pot.currentMonth;
                                 const isFuture = cycle > pot.currentMonth;
@@ -78,38 +78,38 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, onPay }: PotH
                                 const myPaymentStatus = getMyPaymentStatus(cycle, mySlots, transactions);
 
                                 return (
-                                    <tr key={cycle} className={`hover:bg-white/5 transition-colors ${isCurrent ? "bg-[#C1FF72]/5" : ""}`}>
-                                        <td className="p-4 font-mono text-gray-400">
+                                    <tr key={cycle} className={`hover:bg-[var(--surface-deep)]/60 transition-colors ${isCurrent ? "bg-[var(--accent-vivid)]/5" : ""}`}>
+                                        <td className="p-4 font-mono text-[var(--text-muted)]">
                                             #{cycle}
-                                            {isCurrent && <span className="ml-2 text-[10px] bg-[#C1FF72] text-[#1B3022] px-1.5 py-0.5 rounded font-bold">NOW</span>}
+                                            {isCurrent && <span className="ml-2 text-[10px] bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded font-bold">NOW</span>}
                                         </td>
                                         <td className="p-4">
                                             {isFuture ? (
-                                                <span className="text-gray-600 flex items-center gap-1"><Lock size={12} /> Locked</span>
+                                                <span className="text-[var(--text-muted)] flex items-center gap-1"><Lock size={12} /> Locked</span>
                                             ) : isCurrent ? (
-                                                <span className="text-[#C1FF72] font-bold">In Progress</span>
+                                                <span className="text-[var(--accent-vivid)] font-bold">In Progress</span>
                                             ) : (
-                                                <span className="text-gray-400">Completed</span>
+                                                <span className="text-[var(--text-muted)]">Completed</span>
                                             )}
                                         </td>
                                         <td className="p-4">
                                             {winnerSlot ? (
-                                                <div className="flex items-center gap-2 text-[#FFD700]">
+                                                <div className="flex items-center gap-2 text-[var(--gold)]">
                                                     <Trophy size={14} />
                                                     <span className="font-bold">Slot #{winnerSlot.slotNumber}</span>
                                                     <span className="text-xs opacity-70">({winnerSlot.user?.name || "User"})</span>
                                                 </div>
                                             ) : (
-                                                <span className="text-gray-600">-</span>
+                                                <span className="text-[var(--text-muted)]">-</span>
                                             )}
                                         </td>
 
                                         <td className="p-4 font-mono">
                                             {isFuture ? "-" : (
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                                    <div className="w-16 h-1.5 bg-[var(--surface-deep)] rounded-full overflow-hidden">
                                                         <div
-                                                            className="h-full bg-[#C1FF72]"
+                                                            className="h-full bg-[var(--accent-vivid)]"
                                                             style={{ width: `${(paidCount / totalExpected) * 100}%` }}
                                                         />
                                                     </div>
@@ -120,25 +120,25 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, onPay }: PotH
 
                                         <td className="p-4 text-right">
                                             {mySlots.length === 0 ? (
-                                                <span className="text-gray-600">-</span>
+                                                <span className="text-[var(--text-muted)]">-</span>
                                             ) : isFuture ? (
-                                                <span className="text-gray-600">-</span>
+                                                <span className="text-[var(--text-muted)]">-</span>
                                             ) : (
                                                 <div className="flex justify-end gap-2">
                                                     {myPaymentStatus.allPaid ? (
                                                         <div className="text-right">
-                                                            <span className="text-[#C1FF72] flex items-center gap-1 justify-end"><CheckCircle size={14} /> Paid</span>
-                                                            {myPaymentStatus.paidAt && <span className="text-[10px] text-gray-500 block">on {new Date(myPaymentStatus.paidAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>}
+                                                            <span className="text-[var(--accent-vivid)] flex items-center gap-1 justify-end"><CheckCircle size={14} /> Paid</span>
+                                                            {myPaymentStatus.paidAt && <span className="text-[10px] text-[var(--text-muted)] block">on {new Date(myPaymentStatus.paidAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>}
                                                         </div>
                                                     ) : myPaymentStatus.pending ? (
-                                                        <span className="text-yellow-400 flex items-center gap-1 justify-end"><Clock size={14} /> Pending</span>
+                                                        <span className="text-[var(--warning)] flex items-center gap-1 justify-end"><Clock size={14} /> Pending</span>
                                                     ) : (
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-red-400 flex items-center gap-1 justify-end"><AlertCircle size={14} /> Overdue</span>
+                                                            <span className="text-[var(--danger)] flex items-center gap-1 justify-end"><AlertCircle size={14} /> Overdue</span>
                                                             {myPaymentStatus.actionableSlot && (
                                                                 <button
                                                                     onClick={() => onPay(myPaymentStatus.actionableSlot!._id, cycle, pot.config?.contribution || 0)} // Assuming full contribution for simplicity, or we need to calculate share
-                                                                    className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded"
+                                                                    className="bg-[var(--danger)] hover:bg-[var(--danger)]/90 text-[var(--text-primary)] text-[10px] font-bold px-2 py-1 rounded"
                                                                 >
                                                                     Pay
                                                                 </button>

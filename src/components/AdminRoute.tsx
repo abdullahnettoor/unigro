@@ -8,8 +8,8 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
 
     if (isAdmin === undefined) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#1B3022]">
-                <Loader2 className="animate-spin text-[#C1FF72]" />
+            <div className="flex justify-center items-center h-screen bg-[var(--bg-app)]">
+                <Loader2 className="animate-spin text-[var(--accent-vivid)]" />
             </div>
         );
     }

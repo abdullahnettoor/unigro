@@ -325,19 +325,19 @@ export function PotDetail() {
     return (
         <div className="max-w-4xl mx-auto py-6 px-4 sm:py-8">
             {/* Header */}
-            <header className="mb-6 border-b border-white/5 pb-6 sm:mb-8 sm:pb-8">
+            <header className="mb-6 border-b border-[var(--border-subtle)] pb-6 sm:mb-8 sm:pb-8">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <h1 className="text-4xl font-display font-bold">{pot.title}</h1>
-                            <span className={`px-3 py-1 rounded-full text-xs font-mono uppercase ${isDraft ? "bg-yellow-500/20 text-yellow-300" : "bg-[#C1FF72]/20 text-[#C1FF72]"}`}>
-                                {pot.status}
-                            </span>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-mono uppercase ${isDraft ? "bg-[var(--warning)]/20 text-[var(--warning)]" : "bg-[var(--accent-vivid)]/20 text-[var(--accent-vivid)]"}`}>
+                                                {pot.status}
+                                            </span>
                         </div>
                         <ForemanDisplay foremanId={pot.foremanId} />
                         {pot.foreman?.verificationStatus !== "VERIFIED" && (
-                            <div className="mt-3 bg-yellow-500/10 border border-yellow-500/20 text-yellow-200 text-xs px-3 py-2 rounded-lg flex items-center gap-2">
-                                <ShieldAlert size={14} className="text-yellow-500" />
+                            <div className="mt-3 bg-[var(--warning)]/10 border border-[var(--warning)]/20 text-yellow-200 text-xs px-3 py-2 rounded-lg flex items-center gap-2">
+                                <ShieldAlert size={14} className="text-[var(--warning)]" />
                                 <span>
                                     <strong>Caution:</strong> Foreman is Unverified.
                                 </span>
@@ -349,12 +349,12 @@ export function PotDetail() {
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Action Buttons */}
                         {(isActive || isDraft) && hasOpenSlots && (
-                            <button onClick={() => setShowJoinModal(true)} className="bg-[#C1FF72] text-[#1B3022] font-bold px-6 py-2 rounded-full hover:opacity-90 shadow-lg animate-pulse">
+                            <button onClick={() => setShowJoinModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-6 py-2 rounded-full hover:opacity-90 shadow-lg animate-pulse">
                                 Join Pot
                             </button>
                         )}
 
-                        <button onClick={handleShare} className="bg-white/10 text-white font-bold px-4 py-2 rounded-full hover:bg-white/20 flex items-center gap-2 text-sm">
+                        <button onClick={handleShare} className="bg-[var(--surface-deep)]/80 text-[var(--text-primary)] font-bold px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/90 flex items-center gap-2 text-sm">
                             <Share2 size={16} /> Share
                         </button>
 
@@ -362,10 +362,10 @@ export function PotDetail() {
                             <>
                                 {isDraft && (
                                     <>
-                                        <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="bg-[#232931] text-white border border-white/10 font-bold px-4 py-2 rounded-full hover:bg-white/10 flex items-center gap-2 text-sm">
+                                        <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
                                             <Edit2 size={16} /> Edit Pot
                                         </button>
-                                        <button onClick={handleActivate} className="bg-[#C1FF72] text-[#1B3022] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
+                                        <button onClick={handleActivate} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
                                             <Play size={16} /> Activate Pot
                                         </button>
                                     </>
@@ -374,15 +374,15 @@ export function PotDetail() {
                                     <>
                                         {!currentWinnerSlot ? (
                                             <div className="flex gap-2">
-                                                <button onClick={() => setShowWinnerSelection(true)} className="bg-[#232931] text-white border border-white/10 font-bold px-4 py-2 rounded-full hover:bg-white/10 flex items-center gap-2 text-sm">
+                                                <button onClick={() => setShowWinnerSelection(true)} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
                                                     Manual Winner
                                                 </button>
-                                                <button onClick={handleDraw} disabled={isDrawing} className="bg-[#E07A5F] text-white font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
+                                                <button onClick={handleDraw} disabled={isDrawing} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
                                                     <Gavel size={16} /> {isDrawing ? "Rolling..." : "Run Draw"}
                                                 </button>
                                             </div>
                                         ) : (
-                                            <button onClick={() => setShowNextRoundModal(true)} className="bg-[#C1FF72] text-[#1B3022] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm animate-pulse">
+                                            <button onClick={() => setShowNextRoundModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm animate-pulse">
                                                 <ArrowRight size={16} /> Next Round
                                             </button>
                                         )}
@@ -395,31 +395,31 @@ export function PotDetail() {
 
                 {/* Pot Stats Grid - Keep as is, it uses pot.config */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
-                    <div className="bg-[#232931]/50 p-4 rounded-xl border border-white/5">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Total Pool</div>
+                    <div className="bg-[var(--surface-elevated)]/50 p-4 rounded-xl border border-[var(--border-subtle)]">
+                        <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Total Pool</div>
                         <div className="text-xl font-mono">₹{pot.config.totalValue.toLocaleString()}</div>
                     </div>
-                    <div className="bg-[#232931]/50 p-4 rounded-xl border border-white/5">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Winner Gets</div>
-                        <div className="text-xl font-mono text-[#E07A5F]">₹{winningAmount.toLocaleString()}</div>
+                    <div className="bg-[var(--surface-elevated)]/50 p-4 rounded-xl border border-[var(--border-subtle)]">
+                        <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Winner Gets</div>
+                        <div className="text-xl font-mono text-[var(--accent-secondary)]">₹{winningAmount.toLocaleString()}</div>
                     </div>
-                    <div className="bg-[#232931]/50 p-4 rounded-xl border border-white/5">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Next Payment</div>
-                        <div className="text-sm font-bold text-white flex items-center gap-1"><Clock size={12} className="text-[#C1FF72]" /> {nextDueDate}</div>
+                    <div className="bg-[var(--surface-elevated)]/50 p-4 rounded-xl border border-[var(--border-subtle)]">
+                        <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Next Payment</div>
+                        <div className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1"><Clock size={12} className="text-[var(--accent-vivid)]" /> {nextDueDate}</div>
                     </div>
-                    <div className="bg-[#232931]/50 p-4 rounded-xl border border-white/5">
-                        <div className="text-xs text-gray-500 uppercase mb-1">Next Draw</div>
-                        <div className="text-sm font-bold text-white flex items-center gap-1"><Calendar size={12} className="text-[#E07A5F]" /> {nextDrawDate}</div>
+                    <div className="bg-[var(--surface-elevated)]/50 p-4 rounded-xl border border-[var(--border-subtle)]">
+                        <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Next Draw</div>
+                        <div className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1"><Calendar size={12} className="text-[var(--accent-secondary)]" /> {nextDrawDate}</div>
                     </div>
                 </div>
             </header>
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 sm:gap-4 border-b border-white/5 mb-6 sm:mb-8 overflow-x-auto">
+            <div className="flex gap-2 sm:gap-3 border-b border-[var(--border-subtle)] mb-6 sm:mb-8 overflow-x-auto py-1 -mx-4 px-4">
                 {(isMember || isForeman) && (
                     <button
                         onClick={() => setActiveTab('dashboard')}
-                        className={`pb-4 px-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'dashboard' ? "border-[#C1FF72] text-[#C1FF72]" : "border-transparent text-gray-400 hover:text-white"}`}
+                        className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'dashboard' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
                     >
                         Dashboard
                     </button>
@@ -428,24 +428,24 @@ export function PotDetail() {
                 {isForeman && isActive && (
                     <button
                         onClick={() => setActiveTab('approvals')}
-                        className={`pb-4 px-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'approvals' ? "border-[#C1FF72] text-[#C1FF72]" : "border-transparent text-gray-400 hover:text-white"}`}
+                        className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'approvals' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
                     >
-                        Approvals {transactions && transactions.filter(t => t.status === "PENDING").length > 0 && <span className="ml-1 bg-[#C1FF72] text-[#1B3022] px-1.5 py-0.5 rounded-full text-[10px]">{transactions.filter(t => t.status === "PENDING").length}</span>}
+                        Approvals {transactions && transactions.filter(t => t.status === "PENDING").length > 0 && <span className="ml-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded-full text-[10px]">{transactions.filter(t => t.status === "PENDING").length}</span>}
                     </button>
                 )}
 
                 {(isMember || isForeman) && (
                     <button
                         onClick={() => setActiveTab('members')}
-                        className={`pb-4 px-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'members' ? "border-[#C1FF72] text-[#C1FF72]" : "border-transparent text-gray-400 hover:text-white"}`}
+                        className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'members' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
                     >
-                        Members <span className="ml-1 bg-white/10 px-1.5 py-0.5 rounded-full text-[10px] text-gray-300">{memberList.length}</span>
+                        Members <span className="ml-1 bg-[var(--surface-deep)]/80 px-1.5 py-0.5 rounded-full text-[10px] text-[var(--text-muted)]">{memberList.length}</span>
                     </button>
                 )}
 
                 <button
                     onClick={() => setActiveTab('rules')}
-                    className={`pb-4 px-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'rules' ? "border-[#C1FF72] text-[#C1FF72]" : "border-transparent text-gray-400 hover:text-white"}`}
+                    className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'rules' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
                 >
                     Rules & Info
                 </button>
@@ -454,13 +454,13 @@ export function PotDetail() {
                     <>
                         <button
                             onClick={() => setActiveTab('slots')}
-                            className={`pb-4 px-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'slots' ? "border-[#C1FF72] text-[#C1FF72]" : "border-transparent text-gray-400 hover:text-white"}`}
+                            className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'slots' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
                         >
                             Slots ({activeSlots.length}/{pot.config.totalSlots})
                         </button>
                         <button
                             onClick={() => setActiveTab('history')}
-                            className={`pb-4 px-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'history' ? "border-[#C1FF72] text-[#C1FF72]" : "border-transparent text-gray-400 hover:text-white"}`}
+                            className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'history' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
                         >
                             History
                         </button>
@@ -487,15 +487,15 @@ export function PotDetail() {
                         <section>
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-xl font-display font-bold flex items-center gap-2">
-                                    <Clock className="text-[#C1FF72]" /> Current Cycle
+                                    <Clock className="text-[var(--accent-vivid)]" /> Current Cycle
                                 </h3>
-                                <button onClick={() => setActiveTab('slots')} className="text-xs text-[#C1FF72] hover:underline">View All Slots</button>
+                                <button onClick={() => setActiveTab('slots')} className="text-xs text-[var(--accent-vivid)] hover:underline">View All Slots</button>
                             </div>
                             <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} />
                             {currentWinnerSlot && (
                                 <div className="text-center mt-4 animate-bounce">
-                                    <p className="text-gray-400 text-sm">Winner of Cycle {pot.currentMonth}</p>
-                                    <p className="text-2xl font-display font-bold text-[#FFD700]">Slot #{currentWinnerSlot.slotNumber}: {currentWinnerSlot.user?.name}</p>
+                                    <p className="text-[var(--text-muted)] text-sm">Winner of Cycle {pot.currentMonth}</p>
+                                    <p className="text-2xl font-display font-bold text-[var(--gold)]">Slot #{currentWinnerSlot.slotNumber}: {currentWinnerSlot.user?.name}</p>
                                 </div>
                             )}
                         </section>
@@ -520,9 +520,9 @@ export function PotDetail() {
             {/* TAB CONTENT: RULES & INFO */}
             {activeTab === 'rules' && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-[#232931]/50 border border-white/5 rounded-2xl p-6">
+                    <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-6">
                         <h3 className="text-xl font-display font-bold flex items-center gap-2 mb-6">
-                            <Info className="text-[#C1FF72]" /> Rules & Description
+                            <Info className="text-[var(--accent-vivid)]" /> Rules & Description
                         </h3>
                         <div className="prose prose-invert prose-sm max-w-none mb-8">
                             <p className="whitespace-pre-wrap">{pot.description || "No specific description provided by the Foreman."}</p>
@@ -530,26 +530,26 @@ export function PotDetail() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Configuration */}
-                            <div className="bg-white/5 p-6 rounded-xl space-y-4">
-                                <h4 className="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-2"><Layers size={14} /> Pot Configuration</h4>
+                            <div className="bg-[var(--surface-deep)]/60 p-6 rounded-xl space-y-4">
+                                <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Layers size={14} /> Pot Configuration</h4>
                                 <div className="grid grid-cols-2 gap-y-3 text-sm">
-                                    <div className="text-gray-400">Total Value</div><div className="text-white font-mono text-right">₹{pot.config.totalValue.toLocaleString()}</div>
-                                    <div className="text-gray-400">Contribution</div><div className="text-white font-mono text-right">₹{pot.config.contribution.toLocaleString()}</div>
-                                    <div className="text-gray-400">Frequency</div><div className="text-white capitalize text-right">{pot.config.frequency}</div>
-                                    <div className="text-gray-400">Duration</div><div className="text-white text-right">{pot.config.duration} Cycles</div>
-                                    <div className="text-gray-400">Commission</div><div className="text-white text-right">{pot.config.commission}%</div>
-                                    <div className="text-gray-400">Total Slots</div><div className="text-white text-right">{pot.config.totalSlots}</div>
+                                    <div className="text-[var(--text-muted)]">Total Value</div><div className="text-[var(--text-primary)] font-mono text-right">₹{pot.config.totalValue.toLocaleString()}</div>
+                                    <div className="text-[var(--text-muted)]">Contribution</div><div className="text-[var(--text-primary)] font-mono text-right">₹{pot.config.contribution.toLocaleString()}</div>
+                                    <div className="text-[var(--text-muted)]">Frequency</div><div className="text-[var(--text-primary)] capitalize text-right">{pot.config.frequency}</div>
+                                    <div className="text-[var(--text-muted)]">Duration</div><div className="text-[var(--text-primary)] text-right">{pot.config.duration} Cycles</div>
+                                    <div className="text-[var(--text-muted)]">Commission</div><div className="text-[var(--text-primary)] text-right">{pot.config.commission}%</div>
+                                    <div className="text-[var(--text-muted)]">Total Slots</div><div className="text-[var(--text-primary)] text-right">{pot.config.totalSlots}</div>
                                 </div>
                             </div>
 
                             {/* Bank Details */}
                             {pot.bankDetails && (
-                                <div className="bg-white/5 p-6 rounded-xl space-y-4">
-                                    <h4 className="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-2"><Coins size={14} /> Bank Details</h4>
-                                    <div className="whitespace-pre-wrap text-sm text-gray-300 font-mono bg-black/20 p-4 rounded-lg">
+                                <div className="bg-[var(--surface-deep)]/60 p-6 rounded-xl space-y-4">
+                                    <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Coins size={14} /> Bank Details</h4>
+                                    <div className="whitespace-pre-wrap text-sm text-[var(--text-muted)] font-mono bg-[var(--surface-deep)]/60 p-4 rounded-lg">
                                         {pot.bankDetails}
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-2">
+                                    <p className="text-xs text-[var(--text-muted)] mt-2">
                                         * Please make payments to the account above and upload proof for approval.
                                     </p>
                                 </div>
@@ -564,24 +564,24 @@ export function PotDetail() {
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <section>
                         <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
-                            <ShieldCheck className="text-[#C1FF72]" /> Pending Approvals
+                            <ShieldCheck className="text-[var(--accent-vivid)]" /> Pending Approvals
                         </h3>
                         {transactions && transactions.filter(t => t.status === "PENDING").length > 0 ? (
-                            <div className="bg-[#232931]/50 border border-white/5 rounded-xl overflow-hidden divide-y divide-white/5">
+                            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-xl overflow-hidden divide-y divide-[var(--border-subtle)]">
                                 {transactions.filter(t => t.status === "PENDING").map(tx => (
                                     <div key={tx._id} className="p-4 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center font-bold">
+                                            <div className="w-8 h-8 rounded-full bg-[var(--surface-deep)] flex items-center justify-center font-bold">
                                                 #{tx.slot?.slotNumber}
                                             </div>
                                             <div>
                                                 <div className="font-bold text-sm">{tx.user?.name || "Unknown User"}</div>
-                                                <div className="text-xs text-gray-500">Slot #{tx.slot?.slotNumber} • Cycle {tx.monthIndex}</div>
+                                                <div className="text-xs text-[var(--text-muted)]">Slot #{tx.slot?.slotNumber} • Cycle {tx.monthIndex}</div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             {tx.proofUrl && (
-                                                <a href={tx.proofUrl} target="_blank" rel="noreferrer" className="text-xs text-[#C1FF72] hover:underline">View Proof</a>
+                                                <a href={tx.proofUrl} target="_blank" rel="noreferrer" className="text-xs text-[var(--accent-vivid)] hover:underline">View Proof</a>
                                             )}
                                             <ApproveButton transactionId={tx._id} />
                                         </div>
@@ -589,7 +589,7 @@ export function PotDetail() {
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-12 text-gray-500">
+                            <div className="text-center py-12 text-[var(--text-muted)]">
                                 <CheckCircle size={48} className="mx-auto mb-4 opacity-20" />
                                 <p>No pending approvals</p>
                             </div>
@@ -604,17 +604,17 @@ export function PotDetail() {
                     <section>
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-display font-bold flex items-center gap-2">
-                                <Layers className="text-[#C1FF72]" /> All Slots
+                                <Layers className="text-[var(--accent-vivid)]" /> All Slots
                             </h2>
                             {isForeman && (
                                 <>
                                     {availableCount > 0 && (
-                                        <button onClick={() => setShowAddMember(true)} className="text-sm bg-[#232931] border border-white/10 px-4 py-2 rounded-lg hover:border-white/30 transition-all">
+                                        <button onClick={() => setShowAddMember(true)} className="text-sm bg-[var(--surface-elevated)] border border-[var(--border-subtle)] px-4 py-2 rounded-lg hover:border-[var(--border-subtle)] transition-all">
                                             + Assign Slot
                                         </button>
                                     )}
                                     {(availableCount > 0 || reservedSlots.length > 0) && (
-                                        <button onClick={() => setShowSplitModal(true)} className="text-sm bg-[#232931] border border-white/10 px-4 py-2 rounded-lg hover:border-white/30 transition-all ml-2">
+                                        <button onClick={() => setShowSplitModal(true)} className="text-sm bg-[var(--surface-elevated)] border border-[var(--border-subtle)] px-4 py-2 rounded-lg hover:border-[var(--border-subtle)] transition-all ml-2">
                                             <PieChart size={14} className="inline mr-1" /> Split Slot
                                         </button>
                                     )}
@@ -623,20 +623,20 @@ export function PotDetail() {
                         </div>
 
                         {(!isMember && !isForeman) ? (
-                            <div className="bg-[#232931]/50 border border-white/5 rounded-2xl p-8 text-center">
-                                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <EyeOff size={32} className="text-gray-500" />
+                            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-8 text-center">
+                                <div className="w-16 h-16 bg-[var(--surface-deep)]/60 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <EyeOff size={32} className="text-[var(--text-muted)]" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Member List Hidden</h3>
-                                <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Member List Hidden</h3>
+                                <p className="text-[var(--text-muted)] mb-6 max-w-md mx-auto">
                                     To protect the privacy of our members, the full participant list is only visible to joined members.
                                 </p>
                                 {(isActive || isDraft) && hasOpenSlots ? (
-                                    <button onClick={() => setShowJoinModal(true)} className="bg-[#C1FF72] text-[#1B3022] font-bold px-8 py-3 rounded-full hover:opacity-90 shadow-lg">
+                                    <button onClick={() => setShowJoinModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-8 py-3 rounded-full hover:opacity-90 shadow-lg">
                                         Join Pot to View
                                     </button>
                                 ) : (
-                                    <div className="text-[#E07A5F] font-bold">Pot Full</div>
+                                    <div className="text-[var(--accent-secondary)] font-bold">Pot Full</div>
                                 )}
                             </div>
                         ) : (
@@ -664,9 +664,9 @@ export function PotDetail() {
                                     return gridSlots.map(slot => {
                                         if (slot.status === "OPEN") {
                                             return (
-                                                <div key={slot._id} className="p-4 rounded-xl border border-dashed border-white/10 flex items-center justify-between opacity-50">
+                                                <div key={slot._id} className="p-4 rounded-xl border border-dashed border-[var(--border-subtle)] flex items-center justify-between opacity-50">
                                                     <span className="font-mono">Slot #{slot.slotNumber}</span>
-                                                    <span className="text-xs text-gray-400">Available</span>
+                                                    <span className="text-xs text-[var(--text-muted)]">Available</span>
                                                 </div>
                                             );
                                         }
@@ -690,47 +690,47 @@ export function PotDetail() {
                                                         const el = document.getElementById(`split-detail-${slot._id}`);
                                                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                                                     }}
-                                                    className="bg-[#232931] p-4 rounded-xl border border-white/5 hover:border-[#C1FF72] transition-colors cursor-pointer relative group flex flex-col gap-3"
+                                                    className="bg-[var(--surface-elevated)] p-4 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--accent-vivid)] transition-colors cursor-pointer relative group flex flex-col gap-3"
                                                 >
                                                     <div className="flex justify-between items-center">
-                                                        <span className="font-bold text-white flex items-center gap-2">
+                                                        <span className="font-bold text-[var(--text-primary)] flex items-center gap-2">
                                                             Slot #{slot.slotNumber}
-                                                            {isWinner && <span className="text-[10px] text-[#FFD700] border border-[#FFD700] px-1 rounded">WINNER</span>}
+                                                            {isWinner && <span className="text-[10px] text-[var(--gold)] border border-[var(--gold)] px-1 rounded">WINNER</span>}
                                                         </span>
-                                                        <span className="text-[10px] bg-[#C1FF72]/10 text-[#C1FF72] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Split</span>
+                                                        <span className="text-[10px] bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Split</span>
                                                     </div>
                                                     {/* Visual Bar */}
-                                                    <div className="flex h-2 w-full rounded-full overflow-hidden bg-black/40">
+                                                    <div className="flex h-2 w-full rounded-full overflow-hidden bg-[var(--surface-deep)]/70">
                                                         {(slot as any).splitOwners?.map((owner: any, idx: number) => (
                                                             <div
                                                                 key={idx}
                                                                 style={{ width: `${owner.sharePercentage}%` }}
-                                                                className={`h-full ${idx % 2 === 0 ? 'bg-[#C1FF72]' : 'bg-[#a3d95d]'} border-r border-black/20`}
+                                                                className={`h-full ${idx % 2 === 0 ? 'bg-[var(--accent-vivid)]' : 'bg-[var(--accent-soft)]'} border-r border-black/20`}
                                                             />
                                                         ))}
                                                         {/* Remaining space */}
                                                         {(slot as any).splitOwners?.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0) < 100 && (
-                                                            <div className="h-full bg-white/5 flex-1" />
+                                                            <div className="h-full bg-[var(--surface-deep)]/60 flex-1" />
                                                         )}
                                                     </div>
-                                                    <div className="text-[10px] text-gray-500 flex justify-between">
+                                                    <div className="text-[10px] text-[var(--text-muted)] flex justify-between">
                                                         <span>{(slot as any).splitOwners?.length || 0} Owners</span>
-                                                        <span className="group-hover:text-[#C1FF72] transition-colors">View Details ↓</span>
+                                                        <span className="group-hover:text-[var(--accent-vivid)] transition-colors">View Details ↓</span>
                                                     </div>
                                                 </div>
                                             )
                                         }
 
                                         return (
-                                            <div key={slot._id} className={`bg-[#232931] p-4 rounded-xl flex items-center gap-4 border ${isWinner ? "border-[#FFD700]" : "border-white/5"} relative group`}>
-                                                {user?.pictureUrl ? <img src={user.pictureUrl} className="w-10 h-10 rounded-full" /> : <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-400">#{slot.slotNumber}</div>}
+                                            <div key={slot._id} className={`bg-[var(--surface-elevated)] p-4 rounded-xl flex items-center gap-4 border ${isWinner ? "border-[var(--gold)]" : "border-[var(--border-subtle)]"} relative group`}>
+                                                {user?.pictureUrl ? <img src={user.pictureUrl} className="w-10 h-10 rounded-full" /> : <div className="w-10 h-10 rounded-full bg-[var(--surface-deep)] flex items-center justify-center font-bold text-[var(--text-muted)]">#{slot.slotNumber}</div>}
 
                                                 <div className="flex-1 min-w-0">
                                                     <div className="font-bold flex items-center gap-2 truncate">
                                                         {user ? user.name : (slot.isSplit ? "Split Slot" : `Slot #${slot.slotNumber}`)}
-                                                        {user && slot.isGhost && <span className="text-[10px] bg-gray-700 px-1.5 rounded text-gray-300">GHOST</span>}
-                                                        {isWinner && <span className="text-xs text-[#FFD700] border border-[#FFD700] px-1 rounded">WINNER (C{slot.drawOrder})</span>}
-                                                        {!slot.isSplit && isPaid && <span className="text-[10px] bg-[#C1FF72]/20 text-[#C1FF72] px-1.5 rounded font-bold">PAID</span>}
+                                                        {user && slot.isGhost && <span className="text-[10px] bg-[var(--surface-deep)] px-1.5 rounded text-[var(--text-muted)]">GHOST</span>}
+                                                        {isWinner && <span className="text-xs text-[var(--gold)] border border-[var(--gold)] px-1 rounded">WINNER (C{slot.drawOrder})</span>}
+                                                        {!slot.isSplit && isPaid && <span className="text-[10px] bg-[var(--accent-vivid)]/20 text-[var(--accent-vivid)] px-1.5 rounded font-bold">PAID</span>}
                                                     </div>
 
                                                     {/* Split Owners Display */}
@@ -743,18 +743,18 @@ export function PotDetail() {
                                                                 const isOwnerPending = ownerTx?.status === "PENDING";
 
                                                                 return (
-                                                                    <div key={owner.userId} className="text-xs text-gray-300 flex justify-between items-center w-full bg-black/20 px-2 py-1.5 rounded">
+                                                                    <div key={owner.userId} className="text-xs text-[var(--text-muted)] flex justify-between items-center w-full bg-[var(--surface-deep)]/60 px-2 py-1.5 rounded">
                                                                         <span>{owner.userName}</span>
                                                                         <div className="flex items-center gap-2">
-                                                                            <span className="font-mono text-[#C1FF72] text-[10px]">{owner.sharePercentage}%</span>
+                                                                            <span className="font-mono text-[var(--accent-vivid)] text-[10px]">{owner.sharePercentage}%</span>
                                                                             {isActive && (
                                                                                 <>
                                                                                     {isOwnerPaid ? (
-                                                                                        <CheckCircle size={10} className="text-[#C1FF72]" />
+                                                                                        <CheckCircle size={10} className="text-[var(--accent-vivid)]" />
                                                                                     ) : isOwnerPending ? (
-                                                                                        <Clock size={10} className="text-yellow-400" />
+                                                                                        <Clock size={10} className="text-[var(--warning)]" />
                                                                                     ) : (
-                                                                                        <div className="w-2.5 h-2.5 rounded-full border border-red-500/50 bg-red-500/20" title="Unpaid" />
+                                                                                        <div className="w-2.5 h-2.5 rounded-full border border-[var(--danger)]/50  bg-[var(--danger)]/20" title="Unpaid" />
                                                                                     )}
                                                                                 </>
                                                                             )}
@@ -763,7 +763,7 @@ export function PotDetail() {
                                                                 );
                                                             })}
                                                             {(slot as any).splitOwners.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0) < 100 && (
-                                                                <div className="text-[10px] text-gray-500 italic mt-1 px-1">
+                                                                <div className="text-[10px] text-[var(--text-muted)] italic mt-1 px-1">
                                                                     {100 - (slot as any).splitOwners.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0)}% available
                                                                 </div>
                                                             )}
@@ -771,11 +771,11 @@ export function PotDetail() {
                                                     )}
 
                                                     {!slot.isSplit && (
-                                                        <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
+                                                        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                                                             Slot #{slot.slotNumber} • {user?.phone}
-                                                            {isPaid && <span className="text-[#C1FF72] flex items-center gap-1"><CheckCircle size={10} /> Paid</span>}
-                                                            {isPending && <span className="text-yellow-400 flex items-center gap-1"><Clock size={10} /> Pending</span>}
-                                                            {payoutTx && <span className="text-[#C1FF72] ml-2 font-bold">Payout Done</span>}
+                                                            {isPaid && <span className="text-[var(--accent-vivid)] flex items-center gap-1"><CheckCircle size={10} /> Paid</span>}
+                                                            {isPending && <span className="text-[var(--warning)] flex items-center gap-1"><Clock size={10} /> Pending</span>}
+                                                            {payoutTx && <span className="text-[var(--accent-vivid)] ml-2 font-bold">Payout Done</span>}
                                                         </div>
                                                     )}
                                                 </div>
@@ -798,7 +798,7 @@ export function PotDetail() {
                                                                         feedback.toast.success("Slot removed");
                                                                     }
                                                                 }}
-                                                                className="text-red-400 hover:text-red-300 p-1"
+                                                                className="text-[var(--danger)] hover:text-[var(--danger)] p-1"
                                                                 title="Remove Slot"
                                                             >
                                                                 <Trash2 size={16} />
@@ -809,7 +809,7 @@ export function PotDetail() {
                                                             <>
                                                                 {/* Removed MarkPaidButton - Use Members Tab */}
                                                                 {isWinner && !payoutTx && (
-                                                                    <button onClick={() => setShowPayoutModal(slot._id)} className="bg-[#E07A5F] text-white text-[10px] font-bold px-2 py-1 rounded">
+                                                                    <button onClick={() => setShowPayoutModal(slot._id)} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] text-[10px] font-bold px-2 py-1 rounded">
                                                                         Record Payout
                                                                     </button>
                                                                 )}
@@ -825,9 +825,9 @@ export function PotDetail() {
 
                                 {/* SECTION: DETAILED SPLIT SLOTS */}
                                 {allSlots.some(s => s.isSplit) && (
-                                    <div className="mt-12 pt-8 border-t border-white/5">
+                                    <div className="mt-12 pt-8 border-t border-[var(--border-subtle)]">
                                         <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
-                                            <PieChart className="text-[#C1FF72]" /> Shared / Split Slots
+                                            <PieChart className="text-[var(--accent-vivid)]" /> Shared / Split Slots
                                         </h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {allSlots.filter(s => s.isSplit).map(slot => {
@@ -837,15 +837,15 @@ export function PotDetail() {
                                                 const payoutTx = isWinner ? transactions?.find(t => t.slotId === slot._id && t.type === 'payout' && t.monthIndex === slot.drawOrder) : null;
 
                                                 return (
-                                                    <div id={`split-detail-${slot._id}`} key={slot._id} className={`bg-[#232931] p-4 rounded-xl flex items-center gap-4 border ${isWinner ? "border-[#FFD700]" : "border-white/5"} relative group`}>
-                                                        <div className="w-10 h-10 rounded-full bg-[#1a1f26] border border-white/10 flex items-center justify-center font-bold text-[#C1FF72]">
+                                                    <div id={`split-detail-${slot._id}`} key={slot._id} className={`bg-[var(--surface-elevated)] p-4 rounded-xl flex items-center gap-4 border ${isWinner ? "border-[var(--gold)]" : "border-[var(--border-subtle)]"} relative group`}>
+                                                        <div className="w-10 h-10 rounded-full bg-[var(--surface-card)] border border-[var(--border-subtle)] flex items-center justify-center font-bold text-[var(--accent-vivid)]">
                                                             #{slot.slotNumber}
                                                         </div>
 
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="font-bold flex items-center gap-2 truncate text-white mb-2">
+                                                            <div className="font-bold flex items-center gap-2 truncate text-[var(--text-primary)] mb-2">
                                                                 Split Slot #{slot.slotNumber}
-                                                                {isWinner && <span className="text-xs text-[#FFD700] border border-[#FFD700] px-1 rounded">WINNER (C{slot.drawOrder})</span>}
+                                                                {isWinner && <span className="text-xs text-[var(--gold)] border border-[var(--gold)] px-1 rounded">WINNER (C{slot.drawOrder})</span>}
                                                             </div>
 
                                                             <div className="flex flex-col gap-1 mt-1">
@@ -855,27 +855,27 @@ export function PotDetail() {
                                                                     const isOwnerPending = ownerTx?.status === "PENDING";
 
                                                                     return (
-                                                                        <div key={owner.userId} className="text-xs text-gray-300 flex justify-between items-center w-full bg-black/20 px-2 py-1.5 rounded border border-white/5">
+                                                                        <div key={owner.userId} className="text-xs text-[var(--text-muted)] flex justify-between items-center w-full bg-[var(--surface-deep)]/60 px-2 py-1.5 rounded border border-[var(--border-subtle)]">
                                                                             <div className="flex items-center gap-2 overflow-hidden">
                                                                                 {owner.userPictureUrl ? (
-                                                                                    <img src={owner.userPictureUrl} alt={owner.userName} className="w-5 h-5 rounded-full object-cover border border-white/10" />
+                                                                                    <img src={owner.userPictureUrl} alt={owner.userName} className="w-5 h-5 rounded-full object-cover border border-[var(--border-subtle)]" />
                                                                                 ) : (
-                                                                                    <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center font-bold text-[8px] text-gray-400">
+                                                                                    <div className="w-5 h-5 rounded-full bg-[var(--surface-deep)] flex items-center justify-center font-bold text-[8px] text-[var(--text-muted)]">
                                                                                         {owner.userName?.charAt(0)}
                                                                                     </div>
                                                                                 )}
                                                                                 <span className="truncate">{owner.userName}</span>
                                                                             </div>
                                                                             <div className="flex items-center gap-2 shrink-0">
-                                                                                <span className="font-mono text-[#C1FF72] text-[10px]">{owner.sharePercentage}%</span>
+                                                                                <span className="font-mono text-[var(--accent-vivid)] text-[10px]">{owner.sharePercentage}%</span>
                                                                                 {isActive && (
                                                                                     <>
                                                                                         {isOwnerPaid ? (
-                                                                                            <CheckCircle size={10} className="text-[#C1FF72]" />
+                                                                                            <CheckCircle size={10} className="text-[var(--accent-vivid)]" />
                                                                                         ) : isOwnerPending ? (
-                                                                                            <Clock size={10} className="text-yellow-400" />
+                                                                                            <Clock size={10} className="text-[var(--warning)]" />
                                                                                         ) : (
-                                                                                            <div className="w-2.5 h-2.5 rounded-full border border-red-500/50 bg-red-500/20" title="Unpaid" />
+                                                                                            <div className="w-2.5 h-2.5 rounded-full border border-[var(--danger)]/50  bg-[var(--danger)]/20" title="Unpaid" />
                                                                                         )}
                                                                                     </>
                                                                                 )}
@@ -885,7 +885,7 @@ export function PotDetail() {
 
                                                                 })}
                                                                 {(slot as any).splitOwners?.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0) < 100 && (
-                                                                    <div className="text-[10px] text-gray-500 italic mt-1 px-1">
+                                                                    <div className="text-[10px] text-[var(--text-muted)] italic mt-1 px-1">
                                                                         {100 - (slot as any).splitOwners?.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0)}% available
                                                                     </div>
                                                                 )}
@@ -895,7 +895,7 @@ export function PotDetail() {
                                                         {/* Foreman Actions for Split Slots */}
                                                         {isForeman && isActive && isWinner && !payoutTx && (
                                                             <div className="absolute top-2 right-2">
-                                                                <button onClick={() => setShowPayoutModal(slot._id)} className="bg-[#E07A5F] text-white text-[10px] font-bold px-2 py-1 rounded">
+                                                                <button onClick={() => setShowPayoutModal(slot._id)} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] text-[10px] font-bold px-2 py-1 rounded">
                                                                     Record Payout
                                                                 </button>
                                                             </div>
@@ -982,14 +982,14 @@ export function PotDetail() {
             {
                 showPayoutModal && (
                     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-                        <div className="bg-[#1a1f26] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
+                        <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
                             <h3 className="text-xl font-bold mb-4">Record Payout</h3>
-                            <p className="text-gray-400 text-sm mb-4">Confirm payout for Slot winner.</p>
+                            <p className="text-[var(--text-muted)] text-sm mb-4">Confirm payout for Slot winner.</p>
                             <button onClick={async () => {
                                 await recordPayout({ potId: pot._id, slotId: showPayoutModal, monthIndex: pot.currentMonth, amount: winningAmount });
                                 setShowPayoutModal(null);
-                            }} className="w-full bg-[#C1FF72] text-[#1B3022] font-bold py-3 rounded-xl mb-2">Confirm Paid</button>
-                            <button onClick={() => setShowPayoutModal(null)} className="w-full bg-gray-800 text-white font-bold py-3 rounded-xl">Cancel</button>
+                            }} className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl mb-2">Confirm Paid</button>
+                            <button onClick={() => setShowPayoutModal(null)} className="w-full bg-[var(--surface-deep)] text-[var(--text-primary)] font-bold py-3 rounded-xl">Cancel</button>
                         </div>
                     </div>
                 )
@@ -998,22 +998,22 @@ export function PotDetail() {
             {
                 showWinnerSelection && (
                     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-                        <div className="bg-[#1a1f26] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
+                        <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
                             <h3 className="text-xl font-bold mb-4">Select Winner Manually</h3>
                             <div className="space-y-2 max-h-60 overflow-y-auto mb-4">
                                 {activeSlots.filter(s => !s.drawOrder).map(s => (
                                     <button
                                         key={s._id}
                                         onClick={() => setSelectedWinnerSlotNum(s.slotNumber)}
-                                        className={`w-full p-3 rounded-lg text-left border ${selectedWinnerSlotNum === s.slotNumber ? "border-[#C1FF72] bg-[#C1FF72]/10" : "border-white/10 bg-[#232931]"}`}
+                                        className={`w-full p-3 rounded-lg text-left border ${selectedWinnerSlotNum === s.slotNumber ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/10" : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]"}`}
                                     >
                                         Slot #{s.slotNumber} - {s.user?.name}
                                     </button>
                                 ))}
                             </div>
                             <div className="flex gap-2">
-                                <button onClick={() => setShowWinnerSelection(false)} className="flex-1 bg-gray-800 py-2 rounded-lg">Cancel</button>
-                                <button onClick={handleDraw} disabled={!selectedWinnerSlotNum} className="flex-1 bg-[#C1FF72] text-[#1B3022] font-bold py-2 rounded-lg">Confirm</button>
+                                <button onClick={() => setShowWinnerSelection(false)} className="flex-1 bg-[var(--surface-deep)] py-2 rounded-lg">Cancel</button>
+                                <button onClick={handleDraw} disabled={!selectedWinnerSlotNum} className="flex-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-2 rounded-lg">Confirm</button>
                             </div>
                         </div>
                     </div>
@@ -1068,7 +1068,7 @@ function ApproveButton({ transactionId }: { transactionId: Id<"transactions"> })
         <button
             onClick={handleApprove}
             disabled={loading}
-            className="bg-[#232931] border border-white/10 hover:bg-[#C1FF72] hover:text-[#1B3022] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+            className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] hover:bg-[var(--accent-vivid)] hover:text-[var(--text-on-accent)] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
         >
             {loading ? "..." : "Approve"}
         </button>
@@ -1080,18 +1080,18 @@ function ApproveButton({ transactionId }: { transactionId: Id<"transactions"> })
 function ForemanDisplay({ foremanId }: { foremanId: Id<"users"> }) {
     const foreman = useQuery(api.users.get, { userId: foremanId });
 
-    if (!foreman) return <div className="text-xs text-gray-500 animate-pulse">Loading Foreman...</div>;
+    if (!foreman) return <div className="text-xs text-[var(--text-muted)] animate-pulse">Loading Foreman...</div>;
 
     return (
         <div className="flex items-center gap-2 mt-2">
             {foreman.pictureUrl ? (
-                <img src={foreman.pictureUrl} alt={foreman.name} className="w-6 h-6 rounded-full border border-white/10" />
+                <img src={foreman.pictureUrl} alt={foreman.name} className="w-6 h-6 rounded-full border border-[var(--border-subtle)]" />
             ) : (
-                <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-400">
+                <div className="w-6 h-6 rounded-full bg-[var(--surface-deep)] flex items-center justify-center text-[10px] font-bold text-[var(--text-muted)]">
                     {foreman.name?.charAt(0)}
                 </div>
             )}
-            <span className="text-sm text-gray-400">Managed by <span className="text-white font-bold">{foreman.name}</span></span>
+            <span className="text-sm text-[var(--text-muted)]">Managed by <span className="text-[var(--text-primary)] font-bold">{foreman.name}</span></span>
         </div>
     );
 }
@@ -1128,31 +1128,31 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
     }
 
     return (
-        <section className="mb-8 p-6 bg-[#232931] border border-[#C1FF72]/20 rounded-2xl shadow-lg relative overflow-hidden">
+        <section className="mb-8 p-6 bg-[var(--surface-elevated)] border border-[var(--accent-vivid)]/20 rounded-2xl shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Coins size={100} className="text-[#C1FF72]" />
+                <Coins size={100} className="text-[var(--accent-vivid)]" />
             </div>
 
             <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2 z-10 relative">
-                <Clock className="text-[#C1FF72]" /> Your Dashboard
+                <Clock className="text-[var(--accent-vivid)]" /> Your Dashboard
             </h3>
 
             {/* Overdue Payments Alert */}
             {overduePayments.length > 0 && (
-                <div className="mb-6 relative z-10 bg-red-500/10 border border-red-500/20 rounded-xl p-4 animate-pulse">
-                    <h4 className="text-red-400 font-bold flex items-center gap-2 mb-3">
+                <div className="mb-6 relative z-10  bg-[var(--danger)]/10 border border-[var(--danger)]/20 rounded-xl p-4 animate-pulse">
+                    <h4 className="text-[var(--danger)] font-bold flex items-center gap-2 mb-3">
                         <ShieldAlert size={20} /> Action Required: Overdue Payments
                     </h4>
                     <div className="space-y-3">
                         {overduePayments.map((item) => (
-                            <div key={`${item.slot._id}-${item.cycle}`} className="flex justify-between items-center bg-red-500/5 p-3 rounded-lg border border-red-500/10">
+                            <div key={`${item.slot._id}-${item.cycle}`} className="flex justify-between items-center  bg-[var(--danger)]/5 p-3 rounded-lg border border-[var(--danger)]/10">
                                 <div>
-                                    <div className="text-sm font-bold text-white">Cycle {item.cycle} • Slot #{item.slot.slotNumber}</div>
-                                    <div className="text-xs text-red-300">Missed Payment of ₹{item.amount.toLocaleString()}</div>
+                                    <div className="text-sm font-bold text-[var(--text-primary)]">Cycle {item.cycle} • Slot #{item.slot.slotNumber}</div>
+                                    <div className="text-xs text-[var(--danger)]">Missed Payment of ₹{item.amount.toLocaleString()}</div>
                                 </div>
                                 <button
                                     onClick={() => setPaymentModalState({ slotId: item.slot._id, cycle: item.cycle, amount: item.amount })}
-                                    className="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+                                    className="bg-[var(--danger)] hover:bg-[var(--danger)]/90 text-[var(--text-primary)] text-xs font-bold px-4 py-2 rounded-lg transition-colors"
                                 >
                                     Pay Now
                                 </button>
@@ -1180,19 +1180,19 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
                     const dueAmount = (pot.config.contribution * sharePct) / 100;
 
                     return (
-                        <div key={slot._id} className="bg-black/20 p-4 rounded-xl border border-white/5">
+                        <div key={slot._id} className="bg-[var(--surface-deep)]/60 p-4 rounded-xl border border-[var(--border-subtle)]">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <div className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">
+                                    <div className="text-xs text-[var(--text-muted)] uppercase font-bold tracking-wider mb-1">
                                         Slot #{slot.slotNumber}
-                                        {sharePct < 100 && <span className="ml-2 text-[#C1FF72] text-[10px] bg-[#C1FF72]/10 px-1.5 py-0.5 rounded-full">{sharePct}% Share</span>}
+                                        {sharePct < 100 && <span className="ml-2 text-[var(--accent-vivid)] text-[10px] bg-[var(--accent-vivid)]/10 px-1.5 py-0.5 rounded-full">{sharePct}% Share</span>}
                                     </div>
-                                    <div className="text-2xl font-bold font-mono text-white">
+                                    <div className="text-2xl font-bold font-mono text-[var(--text-primary)]">
                                         {status === 'PAID' ? 'Paid' : `₹${dueAmount.toLocaleString()}`}
                                     </div>
-                                    {status !== 'PAID' && <div className="text-xs text-[#E07A5F]">Due by {nextDueDate}</div>}
+                                    {status !== 'PAID' && <div className="text-xs text-[var(--accent-secondary)]">Due by {nextDueDate}</div>}
                                 </div>
-                                <div className={`px-3 py-1 rounded-full text-xs font-bold ${status === 'PAID' ? 'bg-[#C1FF72]/20 text-[#C1FF72]' : 'bg-red-500/20 text-red-300'}`}>
+                                <div className={`px-3 py-1 rounded-full text-xs font-bold ${status === 'PAID' ? 'bg-[var(--accent-vivid)]/20 text-[var(--accent-vivid)]' : ' bg-[var(--danger)]/20 text-[var(--danger)]'}`}>
                                     {status}
                                 </div>
                             </div>
@@ -1200,27 +1200,27 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
                             {status === 'UNPAID' && (
                                 <button
                                     onClick={() => setPaymentModalState({ slotId: slot._id, cycle: pot.currentMonth, amount: dueAmount })}
-                                    className="w-full bg-[#C1FF72] text-[#1B3022] font-bold py-2 rounded-lg hover:opacity-90 mb-4 text-sm"
+                                    className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-2 rounded-lg hover:opacity-90 mb-4 text-sm"
                                 >
                                     Pay Now
                                 </button>
                             )}
 
                             {status === 'PENDING' && (
-                                <div className="text-center text-xs text-yellow-400 bg-yellow-400/10 py-2 rounded-lg mb-4">
+                                <div className="text-center text-xs text-[var(--warning)] bg-[var(--warning)]/10 py-2 rounded-lg mb-4">
                                     Payment Pending Approval
                                 </div>
                             )}
 
-                            <div className="pt-4 border-t border-white/5">
+                            <div className="pt-4 border-t border-[var(--border-subtle)]">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-400">Win Status</span>
+                                    <span className="text-xs text-[var(--text-muted)]">Win Status</span>
                                     {isWinner ? (
-                                        <span className="text-[#FFD700] font-bold text-xs flex items-center gap-1">
+                                        <span className="text-[var(--gold)] font-bold text-xs flex items-center gap-1">
                                             Won Cycle {isWinner} (₹{wonAmount.toLocaleString()})
                                         </span>
                                     ) : (
-                                        <span className="text-gray-500 text-xs">Not yet won</span>
+                                        <span className="text-[var(--text-muted)] text-xs">Not yet won</span>
                                     )}
                                 </div>
                             </div>
@@ -1287,7 +1287,7 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
 
     if (members.length === 0) {
         return (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-[var(--text-muted)]">
                 <Users size={48} className="mx-auto mb-4 opacity-20" />
                 <p>No active members yet.</p>
             </div>
@@ -1297,32 +1297,32 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
     return (
         <div className="space-y-4">
             <h3 className="text-xl font-display font-bold flex items-center gap-2 mb-6">
-                <Users className="text-[#C1FF72]" /> Participants ({members.length})
+                <Users className="text-[var(--accent-vivid)]" /> Participants ({members.length})
             </h3>
 
             <div className="grid grid-cols-1 gap-4">
                 {members.map((m) => {
                     const isFullyPaid = m.totalDue === 0;
                     return (
-                        <div key={m.userId} className="bg-[#232931] border border-white/5 rounded-xl overflow-hidden">
+                        <div key={m.userId} className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
                             <div
-                                className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
+                                className="p-4 flex items-center justify-between cursor-pointer hover:bg-[var(--surface-deep)]/60 transition-colors"
                                 onClick={() => toggleExpand(m.userId)}
                             >
                                 <div className="flex items-center gap-3">
                                     {m.user.pictureUrl ? (
                                         <img src={m.user.pictureUrl} alt={m.user.name} className="w-10 h-10 rounded-full" />
                                     ) : (
-                                        <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-400">
+                                        <div className="w-10 h-10 rounded-full bg-[var(--surface-deep)] flex items-center justify-center font-bold text-[var(--text-muted)]">
                                             {m.user.name.charAt(0)}
                                         </div>
                                     )}
                                     <div>
                                         <div className="font-bold flex items-center gap-2">
                                             {m.user.name}
-                                            {m.totalShare < 100 && <span className="text-[10px] bg-white/10 px-1.5 rounded-full text-gray-400">{m.totalShare}% Stake</span>}
+                                            {m.totalShare < 100 && <span className="text-[10px] bg-[var(--surface-deep)]/80 px-1.5 rounded-full text-[var(--text-muted)]">{m.totalShare}% Stake</span>}
                                         </div>
-                                        <div className="text-xs text-gray-400">
+                                        <div className="text-xs text-[var(--text-muted)]">
                                             {m.slots.length} Slot{m.slots.length !== 1 ? 's' : ''} • {m.user.phone}
                                         </div>
                                     </div>
@@ -1331,34 +1331,34 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                 <div className="flex items-center gap-4">
                                     <div className="text-right">
 
-                                        <div className={`font-bold font-mono ${isFullyPaid ? "text-[#C1FF72]" : "text-[#E07A5F]"}`}>
+                                        <div className={`font-bold font-mono ${isFullyPaid ? "text-[var(--accent-vivid)]" : "text-[var(--accent-secondary)]"}`}>
                                             {isFullyPaid ? "PAID" : `Due: ₹${m.totalDue.toLocaleString()}`}
                                         </div>
                                         {!isFullyPaid && (
-                                            <div className="text-[10px] text-gray-500">{m.paidCount}/{m.slots.length} Paid</div>
+                                            <div className="text-[10px] text-[var(--text-muted)]">{m.paidCount}/{m.slots.length} Paid</div>
                                         )}
                                     </div>
-                                    {expandedUser === m.userId ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
+                                    {expandedUser === m.userId ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                                 </div>
                             </div>
 
                             {/* Expanded Details */}
                             {expandedUser === m.userId && (
-                                <div className="bg-black/20 p-4 border-t border-white/5 space-y-2">
+                                <div className="bg-[var(--surface-deep)]/60 p-4 border-t border-[var(--border-subtle)] space-y-2">
                                     {/* Missed Payments Section */}
                                     {m.missedPayments?.length > 0 && (
-                                        <div className="mb-4 bg-red-500/10 rounded-lg p-3 border border-red-500/20">
-                                            <div className="text-xs font-bold text-red-400 mb-2 flex items-center gap-1">
+                                        <div className="mb-4  bg-[var(--danger)]/10 rounded-lg p-3 border border-[var(--danger)]/20">
+                                            <div className="text-xs font-bold text-[var(--danger)] mb-2 flex items-center gap-1">
                                                 <ShieldAlert size={12} /> Missed Payments
                                             </div>
                                             <div className="space-y-2">
                                                 {m.missedPayments.map((missed: any, idx: number) => (
                                                     <div key={idx} className="flex justify-between items-center text-xs">
-                                                        <span className="text-gray-300">
+                                                        <span className="text-[var(--text-muted)]">
                                                             Cycle {missed.monthIndex + 1} • Slot #{missed.slotNumber}
                                                         </span>
                                                         <div className="flex items-center gap-3">
-                                                            <span className="font-bold text-red-400">₹{missed.amount.toLocaleString()}</span>
+                                                            <span className="font-bold text-[var(--danger)]">₹{missed.amount.toLocaleString()}</span>
 
                                                             {/* User Self-Pay Action */}
                                                             {missed.isMyPayment && missed.status === 'UNPAID' && (
@@ -1367,13 +1367,13 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                                                         e.stopPropagation();
                                                                         setPaymentModalState({ slotId: missed.slotId, cycle: missed.monthIndex, amount: missed.amount });
                                                                     }}
-                                                                    className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded hover:bg-red-600 shadow-sm"
+                                                                    className="bg-[var(--danger)] text-[var(--text-on-accent)] text-[10px] font-bold px-3 py-1 rounded hover:bg-[var(--danger)]/90 shadow-sm"
                                                                 >
                                                                     Pay Now
                                                                 </button>
                                                             )}
                                                             {missed.status === 'PENDING' && (
-                                                                <span className="text-yellow-400 text-[10px] bg-yellow-400/10 px-2 py-0.5 rounded flex items-center gap-1">
+                                                                <span className="text-[var(--warning)] text-[10px] bg-[var(--warning)]/10 px-2 py-0.5 rounded flex items-center gap-1">
                                                                     <Clock size={10} /> Pending
                                                                 </span>
                                                             )}
@@ -1385,7 +1385,7 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                                                         e.stopPropagation();
                                                                         handleMarkPaid(missed.slotId, m.userId, missed.monthIndex, missed.amount);
                                                                     }}
-                                                                    className="bg-[#232931] border border-red-500/30 text-red-300 text-[10px] px-2 py-0.5 rounded hover:bg-red-500/20"
+                                                                    className="bg-[var(--surface-elevated)] border border-[var(--danger)]/30 text-[var(--danger)] text-[10px] px-2 py-0.5 rounded hover:bg-[var(--danger)]/20"
                                                                 >
                                                                     Mark Paid
                                                                 </button>
@@ -1413,13 +1413,13 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                         // Ideally I should update aggregation to pass 'status' string.
 
                                         return (
-                                            <div key={slot._id} className="flex justify-between items-center text-sm p-2 rounded hover:bg-white/5">
+                                            <div key={slot._id} className="flex justify-between items-center text-sm p-2 rounded hover:bg-[var(--surface-deep)]/60">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-gray-400 font-mono">Slot #{slot.slotNumber}</span>
-                                                    {slot.isSplit && <span className="text-[10px] bg-white/10 px-1.5 rounded text-gray-400">{slot.share}%</span>}
+                                                    <span className="text-[var(--text-muted)] font-mono">Slot #{slot.slotNumber}</span>
+                                                    {slot.isSplit && <span className="text-[10px] bg-[var(--surface-deep)]/80 px-1.5 rounded text-[var(--text-muted)]">{slot.share}%</span>}
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className={`font-bold ${slot.isPaid ? 'text-[#C1FF72]' : 'text-gray-300'}`}>
+                                                    <span className={`font-bold ${slot.isPaid ? 'text-[var(--accent-vivid)]' : 'text-[var(--text-muted)]'}`}>
                                                         {slot.isPaid ? 'PAID' : `₹${slot.due.toLocaleString()}`}
                                                     </span>
 
@@ -1433,7 +1433,7 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                                                         e.stopPropagation();
                                                                         setPaymentModalState({ slotId: slot._id, cycle: currentMonth, amount: slot.due });
                                                                     }}
-                                                                    className="bg-[#C1FF72] text-[#1B3022] text-[10px] font-bold px-3 py-1 rounded hover:opacity-90 shadow-sm"
+                                                                    className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] text-[10px] font-bold px-3 py-1 rounded hover:opacity-90 shadow-sm"
                                                                 >
                                                                     Pay Now
                                                                 </button>
@@ -1446,14 +1446,14 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                                                         e.stopPropagation();
                                                                         handleMarkPaid(slot._id, m.userId, currentMonth, slot.due);
                                                                     }}
-                                                                    className="bg-[#232931] border border-[#C1FF72]/30 text-[#C1FF72] text-[10px] font-bold px-2 py-1 rounded hover:bg-[#C1FF72]/10"
+                                                                    className="bg-[var(--surface-elevated)] border border-[var(--accent-vivid)]/30 text-[var(--accent-vivid)] text-[10px] font-bold px-2 py-1 rounded hover:bg-[var(--accent-vivid)]/10"
                                                                 >
                                                                     Mark Paid
                                                                 </button>
                                                             )}
                                                         </>
                                                     )}
-                                                    {slot.isPaid && <CheckCircle size={14} className="text-[#C1FF72]" />}
+                                                    {slot.isPaid && <CheckCircle size={14} className="text-[var(--accent-vivid)]" />}
                                                 </div>
                                             </div>
                                         )

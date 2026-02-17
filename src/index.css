@@ -6,25 +6,53 @@
   --font-body: "Source Sans 3", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-bg-app: #1B3022;
-  /* Deep Forest */
-  --color-surface-elevated: #232931;
-  /* Midnight Clay */
-  --color-accent-vivid: #C1FF72;
-  /* Electric Moss */
-  --color-accent-secondary: #E07A5F;
-  /* Terracotta */
-  --color-text-primary: #e4e4e7;
-  --color-text-muted: #a1a1aa;
+  --color-bg-app: #F6F5F2;
+  --color-surface-elevated: #FFFFFF;
+  --color-accent-vivid: #2F7A5F;
+  --color-accent-secondary: #C8925A;
+  --color-text-primary: #1D2622;
+  --color-text-muted: #5B6A63;
 }
 
 :root {
-  --bg-app: #1B3022;
-  --surface-elevated: #232931;
-  --accent-vivid: #C1FF72;
-  --accent-secondary: #E07A5F;
-  --text-primary: #e4e4e7;
-  --text-muted: #a1a1aa;
+  --bg-app: #F6F5F2;
+  --surface-elevated: #FFFFFF;
+  --surface-card: #F0F4F1;
+  --surface-deep: #E7ECE9;
+  --accent-vivid: #2F7A5F;
+  --accent-soft: #D7F0E3;
+  --accent-secondary: #C8925A;
+  --accent-glow: 200 146 90;
+  --text-primary: #1D2622;
+  --text-muted: #5B6A63;
+  --text-on-accent: #F6F5F2;
+  --border-subtle: #D9E2DD;
+  --success: #2F7A5F;
+  --warning: #C9853B;
+  --danger: #C8463A;
+  --gold: #C9A227;
+  --hero-gradient: radial-gradient(circle at top, #E8F2ED 0%, #F6F5F2 50%, #ECE8E1 100%);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg-app: #0F1F1A;
+  --surface-elevated: #182923;
+  --surface-card: #1A2E27;
+  --surface-deep: #12231D;
+  --accent-vivid: #A6E6B0;
+  --accent-soft: #1E3B30;
+  --accent-secondary: #E3A96A;
+  --accent-glow: 227 169 106;
+  --text-primary: #E8F0EC;
+  --text-muted: #A9B8B2;
+  --text-on-accent: #0F1F1A;
+  --border-subtle: #2C3F38;
+  --success: #A6E6B0;
+  --warning: #E3A96A;
+  --danger: #E1675A;
+  --gold: #E5C36C;
+  --hero-gradient: radial-gradient(circle at top, #1F3A2E 0%, #0F1F1A 48%, #0B1814 100%);
   color-scheme: dark;
 }
 
@@ -94,4 +122,9 @@ input[type="submit"] {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+.theme-transition,
+.theme-transition * {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, fill 200ms ease, stroke 200ms ease;
 }
