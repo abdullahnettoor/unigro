@@ -30,15 +30,33 @@ export const submitPayment = mutation({
         // Verify ownership of slot
         const slot = await ctx.db.get(args.slotId);
         if (!slot) throw new Error("Slot not found");
-        if (slot.userId !== user._id) throw new Error("You do not own this slot");
+        let isOwner = slot.userId === user._id;
+        if (!isOwner && slot.isSplit) {
+            const ownership = await ctx.db
+                .query("split_ownership")
+                .withIndex("by_slot", (q) => q.eq("slotId", slot._id))
+                .filter((q) => q.eq(q.field("userId"), user._id))
+                .first();
+            if (ownership) isOwner = true;
+        }
+
+        if (!isOwner) throw new Error("You do not own this slot");
         if (slot.potId !== args.potId) throw new Error("Slot does not belong to this pot");
 
-        // Check if transaction exists
-        const existingTx = await ctx.db
+        // Check if transaction exists (Unique per user for split slots)
+        let existingTxQuery = ctx.db
             .query("transactions")
             .withIndex("by_pot_month", (q) => q.eq("potId", args.potId).eq("monthIndex", args.monthIndex))
-            .filter((q) => q.eq(q.field("slotId"), args.slotId))
-            .unique();
+            .filter((q) => q.eq(q.field("slotId"), args.slotId));
+
+        // If split slot (or to be safe), filter by userId as well
+        // Note: For non-split slots, checks against slot owner's userId is implicitly handled by ownership check above + this insertion
+        // but for backward compatibility and split support, we explicitly check userId if we are recording it.
+        // Queries in Convex can't easily conditional filter, so we filter in memory or chain.
+        // Actually best to just filter by userId since we are inserting it now.
+        existingTxQuery = existingTxQuery.filter((q) => q.eq(q.field("userId"), user._id));
+
+        const existingTx = await existingTxQuery.unique();
 
         let proofUrl = undefined;
         if (args.storageId) {
@@ -59,6 +77,7 @@ export const submitPayment = mutation({
                 potId: args.potId,
                 slotId: args.slotId,
                 monthIndex: args.monthIndex,
+                userId: user._id, // Record Payer
                 ...data,
             });
         }
@@ -71,6 +90,7 @@ export const recordCashPayment = mutation({
         potId: v.id("pots"),
         slotId: v.id("slots"),
         monthIndex: v.number(),
+        userId: v.optional(v.id("users")), // Optional: Specify which user if split slot
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -88,11 +108,20 @@ export const recordCashPayment = mutation({
         if (!foreman || foreman._id !== pot.foremanId) throw new Error("Only Foreman can record cash payments");
 
         // Check if transaction exists
-        const existingTx = await ctx.db
+        let existingTxQuery = ctx.db
             .query("transactions")
             .withIndex("by_pot_month", (q) => q.eq("potId", args.potId).eq("monthIndex", args.monthIndex))
-            .filter((q) => q.eq(q.field("slotId"), args.slotId))
-            .unique();
+            .filter((q) => q.eq(q.field("slotId"), args.slotId));
+
+        if (args.userId) {
+            existingTxQuery = existingTxQuery.filter((q) => q.eq(q.field("userId"), args.userId));
+        }
+        // If no userId provided, it might match *any* transaction for that slot? 
+        // Or if it's a legacy slot (no split), it might find the one without userId?
+        // For safety, if it's a split slot, userId SHOULD be provided.
+        // But for now, we follow the query.
+
+        const existingTx = await existingTxQuery.first(); // unique() might fail if multiple exist and no userId provided
 
         if (existingTx) {
             await ctx.db.patch(existingTx._id, {
@@ -100,10 +129,19 @@ export const recordCashPayment = mutation({
                 remarks: "Cash Payment Recorded by Foreman"
             });
         } else {
+            // Need to know WHO paid if we are creating a new one.
+            // If userId is not provided, we might default to slot owner?
+            let payerId = args.userId;
+            if (!payerId) {
+                const slot = await ctx.db.get(args.slotId);
+                if (slot && slot.userId) payerId = slot.userId;
+            }
+
             await ctx.db.insert("transactions", {
                 potId: args.potId,
                 slotId: args.slotId,
                 monthIndex: args.monthIndex,
+                userId: payerId,
                 status: "PAID",
                 remarks: "Cash Payment Recorded by Foreman",
             });
@@ -186,7 +224,10 @@ export const list = query({
             let user = null;
             if (tx.slotId) {
                 slot = await ctx.db.get(tx.slotId);
-                if (slot && slot.userId) {
+                // IF transaction has a userId, use that. Otherwise fallback to slot owner.
+                if (tx.userId) {
+                    user = await ctx.db.get(tx.userId);
+                } else if (slot && slot.userId) {
                     user = await ctx.db.get(slot.userId);
                 }
             }

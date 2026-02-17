@@ -52,20 +52,32 @@ export default defineSchema({
     slots: defineTable({
         potId: v.id("pots"),
         slotNumber: v.number(), // 1 to N
-        userId: v.optional(v.id("users")), // Null = Open Slot
+        userId: v.optional(v.id("users")), // Null = Open Slot. Primary owner if not split.
         status: v.union(v.literal("OPEN"), v.literal("RESERVED"), v.literal("FILLED")),
         isGhost: v.boolean(),
+        isSplit: v.optional(v.boolean()), // True if multiple owners
         // Billing & Winnings
         drawOrder: v.optional(v.number()), // Cycle specific winner
     })
         .index("by_pot", ["potId"])
-        .index("by_user", ["userId"]) // For listing pots by user
+        .index("by_user", ["userId"]) // For lising pots by user
         .index("by_user_pot", ["userId", "potId"])
         .index("by_pot_slotNumber", ["potId", "slotNumber"]),
+
+    // NEW: Split Ownership Table
+    split_ownership: defineTable({
+        slotId: v.id("slots"),
+        userId: v.id("users"),
+        sharePercentage: v.number(), // e.g., 50 (for 50%)
+        status: v.union(v.literal("ACTIVE"), v.literal("REMOVED")),
+    })
+        .index("by_slot", ["slotId"])
+        .index("by_user", ["userId"]),
 
     transactions: defineTable({
         potId: v.id("pots"),
         slotId: v.id("slots"),
+        userId: v.optional(v.id("users")), // NEW: Track who made the payment (crucial for split slots)
         monthIndex: v.number(),
         status: v.union(v.literal("UNPAID"), v.literal("PENDING"), v.literal("PAID")),
         type: v.optional(v.union(v.literal("cash"), v.literal("online"), v.literal("payout"))),

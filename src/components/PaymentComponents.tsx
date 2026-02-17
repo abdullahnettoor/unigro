@@ -8,10 +8,11 @@ interface PaymentModalProps {
     potId: Id<"pots">;
     slotId: Id<"slots">;
     monthIndex: number;
+    amount: number;
     onClose: () => void;
 }
 
-export function PaymentModal({ potId, slotId, monthIndex, onClose }: PaymentModalProps) {
+export function PaymentModal({ potId, slotId, monthIndex, amount, onClose }: PaymentModalProps) {
     const generateUploadUrl = useMutation(api.transactions.generateUploadUrl);
     const submitPayment = useMutation(api.transactions.submitPayment);
 
@@ -99,7 +100,7 @@ export function PaymentModal({ potId, slotId, monthIndex, onClose }: PaymentModa
                 </button>
 
                 <h3 className="text-xl font-bold mb-1">Make Payment</h3>
-                <p className="text-gray-400 text-sm mb-6">Month {monthIndex + 1}</p>
+                <p className="text-gray-400 text-sm mb-6">Month {monthIndex + 1} • <span className="text-[#C1FF72] font-mono">₹{amount.toLocaleString()}</span></p>
 
                 {!paymentType ? (
                     <div className="grid grid-cols-2 gap-4">

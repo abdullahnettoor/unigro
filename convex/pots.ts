@@ -131,9 +131,24 @@ export const get = query({
                 if (slot.userId) {
                     user = await ctx.db.get(slot.userId);
                 }
+
+                let splitOwners: any[] = [];
+                if (slot.isSplit) {
+                    const shares = await ctx.db
+                        .query("split_ownership")
+                        .withIndex("by_slot", (q) => q.eq("slotId", slot._id))
+                        .collect();
+
+                    splitOwners = await Promise.all(shares.map(async (share) => {
+                        const u = await ctx.db.get(share.userId);
+                        return { ...share, userName: u?.name, userPhone: u?.phone, userPictureUrl: u?.pictureUrl };
+                    }));
+                }
+
                 return {
                     ...slot,
-                    user
+                    user,
+                    splitOwners
                 };
             })
         );
@@ -488,6 +503,108 @@ export const updatePot = mutation({
                 bankDetails: args.bankDetails ?? pot.bankDetails,
                 drawStrategy: args.drawStrategy ?? pot.drawStrategy,
                 // Ignored: startDate, config updates
+            });
+        }
+    }
+});
+
+// Assign Split Slot (Partial Ownership)
+export const assignSplitSlot = mutation({
+    args: {
+        potId: v.id("pots"),
+        slotNumber: v.number(),
+        name: v.string(),
+        phone: v.string(),
+        email: v.optional(v.string()), // Optional email for ghost users
+        sharePercentage: v.number(), // e.g. 50
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const pot = await ctx.db.get(args.potId);
+        if (!pot) throw new Error("Pot not found");
+
+        // Verify Foreman
+        const foreman = await ctx.db.query("users").withIndex("by_clerkId", q => q.eq("clerkId", identity.subject)).unique();
+        if (!foreman || foreman._id !== pot.foremanId) throw new Error("Only Foreman can assign slots");
+
+        if (foreman.verificationStatus !== "VERIFIED") {
+            throw new Error("You must be a Verified User to invite members.");
+        }
+
+        if (args.sharePercentage <= 0 || args.sharePercentage > 100) throw new Error("Invalid share percentage");
+
+        // Find or Create User
+        // Check by phone first (to link existing ghosts or users)
+        let user = await ctx.db.query("users").withIndex("by_phone", q => q.eq("phone", args.phone)).unique();
+
+        if (!user) {
+            // Create Ghost User
+            const userId = await ctx.db.insert("users", {
+                name: args.name,
+                phone: args.phone,
+                email: args.email,
+                verificationStatus: "UNVERIFIED"
+            });
+            user = await ctx.db.get(userId);
+        }
+        if (!user) throw new Error("Failed to resolve user");
+
+        // Find or Create Slot
+        let slot = await ctx.db
+            .query("slots")
+            .withIndex("by_pot_slotNumber", q => q.eq("potId", args.potId).eq("slotNumber", args.slotNumber))
+            .unique();
+
+        if (!slot) {
+            const slotId = await ctx.db.insert("slots", {
+                potId: args.potId,
+                slotNumber: args.slotNumber,
+                status: "RESERVED", // Start as Reserved/Partial
+                isGhost: false,
+                isSplit: true
+            });
+            slot = await ctx.db.get(slotId);
+        }
+        if (!slot) throw new Error("Failed to resolve slot");
+
+        // Guard: Cannot split a slot that is already assigned to a normal user
+        if (slot.status !== "OPEN" && !slot.isSplit) {
+            throw new Error("Slot is already completely assigned to a member. Remove them first.");
+        }
+
+        // Check Existing Shares
+        const existingShares = await ctx.db
+            .query("split_ownership")
+            .withIndex("by_slot", q => q.eq("slotId", slot!._id))
+            .collect();
+
+        const currentTotal = existingShares.filter(s => s.status === "ACTIVE").reduce((sum, s) => sum + s.sharePercentage, 0);
+
+        if (currentTotal + args.sharePercentage > 100) {
+            throw new Error(`Cannot assign ${args.sharePercentage}% share. Only ${100 - currentTotal}% remaining.`);
+        }
+
+        // Add Share
+        await ctx.db.insert("split_ownership", {
+            slotId: slot._id,
+            userId: user._id,
+            sharePercentage: args.sharePercentage,
+            status: "ACTIVE"
+        });
+
+        // Update Slot Status
+        const newTotal = currentTotal + args.sharePercentage;
+        if (newTotal === 100) {
+            await ctx.db.patch(slot._id, {
+                status: "FILLED",
+                isSplit: true
+            });
+        } else {
+            await ctx.db.patch(slot._id, {
+                status: "RESERVED", // Partially filled
+                isSplit: true
             });
         }
     }
