@@ -15,7 +15,7 @@ export function Dashboard() {
     const joinedPots = pots?.filter(p => p.foremanId !== user?._id) || [];
 
     return (
-        <div className="max-w-4xl mx-auto py-8 px-4">
+        <div className="max-w-4xl mx-auto py-6 px-4 sm:py-8">
 
             {/* Verification Banner */}
             {user && user.verificationStatus === "UNVERIFIED" && (
@@ -61,14 +61,14 @@ export function Dashboard() {
             )}
 
             {/* Global Header */}
-            <header className="flex justify-between items-center mb-8">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                 <div>
                     <h1 className="text-3xl font-display font-bold">My Dashboard</h1>
                     <p className="text-gray-400">Track your pots, payments, and investments.</p>
                 </div>
                 <Link
                     to="/create"
-                    className="flex items-center gap-2 bg-[#C1FF72] text-[#1B3022] px-4 py-2 rounded-full font-bold hover:opacity-90 transition-opacity"
+                    className="flex items-center justify-center gap-2 bg-[#C1FF72] text-[#1B3022] px-4 py-2 rounded-full font-bold hover:opacity-90 transition-opacity w-full sm:w-auto"
                 >
                     <Plus size={20} />
                     New Pot

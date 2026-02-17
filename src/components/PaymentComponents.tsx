@@ -3,6 +3,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Upload, CheckCircle, Clock, AlertCircle, X, Image as ImageIcon, Banknote, Smartphone } from "lucide-react";
+import { useFeedback } from "./FeedbackProvider";
 
 interface PaymentModalProps {
     potId: Id<"pots">;
@@ -18,6 +19,7 @@ interface PaymentModalProps {
 export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isForeman, onForemanRecord }: PaymentModalProps) {
     const generateUploadUrl = useMutation(api.transactions.generateUploadUrl);
     const submitPayment = useMutation(api.transactions.submitPayment);
+    const feedback = useFeedback();
 
     const [paymentType, setPaymentType] = useState<"cash" | "online" | null>(isForeman ? "cash" : null); // Foreman defaults to cash
     const [file, setFile] = useState<File | null>(null);
@@ -91,7 +93,12 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
             return;
         }
 
-        if (confirm("Confirm that you have paid cash to the Foreman?")) {
+        const ok = await feedback.confirm({
+            title: "Confirm cash payment?",
+            message: "The foreman will need to approve this request.",
+            confirmText: "Confirm",
+        });
+        if (ok) {
             setIsUploading(true);
             try {
                 await submitPayment({
@@ -101,6 +108,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                     type: "cash",
                     remarks: "Cash payment pending approval",
                 });
+                feedback.toast.success("Cash payment submitted");
                 onClose();
             } catch (err) {
                 console.error(err);

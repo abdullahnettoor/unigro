@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id, Doc } from "../../convex/_generated/dataModel";
 import { useState } from "react";
+import { useFeedback } from "../components/FeedbackProvider";
 import { SplitSlotModal } from "../components/SplitSlotModal"; // New
 import { AddMemberModal } from "../components/AddMemberModal";
 import { JoinPotModal } from "../components/JoinPotModal";
@@ -24,6 +25,7 @@ export function PotDetail() {
     const deleteSlot = useMutation(api.pots.deleteSlot);
     const recordPayout = useMutation(api.transactions.recordPayout);
     const recordCashPayment = useMutation(api.transactions.recordCashPayment); // Hoisted for Foreman Action
+    const feedback = useFeedback();
 
     // UI State
     const [showAddMember, setShowAddMember] = useState(false);
@@ -138,38 +140,49 @@ export function PotDetail() {
 
     // Actions
     const handleActivate = async () => {
-        if (availableCount > 0) return alert(`Cannot activate: ${availableCount} slots are still empty.`);
-        if (confirm("Are you sure? Financial rules will be locked.")) {
-            try {
-                await activatePot({ potId: pot._id });
-            } catch (error: any) {
-                console.error(error);
-                // Extract useful message from Convex error
-                const msg = error.message.includes("Verified") ? "You must be a Verified User to activate a pot." : "Failed to activate pot.";
-                alert(msg);
-            }
+        if (availableCount > 0) {
+            feedback.toast.info("Cannot activate yet", `${availableCount} slots are still empty.`);
+            return;
+        }
+        const ok = await feedback.confirm({
+            title: "Activate pot?",
+            message: "Financial rules will be locked after activation.",
+            confirmText: "Activate",
+        });
+        if (!ok) return;
+        try {
+            await activatePot({ potId: pot._id });
+            feedback.toast.success("Pot activated", "Members can now start payments.");
+        } catch (error: any) {
+            console.error(error);
+            const msg = error.message.includes("Verified") ? "You must be a Verified User to activate a pot." : "Failed to activate pot.";
+            feedback.toast.error("Activation failed", msg);
         }
     };
 
 
     const handleDraw = async () => {
-        if (confirm("Run the draw for this month?")) {
-            setIsDrawing(true);
-            try {
-                // Determine Winner
-                if (selectedWinnerSlotNum) {
-                    await runDraw({ potId: pot._id, customWinnerSlotNumber: selectedWinnerSlotNum });
-                } else {
-                    await runDraw({ potId: pot._id });
-                }
-                setIsDrawing(false);
-                setShowWinnerSelection(false);
-                setSelectedWinnerSlotNum(null);
-            } catch (err) {
-                console.error(err);
-                setIsDrawing(false);
-                alert("Draw failed");
+        const ok = await feedback.confirm({
+            title: "Run the draw?",
+            message: "This will select the winner for the current cycle.",
+            confirmText: "Run Draw",
+        });
+        if (!ok) return;
+        setIsDrawing(true);
+        try {
+            if (selectedWinnerSlotNum) {
+                await runDraw({ potId: pot._id, customWinnerSlotNumber: selectedWinnerSlotNum });
+            } else {
+                await runDraw({ potId: pot._id });
             }
+            setShowWinnerSelection(false);
+            setSelectedWinnerSlotNum(null);
+            feedback.toast.success("Draw completed", "Winner has been selected.");
+        } catch (err) {
+            console.error(err);
+            feedback.toast.error("Draw failed", "Please try again.");
+        } finally {
+            setIsDrawing(false);
         }
     };
 
@@ -182,7 +195,7 @@ export function PotDetail() {
         if (navigator.share) await navigator.share(shareData);
         else {
             await navigator.clipboard.writeText(window.location.href);
-            alert("Link copied!");
+            feedback.toast.success("Link copied", "Share it with your members.");
         }
     };
 
@@ -310,9 +323,9 @@ export function PotDetail() {
 
     // --- RENDER ---
     return (
-        <div className="max-w-4xl mx-auto py-8 px-4">
+        <div className="max-w-4xl mx-auto py-6 px-4 sm:py-8">
             {/* Header */}
-            <header className="mb-8 border-b border-white/5 pb-8">
+            <header className="mb-6 border-b border-white/5 pb-6 sm:mb-8 sm:pb-8">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
@@ -381,7 +394,7 @@ export function PotDetail() {
                 </div>
 
                 {/* Pot Stats Grid - Keep as is, it uses pot.config */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
                     <div className="bg-[#232931]/50 p-4 rounded-xl border border-white/5">
                         <div className="text-xs text-gray-500 uppercase mb-1">Total Pool</div>
                         <div className="text-xl font-mono">₹{pot.config.totalValue.toLocaleString()}</div>
@@ -402,7 +415,7 @@ export function PotDetail() {
             </header>
 
             {/* Tab Navigation */}
-            <div className="flex gap-4 border-b border-white/5 mb-8 overflow-x-auto">
+            <div className="flex gap-2 sm:gap-4 border-b border-white/5 mb-6 sm:mb-8 overflow-x-auto">
                 {(isMember || isForeman) && (
                     <button
                         onClick={() => setActiveTab('dashboard')}
@@ -774,8 +787,15 @@ export function PotDetail() {
                                                         {isDraft && (
                                                             <button
                                                                 onClick={async () => {
-                                                                    if (confirm(`Remove Slot #${slot.slotNumber}?`)) {
+                                                                    const ok = await feedback.confirm({
+                                                                        title: `Remove Slot #${slot.slotNumber}?`,
+                                                                        message: "This will remove the member and free the slot.",
+                                                                        confirmText: "Remove",
+                                                                        danger: true,
+                                                                    });
+                                                                    if (ok) {
                                                                         await deleteSlot({ potId: pot._id, slotNumber: slot.slotNumber });
+                                                                        feedback.toast.success("Slot removed");
                                                                     }
                                                                 }}
                                                                 className="text-red-400 hover:text-red-300 p-1"
@@ -1029,13 +1049,19 @@ export function PotDetail() {
 function ApproveButton({ transactionId }: { transactionId: Id<"transactions"> }) {
     const approvePayment = useMutation(api.transactions.approvePayment);
     const [loading, setLoading] = useState(false);
+    const feedback = useFeedback();
 
     const handleApprove = async () => {
-        if (confirm("Confirm payment receipt?")) {
-            setLoading(true);
-            await approvePayment({ transactionId });
-            setLoading(false);
-        }
+        const ok = await feedback.confirm({
+            title: "Confirm payment receipt?",
+            message: "This will mark the payment as received.",
+            confirmText: "Confirm",
+        });
+        if (!ok) return;
+        setLoading(true);
+        await approvePayment({ transactionId });
+        setLoading(false);
+        feedback.toast.success("Payment approved");
     }
 
     return (

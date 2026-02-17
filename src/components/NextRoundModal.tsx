@@ -3,6 +3,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { X, ArrowRight } from "lucide-react";
+import { useFeedback } from "./FeedbackProvider";
 
 interface NextRoundModalProps {
     potId: Id<"pots">;
@@ -17,11 +18,15 @@ export function NextRoundModal({ potId, currentMonth, totalMonths, defaultNextDa
     const advanceCycle = useMutation(api.pots.advanceCycle);
     const [nextDate, setNextDate] = useState(defaultNextDate);
     const [loading, setLoading] = useState(false);
+    const feedback = useFeedback();
 
     const isLastRound = currentMonth >= totalMonths;
 
     const handleAdvance = async () => {
-        if (!nextDate && !isLastRound) return alert("Please select a date for the next draw.");
+        if (!nextDate && !isLastRound) {
+            feedback.toast.info("Select a date", "Please choose the next draw date.");
+            return;
+        }
 
         setLoading(true);
         try {
@@ -31,7 +36,7 @@ export function NextRoundModal({ potId, currentMonth, totalMonths, defaultNextDa
             });
             onClose();
         } catch (err: any) {
-            alert("Failed to advance: " + err.message);
+            feedback.toast.error("Failed to advance", err.message);
         }
         setLoading(false);
     };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Download, X } from 'lucide-react';
 
@@ -24,14 +24,24 @@ export function PWAPrompt() {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [dismissed, setDismissed] = useState(false);
 
+    const track = useCallback((event: string, details?: Record<string, unknown>) => {
+        const w = window as any;
+        if (typeof w.gtag === "function") {
+            w.gtag("event", event, details || {});
+        } else if (Array.isArray(w.dataLayer)) {
+            w.dataLayer.push({ event, ...(details || {}) });
+        }
+    }, []);
+
     useEffect(() => {
         const handler = (e: Event) => {
             e.preventDefault();
             setDeferredPrompt(e as BeforeInstallPromptEvent);
+            track("pwa_install_prompt_available");
         };
         window.addEventListener('beforeinstallprompt', handler);
         return () => window.removeEventListener('beforeinstallprompt', handler);
-    }, []);
+    }, [track]);
 
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
@@ -40,6 +50,7 @@ export function PWAPrompt() {
     const close = () => {
         setOfflineReady(false);
         setNeedRefresh(false);
+        track("pwa_prompt_dismissed");
         setDeferredPrompt(null);
         setDismissed(true);
     };
@@ -81,8 +92,10 @@ export function PWAPrompt() {
                     {!needRefresh && !offlineReady && deferredPrompt && (
                         <button
                             onClick={async () => {
+                                track("pwa_install_prompt_shown");
                                 await deferredPrompt.prompt();
-                                await deferredPrompt.userChoice;
+                                const result = await deferredPrompt.userChoice;
+                                track("pwa_install_prompt_result", { outcome: result.outcome });
                                 setDeferredPrompt(null);
                             }}
                             className="w-full rounded-lg bg-[#C1FF72] px-3 py-2 text-sm font-bold text-[#1B3022] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"

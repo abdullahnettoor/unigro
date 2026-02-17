@@ -3,6 +3,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { X } from "lucide-react";
+import { useFeedback } from "./FeedbackProvider";
 
 interface JoinPotModalProps {
     potId: Id<"pots">;
@@ -16,6 +17,7 @@ interface JoinPotModalProps {
 
 export function JoinPotModal({ potId, contribution, totalValue, totalSlots, filledSlots, onClose, onViewRules }: JoinPotModalProps) {
     const joinPot = useMutation(api.pots.join);
+    const feedback = useFeedback();
     const [selectedSlotCount, setSelectedSlotCount] = useState(1);
     const [agreed, setAgreed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,11 +26,12 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
         setIsSubmitting(true);
         try {
             await joinPot({ potId, slotCount: selectedSlotCount });
+            feedback.toast.success("Joined pot", "You're in. Check your dashboard.");
             onClose();
         } catch (error: any) {
             console.error(error);
             const msg = error.message.includes("unverified") ? "Cannot join: Pot Foreman is unverified." : "Failed to join pot.";
-            alert(msg);
+            feedback.toast.error("Join failed", msg);
         } finally {
             setIsSubmitting(false);
         }

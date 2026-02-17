@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { X, UserPlus, Layers, PieChart } from "lucide-react";
+import { useFeedback } from "./FeedbackProvider";
 
 interface SplitSlotModalProps {
     potId: Id<"pots">;
@@ -13,6 +14,7 @@ interface SplitSlotModalProps {
 export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProps) {
     const assignSplitSlot = useMutation(api.pots.assignSplitSlot);
     const currentUser = useQuery(api.users.current);
+    const feedback = useFeedback();
 
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
@@ -46,12 +48,13 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
                 email: email || undefined,
                 sharePercentage: Number(percentage)
             });
+            feedback.toast.success("Split assigned", "Member share added.");
             onClose();
         } catch (err: any) {
             console.error(err);
             const msg = err.message.includes("Verified") ? "You must be a Verified User to invite members." :
                 err.message.includes("remaining") ? err.message : "Failed to assign split slot.";
-            alert(msg);
+            feedback.toast.error("Failed to assign split slot", msg);
             setIsSubmitting(false); // Only reset if failed
         }
     };

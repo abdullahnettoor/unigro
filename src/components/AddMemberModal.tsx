@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { X, UserPlus, Phone, Layers } from "lucide-react";
+import { useFeedback } from "./FeedbackProvider";
 
 interface AddMemberModalProps {
     potId: Id<"pots">;
@@ -13,6 +14,7 @@ interface AddMemberModalProps {
 export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProps) {
     const assignSlot = useMutation(api.pots.assignSlot);
     const currentUser = useQuery(api.users.current); // Fetch current user
+    const feedback = useFeedback();
 
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
@@ -38,11 +40,12 @@ export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProp
                 name,
                 phone
             });
+            feedback.toast.success("Member added", "Slot assigned successfully.");
             onClose();
         } catch (err: any) {
             console.error(err);
             const msg = err.message.includes("Verified") ? "You must be a Verified User to invite members." : "Failed to add member.";
-            alert(msg);
+            feedback.toast.error("Failed to add member", msg);
             setIsSubmitting(false);
         }
     };

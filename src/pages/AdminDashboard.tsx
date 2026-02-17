@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Check, X, CreditCard, Loader2 } from "lucide-react";
+import { useFeedback } from "../components/FeedbackProvider";
 
 export function AdminDashboard() {
     const pendingRequests = useQuery(api.verification.getPending);
     const reviewVerification = useMutation(api.verification.review);
+    const feedback = useFeedback();
 
     // Track loading state for each request
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -26,10 +28,11 @@ export function AdminDashboard() {
                 status,
                 notes: status === "REJECTED" ? rejectionNote : undefined
             });
+            feedback.toast.success("Status updated");
             setRejectingId(null);
         } catch (err) {
             console.error(err);
-            alert("Failed to update status");
+            feedback.toast.error("Update failed", "Please try again.");
         } finally {
             setActionLoading(null);
         }
