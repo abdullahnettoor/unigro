@@ -1,5 +1,5 @@
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
-import { SignInButton, UserButton } from "@clerk/clerk-react";
+import { SignInButton, useUser } from "@clerk/clerk-react";
 import { UserSync } from "./components/UserSync";
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { Home, PlusCircle, User } from "lucide-react";
@@ -11,6 +11,7 @@ import { ProfileModal } from "./components/ProfileModal";
 import { PWAPrompt } from "./components/PWAPrompt";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminRoute } from "./components/AdminRoute";
+import { UserMenu } from "./components/UserMenu";
 
 function Landing() {
   return (
@@ -34,6 +35,7 @@ function Landing() {
 
 function BottomNav() {
   const location = useLocation();
+  const { user } = useUser();
   const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
 
   return (
@@ -55,14 +57,24 @@ function BottomNav() {
           <PlusCircle size={18} />
           New Pot
         </Link>
-        <Link
-          to="/profile"
-          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/profile") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
-          aria-current={isActive("/profile") ? "page" : undefined}
-        >
-          <User size={18} />
-          Profile
-        </Link>
+
+        <UserMenu
+          placement="top-end"
+          trigger={
+            <div className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/profile") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
+              {user?.imageUrl ? (
+                <img
+                  src={user.imageUrl}
+                  alt="Profile"
+                  className={`w-[18px] h-[18px] rounded-full object-cover ${isActive("/profile") ? "ring-2 ring-[var(--accent-vivid)]" : ""}`}
+                />
+              ) : (
+                <User size={18} />
+              )}
+              Profile
+            </div>
+          }
+        />
       </div>
     </nav>
   );
@@ -72,15 +84,12 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)] pb-24 sm:pb-0">
       <nav className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-center sm:justify-between px-4 py-3 sm:px-6 relative">
           <Link to="/" className="transition-opacity hover:opacity-80">
             <h1 className="text-xl font-[family-name:var(--font-display)] font-bold sm:text-2xl">GrowPot</h1>
           </Link>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Link to="/profile" className="text-sm font-bold text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]">
-              My Identity
-            </Link>
-            <UserButton afterSignOutUrl="/" />
+          <div className="hidden sm:flex items-center gap-3 sm:gap-4 absolute right-4 sm:static">
+            <UserMenu />
           </div>
         </div>
       </nav>

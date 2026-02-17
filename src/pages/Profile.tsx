@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Upload, AlertCircle, Clock, ShieldCheck, FileText, Smartphone, Mail, X, Loader2 } from "lucide-react";
+import { Upload, AlertCircle, Clock, ShieldCheck, FileText, Smartphone, Mail, X, Loader2, BadgeCheck } from "lucide-react";
 import { getThemePreference, setThemePreference, type ThemePreference } from "../lib/theme";
 
 export function Profile() {
@@ -74,7 +74,7 @@ export function Profile() {
     const statusConfig = {
         UNVERIFIED: { color: "text-[var(--text-muted)]", bg: "bg-[var(--surface-deep)]/60", border: "border-[var(--border-subtle)]", icon: AlertCircle, label: "Unverified" },
         PENDING: { color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10", border: "border-[var(--warning)]/20", icon: Clock, label: "Verification Pending" },
-        VERIFIED: { color: "text-[var(--success)]", bg: "bg-[var(--accent-vivid)]/10", border: "border-[var(--accent-vivid)]/20", icon: ShieldCheck, label: "Verified Identity" },
+        VERIFIED: { color: "text-[var(--success)]", bg: "bg-[var(--accent-vivid)]/10", border: "border-[var(--accent-vivid)]/20", icon: BadgeCheck, label: "Verified Identity" },
         REJECTED: { color: "text-[var(--danger)]", bg: "bg-[var(--danger)]/10", border: "border-[var(--danger)]/20", icon: X, label: "Verification Rejected" },
     };
 
@@ -88,22 +88,24 @@ export function Profile() {
             <p className="text-[var(--text-muted)] mb-8">Manage your identity and trust settings.</p>
 
             {/* Profile Header */}
-            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-6 mb-6 flex items-center gap-6">
+            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-6 mb-6 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
                 <img src={user.pictureUrl} alt={user.name} className="w-20 h-20 rounded-full border-2 border-[var(--border-subtle)]" />
                 <div className="flex-1">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <h2 className="text-2xl font-bold flex flex-col sm:flex-row items-center gap-2 justify-center sm:justify-start">
                         {user.name}
-                        {status === "VERIFIED" && <ShieldCheck className="text-[var(--accent-vivid)]" size={20} />}
+                        {status === "VERIFIED" && <BadgeCheck className="text-[var(--accent-vivid)]" size={24} fill="var(--surface-elevated)" />}
                     </h2>
-                    <div className="flex gap-4 mt-2 text-sm text-[var(--text-muted)]">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 text-sm text-[var(--text-muted)] items-center sm:items-start">
                         <span className="flex items-center gap-1"><Mail size={14} /> {user.email}</span>
                         {user.phone && <span className="flex items-center gap-1"><Smartphone size={14} /> {user.phone}</span>}
                     </div>
                 </div>
-                <div className={`px-4 py-2 rounded-xl border flex items-center gap-2 ${config.bg} ${config.border} ${config.color}`}>
-                    <Icon size={18} />
-                    <span className="font-bold text-sm">{config.label}</span>
-                </div>
+                {status !== "VERIFIED" && (
+                    <div className={`px-4 py-2 rounded-xl border flex items-center gap-2 ${config.bg} ${config.border} ${config.color}`}>
+                        <Icon size={18} />
+                        <span className="font-bold text-sm">{config.label}</span>
+                    </div>
+                )}
             </div>
 
             <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6 mb-8">
@@ -136,7 +138,7 @@ export function Profile() {
 
             {/* Verification Section */}
             {(status === "UNVERIFIED" || status === "REJECTED") && (
-                <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-8">
+                <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6 sm:p-8">
                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                         <ShieldCheck className="text-[var(--accent-vivid)]" /> Verify Identity
                     </h3>
@@ -150,8 +152,8 @@ export function Profile() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6 max-w-lg">
-                        <div className="grid grid-cols-2 gap-4">
+                    <form onSubmit={handleSubmit} className="space-y-6 max-w-lg mx-auto sm:mx-0">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs uppercase text-[var(--text-muted)] font-bold mb-2">ID Type</label>
                                 <select
@@ -219,8 +221,8 @@ export function Profile() {
                         <button
                             type="submit"
                             disabled={isUploading}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
-                    >
+                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+                        >
                             {isUploading ? "Uploading..." : "Submit for Verification"}
                         </button>
                     </form>

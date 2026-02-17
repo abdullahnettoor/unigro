@@ -42,13 +42,12 @@ function Toasts({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: stri
       {items.map((t) => (
         <div
           key={t.id}
-          className={`rounded-xl border px-4 py-3 shadow-2xl backdrop-blur-md ${
-            t.variant === "success"
+          className={`rounded-xl border px-4 py-3 shadow-2xl backdrop-blur-md ${t.variant === "success"
               ? "border-[var(--success)]/30 bg-[var(--success)]/10 text-[var(--success)]"
               : t.variant === "error"
                 ? "border-[var(--danger)]/30 bg-[var(--danger)]/10 text-[var(--danger)]"
                 : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 text-[var(--text-primary)]"
-          }`}
+            }`}
           role="status"
         >
           <div className="flex items-start justify-between gap-3">
@@ -97,11 +96,10 @@ function ConfirmDialog({
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 rounded-xl py-2.5 text-sm font-semibold ${
-              options.danger
+            className={`flex-1 rounded-xl py-2.5 text-sm font-semibold ${options.danger
                 ? "bg-[var(--danger)] text-[var(--text-on-accent)] hover:bg-[var(--danger)]/90"
                 : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
-            }`}
+              }`}
           >
             {options.confirmText || "Confirm"}
           </button>
@@ -115,7 +113,7 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmOptions, setConfirmOptions] = useState<ConfirmOptions | null>(null);
-  const confirmResolver = useRef<(value: boolean) => void>();
+  const confirmResolver = useRef<((value: boolean) => void) | null>(null);
 
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
