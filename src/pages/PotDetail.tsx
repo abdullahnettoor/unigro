@@ -193,6 +193,7 @@ export function PotDetail() {
                     slots: [],
                     totalShare: 0,
                     totalDue: 0,
+                    missedPayments: [],
                     paidCount: 0
                 });
             }
@@ -202,6 +203,32 @@ export function PotDetail() {
             const tx = transactions?.find(t => t.slotId === slot._id && t.monthIndex === pot.currentMonth && (t.userId === userId || !t.userId));
             const isPaid = tx?.status === "PAID";
             const due = pot.config.contribution;
+
+            // Calculate Overdue
+            // Logic Matches MemberDashboard: Iterate 1 to currentMonth (exclusive of current, or inclusive? MemberDashboard uses < currentMonth for Past Overdue)
+            // MemberDashboard uses: for (let cycle = 1; cycle < pot.currentMonth; cycle++)
+            // This means it strictly looks for PAST cycles. Current month is handled separately.
+            if (pot.status === "ACTIVE") {
+                for (let m = 1; m < pot.currentMonth; m++) {
+                    // For full owners, slotId + monthIndex is unique enough (recordPayment ensures ownership)
+                    // BUT MemberDashboard uses: (t.userId === currentUserId || !t.userId)
+                    // We should use the same loose check to find ANY transaction for this slot+month
+                    // because for full slots, there is only one user.
+                    const pastTx = transactions.find(t => t.slotId === slot._id && t.monthIndex === m && (t.userId === userId || !t.userId));
+
+                    if (!pastTx || pastTx.status === "UNPAID") {
+                        stats.missedPayments.push({
+                            slotId: slot._id,
+                            slotNumber: slot.slotNumber,
+                            monthIndex: m,
+                            amount: due,
+                            share: 100,
+                            status: pastTx?.status || 'UNPAID',
+                            isMyPayment: userId === currentUser?._id
+                        });
+                    }
+                }
+            }
 
 
             stats.slots.push({ ...slot, share: 100, isPaid, due });
@@ -226,6 +253,7 @@ export function PotDetail() {
                         slots: [],
                         totalShare: 0,
                         totalDue: 0,
+                        missedPayments: [],
                         paidCount: 0
                     });
                 }
@@ -234,6 +262,28 @@ export function PotDetail() {
                 const tx = transactions?.find(t => t.slotId === slot._id && t.monthIndex === pot.currentMonth && t.userId === userId);
                 const isPaid = tx?.status === "PAID";
                 const due = (pot.config.contribution * owner.sharePercentage) / 100;
+
+                // Calculate Overdue
+                if (pot.status === "ACTIVE") {
+                    for (let m = 1; m < pot.currentMonth; m++) {
+                        // Match MemberDashboard Logic: (t.userId === currentUserId || !t.userId)
+                        // Here 'userId' var is the split owner's ID.
+                        const pastTx = transactions?.find(t => t.slotId === slot._id && t.monthIndex === m && (t.userId === userId || !t.userId));
+
+                        if (!pastTx || pastTx.status === "UNPAID") {
+                            // Double check if this user actually owns the slot share? We know they do from 'splitOwners'.
+                            stats.missedPayments.push({
+                                slotId: slot._id,
+                                slotNumber: slot.slotNumber,
+                                monthIndex: m,
+                                amount: due,
+                                share: owner.sharePercentage,
+                                status: pastTx?.status || 'UNPAID',
+                                isMyPayment: userId === currentUser?._id
+                            });
+                        }
+                    }
+                }
 
 
 
@@ -439,6 +489,7 @@ export function PotDetail() {
                         currentMonth={pot.currentMonth}
                         isForeman={isForeman}
                         isActive={isActive}
+                        currentUserId={currentUser?._id} // Pass current user ID
                     />
                 </div>
             )}
@@ -1125,10 +1176,12 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
     );
 }
 
-function MembersList({ members, potId, currentMonth, isForeman, isActive }: { members: any[], potId: Id<"pots">, currentMonth: number, isForeman: boolean, isActive: boolean }) {
+
+function MembersList({ members, potId, currentMonth, isForeman, isActive, currentUserId }: { members: any[], potId: Id<"pots">, currentMonth: number, isForeman: boolean, isActive: boolean, currentUserId?: string }) {
     const recordCashPayment = useMutation(api.transactions.recordCashPayment);
     const [expandedUser, setExpandedUser] = useState<string | null>(null);
     const [processing, setProcessing] = useState<string | null>(null);
+    const [paymentModalState, setPaymentModalState] = useState<{ slotId: Id<"slots">, cycle: number, amount: number } | null>(null); // New Local State
 
     const toggleExpand = (userId: string) => {
         setExpandedUser(expandedUser === userId ? null : userId);
@@ -1152,6 +1205,7 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive }: { me
             }
         }
     };
+
 
     if (members.length === 0) {
         return (
@@ -1213,42 +1267,137 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive }: { me
                             {/* Expanded Details */}
                             {expandedUser === m.userId && (
                                 <div className="bg-black/20 p-4 border-t border-white/5 space-y-2">
-
-                                    {m.slots.map((slot: any) => (
-                                        <div key={slot._id} className="flex justify-between items-center text-sm p-2 rounded hover:bg-white/5">
-                                            <div className="flex items-center gap-2">
-                                                <div className="font-mono text-gray-400">Slot #{slot.slotNumber}</div>
-                                                {slot.share < 100 && <span className="text-[10px] bg-[#C1FF72]/10 text-[#C1FF72] px-1.5 rounded">{slot.share}%</span>}
+                                    {/* Missed Payments Section */}
+                                    {m.missedPayments?.length > 0 && (
+                                        <div className="mb-4 bg-red-500/10 rounded-lg p-3 border border-red-500/20">
+                                            <div className="text-xs font-bold text-red-400 mb-2 flex items-center gap-1">
+                                                <ShieldAlert size={12} /> Missed Payments
                                             </div>
+                                            <div className="space-y-2">
+                                                {m.missedPayments.map((missed: any, idx: number) => (
+                                                    <div key={idx} className="flex justify-between items-center text-xs">
+                                                        <span className="text-gray-300">
+                                                            Cycle {missed.monthIndex + 1} • Slot #{missed.slotNumber}
+                                                        </span>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="font-bold text-red-400">₹{missed.amount.toLocaleString()}</span>
 
-                                            <div className="flex items-center gap-4">
-                                                {slot.isPaid ? (
-                                                    <span className="text-[#C1FF72] text-xs font-bold flex items-center gap-1"><CheckCircle size={12} /> Paid</span>
-                                                ) : (
-                                                    <span className="text-[#E07A5F] text-xs font-bold">Due: ₹{slot.due.toLocaleString()}</span>
-                                                )}
+                                                            {/* User Self-Pay Action */}
+                                                            {missed.isMyPayment && missed.status === 'UNPAID' && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setPaymentModalState({ slotId: missed.slotId, cycle: missed.monthIndex, amount: missed.amount });
+                                                                    }}
+                                                                    className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded hover:bg-red-600 shadow-sm"
+                                                                >
+                                                                    Pay Now
+                                                                </button>
+                                                            )}
+                                                            {missed.status === 'PENDING' && (
+                                                                <span className="text-yellow-400 text-[10px] bg-yellow-400/10 px-2 py-0.5 rounded flex items-center gap-1">
+                                                                    <Clock size={10} /> Pending
+                                                                </span>
+                                                            )}
 
-                                                {isForeman && isActive && !slot.isPaid && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleMarkPaid(slot._id, m.userId);
-                                                        }}
-                                                        disabled={processing === `${slot._id}-${m.userId}-${currentMonth}`}
-                                                        className="bg-[#C1FF72] text-[#1B3022] text-[10px] font-bold px-2 py-1 rounded hover:opacity-90 disabled:opacity-50"
-                                                    >
-                                                        {processing === `${slot._id}-${m.userId}-${currentMonth}` ? "..." : "Mark Paid"}
-                                                    </button>
-                                                )}
+                                                            {/* Foreman Action */}
+                                                            {isForeman && isActive && missed.status !== 'PENDING' && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleMarkPaid(missed.slotId, m.userId, missed.monthIndex);
+                                                                    }}
+                                                                    disabled={processing === `${missed.slotId}-${m.userId}-${missed.monthIndex}`}
+                                                                    className="bg-[#232931] border border-red-500/30 text-red-300 text-[10px] px-2 py-0.5 rounded hover:bg-red-500/20 disabled:opacity-50"
+                                                                >
+                                                                    Mark Paid
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    ))}
+                                    )}
+
+                                    {/* Current Slots List */}
+                                    {m.slots.map((slot: any) => {
+                                        // Determine status for CURRENT month for this slot
+                                        // Note: We need to know if this specific slot is pending/paid for current month.
+                                        // The 'slot' object here has 'isPaid' computed earlier (which is boolean), but distinct PENDING state 
+                                        // might need to be re-derived or passed down. 
+                                        // Let's assume 'isPaid' covers PAID. For PENDING, we need to check transactions again or 
+                                        // update the aggregation logic to pass 'status' instead of 'isPaid'.
+                                        // For now, let's rely on what we have, but ideally 'slot' should have 'status'.
+                                        // Actually checking 'isPaid' is purely based on 'status === "PAID"'.
+                                        // Let's do a quick lookup if needed or assume we can add 'status' to slot object in aggregation.
+
+                                        // REVISIT: I'll use the MembersList props for now.
+                                        // Ideally I should update aggregation to pass 'status' string.
+
+                                        return (
+                                            <div key={slot._id} className="flex justify-between items-center text-sm p-2 rounded hover:bg-white/5">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-gray-400 font-mono">Slot #{slot.slotNumber}</span>
+                                                    {slot.isSplit && <span className="text-[10px] bg-white/10 px-1.5 rounded text-gray-400">{slot.share}%</span>}
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`font-bold ${slot.isPaid ? 'text-[#C1FF72]' : 'text-gray-300'}`}>
+                                                        {slot.isPaid ? 'PAID' : `₹${slot.due.toLocaleString()}`}
+                                                    </span>
+
+                                                    {/* Actions */}
+                                                    {!slot.isPaid && isActive && (
+                                                        <>
+                                                            {/* Self Pay */}
+                                                            {m.userId === currentUserId && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setPaymentModalState({ slotId: slot._id, cycle: currentMonth, amount: slot.due });
+                                                                    }}
+                                                                    className="bg-[#C1FF72] text-[#1B3022] text-[10px] font-bold px-3 py-1 rounded hover:opacity-90 shadow-sm"
+                                                                >
+                                                                    Pay Now
+                                                                </button>
+                                                            )}
+
+                                                            {/* Foreman Mark Paid */}
+                                                            {isForeman && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleMarkPaid(slot._id, m.userId);
+                                                                    }}
+                                                                    disabled={processing === `${slot._id}-${m.userId}-${currentMonth}`}
+                                                                    className="bg-[#232931] border border-[#C1FF72]/30 text-[#C1FF72] text-[10px] font-bold px-2 py-1 rounded hover:bg-[#C1FF72]/10 disabled:opacity-50"
+                                                                >
+                                                                    {processing === `${slot._id}-${m.userId}-${currentMonth}` ? "..." : "Mark Paid"}
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                    {slot.isPaid && <CheckCircle size={14} className="text-[#C1FF72]" />}
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             )}
                         </div>
                     );
                 })}
             </div>
+
+            {paymentModalState && (
+                <PaymentModal
+                    potId={potId}
+                    slotId={paymentModalState.slotId}
+                    monthIndex={paymentModalState.cycle}
+                    amount={paymentModalState.amount}
+                    onClose={() => setPaymentModalState(null)}
+                />
+            )}
         </div>
     );
 }
