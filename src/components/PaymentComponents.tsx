@@ -208,7 +208,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                         </div>
                                     ) : (
                                         <div className="bg-[var(--warning)]/10 p-4 rounded-xl mb-6 border border-[var(--warning)]/20">
-                                            <p className="text-yellow-200 text-sm">
+                                            <p className="text-[var(--warning)] text-sm">
                                                 Please confirm that you have handed strictly cash to the Foreman. The Foreman will need to approve this request.
                                             </p>
                                         </div>
