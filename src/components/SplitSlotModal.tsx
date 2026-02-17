@@ -57,8 +57,8 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-[#232931] border border-white/10 rounded-2xl p-6 w-full max-w-md relative animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
+            <div className="bg-[#232931] border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md relative animate-in fade-in zoom-in duration-200">
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white"

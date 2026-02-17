@@ -961,8 +961,8 @@ export function PotDetail() {
 
             {
                 showPayoutModal && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <div className="bg-[#1a1f26] border border-white/10 rounded-2xl w-full max-w-md p-6">
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
+                        <div className="bg-[#1a1f26] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
                             <h3 className="text-xl font-bold mb-4">Record Payout</h3>
                             <p className="text-gray-400 text-sm mb-4">Confirm payout for Slot winner.</p>
                             <button onClick={async () => {
@@ -977,8 +977,8 @@ export function PotDetail() {
 
             {
                 showWinnerSelection && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <div className="bg-[#1a1f26] border border-white/10 rounded-2xl w-full max-w-md p-6">
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
+                        <div className="bg-[#1a1f26] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
                             <h3 className="text-xl font-bold mb-4">Select Winner Manually</h3>
                             <div className="space-y-2 max-h-60 overflow-y-auto mb-4">
                                 {activeSlots.filter(s => !s.drawOrder).map(s => (

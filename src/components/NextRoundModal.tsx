@@ -37,8 +37,8 @@ export function NextRoundModal({ potId, currentMonth, totalMonths, defaultNextDa
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-[#1a1f26] border border-white/10 rounded-2xl w-full max-w-md p-6">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
+            <div className="bg-[#1a1f26] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-display font-bold text-white flex items-center gap-2">
                         {isLastRound ? "Complete Pot" : "Start Next Round"}

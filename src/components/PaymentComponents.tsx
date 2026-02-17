@@ -111,8 +111,8 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-[#232931] border border-white/10 rounded-2xl p-6 w-full max-w-md relative">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
+            <div className="bg-[#232931] border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md relative">
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
                     <X size={20} />
                 </button>

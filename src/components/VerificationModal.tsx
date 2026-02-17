@@ -71,8 +71,8 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
-            <div className="bg-[#232931] border border-white/10 rounded-2xl p-8 w-full max-w-md relative animate-in fade-in zoom-in duration-300 overflow-y-auto max-h-[90vh]">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-end justify-center p-3 sm:items-center sm:p-4 z-[100]">
+            <div className="bg-[#232931] border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 sm:p-8 w-full sm:max-w-md relative animate-in fade-in zoom-in duration-300 overflow-y-auto max-h-[85vh]">
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
