@@ -1,15 +1,20 @@
-import type { Doc } from "../../convex/_generated/dataModel";
+import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { CheckCircle, Clock, AlertCircle, Lock, Trophy } from "lucide-react";
 
 interface PotHistoryProps {
     pot: Doc<"pots">;
-    allSlots: (Doc<"slots"> & { user?: { name: string } | null })[];
+    allSlots: (Doc<"slots"> & {
+        user?: { name: string } | null;
+        splitOwners?: { userId: Id<"users">; sharePercentage: number }[]
+    })[];
     transactions: Doc<"transactions">[];
     mySlots: Doc<"slots">[];
-    isForeman: boolean;
+
+    isForeman?: boolean; // Deprecated, unused
+    onPay: (slotId: Id<"slots">, cycle: number, amount: number) => void;
 }
 
-export function PotHistory({ pot, allSlots, transactions, mySlots, isForeman }: PotHistoryProps) {
+export function PotHistory({ pot, allSlots, transactions, mySlots, onPay }: PotHistoryProps) {
     const cycles = Array.from({ length: pot.config.duration }, (_, i) => i + 1);
 
     return (
@@ -26,7 +31,7 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, isForeman }: 
                                 <th className="p-4 whitespace-nowrap">Cycle</th>
                                 <th className="p-4 whitespace-nowrap">Status</th>
                                 <th className="p-4 whitespace-nowrap">Winner</th>
-                                {isForeman && <th className="p-4 whitespace-nowrap">Collection</th>}
+                                <th className="p-4 whitespace-nowrap">Collection</th>
                                 <th className="p-4 whitespace-nowrap text-right">My Payment</th>
                             </tr>
                         </thead>
@@ -38,9 +43,36 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, isForeman }: 
                                 // Winner
                                 const winnerSlot = allSlots.find(s => s.drawOrder === cycle);
 
-                                // Collection Stats (Foreman)
-                                const totalExpected = activeSlotsCount(allSlots); // Approximation: filled slots
-                                const paidCount = transactions.filter(t => t.monthIndex === cycle && t.status === "PAID").length;
+                                // Collection Stats
+                                const totalExpected = activeSlotsCount(allSlots);
+
+                                let paidCount = 0;
+                                allSlots.forEach(slot => {
+                                    if (slot.status !== "FILLED" && slot.status !== "RESERVED") return;
+
+                                    if (slot.isSplit && slot.splitOwners) {
+                                        slot.splitOwners.forEach(owner => {
+                                            const tx = transactions.find(t =>
+                                                t.monthIndex === cycle &&
+                                                t.slotId === slot._id &&
+                                                t.userId === owner.userId &&
+                                                t.status === "PAID"
+                                            );
+                                            if (tx) {
+                                                paidCount += (owner.sharePercentage / 100);
+                                            }
+                                        });
+                                    } else {
+                                        const tx = transactions.find(t =>
+                                            t.monthIndex === cycle &&
+                                            t.slotId === slot._id &&
+                                            t.status === "PAID"
+                                        );
+                                        if (tx) {
+                                            paidCount += 1;
+                                        }
+                                    }
+                                });
 
                                 // My Payment
                                 const myPaymentStatus = getMyPaymentStatus(cycle, mySlots, transactions);
@@ -72,21 +104,19 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, isForeman }: 
                                             )}
                                         </td>
 
-                                        {isForeman && (
-                                            <td className="p-4 font-mono">
-                                                {isFuture ? "-" : (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                                            <div
-                                                                className="h-full bg-[#C1FF72]"
-                                                                style={{ width: `${(paidCount / totalExpected) * 100}%` }}
-                                                            />
-                                                        </div>
-                                                        <span className="text-xs">{paidCount}/{totalExpected}</span>
+                                        <td className="p-4 font-mono">
+                                            {isFuture ? "-" : (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-[#C1FF72]"
+                                                            style={{ width: `${(paidCount / totalExpected) * 100}%` }}
+                                                        />
                                                     </div>
-                                                )}
-                                            </td>
-                                        )}
+                                                    <span className="text-xs">{paidCount % 1 === 0 ? paidCount : paidCount.toFixed(1)}/{totalExpected}</span>
+                                                </div>
+                                            )}
+                                        </td>
 
                                         <td className="p-4 text-right">
                                             {mySlots.length === 0 ? (
@@ -96,11 +126,24 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, isForeman }: 
                                             ) : (
                                                 <div className="flex justify-end gap-2">
                                                     {myPaymentStatus.allPaid ? (
-                                                        <span className="text-[#C1FF72] flex items-center gap-1 justify-end"><CheckCircle size={14} /> Paid</span>
+                                                        <div className="text-right">
+                                                            <span className="text-[#C1FF72] flex items-center gap-1 justify-end"><CheckCircle size={14} /> Paid</span>
+                                                            {myPaymentStatus.paidAt && <span className="text-[10px] text-gray-500 block">on {new Date(myPaymentStatus.paidAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>}
+                                                        </div>
                                                     ) : myPaymentStatus.pending ? (
                                                         <span className="text-yellow-400 flex items-center gap-1 justify-end"><Clock size={14} /> Pending</span>
                                                     ) : (
-                                                        <span className="text-red-400 flex items-center gap-1 justify-end"><AlertCircle size={14} /> Overdue</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-red-400 flex items-center gap-1 justify-end"><AlertCircle size={14} /> Overdue</span>
+                                                            {myPaymentStatus.actionableSlot && (
+                                                                <button
+                                                                    onClick={() => onPay(myPaymentStatus.actionableSlot!._id, cycle, pot.config?.contribution || 0)} // Assuming full contribution for simplicity, or we need to calculate share
+                                                                    className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded"
+                                                                >
+                                                                    Pay
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             )}
@@ -126,17 +169,26 @@ function getMyPaymentStatus(cycle: number, mySlots: Doc<"slots">[], transactions
 
     let allPaid = true;
     let pending = false;
+    let paidAt: number | undefined = undefined;
+    let actionableSlot: Doc<"slots"> | undefined = undefined;
 
     // Check transaction for EACH of my slots for this cycle
     for (const slot of mySlots) {
+        // Need to filter transactions by userId if split, but typically mySlots filters ownership.
+        // Let's assume loose check for now or strict if userId available.
         const tx = transactions.find(t => t.slotId === slot._id && t.monthIndex === cycle);
+
         if (!tx || tx.status === "UNPAID") {
             allPaid = false;
+            actionableSlot = slot; // Return the first unpaid slot to allow action
         } else if (tx.status === "PENDING") {
             allPaid = false;
             pending = true;
+        } else if (tx.status === "PAID") {
+            // If multiple slots, show latest date? or first?
+            paidAt = tx.paidAt || tx._creationTime;
         }
     }
 
-    return { allPaid, pending };
+    return { allPaid, pending, paidAt, actionableSlot };
 }

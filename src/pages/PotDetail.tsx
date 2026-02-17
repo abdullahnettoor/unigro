@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
+import type { Id, Doc } from "../../convex/_generated/dataModel";
 import { useState } from "react";
 import { SplitSlotModal } from "../components/SplitSlotModal"; // New
 import { AddMemberModal } from "../components/AddMemberModal";
@@ -23,6 +23,7 @@ export function PotDetail() {
     const runDraw = useMutation(api.pots.runDraw);
     const deleteSlot = useMutation(api.pots.deleteSlot);
     const recordPayout = useMutation(api.transactions.recordPayout);
+    const recordCashPayment = useMutation(api.transactions.recordCashPayment); // Hoisted for Foreman Action
 
     // UI State
     const [showAddMember, setShowAddMember] = useState(false);
@@ -34,7 +35,16 @@ export function PotDetail() {
 
     const [showWinnerSelection, setShowWinnerSelection] = useState(false);
     const [selectedWinnerSlotNum, setSelectedWinnerSlotNum] = useState<number | null>(null);
+
     const [showPayoutModal, setShowPayoutModal] = useState<Id<"slots"> | null>(null);
+    // Global Payment Modal State (for History & Foreman actions)
+    const [globalPaymentState, setGlobalPaymentState] = useState<{
+        slotId: Id<"slots">,
+        cycle: number,
+        amount: number,
+        isForemanAction?: boolean, // New: Trigger Foreman Mode
+        userId?: Id<"users"> // For Foreman to know who he is marking for
+    } | null>(null);
 
     type Tab = 'dashboard' | 'rules' | 'slots' | 'members' | 'history' | 'approvals';
     const [activeTab, setActiveTab] = useState<Tab>('rules');
@@ -892,7 +902,14 @@ export function PotDetail() {
                             allSlots={allSlots}
                             transactions={transactions || []}
                             mySlots={mySlots}
-                            isForeman={isForeman}
+
+                            onPay={(slotId, cycle, amount) => {
+                                setGlobalPaymentState({
+                                    slotId,
+                                    cycle,
+                                    amount
+                                });
+                            }}
                         />
                     </div>
                 )
@@ -983,6 +1000,27 @@ export function PotDetail() {
                 )
             }
 
+            {/* Generic Payment Modal (History / Foreman) */}
+            {globalPaymentState && (
+                <PaymentModal
+                    potId={pot._id}
+                    slotId={globalPaymentState.slotId}
+                    monthIndex={globalPaymentState.cycle}
+                    amount={globalPaymentState.amount}
+                    onClose={() => setGlobalPaymentState(null)}
+                    isForeman={globalPaymentState.isForemanAction}
+                    onForemanRecord={async (date) => {
+                        await recordCashPayment({
+                            potId: pot._id,
+                            slotId: globalPaymentState.slotId,
+                            monthIndex: globalPaymentState.cycle,
+                            userId: globalPaymentState.userId,
+                            paidAt: date
+                        });
+                    }}
+                />
+            )}
+
             {/* Edit Pot / Next Round modals omitted for brevity, logic is same as before but using updatePot/advanceCycle from simple form */}
         </div >
     );
@@ -1032,7 +1070,9 @@ function ForemanDisplay({ foremanId }: { foremanId: Id<"users"> }) {
     );
 }
 
-function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserId }: { pot: any, mySlots: any[], transactions: any[], nextDueDate: string, currentUserId: string }) {
+function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserId }: { pot: Doc<"pots">, mySlots: any[], transactions: any[], nextDueDate: string, currentUserId: string }) {
+    const recordCashPayment = useMutation(api.transactions.recordCashPayment);
+
     const [paymentModalState, setPaymentModalState] = useState<{ slotId: Id<"slots">, cycle: number, amount: number } | null>(null);
 
     // Calculate Overdue Payments
@@ -1170,6 +1210,16 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
                     monthIndex={paymentModalState.cycle}
                     amount={paymentModalState.amount}
                     onClose={() => setPaymentModalState(null)}
+                    isForeman={false}
+                    onForemanRecord={async (date) => {
+                        await recordCashPayment({
+                            potId: pot._id,
+                            slotId: paymentModalState.slotId,
+                            monthIndex: paymentModalState.cycle,
+                            userId: currentUserId as Id<"users">,
+                            paidAt: date
+                        });
+                    }}
                 />
             )}
         </section>
@@ -1180,30 +1230,32 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
 function MembersList({ members, potId, currentMonth, isForeman, isActive, currentUserId }: { members: any[], potId: Id<"pots">, currentMonth: number, isForeman: boolean, isActive: boolean, currentUserId?: string }) {
     const recordCashPayment = useMutation(api.transactions.recordCashPayment);
     const [expandedUser, setExpandedUser] = useState<string | null>(null);
-    const [processing, setProcessing] = useState<string | null>(null);
-    const [paymentModalState, setPaymentModalState] = useState<{ slotId: Id<"slots">, cycle: number, amount: number } | null>(null); // New Local State
+
+    const [paymentModalState, setPaymentModalState] = useState<{
+        slotId: Id<"slots">,
+        cycle: number,
+        amount: number,
+        isForemanAction?: boolean,
+        userId?: Id<"users">
+    } | null>(null);
 
     const toggleExpand = (userId: string) => {
         setExpandedUser(expandedUser === userId ? null : userId);
     };
 
-    const handleMarkPaid = async (slotId: Id<"slots">, userId: Id<"users">, monthIndex?: number) => {
-        const targetMonth = monthIndex !== undefined ? monthIndex : currentMonth;
-        const confirmMsg = monthIndex !== undefined
-            ? `Mark this member's share for Cycle ${monthIndex + 1} as PAID?`
-            : "Mark this member's share as PAID for the current month?";
 
-        if (confirm(confirmMsg)) {
-            setProcessing(`${slotId}-${userId}-${targetMonth}`);
-            try {
-                await recordCashPayment({ potId, slotId, monthIndex: targetMonth, userId });
-            } catch (error) {
-                console.error(error);
-                alert("Failed to record payment");
-            } finally {
-                setProcessing(null);
-            }
-        }
+
+    // NEW Handle Mark Paid (Foreman w/ Backdate)
+    const handleMarkPaid = (slotId: Id<"slots">, userId: Id<"users">, monthIndex?: number, dueAmount: number = 0) => {
+        const targetMonth = monthIndex !== undefined ? monthIndex : currentMonth;
+        // Open Modal in Foreman Mode
+        setPaymentModalState({
+            slotId,
+            cycle: targetMonth,
+            amount: dueAmount,
+            isForemanAction: true,
+            userId
+        });
     };
 
 
@@ -1305,10 +1357,9 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        handleMarkPaid(missed.slotId, m.userId, missed.monthIndex);
+                                                                        handleMarkPaid(missed.slotId, m.userId, missed.monthIndex, missed.amount);
                                                                     }}
-                                                                    disabled={processing === `${missed.slotId}-${m.userId}-${missed.monthIndex}`}
-                                                                    className="bg-[#232931] border border-red-500/30 text-red-300 text-[10px] px-2 py-0.5 rounded hover:bg-red-500/20 disabled:opacity-50"
+                                                                    className="bg-[#232931] border border-red-500/30 text-red-300 text-[10px] px-2 py-0.5 rounded hover:bg-red-500/20"
                                                                 >
                                                                     Mark Paid
                                                                 </button>
@@ -1367,12 +1418,11 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        handleMarkPaid(slot._id, m.userId);
+                                                                        handleMarkPaid(slot._id, m.userId, currentMonth, slot.due);
                                                                     }}
-                                                                    disabled={processing === `${slot._id}-${m.userId}-${currentMonth}`}
-                                                                    className="bg-[#232931] border border-[#C1FF72]/30 text-[#C1FF72] text-[10px] font-bold px-2 py-1 rounded hover:bg-[#C1FF72]/10 disabled:opacity-50"
+                                                                    className="bg-[#232931] border border-[#C1FF72]/30 text-[#C1FF72] text-[10px] font-bold px-2 py-1 rounded hover:bg-[#C1FF72]/10"
                                                                 >
-                                                                    {processing === `${slot._id}-${m.userId}-${currentMonth}` ? "..." : "Mark Paid"}
+                                                                    Mark Paid
                                                                 </button>
                                                             )}
                                                         </>
@@ -1396,6 +1446,16 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                     monthIndex={paymentModalState.cycle}
                     amount={paymentModalState.amount}
                     onClose={() => setPaymentModalState(null)}
+                    isForeman={paymentModalState.isForemanAction}
+                    onForemanRecord={async (date) => {
+                        await recordCashPayment({
+                            potId,
+                            slotId: paymentModalState.slotId,
+                            monthIndex: paymentModalState.cycle,
+                            userId: paymentModalState.userId,
+                            paidAt: date
+                        });
+                    }}
                 />
             )}
         </div>

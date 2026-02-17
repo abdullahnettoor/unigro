@@ -65,9 +65,10 @@ export const submitPayment = mutation({
 
         const data = {
             status: "PENDING" as const,
+            type: "online" as const, // Capture as online payment
+            paidAt: Date.now(), // Capture submission time
             proofUrl,
             remarks: args.remarks,
-            type: args.type,
         };
 
         if (existingTx) {
@@ -91,6 +92,7 @@ export const recordCashPayment = mutation({
         slotId: v.id("slots"),
         monthIndex: v.number(),
         userId: v.optional(v.id("users")), // Optional: Specify which user if split slot
+        paidAt: v.optional(v.number()), // NEW
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -123,9 +125,14 @@ export const recordCashPayment = mutation({
 
         const existingTx = await existingTxQuery.first(); // unique() might fail if multiple exist and no userId provided
 
+        // Use provided date or now
+        const paymentDate = args.paidAt || Date.now();
+
         if (existingTx) {
             await ctx.db.patch(existingTx._id, {
                 status: "PAID",
+                type: "cash",
+                paidAt: paymentDate, // Update date
                 remarks: "Cash Payment Recorded by Foreman"
             });
         } else {
@@ -143,6 +150,8 @@ export const recordCashPayment = mutation({
                 monthIndex: args.monthIndex,
                 userId: payerId,
                 status: "PAID",
+                type: "cash",
+                paidAt: paymentDate,
                 remarks: "Cash Payment Recorded by Foreman",
             });
         }
@@ -170,7 +179,12 @@ export const approvePayment = mutation({
 
         if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can approve");
 
-        await ctx.db.patch(args.transactionId, { status: "PAID" });
+        await ctx.db.patch(args.transactionId, {
+            status: "PAID",
+            // Keep original paidAt (when user submitted) or update to approval time?
+            // Let's keep original paidAt if exists, else set now.
+            paidAt: tx.paidAt || Date.now()
+        });
     },
 });
 

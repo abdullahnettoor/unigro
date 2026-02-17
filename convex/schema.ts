@@ -81,6 +81,7 @@ export default defineSchema({
         monthIndex: v.number(),
         status: v.union(v.literal("UNPAID"), v.literal("PENDING"), v.literal("PAID")),
         type: v.optional(v.union(v.literal("cash"), v.literal("online"), v.literal("payout"))),
+        paidAt: v.optional(v.number()), // NEW: Actual payment date
         proofUrl: v.optional(v.string()),
         remarks: v.optional(v.string()),
     }).index("by_pot_month", ["potId", "monthIndex"]),

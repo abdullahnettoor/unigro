@@ -9,17 +9,21 @@ interface PaymentModalProps {
     slotId: Id<"slots">;
     monthIndex: number;
     amount: number;
+
     onClose: () => void;
+    isForeman?: boolean;
+    onForemanRecord?: (date: number) => Promise<void>;
 }
 
-export function PaymentModal({ potId, slotId, monthIndex, amount, onClose }: PaymentModalProps) {
+export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isForeman, onForemanRecord }: PaymentModalProps) {
     const generateUploadUrl = useMutation(api.transactions.generateUploadUrl);
     const submitPayment = useMutation(api.transactions.submitPayment);
 
-    const [paymentType, setPaymentType] = useState<"cash" | "online" | null>(null);
+    const [paymentType, setPaymentType] = useState<"cash" | "online" | null>(isForeman ? "cash" : null); // Foreman defaults to cash
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState("");
+    const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]); // Foreman Backdating
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,6 +77,20 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose }: Pay
     };
 
     const handleCashSubmit = async () => {
+        if (isForeman && onForemanRecord) {
+            setIsUploading(true);
+            try {
+                const dateTimestamp = new Date(paymentDate).getTime();
+                await onForemanRecord(dateTimestamp);
+                onClose();
+            } catch (err) {
+                console.error(err);
+                setError("Failed to record payment.");
+                setIsUploading(false);
+            }
+            return;
+        }
+
         if (confirm("Confirm that you have paid cash to the Foreman?")) {
             setIsUploading(true);
             try {
@@ -164,25 +182,43 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose }: Pay
                                 </button>
                             </form>
                         ) : (
+
                             <div className="text-center">
-                                <div className="bg-yellow-500/10 p-4 rounded-xl mb-6 border border-yellow-500/20">
-                                    <p className="text-yellow-200 text-sm">
-                                        Please confirm that you have handed strictly cash to the Foreman. The Foreman will need to approve this request.
-                                    </p>
-                                </div>
+                                {
+                                    isForeman ? (
+                                        <div className="mb-6 text-left" >
+                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Payment Date</label>
+                                            <input
+                                                type="date"
+                                                value={paymentDate}
+                                                onChange={(e) => setPaymentDate(e.target.value)}
+                                                className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:border-[#C1FF72] outline-none"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-2">
+                                                Record the actual date this payment was received.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-yellow-500/10 p-4 rounded-xl mb-6 border border-yellow-500/20">
+                                            <p className="text-yellow-200 text-sm">
+                                                Please confirm that you have handed strictly cash to the Foreman. The Foreman will need to approve this request.
+                                            </p>
+                                        </div>
+                                    )}
                                 <button
                                     onClick={handleCashSubmit}
                                     disabled={isUploading}
-                                    className="w-full bg-yellow-500 text-[#1B3022] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+                                    className={`w-full font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 ${isForeman ? "bg-[#C1FF72] text-[#1B3022]" : "bg-yellow-500 text-[#1B3022]"}`}
                                 >
-                                    {isUploading ? "Processing..." : "Confirm Cash Payment"}
+                                    {isUploading ? "Processing..." : (isForeman ? "Record Received" : "Confirm Cash Payment")}
                                 </button>
                             </div>
                         )}
                     </>
-                )}
-            </div>
-        </div>
+                )
+                }
+            </div >
+        </div >
     );
 }
 
