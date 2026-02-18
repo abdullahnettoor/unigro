@@ -120,7 +120,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
                         >
                             <div className="flex items-center gap-3 text-[var(--text-primary)]">
                                 <User size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" />
-                                <span>My Profile</span>
+                                <span>Profile</span>
                             </div>
                             {/* Verification Badge */}
                             <div className={`flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-[var(--surface-card)] ${statusColor} border-[var(--border-subtle)]`}>

@@ -84,7 +84,7 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
                     <div className="w-16 h-16 bg-[var(--accent-vivid)]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--accent-vivid)]/20">
                         <ShieldCheck size={32} className="text-[var(--accent-vivid)]" />
                     </div>
-                    <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Verify Your Identity</h2>
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Verify your identity</h2>
                     <p className="text-[var(--text-muted)] text-sm">
                         Upload your Government ID for trust verification.
                     </p>

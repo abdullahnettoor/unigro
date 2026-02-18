@@ -109,5 +109,12 @@ All colors are expressed through CSS variables. Do not hardcode hex colors in co
 - Use bottom sheet prompts on mobile
 - Install/update prompt uses brand accent
 
+## 10. Content & Terminology
+- Use **Organizer** instead of “Foreman” or “Manager” everywhere in UI copy.
+- Use **Cycle** consistently for recurring periods.
+  - For “occasional” pots, use **Round**.
+- Use sentence case for labels and helper text.
+- Use title case for the primary entity: **Join Pot**.
+
 ---
 If you add a new component, define its colors using existing CSS variables before introducing new tokens.

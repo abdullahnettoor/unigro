@@ -29,7 +29,7 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
                         {pot.title}
                     </h3>
                     <div className="text-[var(--text-muted)] text-xs mb-6 flex items-center gap-1">
-                        Managed by <span className="text-[var(--text-muted)] font-medium truncate max-w-[150px]">{isForeman ? "You" : (pot.foreman?.name || "Foreman")}</span>
+                        Organized by <span className="text-[var(--text-muted)] font-medium truncate max-w-[150px]">{isForeman ? "you" : (pot.foreman?.name || "Organizer")}</span>
                     </div>
                 </div>
 
@@ -40,7 +40,7 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
                     </div>
                     <div>
                         <div className="text-[10px] text-[var(--text-muted)] uppercase mb-1">
-                            Per {pot.config.frequency === 'monthly' ? 'Month' : (pot.config.frequency === 'occasional' ? 'Round' : 'Cycle')}
+                            Per {pot.config.frequency === 'occasional' ? 'Round' : 'Cycle'}
                         </div>
                         <div className="text-lg font-mono font-bold text-[var(--accent-secondary)]">₹{pot.config.contribution.toLocaleString()}</div>
                     </div>

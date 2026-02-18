@@ -43,25 +43,25 @@ function BottomNav() {
       <div className="grid grid-cols-3 gap-2">
         <Link
           to="/"
-          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 font-semibold transition-colors ${isActive("/") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
           aria-current={isActive("/") ? "page" : undefined}
         >
           <Home size={18} />
-          Dashboard
+          <span className="text-xs leading-none mt-1">Dashboard</span>
         </Link>
         <Link
           to="/create"
-          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/create") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 font-semibold transition-colors ${isActive("/create") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
           aria-current={isActive("/create") ? "page" : undefined}
         >
           <PlusCircle size={18} />
-          New Pot
+          <span className="text-xs leading-none mt-1">New Pot</span>
         </Link>
 
         <UserMenu
           placement="top-end"
           trigger={
-            <div className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 text-xs font-semibold transition-colors ${isActive("/profile") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
+            <div className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 font-semibold transition-colors ${isActive("/profile") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
               {user?.imageUrl ? (
                 <img
                   src={user.imageUrl}
@@ -71,7 +71,7 @@ function BottomNav() {
               ) : (
                 <User size={18} />
               )}
-              Profile
+              <span className="text-xs leading-none mt-1">Profile</span>
             </div>
           }
         />

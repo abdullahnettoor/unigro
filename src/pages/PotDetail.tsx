@@ -85,9 +85,6 @@ export function PotDetail() {
     // Split Slots Logic
     const reservedSlots = activeSlots.filter(s => s.status === "RESERVED");
 
-    // DEBUG: Check if reserved slots are detected
-    console.log("Active Slots:", activeSlots);
-    console.log("Reserved Slots:", reservedSlots);
 
     const splitEligibleSlots = [
         ...reservedSlots.map(s => {
@@ -102,7 +99,6 @@ export function PotDetail() {
         ...virtualOpenSlots.map(s => ({ ...s, remainingPercentage: 100 }))
     ].sort((a, b) => a.slotNumber - b.slotNumber);
 
-    console.log("Split Eligible Slots:", splitEligibleSlots);
 
     const filledCount = activeSlots.length;
     const availableCount = pot.config.totalSlots - filledCount;
@@ -188,7 +184,7 @@ export function PotDetail() {
 
     const handleShare = async () => {
         const shareData = {
-            title: `Join my Chit Fund: ${pot.title}`,
+            title: `Join my GrowPot: ${pot.title}`,
             text: `Pool Value: ₹${pot.config.totalValue.toLocaleString()}. Join now!`,
             url: window.location.href
         };
@@ -334,12 +330,12 @@ export function PotDetail() {
                                                 {pot.status}
                                             </span>
                         </div>
-                        <ForemanDisplay foremanId={pot.foremanId} />
+                        <OrganizerDisplay foremanId={pot.foremanId} />
                         {pot.foreman?.verificationStatus !== "VERIFIED" && (
-                            <div className="mt-3 bg-[var(--warning)]/10 border border-[var(--warning)]/20 text-yellow-200 text-xs px-3 py-2 rounded-lg flex items-center gap-2">
+                            <div className="mt-3 bg-[var(--warning)]/10 border border-[var(--warning)]/20 text-[var(--warning)] text-xs px-3 py-2 rounded-lg flex items-center gap-2">
                                 <ShieldAlert size={14} className="text-[var(--warning)]" />
                                 <span>
-                                    <strong>Caution:</strong> Foreman is Unverified.
+                                    <strong>Caution:</strong> Organizer not verified yet.
                                 </span>
                             </div>
                         )}
@@ -366,7 +362,7 @@ export function PotDetail() {
                                             <Edit2 size={16} /> Edit Pot
                                         </button>
                                         <button onClick={handleActivate} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
-                                            <Play size={16} /> Activate Pot
+                                            <Play size={16} /> Activate pot
                                         </button>
                                     </>
                                 )}
@@ -375,16 +371,16 @@ export function PotDetail() {
                                         {!currentWinnerSlot ? (
                                             <div className="flex gap-2">
                                                 <button onClick={() => setShowWinnerSelection(true)} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
-                                                    Manual Winner
+                                                    Manual winner
                                                 </button>
                                                 <button onClick={handleDraw} disabled={isDrawing} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
                                                     <Gavel size={16} /> {isDrawing ? "Rolling..." : "Run Draw"}
                                                 </button>
                                             </div>
                                         ) : (
-                                            <button onClick={() => setShowNextRoundModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm animate-pulse">
-                                                <ArrowRight size={16} /> Next Round
-                                            </button>
+                                                <button onClick={() => setShowNextRoundModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm animate-pulse">
+                                                    <ArrowRight size={16} /> Next round
+                                                </button>
                                         )}
                                     </>
                                 )}
@@ -525,7 +521,7 @@ export function PotDetail() {
                             <Info className="text-[var(--accent-vivid)]" /> Rules & Description
                         </h3>
                         <div className="prose prose-invert prose-sm max-w-none mb-8">
-                            <p className="whitespace-pre-wrap">{pot.description || "No specific description provided by the Foreman."}</p>
+                            <p className="whitespace-pre-wrap">{pot.description || "No specific description provided by the organizer."}</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -633,7 +629,7 @@ export function PotDetail() {
                                 </p>
                                 {(isActive || isDraft) && hasOpenSlots ? (
                                     <button onClick={() => setShowJoinModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-8 py-3 rounded-full hover:opacity-90 shadow-lg">
-                                        Join Pot to View
+                                        Join Pot to view
                                     </button>
                                 ) : (
                                     <div className="text-[var(--accent-secondary)] font-bold">Pot Full</div>
@@ -810,7 +806,7 @@ export function PotDetail() {
                                                                 {/* Removed MarkPaidButton - Use Members Tab */}
                                                                 {isWinner && !payoutTx && (
                                                                     <button onClick={() => setShowPayoutModal(slot._id)} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] text-[10px] font-bold px-2 py-1 rounded">
-                                                                        Record Payout
+                                                                        Record payout
                                                                     </button>
                                                                 )}
                                                             </>
@@ -896,7 +892,7 @@ export function PotDetail() {
                                                         {isForeman && isActive && isWinner && !payoutTx && (
                                                             <div className="absolute top-2 right-2">
                                                                 <button onClick={() => setShowPayoutModal(slot._id)} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] text-[10px] font-bold px-2 py-1 rounded">
-                                                                    Record Payout
+                                                                    Record payout
                                                                 </button>
                                                             </div>
                                                         )}
@@ -983,7 +979,7 @@ export function PotDetail() {
                 showPayoutModal && (
                     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
                         <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
-                            <h3 className="text-xl font-bold mb-4">Record Payout</h3>
+                            <h3 className="text-xl font-bold mb-4">Record payout</h3>
                             <p className="text-[var(--text-muted)] text-sm mb-4">Confirm payout for Slot winner.</p>
                             <button onClick={async () => {
                                 await recordPayout({ potId: pot._id, slotId: showPayoutModal, monthIndex: pot.currentMonth, amount: winningAmount });
@@ -1077,10 +1073,10 @@ function ApproveButton({ transactionId }: { transactionId: Id<"transactions"> })
 
 
 
-function ForemanDisplay({ foremanId }: { foremanId: Id<"users"> }) {
+function OrganizerDisplay({ foremanId }: { foremanId: Id<"users"> }) {
     const foreman = useQuery(api.users.get, { userId: foremanId });
 
-    if (!foreman) return <div className="text-xs text-[var(--text-muted)] animate-pulse">Loading Foreman...</div>;
+    if (!foreman) return <div className="text-xs text-[var(--text-muted)] animate-pulse">Loading organizer...</div>;
 
     return (
         <div className="flex items-center gap-2 mt-2">
@@ -1091,7 +1087,7 @@ function ForemanDisplay({ foremanId }: { foremanId: Id<"users"> }) {
                     {foreman.name?.charAt(0)}
                 </div>
             )}
-            <span className="text-sm text-[var(--text-muted)]">Managed by <span className="text-[var(--text-primary)] font-bold">{foreman.name}</span></span>
+            <span className="text-sm text-[var(--text-muted)]">Organized by <span className="text-[var(--text-primary)] font-bold">{foreman.name}</span></span>
         </div>
     );
 }

@@ -95,7 +95,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
 
         const ok = await feedback.confirm({
             title: "Confirm cash payment?",
-            message: "The foreman will need to approve this request.",
+            message: "The organizer will need to approve this request.",
             confirmText: "Confirm",
         });
         if (ok) {
@@ -126,7 +126,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                 </button>
 
                 <h3 className="text-xl font-bold mb-1">Make Payment</h3>
-                <p className="text-[var(--text-muted)] text-sm mb-6">Month {monthIndex + 1} • <span className="text-[var(--accent-vivid)] font-mono">₹{amount.toLocaleString()}</span></p>
+                <p className="text-[var(--text-muted)] text-sm mb-6">Cycle {monthIndex + 1} • <span className="text-[var(--accent-vivid)] font-mono">₹{amount.toLocaleString()}</span></p>
 
                 {!paymentType ? (
                     <div className="grid grid-cols-2 gap-4">
@@ -209,7 +209,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                     ) : (
                                         <div className="bg-[var(--warning)]/10 p-4 rounded-xl mb-6 border border-[var(--warning)]/20">
                                             <p className="text-[var(--warning)] text-sm">
-                                                Please confirm that you have handed strictly cash to the Foreman. The Foreman will need to approve this request.
+                                                Please confirm that you have handed cash to the organizer. The organizer will need to approve this request.
                                             </p>
                                         </div>
                                     )}
@@ -218,7 +218,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                     disabled={isUploading}
                                     className={`w-full font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 ${isForeman ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)]" : "bg-[var(--warning)] text-[var(--text-on-accent)]"}`}
                                 >
-                                    {isUploading ? "Processing..." : (isForeman ? "Record Received" : "Confirm Cash Payment")}
+                                    {isUploading ? "Processing..." : (isForeman ? "Record received" : "Confirm cash payment")}
                                 </button>
                             </div>
                         )}
@@ -250,7 +250,7 @@ export function PaymentStatusCard({ status, amount, monthIndex, onPay }: Payment
     return (
         <div className={`rounded-xl p-4 border ${config.border} ${config.bg} flex items-center justify-between`}>
             <div>
-                <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-1">Month {monthIndex + 1} Payment</div>
+                <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-1">Cycle {monthIndex + 1} Payment</div>
                 <div className="text-2xl font-mono font-bold text-[var(--text-primary)]">₹{amount.toLocaleString()}</div>
             </div>
 

@@ -77,7 +77,7 @@ export function ProfileModal() {
                             />
                         </div>
                         <p className="text-[10px] text-[var(--text-muted)] mt-2 ml-1">
-                            Used to claim "Ghost" accounts created by Foremans.
+                            Used to claim “Ghost” accounts created by organizers.
                         </p>
                     </div>
 

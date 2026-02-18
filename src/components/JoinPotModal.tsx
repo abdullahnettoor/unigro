@@ -30,7 +30,7 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
             onClose();
         } catch (error: any) {
             console.error(error);
-            const msg = error.message.includes("unverified") ? "Cannot join: Pot Foreman is unverified." : "Failed to join pot.";
+            const msg = error.message.includes("unverified") ? "Cannot join: organizer is unverified." : "Failed to join pot.";
             feedback.toast.error("Join failed", msg);
         } finally {
             setIsSubmitting(false);
@@ -83,7 +83,7 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
 
                     <div className="bg-[var(--surface-deep)]/60 p-4 rounded-xl space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-[var(--text-muted)]">Monthly Pay</span>
+                            <span className="text-[var(--text-muted)]">Per-cycle pay</span>
                             <span className="font-bold text-[var(--text-primary)]">₹{totalCommitment.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-sm">

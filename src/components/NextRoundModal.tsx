@@ -46,14 +46,14 @@ export function NextRoundModal({ potId, currentMonth, totalMonths, defaultNextDa
             <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-display font-bold text-[var(--text-primary)] flex items-center gap-2">
-                        {isLastRound ? "Complete Pot" : "Start Next Round"}
+                        {isLastRound ? "Complete pot" : "Start next round"}
                     </h3>
                     <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><X size={20} /></button>
                 </div>
 
                 <div className="space-y-6">
                     <p className="text-[var(--text-muted)] text-sm">
-                        Winner for Cycle {currentMonth} has been selected.
+                        Winner for cycle {currentMonth} has been selected.
                         {isLastRound
                             ? " This was the final round. Completing this pot will archive it."
                             : " Ready to start collecting for the next cycle?"
@@ -81,7 +81,7 @@ export function NextRoundModal({ potId, currentMonth, totalMonths, defaultNextDa
                         className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 flex justify-center items-center gap-2"
                     >
                         {loading ? "Processing..." : (
-                            isLastRound ? "Finish Pot" : <>Begin Cycle {currentMonth + 1} <ArrowRight size={18} /></>
+                            isLastRound ? "Finish pot" : <>Begin cycle {currentMonth + 1} <ArrowRight size={18} /></>
                         )}
                     </button>
                 </div>

@@ -223,7 +223,7 @@ export function CreatePot() {
 
                         <div>
                             <label className="block text-sm font-medium text-[var(--text-muted)] mb-2 flex items-center gap-2">
-                                <Percent size={16} /> Foreman Commission (%)
+                                <Percent size={16} /> Organizer Commission (%)
                             </label>
                             <input
                                 type="number"
@@ -262,12 +262,12 @@ export function CreatePot() {
                                 onChange={(e) => setFormData({ ...formData, drawStrategy: e.target.value as any })}
                                 className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]"
                             >
-                                <option value="RANDOM">Random (Lucky Draw)</option>
-                                <option value="MANUAL">Manual Select (Foreman Decides)</option>
+                                <option value="RANDOM">Random (Lucky draw)</option>
+                                <option value="MANUAL">Manual select (Organizer decides)</option>
                             </select>
                             <p className="text-xs text-[var(--text-muted)] mt-2">
                                 {formData.drawStrategy === "RANDOM" && "System randomly picks a winner from eligible members."}
-                                {formData.drawStrategy === "MANUAL" && "Foreman manually selects the winner (e.g., for bidding or need-based)."}
+                                {formData.drawStrategy === "MANUAL" && "Organizer manually selects the winner (e.g., for bidding or need-based)."}
                             </p>
                         </div>
 

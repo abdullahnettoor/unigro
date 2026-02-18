@@ -84,7 +84,7 @@ export function Profile() {
 
     return (
         <div className="max-w-3xl mx-auto py-12 px-4">
-            <h1 className="text-3xl font-display font-bold mb-2">My Profile</h1>
+            <h1 className="text-3xl font-display font-bold mb-2">Profile</h1>
             <p className="text-[var(--text-muted)] mb-8">Manage your identity and trust settings.</p>
 
             {/* Profile Header */}
@@ -140,7 +140,7 @@ export function Profile() {
             {(status === "UNVERIFIED" || status === "REJECTED") && (
                 <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6 sm:p-8">
                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <ShieldCheck className="text-[var(--accent-vivid)]" /> Verify Identity
+                        <ShieldCheck className="text-[var(--accent-vivid)]" /> Verify your identity
                     </h3>
                     <p className="text-[var(--text-muted)] mb-6 max-w-xl">
                         To join higher-value pots and build trust with Foremen, please upload a Government ID (Aadhaar, PAN, or Driving License).

@@ -27,7 +27,7 @@ export function Dashboard() {
                         <ShieldAlert size={24} />
                     </div>
                     <div>
-                        <h3 className="text-[var(--warning)] font-bold mb-1">Verify your Identity</h3>
+                        <h3 className="text-[var(--warning)] font-bold mb-1">Verify your identity</h3>
                         <p className="text-[var(--text-muted)] text-sm">Upload a Government ID to build trust and unlock full features.</p>
                     </div>
                 </div>
@@ -63,7 +63,7 @@ export function Dashboard() {
             {/* Global Header */}
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-3xl font-display font-bold">My Dashboard</h1>
+                    <h1 className="text-3xl font-display font-bold">Dashboard</h1>
                     <p className="text-[var(--text-muted)]">Track your pots, payments, and investments.</p>
                 </div>
                 <Link
@@ -81,7 +81,7 @@ export function Dashboard() {
                     <header className="flex justify-between items-center mb-6">
                         <div>
                             <h2 className="text-2xl font-display font-bold flex items-center gap-3">
-                                Managed by Me
+                                Pots you organize
                                 {pots && <span className="bg-[var(--surface-deep)]/80 text-sm px-2 py-0.5 rounded-full text-[var(--text-muted)]">{managedPots.length}</span>}
                             </h2>
                         </div>
@@ -100,7 +100,7 @@ export function Dashboard() {
                 <header className="flex justify-between items-center mb-6">
                     <div>
                         <h2 className="text-2xl font-display font-bold flex items-center gap-3">
-                            My Investments
+                            Pots you joined
                             {pots && <span className="bg-[var(--surface-deep)]/80 text-sm px-2 py-0.5 rounded-full text-[var(--text-muted)]">{joinedPots.length}</span>}
                         </h2>
                     </div>
