@@ -46,7 +46,7 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
             <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden">
                 <div className="flex justify-between items-center p-6 pb-4 border-b border-[var(--border-subtle)]/80">
                     <h3 className="text-xl font-bold">Join Pot</h3>
-                    <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><X size={20} /></button>
+                    <button onClick={onClose} aria-label="Close join pot" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><X size={20} /></button>
                 </div>
 
                 <div className="overflow-y-auto px-6 py-4 space-y-4">
@@ -56,6 +56,7 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
                         <div className="flex items-center justify-center gap-6">
                             <button
                                 onClick={() => setSelectedSlotCount(Math.max(1, selectedSlotCount - 1))}
+                                aria-label="Decrease slots"
                                 className="w-12 h-12 rounded-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--surface-deep)]/80 text-[var(--text-primary)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={selectedSlotCount <= 1}
                             >
@@ -69,6 +70,7 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
 
                             <button
                                 onClick={() => setSelectedSlotCount(Math.min(availableSlots, selectedSlotCount + 1))}
+                                aria-label="Increase slots"
                                 className="w-12 h-12 rounded-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--surface-deep)]/80 text-[var(--text-primary)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={selectedSlotCount >= availableSlots}
                             >

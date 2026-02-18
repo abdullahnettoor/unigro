@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id, Doc } from "../../convex/_generated/dataModel";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFeedback } from "../components/FeedbackProvider";
 import { SplitSlotModal } from "../components/SplitSlotModal"; // New
 import { AddMemberModal } from "../components/AddMemberModal";
@@ -50,16 +50,13 @@ export function PotDetail() {
 
     type Tab = 'dashboard' | 'rules' | 'slots' | 'members' | 'history' | 'approvals';
     const [activeTab, setActiveTab] = useState<Tab>('rules');
-    const [hasConsolidatedTabs, setHasConsolidatedTabs] = useState(false);
-
-    if (!pot || transactions === undefined) return <div className="p-8 text-center animate-pulse">Loading Pot Details...</div>;
 
     // Computed State
-    const isDraft = pot.status === "DRAFT";
-    const isActive = pot.status === "ACTIVE";
+    const isDraft = pot?.status === "DRAFT";
+    const isActive = pot?.status === "ACTIVE";
 
-    const isForeman = currentUser?._id === pot.foremanId;
-    const allSlots = pot.slots || [];
+    const isForeman = currentUser?._id === pot?.foremanId;
+    const allSlots = pot?.slots || [];
     const activeSlots = allSlots.filter(s => s.status === "FILLED" || s.status === "RESERVED");
 
     const mySlots = currentUser ? allSlots.filter(s =>
@@ -68,13 +65,15 @@ export function PotDetail() {
     ) : [];
     const isMember = mySlots.length > 0;
 
-    // Tab Auto-Switch Logic
-    if (!hasConsolidatedTabs && currentUser) {
-        if (isMember || isForeman) {
-            setActiveTab('dashboard');
-        }
-        setHasConsolidatedTabs(true);
-    }
+    // Keep default tab role-aware without state updates during render.
+    useEffect(() => {
+        setActiveTab((prev) => {
+            if (prev !== "rules") return prev;
+            return currentUser && (isMember || isForeman) ? "dashboard" : "rules";
+        });
+    }, [currentUser, isMember, isForeman]);
+
+    if (!pot || transactions === undefined) return <div className="p-8 text-center animate-pulse">Loading pot details...</div>;
 
     // Constants
     const filledSlotNumbers = new Set(activeSlots.map(s => s.slotNumber));
@@ -161,7 +160,7 @@ export function PotDetail() {
         const ok = await feedback.confirm({
             title: "Run the draw?",
             message: "This will select the winner for the current cycle.",
-            confirmText: "Run Draw",
+            confirmText: "Run draw",
         });
         if (!ok) return;
         setIsDrawing(true);
@@ -315,6 +314,13 @@ export function PotDetail() {
     });
 
     const memberList = Array.from(memberStats.values()).sort((a, b) => a.user.name.localeCompare(b.user.name));
+    const pendingApprovalsCount = transactions?.filter((t) => t.status === "PENDING").length || 0;
+    const tabButtonClass = (tab: Tab) =>
+        `px-3 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap rounded-full ${
+            activeTab === tab
+                ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
+                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        }`;
 
 
     // --- RENDER ---
@@ -345,12 +351,12 @@ export function PotDetail() {
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Action Buttons */}
                         {(isActive || isDraft) && hasOpenSlots && (
-                            <button onClick={() => setShowJoinModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-6 py-2 rounded-full hover:opacity-90 shadow-lg animate-pulse">
+                            <button onClick={() => setShowJoinModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold min-h-11 px-6 py-2 rounded-full hover:opacity-90 shadow-lg">
                                 Join Pot
                             </button>
                         )}
 
-                        <button onClick={handleShare} className="bg-[var(--surface-deep)]/80 text-[var(--text-primary)] font-bold px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/90 flex items-center gap-2 text-sm">
+                        <button onClick={handleShare} className="bg-[var(--surface-deep)]/80 text-[var(--text-primary)] font-semibold min-h-11 px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/90 flex items-center gap-2 text-sm">
                             <Share2 size={16} /> Share
                         </button>
 
@@ -358,27 +364,32 @@ export function PotDetail() {
                             <>
                                 {isDraft && (
                                     <>
-                                        <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
-                                            <Edit2 size={16} /> Edit Pot
+                                        <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold min-h-11 px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
+                                            <Edit2 size={16} /> Edit pot
                                         </button>
-                                        <button onClick={handleActivate} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
+                                        <button onClick={handleActivate} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold min-h-11 px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
                                             <Play size={16} /> Activate pot
                                         </button>
                                     </>
                                 )}
                                 {isActive && (
                                     <>
+                                        {pendingApprovalsCount > 0 && (
+                                            <button onClick={() => setActiveTab("approvals")} className="bg-[var(--warning)]/15 text-[var(--warning)] border border-[var(--warning)]/30 font-semibold min-h-11 px-4 py-2 rounded-full hover:bg-[var(--warning)]/20 flex items-center gap-2 text-sm">
+                                                <ShieldCheck size={16} /> Review approvals ({pendingApprovalsCount})
+                                            </button>
+                                        )}
                                         {!currentWinnerSlot ? (
                                             <div className="flex gap-2">
-                                                <button onClick={() => setShowWinnerSelection(true)} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-bold px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
+                                                <button onClick={() => setShowWinnerSelection(true)} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold min-h-11 px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
                                                     Manual winner
                                                 </button>
-                                                <button onClick={handleDraw} disabled={isDrawing} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
-                                                    <Gavel size={16} /> {isDrawing ? "Rolling..." : "Run Draw"}
+                                                <button onClick={handleDraw} disabled={isDrawing} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] font-bold min-h-11 px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
+                                                    <Gavel size={16} /> {isDrawing ? "Rolling..." : "Run draw"}
                                                 </button>
                                             </div>
                                         ) : (
-                                                <button onClick={() => setShowNextRoundModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm animate-pulse">
+                                                <button onClick={() => setShowNextRoundModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold min-h-11 px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
                                                     <ArrowRight size={16} /> Next round
                                                 </button>
                                         )}
@@ -415,25 +426,25 @@ export function PotDetail() {
                 {(isMember || isForeman) && (
                     <button
                         onClick={() => setActiveTab('dashboard')}
-                        className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'dashboard' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+                        className={tabButtonClass("dashboard")}
                     >
-                        Dashboard
+                        Overview
                     </button>
                 )}
 
                 {isForeman && isActive && (
                     <button
                         onClick={() => setActiveTab('approvals')}
-                        className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'approvals' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+                        className={tabButtonClass("approvals")}
                     >
-                        Approvals {transactions && transactions.filter(t => t.status === "PENDING").length > 0 && <span className="ml-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded-full text-[10px]">{transactions.filter(t => t.status === "PENDING").length}</span>}
+                        Approvals {pendingApprovalsCount > 0 && <span className="ml-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded-full text-[10px]">{pendingApprovalsCount}</span>}
                     </button>
                 )}
 
                 {(isMember || isForeman) && (
                     <button
                         onClick={() => setActiveTab('members')}
-                        className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'members' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+                        className={tabButtonClass("members")}
                     >
                         Members <span className="ml-1 bg-[var(--surface-deep)]/80 px-1.5 py-0.5 rounded-full text-[10px] text-[var(--text-muted)]">{memberList.length}</span>
                     </button>
@@ -441,22 +452,22 @@ export function PotDetail() {
 
                 <button
                     onClick={() => setActiveTab('rules')}
-                    className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'rules' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+                    className={tabButtonClass("rules")}
                 >
-                    Rules & Info
+                    Rules and info
                 </button>
 
                 {(isMember || isForeman) && (
                     <>
                         <button
                             onClick={() => setActiveTab('slots')}
-                            className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'slots' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+                            className={tabButtonClass("slots")}
                         >
                             Slots ({activeSlots.length}/{pot.config.totalSlots})
                         </button>
                         <button
                             onClick={() => setActiveTab('history')}
-                            className={`px-3 py-2 text-xs sm:text-sm font-bold transition-colors whitespace-nowrap rounded-full ${activeTab === 'history' ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+                            className={tabButtonClass("history")}
                         >
                             History
                         </button>
@@ -485,7 +496,7 @@ export function PotDetail() {
                                 <h3 className="text-xl font-display font-bold flex items-center gap-2">
                                     <Clock className="text-[var(--accent-vivid)]" /> Current Cycle
                                 </h3>
-                                <button onClick={() => setActiveTab('slots')} className="text-xs text-[var(--accent-vivid)] hover:underline">View All Slots</button>
+                                <button onClick={() => setActiveTab('slots')} className="text-xs text-[var(--accent-vivid)] hover:underline">View all slots</button>
                             </div>
                             <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} />
                             {currentWinnerSlot && (
@@ -518,7 +529,7 @@ export function PotDetail() {
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-6">
                         <h3 className="text-xl font-display font-bold flex items-center gap-2 mb-6">
-                            <Info className="text-[var(--accent-vivid)]" /> Rules & Description
+                            <Info className="text-[var(--accent-vivid)]" /> Rules and description
                         </h3>
                         <div className="prose prose-invert prose-sm max-w-none mb-8">
                             <p className="whitespace-pre-wrap">{pot.description || "No specific description provided by the organizer."}</p>
@@ -527,7 +538,7 @@ export function PotDetail() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Configuration */}
                             <div className="bg-[var(--surface-deep)]/60 p-6 rounded-xl space-y-4">
-                                <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Layers size={14} /> Pot Configuration</h4>
+                                <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Layers size={14} /> Pot configuration</h4>
                                 <div className="grid grid-cols-2 gap-y-3 text-sm">
                                     <div className="text-[var(--text-muted)]">Total Value</div><div className="text-[var(--text-primary)] font-mono text-right">₹{pot.config.totalValue.toLocaleString()}</div>
                                     <div className="text-[var(--text-muted)]">Contribution</div><div className="text-[var(--text-primary)] font-mono text-right">₹{pot.config.contribution.toLocaleString()}</div>
@@ -541,7 +552,7 @@ export function PotDetail() {
                             {/* Bank Details */}
                             {pot.bankDetails && (
                                 <div className="bg-[var(--surface-deep)]/60 p-6 rounded-xl space-y-4">
-                                    <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Coins size={14} /> Bank Details</h4>
+                                    <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Coins size={14} /> Bank details</h4>
                                     <div className="whitespace-pre-wrap text-sm text-[var(--text-muted)] font-mono bg-[var(--surface-deep)]/60 p-4 rounded-lg">
                                         {pot.bankDetails}
                                     </div>
@@ -587,7 +598,7 @@ export function PotDetail() {
                         ) : (
                             <div className="text-center py-12 text-[var(--text-muted)]">
                                 <CheckCircle size={48} className="mx-auto mb-4 opacity-20" />
-                                <p>No pending approvals</p>
+                                <p>No pending approvals.</p>
                             </div>
                         )}
                     </section>
@@ -1130,7 +1141,7 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
             </div>
 
             <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2 z-10 relative">
-                <Clock className="text-[var(--accent-vivid)]" /> Your Dashboard
+                <Clock className="text-[var(--accent-vivid)]" /> Your dashboard
             </h3>
 
             {/* Overdue Payments Alert */}

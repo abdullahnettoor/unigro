@@ -79,27 +79,39 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
     return (
         <div className="relative" ref={menuRef}>
             {/* Trigger */}
-            <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer">
-                {trigger ? (
-                    trigger
-                ) : (
-                    <button
-                        className={`relative rounded-full transition-all ring-2 ring-offset-2 ring-offset-[var(--bg-app)] ${isOpen ? 'ring-[var(--accent-vivid)]' : 'ring-transparent hover:ring-[var(--border-subtle)]'}`}
-                    >
-                        <img
-                            src={user.imageUrl}
-                            alt={user.fullName || "User"}
-                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover"
-                        />
-                        {/* Status Indicator Dot */}
-                        {status === "VERIFIED" && (
-                            <div className="absolute -bottom-0.5 -right-0.5 bg-[var(--success)] text-[var(--text-on-accent)] p-0.5 rounded-full ring-2 ring-[var(--bg-app)]">
-                                <ShieldCheck size={10} />
-                            </div>
-                        )}
-                    </button>
-                )}
-            </div>
+            {trigger ? (
+                <button
+                    type="button"
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-label="Open profile menu"
+                    aria-haspopup="menu"
+                    aria-expanded={isOpen}
+                    className="cursor-pointer"
+                >
+                    {trigger}
+                </button>
+            ) : (
+                <button
+                    type="button"
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-label="Open profile menu"
+                    aria-haspopup="menu"
+                    aria-expanded={isOpen}
+                    className={`relative rounded-full transition-all ring-2 ring-offset-2 ring-offset-[var(--bg-app)] ${isOpen ? 'ring-[var(--accent-vivid)]' : 'ring-transparent hover:ring-[var(--border-subtle)]'}`}
+                >
+                    <img
+                        src={user.imageUrl}
+                        alt={user.fullName || "User"}
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover"
+                    />
+                    {/* Status Indicator Dot */}
+                    {status === "VERIFIED" && (
+                        <div className="absolute -bottom-0.5 -right-0.5 bg-[var(--success)] text-[var(--text-on-accent)] p-0.5 rounded-full ring-2 ring-[var(--bg-app)]">
+                            <ShieldCheck size={10} />
+                        </div>
+                    )}
+                </button>
+            )}
 
             {/* Dropdown Menu */}
             {isOpen && (

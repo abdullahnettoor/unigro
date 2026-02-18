@@ -65,6 +65,7 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
                 <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
                     <button
                         onClick={onClose}
+                        aria-label="Close split slot"
                         className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     >
                         <X size={20} />

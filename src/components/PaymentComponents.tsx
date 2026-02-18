@@ -122,7 +122,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
             <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative">
                 <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
-                    <button onClick={onClose} className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                    <button onClick={onClose} aria-label="Close payment modal" className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                         <X size={20} />
                     </button>
                     <h3 className="text-xl font-bold mb-1">Make payment</h3>

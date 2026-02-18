@@ -75,6 +75,7 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
             <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl p-6 sm:p-8 w-full sm:max-w-md relative animate-in fade-in zoom-in duration-300 overflow-y-auto max-h-[85vh]">
                 <button
                     onClick={onClose}
+                    aria-label="Close verification modal"
                     className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >
                     <X size={24} />

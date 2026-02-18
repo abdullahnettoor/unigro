@@ -104,7 +104,7 @@ export function PWAPrompt() {
                         </button>
                     )}
                 </div>
-                <button onClick={close} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                <button onClick={close} aria-label="Dismiss prompt" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                     <X size={16} />
                 </button>
             </div>
