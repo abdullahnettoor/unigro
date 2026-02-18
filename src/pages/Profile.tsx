@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Upload, AlertCircle, Clock, ShieldCheck, FileText, Smartphone, Mail, X, Loader2, BadgeCheck } from "lucide-react";
+import { Upload, AlertCircle, Clock, ShieldCheck, FileText, Smartphone, Mail, X, Loader2 } from "lucide-react";
 import { getThemePreference, setThemePreference, type ThemePreference } from "../lib/theme";
 
 export function Profile() {
@@ -74,7 +74,7 @@ export function Profile() {
     const statusConfig = {
         UNVERIFIED: { color: "text-[var(--text-muted)]", bg: "bg-[var(--surface-deep)]/60", border: "border-[var(--border-subtle)]", icon: AlertCircle, label: "Unverified" },
         PENDING: { color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10", border: "border-[var(--warning)]/20", icon: Clock, label: "Verification Pending" },
-        VERIFIED: { color: "text-[var(--success)]", bg: "bg-[var(--accent-vivid)]/10", border: "border-[var(--accent-vivid)]/20", icon: BadgeCheck, label: "Verified Identity" },
+        VERIFIED: { color: "text-[var(--success)]", bg: "bg-[var(--accent-vivid)]/10", border: "border-[var(--accent-vivid)]/20", icon: ShieldCheck, label: "Verified Identity" },
         REJECTED: { color: "text-[var(--danger)]", bg: "bg-[var(--danger)]/10", border: "border-[var(--danger)]/20", icon: X, label: "Verification Rejected" },
     };
 
@@ -91,9 +91,9 @@ export function Profile() {
             <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-6 mb-6 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
                 <img src={user.pictureUrl} alt={user.name} className="w-20 h-20 rounded-full border-2 border-[var(--border-subtle)]" />
                 <div className="flex-1">
-                    <h2 className="text-2xl font-bold flex flex-col sm:flex-row items-center gap-2 justify-center sm:justify-start">
+                    <h2 className="text-2xl font-bold flex items-center gap-2 justify-center sm:justify-start">
                         {user.name}
-                        {status === "VERIFIED" && <BadgeCheck className="text-[var(--accent-vivid)]" size={24} fill="var(--surface-elevated)" />}
+                        {status === "VERIFIED" && <ShieldCheck className="text-[var(--accent-vivid)]" size={24} fill="var(--surface-elevated)" />}
                     </h2>
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 text-sm text-[var(--text-muted)] items-center sm:items-start">
                         <span className="flex items-center gap-1"><Mail size={14} /> {user.email}</span>
