@@ -49,7 +49,7 @@ export function AdminDashboard() {
     return (
         <div className="max-w-6xl mx-auto py-8 px-4">
             <header className="mb-8">
-                <h1 className="text-3xl font-display font-bold">Admin Dashboard</h1>
+                <h1 className="text-3xl font-display font-bold">Admin dashboard</h1>
                 <p className="text-[var(--text-muted)]">Review identity verification requests.</p>
             </header>
 
@@ -121,7 +121,7 @@ export function AdminDashboard() {
                                                     className="flex-1  bg-[var(--danger)] text-[var(--text-on-accent)] hover:bg-[var(--danger)]/90 py-2 rounded-lg font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
                                                 >
                                                     {actionLoading === req._id && <Loader2 className="animate-spin" size={14} />}
-                                                    Confirm Reject
+                                                    Confirm reject
                                                 </button>
                                             </div>
                                         </div>

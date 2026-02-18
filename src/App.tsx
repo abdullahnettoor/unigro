@@ -37,31 +37,38 @@ function BottomNav() {
   const location = useLocation();
   const { user } = useUser();
   const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
+  const itemClass = (active: boolean) =>
+    `flex min-h-11 flex-col items-center justify-center rounded-xl px-2 py-2 text-center transition-colors ${
+      active
+        ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
+        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+    }`;
+  const labelClass = "mt-1 text-[11px] font-semibold leading-none";
 
   return (
     <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-2 shadow-2xl backdrop-blur-md sm:hidden">
       <div className="grid grid-cols-3 gap-2">
         <Link
           to="/"
-          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 font-semibold transition-colors ${isActive("/") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+          className={itemClass(isActive("/"))}
           aria-current={isActive("/") ? "page" : undefined}
         >
           <Home size={18} />
-          <span className="text-xs leading-none mt-1">Dashboard</span>
+          <span className={labelClass}>Dashboard</span>
         </Link>
         <Link
           to="/create"
-          className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 font-semibold transition-colors ${isActive("/create") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+          className={itemClass(isActive("/create"))}
           aria-current={isActive("/create") ? "page" : undefined}
         >
           <PlusCircle size={18} />
-          <span className="text-xs leading-none mt-1">New Pot</span>
+          <span className={labelClass}>New Pot</span>
         </Link>
 
         <UserMenu
           placement="top-end"
           trigger={
-            <div className={`flex flex-col items-center justify-center rounded-xl px-2 py-2 font-semibold transition-colors ${isActive("/profile") ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
+            <div className={itemClass(isActive("/profile"))}>
               {user?.imageUrl ? (
                 <img
                   src={user.imageUrl}
@@ -71,7 +78,7 @@ function BottomNav() {
               ) : (
                 <User size={18} />
               )}
-              <span className="text-xs leading-none mt-1">Profile</span>
+              <span className={labelClass}>Profile</span>
             </div>
           }
         />

@@ -44,7 +44,7 @@ export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProp
             onClose();
         } catch (err: any) {
             console.error(err);
-            const msg = err.message.includes("Verified") ? "You must be a Verified User to invite members." : "Failed to add member.";
+            const msg = err.message.includes("Verified") ? "You must be verified to invite members." : "Failed to add member.";
             feedback.toast.error("Failed to add member", msg);
             setIsSubmitting(false);
         }
@@ -52,32 +52,33 @@ export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProp
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
-            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md relative animate-in fade-in zoom-in duration-200">
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                >
-                    <X size={20} />
-                </button>
-
-                <h3 className="text-2xl font-display font-bold mb-1">Assign Slot</h3>
-                <div className="mb-6 flex justify-between items-center">
-                    <p className="text-[var(--text-muted)] text-sm">Assign a participant to a specific slot.</p>
-                    {currentUser && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setName(currentUser.name || "");
-                                setPhone(currentUser.phone || "");
-                            }}
-                            className="text-xs text-[var(--accent-vivid)] hover:underline font-bold"
-                        >
-                            Assign to Me
-                        </button>
-                    )}
+            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-200">
+                <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    >
+                        <X size={20} />
+                    </button>
+                    <h3 className="text-2xl font-display font-bold mb-1">Assign slot</h3>
+                    <div className="flex justify-between items-center">
+                        <p className="text-[var(--text-muted)] text-sm">Assign a participant to a specific slot.</p>
+                        {currentUser && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setName(currentUser.name || "");
+                                    setPhone(currentUser.phone || "");
+                                }}
+                                className="text-xs text-[var(--accent-vivid)] hover:underline font-bold"
+                            >
+                                Assign to me
+                            </button>
+                        )}
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
                     <div>
                         <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Slot Number</label>
                         <div className="relative">
@@ -129,13 +130,15 @@ export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProp
 
                     {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
 
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
-                    >
-                        {isSubmitting ? "Assigning..." : <><UserPlus size={18} /> Assign Slot</>}
-                    </button>
+                    <div className="sticky bottom-0 bg-[var(--surface-elevated)] pt-2">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
+                        >
+                            {isSubmitting ? "Assigning..." : <><UserPlus size={18} /> Assign slot</>}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

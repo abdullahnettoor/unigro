@@ -6,6 +6,62 @@ import { PotCard } from "../components/PotCard";
 import { Plus, ShieldAlert, ShieldCheck } from "lucide-react";
 import { VerificationModal } from "../components/VerificationModal";
 
+type VerificationStatus = "UNVERIFIED" | "PENDING" | "REJECTED";
+
+function VerificationBanner({
+    status,
+    onClick,
+}: {
+    status: VerificationStatus;
+    onClick?: () => void;
+}) {
+    const config = {
+        UNVERIFIED: {
+            title: "Verify your identity",
+            message: "Upload a government ID to unlock full features and build trust.",
+            icon: ShieldAlert,
+            tone: "warning",
+            interactive: true,
+        },
+        PENDING: {
+            title: "Verification pending",
+            message: "Your documents are under review. This usually takes up to 24 hours.",
+            icon: ShieldCheck,
+            tone: "warning",
+            interactive: false,
+        },
+        REJECTED: {
+            title: "Verification rejected",
+            message: "Action required. Open this alert to view the reason and submit again.",
+            icon: ShieldAlert,
+            tone: "danger",
+            interactive: true,
+        },
+    } as const;
+
+    const c = config[status];
+    const toneClass = c.tone === "warning"
+        ? "bg-[var(--warning)]/10 border-[var(--warning)]/20 text-[var(--warning)]"
+        : "bg-[var(--danger)]/10 border-[var(--danger)]/20 text-[var(--danger)]";
+    const hoverClass = c.interactive ? (c.tone === "warning" ? "hover:bg-[var(--warning)]/15" : "hover:bg-[var(--danger)]/15") : "";
+    const Icon = c.icon;
+
+    return (
+        <div
+            onClick={c.interactive ? onClick : undefined}
+            className={`mb-6 rounded-2xl border p-4 sm:mb-8 ${toneClass} ${hoverClass} flex items-center gap-4 ${c.interactive ? "cursor-pointer transition-colors" : ""}`}
+        >
+            <div className="shrink-0 rounded-full bg-black/5 p-2">
+                <Icon size={22} />
+            </div>
+            <div>
+                <h3 className="mb-1 font-bold">{c.title}</h3>
+                <p className="text-sm text-[var(--text-muted)]">{c.message}</p>
+            </div>
+        </div>
+    );
+}
+
 export function Dashboard() {
     const pots = useQuery(api.pots.list);
     const user = useQuery(api.users.current);
@@ -19,52 +75,22 @@ export function Dashboard() {
 
             {/* Verification Banner */}
             {user && user.verificationStatus === "UNVERIFIED" && (
-                <div
-                    onClick={() => setShowVerificationModal(true)}
-                    className="mb-6 sm:mb-8 p-4 bg-[var(--warning)]/10 border border-[var(--warning)]/20 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-[var(--warning)]/20 transition-colors"
-                >
-                    <div className="bg-[var(--warning)]/20 p-2 rounded-full text-[var(--warning)] shrink-0">
-                        <ShieldAlert size={24} />
-                    </div>
-                    <div>
-                        <h3 className="text-[var(--warning)] font-bold mb-1">Verify your identity</h3>
-                        <p className="text-[var(--text-muted)] text-sm">Upload a Government ID to build trust and unlock full features.</p>
-                    </div>
-                </div>
+                <VerificationBanner status="UNVERIFIED" onClick={() => setShowVerificationModal(true)} />
             )}
 
             {user && user.verificationStatus === "PENDING" && (
-                <div className="mb-6 sm:mb-8 p-4 bg-[var(--warning)]/10 border border-[var(--warning)]/20 rounded-xl flex items-center gap-4">
-                    <div className="bg-[var(--warning)]/20 p-2 rounded-full text-[var(--warning)] shrink-0">
-                        <ShieldCheck size={24} />
-                    </div>
-                    <div>
-                        <h3 className="text-[var(--warning)] font-bold mb-1">Verification Pending</h3>
-                        <p className="text-[var(--text-muted)] text-sm">Your documents are under review. This usually takes 24 hours.</p>
-                    </div>
-                </div>
+                <VerificationBanner status="PENDING" />
             )}
 
             {user && user.verificationStatus === "REJECTED" && (
-                <div
-                    onClick={() => setShowVerificationModal(true)}
-                    className="mb-6 sm:mb-8 p-4 bg-[var(--danger)]/10 border border-[var(--danger)]/20 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-[var(--danger)]/20 transition-colors"
-                >
-                    <div className="bg-[var(--danger)]/20 p-2 rounded-full text-[var(--danger)] shrink-0">
-                        <ShieldAlert size={24} />
-                    </div>
-                    <div>
-                        <h3 className="text-[var(--danger)] font-bold mb-1">Verification Rejected</h3>
-                        <p className="text-[var(--text-muted)] text-sm">Action required. Click to view reason and resubmit.</p>
-                    </div>
-                </div>
+                <VerificationBanner status="REJECTED" onClick={() => setShowVerificationModal(true)} />
             )}
 
             {/* Global Header */}
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
                 <div>
                     <h1 className="text-3xl font-display font-bold">Dashboard</h1>
-                    <p className="text-[var(--text-muted)]">Track your pots, payments, and investments.</p>
+                    <p className="text-[var(--text-muted)]">Track your pots, payments, and upcoming cycles.</p>
                 </div>
                 <Link
                     to="/create"
@@ -82,7 +108,7 @@ export function Dashboard() {
                         <div>
                             <h2 className="text-2xl font-display font-bold flex items-center gap-3">
                                 Pots you organize
-                                {pots && <span className="bg-[var(--surface-deep)]/80 text-sm px-2 py-0.5 rounded-full text-[var(--text-muted)]">{managedPots.length}</span>}
+                                {pots && <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">{managedPots.length}</span>}
                             </h2>
                         </div>
                     </header>
@@ -101,7 +127,7 @@ export function Dashboard() {
                     <div>
                         <h2 className="text-2xl font-display font-bold flex items-center gap-3">
                             Pots you joined
-                            {pots && <span className="bg-[var(--surface-deep)]/80 text-sm px-2 py-0.5 rounded-full text-[var(--text-muted)]">{joinedPots.length}</span>}
+                            {pots && <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">{joinedPots.length}</span>}
                         </h2>
                     </div>
                 </header>

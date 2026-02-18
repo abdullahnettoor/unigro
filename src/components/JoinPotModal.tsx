@@ -43,13 +43,13 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-            <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
-                <div className="flex justify-between items-center mb-6">
+            <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden">
+                <div className="flex justify-between items-center p-6 pb-4 border-b border-[var(--border-subtle)]/80">
                     <h3 className="text-xl font-bold">Join Pot</h3>
                     <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><X size={20} /></button>
                 </div>
 
-                <div className="mb-6 space-y-4">
+                <div className="overflow-y-auto px-6 py-4 space-y-4">
                     <div className="text-center space-y-3 py-2">
                         <label className="block text-sm text-[var(--text-muted)]">Select Number of Slots</label>
 
@@ -106,7 +106,7 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
                     </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2 border-t border-[var(--border-subtle)]/80 bg-[var(--surface-card)] p-4">
                     <button onClick={onClose} className="flex-1 bg-[var(--surface-deep)] py-3 rounded-xl font-bold hover:bg-[var(--surface-deep)] transition-colors text-[var(--text-primary)]">
                         Cancel
                     </button>

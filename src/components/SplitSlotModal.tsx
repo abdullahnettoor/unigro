@@ -52,7 +52,7 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
             onClose();
         } catch (err: any) {
             console.error(err);
-            const msg = err.message.includes("Verified") ? "You must be a Verified User to invite members." :
+            const msg = err.message.includes("Verified") ? "You must be verified to invite members." :
                 err.message.includes("remaining") ? err.message : "Failed to assign split slot.";
             feedback.toast.error("Failed to assign split slot", msg);
             setIsSubmitting(false); // Only reset if failed
@@ -61,22 +61,24 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
-            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md relative animate-in fade-in zoom-in duration-200">
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                >
-                    <X size={20} />
-                </button>
+            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-200">
+                <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    >
+                        <X size={20} />
+                    </button>
 
-                <h3 className="text-2xl font-display font-bold mb-1 flex items-center gap-2">
-                    <PieChart className="text-[var(--accent-vivid)]" /> Split Slot
-                </h3>
-                <div className="mb-6 flex justify-between items-center">
-                    <p className="text-[var(--text-muted)] text-sm">Assign a partial share of a slot.</p>
+                    <h3 className="text-2xl font-display font-bold mb-1 flex items-center gap-2">
+                        <PieChart className="text-[var(--accent-vivid)]" /> Split slot
+                    </h3>
+                    <div className="flex justify-between items-center">
+                        <p className="text-[var(--text-muted)] text-sm">Assign a partial share of a slot.</p>
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
                     {/* Slot Selection */}
                     <div>
                         <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Slot Number</label>
@@ -158,13 +160,15 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
 
                     {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
 
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
-                    >
-                        {isSubmitting ? "Assigning..." : <><UserPlus size={18} /> Assign Share</>}
-                    </button>
+                    <div className="sticky bottom-0 bg-[var(--surface-elevated)] pt-2">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
+                        >
+                            {isSubmitting ? "Assigning..." : <><UserPlus size={18} /> Assign share</>}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

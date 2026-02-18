@@ -86,7 +86,7 @@ export function PWAPrompt() {
                             onClick={() => updateServiceWorker(true)}
                             className="w-full rounded-lg bg-[var(--accent-vivid)] px-3 py-2 text-sm font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"
                         >
-                            Update Now
+                            Update now
                         </button>
                     )}
                     {!needRefresh && !offlineReady && deferredPrompt && (
@@ -100,7 +100,7 @@ export function PWAPrompt() {
                             }}
                             className="w-full rounded-lg bg-[var(--accent-vivid)] px-3 py-2 text-sm font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"
                         >
-                            Install App
+                            Install app
                         </button>
                     )}
                 </div>

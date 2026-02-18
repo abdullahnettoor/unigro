@@ -120,16 +120,18 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
-            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md relative">
-                <button onClick={onClose} className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
-                    <X size={20} />
-                </button>
+            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative">
+                <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                        <X size={20} />
+                    </button>
+                    <h3 className="text-xl font-bold mb-1">Make payment</h3>
+                    <p className="text-[var(--text-muted)] text-sm">Cycle {monthIndex + 1} • <span className="text-[var(--accent-vivid)] font-mono">₹{amount.toLocaleString()}</span></p>
+                </div>
 
-                <h3 className="text-xl font-bold mb-1">Make Payment</h3>
-                <p className="text-[var(--text-muted)] text-sm mb-6">Cycle {monthIndex + 1} • <span className="text-[var(--accent-vivid)] font-mono">₹{amount.toLocaleString()}</span></p>
-
-                {!paymentType ? (
-                    <div className="grid grid-cols-2 gap-4">
+                <div className="flex-1 overflow-y-auto p-6">
+                    {!paymentType ? (
+                        <div className="grid grid-cols-2 gap-4">
                         <button
                             onClick={() => setPaymentType("online")}
                             className="bg-[var(--surface-deep)] hover:bg-[var(--accent-vivid)]/10 border border-[var(--border-subtle)] hover:border-[var(--accent-vivid)] p-6 rounded-xl flex flex-col items-center gap-3 transition-all group"
@@ -186,7 +188,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                     disabled={isUploading || !file}
                                     className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {isUploading ? "Uploading..." : "Submit Proof"}
+                                    {isUploading ? "Uploading..." : "Submit proof"}
                                 </button>
                             </form>
                         ) : (
@@ -222,9 +224,10 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                 </button>
                             </div>
                         )}
-                    </>
-                )
-                }
+                        </>
+                    )
+                    }
+                </div>
             </div >
         </div >
     );

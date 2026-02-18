@@ -143,7 +143,7 @@ export function Profile() {
                         <ShieldCheck className="text-[var(--accent-vivid)]" /> Verify your identity
                     </h3>
                     <p className="text-[var(--text-muted)] mb-6 max-w-xl">
-                        To join higher-value pots and build trust with Foremen, please upload a Government ID (Aadhaar, PAN, or Driving License).
+                        To join higher-value pots and build trust with organizers, please upload a government ID (Aadhaar, PAN, or Driving License).
                     </p>
 
                     {status === "REJECTED" && user.adminNotes && (
@@ -223,7 +223,7 @@ export function Profile() {
                             disabled={isUploading}
                             className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
                         >
-                            {isUploading ? "Uploading..." : "Submit for Verification"}
+                            {isUploading ? "Uploading..." : "Submit for verification"}
                         </button>
                     </form>
                 </section>
@@ -234,7 +234,7 @@ export function Profile() {
                     <div className="w-16 h-16 bg-[var(--warning)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Clock size={32} className="text-[var(--warning)]" />
                     </div>
-                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Verification in Progress</h3>
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Verification in progress</h3>
                     <p className="text-[var(--text-muted)] max-w-md mx-auto">
                         Your documents have been submitted and are under review. This usually takes 24-48 hours.
                     </p>

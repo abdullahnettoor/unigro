@@ -125,7 +125,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
                             {/* Verification Badge */}
                             <div className={`flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-[var(--surface-card)] ${statusColor} border-[var(--border-subtle)]`}>
                                 <StatusIcon size={12} />
-                                {status === "VERIFIED" ? "VERIFIED" : "Check Status"}
+                                {status === "VERIFIED" ? "Verified" : "Check status"}
                             </div>
                         </Link>
 
@@ -144,7 +144,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
                             {[
                                 { id: "light", icon: Sun, label: "Light" },
                                 { id: "dark", icon: Moon, label: "Dark" },
-                                { id: "system", icon: Monitor, label: "Auto" }
+                                { id: "system", icon: Monitor, label: "System" }
                             ].map((opt) => (
                                 <button
                                     key={opt.id}

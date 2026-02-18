@@ -19,6 +19,13 @@
 }
 
 :root {
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --motion-fast: 160ms;
+  --motion-normal: 220ms;
+  --motion-slow: 320ms;
   --bg-app: #F6F5F2;
   --surface-elevated: #FFFFFF;
   --surface-card: #F0F4F1;
@@ -130,5 +137,5 @@ input[type="submit"] {
 
 .theme-transition,
 .theme-transition * {
-  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, fill 200ms ease, stroke 200ms ease;
+  transition: background-color var(--motion-normal) ease, color var(--motion-normal) ease, border-color var(--motion-normal) ease, box-shadow var(--motion-normal) ease, fill var(--motion-normal) ease, stroke var(--motion-normal) ease;
 }

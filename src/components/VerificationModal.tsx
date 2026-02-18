@@ -86,11 +86,11 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
                     </div>
                     <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Verify your identity</h2>
                     <p className="text-[var(--text-muted)] text-sm">
-                        Upload your Government ID for trust verification.
+                        Upload your government ID for trust verification.
                     </p>
                     {user?.adminNotes && user.verificationStatus === "REJECTED" && (
-                        <div className="mt-4  bg-[var(--danger)]/10 border border-[var(--danger)]/20 p-3 rounded-lg text-sm text-red-200">
-                            <strong>Reason for Rejection:</strong> {user.adminNotes}
+                        <div className="mt-4 bg-[var(--danger)]/10 border border-[var(--danger)]/20 p-3 rounded-lg text-sm text-[var(--danger)]">
+                            <strong>Reason for rejection:</strong> {user.adminNotes}
                         </div>
                     )}
                 </div>
@@ -145,7 +145,7 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
                         ) : (
                             <div className="flex flex-col items-center text-[var(--text-muted)]">
                                 <Upload size={24} className="mb-2" />
-                                <p className="text-sm font-bold">Upload Document Image</p>
+                                <p className="text-sm font-bold">Upload document image</p>
                                 <p className="text-[10px] mt-1">JPG, PNG, PDF</p>
                             </div>
                         )}
@@ -163,7 +163,7 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
                         disabled={loading || !file}
                         className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-4 rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? "Uploading..." : "Submit for Verification"}
+                        {loading ? "Uploading..." : "Submit for verification"}
                     </button>
                 </form>
             </div>

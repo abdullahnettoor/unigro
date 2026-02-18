@@ -151,7 +151,7 @@ export function PotDetail() {
             feedback.toast.success("Pot activated", "Members can now start payments.");
         } catch (error: any) {
             console.error(error);
-            const msg = error.message.includes("Verified") ? "You must be a Verified User to activate a pot." : "Failed to activate pot.";
+            const msg = error.message.includes("Verified") ? "You must be verified to activate a pot." : "Failed to activate pot.";
             feedback.toast.error("Activation failed", msg);
         }
     };
