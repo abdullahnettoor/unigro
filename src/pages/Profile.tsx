@@ -73,9 +73,9 @@ export function Profile() {
 
     const statusConfig = {
         UNVERIFIED: { color: "text-[var(--text-muted)]", bg: "bg-[var(--surface-deep)]/60", border: "border-[var(--border-subtle)]", icon: AlertCircle, label: "Unverified" },
-        PENDING: { color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10", border: "border-[var(--warning)]/20", icon: Clock, label: "Verification Pending" },
-        VERIFIED: { color: "text-[var(--success)]", bg: "bg-[var(--accent-vivid)]/10", border: "border-[var(--accent-vivid)]/20", icon: ShieldCheck, label: "Verified Identity" },
-        REJECTED: { color: "text-[var(--danger)]", bg: "bg-[var(--danger)]/10", border: "border-[var(--danger)]/20", icon: X, label: "Verification Rejected" },
+        PENDING: { color: "text-[var(--warning)]", bg: "bg-[var(--warning)]/10", border: "border-[var(--warning)]/20", icon: Clock, label: "Verification pending" },
+        VERIFIED: { color: "text-[var(--success)]", bg: "bg-[var(--accent-vivid)]/10", border: "border-[var(--accent-vivid)]/20", icon: ShieldCheck, label: "Identity verified" },
+        REJECTED: { color: "text-[var(--danger)]", bg: "bg-[var(--danger)]/10", border: "border-[var(--danger)]/20", icon: X, label: "Verification rejected" },
     };
 
     const status = (user.verificationStatus as keyof typeof statusConfig) || "UNVERIFIED";
@@ -148,7 +148,7 @@ export function Profile() {
 
                     {status === "REJECTED" && user.adminNotes && (
                         <div className="bg-[var(--danger)]/10 border border-[var(--danger)]/20 p-4 rounded-xl mb-6 text-[var(--danger)] text-sm">
-                            <strong>Reason for Rejection:</strong> {user.adminNotes}
+                            <strong>Reason for rejection:</strong> {user.adminNotes}
                         </div>
                     )}
 

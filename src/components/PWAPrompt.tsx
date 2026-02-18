@@ -8,6 +8,9 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 export function PWAPrompt() {
+    const DISMISS_KEY = "pwa_prompt_dismissed_at";
+    const DISMISS_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
+
     const {
         offlineReady: [offlineReady, setOfflineReady],
         needRefresh: [needRefresh, setNeedRefresh],
@@ -34,6 +37,14 @@ export function PWAPrompt() {
     }, []);
 
     useEffect(() => {
+        const dismissedAtRaw = window.localStorage.getItem(DISMISS_KEY);
+        const dismissedAt = dismissedAtRaw ? Number(dismissedAtRaw) : 0;
+        if (dismissedAt > 0 && Date.now() - dismissedAt < DISMISS_COOLDOWN_MS) {
+            setDismissed(true);
+        }
+    }, []);
+
+    useEffect(() => {
         const handler = (e: Event) => {
             e.preventDefault();
             setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -53,6 +64,7 @@ export function PWAPrompt() {
         track("pwa_prompt_dismissed");
         setDeferredPrompt(null);
         setDismissed(true);
+        window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
     };
 
     if (!offlineReady && !needRefresh && !showInstallHint) return null;

@@ -72,7 +72,7 @@ export function AdminDashboard() {
                                 ) : (
                                     <div className="text-[var(--text-muted)] flex flex-col items-center">
                                         <CreditCard size={40} className="mb-2 opacity-50" />
-                                        <span>No Document</span>
+                                        <span>No document</span>
                                     </div>
                                 )}
                             </div>

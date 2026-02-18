@@ -72,31 +72,33 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
 
     return (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-end justify-center p-3 sm:items-center sm:p-4 z-[100]">
-            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl p-6 sm:p-8 w-full sm:max-w-md relative animate-in fade-in zoom-in duration-300 overflow-y-auto max-h-[85vh]">
-                <button
-                    onClick={onClose}
-                    aria-label="Close verification modal"
-                    className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-                >
-                    <X size={24} />
-                </button>
+            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-300">
+                <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
+                    <button
+                        onClick={onClose}
+                        aria-label="Close verification modal"
+                        className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
 
-                <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-[var(--accent-vivid)]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--accent-vivid)]/20">
-                        <ShieldCheck size={32} className="text-[var(--accent-vivid)]" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Verify your identity</h2>
-                    <p className="text-[var(--text-muted)] text-sm">
-                        Upload your government ID for trust verification.
-                    </p>
-                    {user?.adminNotes && user.verificationStatus === "REJECTED" && (
-                        <div className="mt-4 bg-[var(--danger)]/10 border border-[var(--danger)]/20 p-3 rounded-lg text-sm text-[var(--danger)]">
-                            <strong>Reason for rejection:</strong> {user.adminNotes}
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-[var(--accent-vivid)]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--accent-vivid)]/20">
+                            <ShieldCheck size={32} className="text-[var(--accent-vivid)]" />
                         </div>
-                    )}
+                        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Verify your identity</h2>
+                        <p className="text-[var(--text-muted)] text-sm">
+                            Upload your government ID for trust verification.
+                        </p>
+                        {user?.adminNotes && user.verificationStatus === "REJECTED" && (
+                            <div className="mt-4 bg-[var(--danger)]/10 border border-[var(--danger)]/20 p-3 rounded-lg text-sm text-[var(--danger)]">
+                                <strong>Reason for rejection:</strong> {user.adminNotes}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
                     {/* ID Type Selection */}
                     <div>
                         <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Document Type</label>
@@ -159,13 +161,15 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
                         </div>
                     )}
 
-                    <button
-                        type="submit"
-                        disabled={loading || !file}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-4 rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {loading ? "Uploading..." : "Submit for verification"}
-                    </button>
+                    <div className="sticky bottom-0 bg-[var(--surface-elevated)] pt-2">
+                        <button
+                            type="submit"
+                            disabled={loading || !file}
+                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-4 rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? "Uploading..." : "Submit for verification"}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

@@ -340,9 +340,7 @@ export function PotDetail() {
                         {pot.foreman?.verificationStatus !== "VERIFIED" && (
                             <div className="mt-3 bg-[var(--warning)]/10 border border-[var(--warning)]/20 text-[var(--warning)] text-xs px-3 py-2 rounded-lg flex items-center gap-2">
                                 <ShieldAlert size={14} className="text-[var(--warning)]" />
-                                <span>
-                                    <strong>Caution:</strong> Organizer not verified yet.
-                                </span>
+                                <span><strong>Caution:</strong> Organizer is not verified yet.</span>
                             </div>
                         )}
                     </div>

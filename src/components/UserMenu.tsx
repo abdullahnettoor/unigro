@@ -146,7 +146,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[var(--text-primary)] rounded-xl hover:bg-[var(--surface-deep)] transition-colors group"
                         >
                             <Settings size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" />
-                            <span>Manage Account</span>
+                            <span>Manage account</span>
                         </button>
                     </div>
 
@@ -179,7 +179,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[var(--danger)] rounded-xl hover:bg-[var(--danger)]/10 transition-colors"
                         >
                             <LogOut size={18} />
-                            <span>Sign Out</span>
+                            <span>Sign out</span>
                         </button>
                     </div>
                 </div>

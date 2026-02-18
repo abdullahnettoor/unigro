@@ -1,17 +1,64 @@
+import { lazy, Suspense, useEffect } from "react";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { SignInButton, useUser } from "@clerk/clerk-react";
 import { UserSync } from "./components/UserSync";
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { Home, PlusCircle, User } from "lucide-react";
-import { Dashboard } from "./pages/Dashboard";
-import { CreatePot } from "./pages/CreatePot";
-import { PotDetail } from "./pages/PotDetail";
-import { Profile } from "./pages/Profile";
-import { ProfileModal } from "./components/ProfileModal";
 import { PWAPrompt } from "./components/PWAPrompt";
-import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminRoute } from "./components/AdminRoute";
 import { UserMenu } from "./components/UserMenu";
+
+const loadDashboard = () => import("./pages/Dashboard");
+const loadCreatePot = () => import("./pages/CreatePot");
+const loadPotDetail = () => import("./pages/PotDetail");
+const loadProfile = () => import("./pages/Profile");
+const loadAdminDashboard = () => import("./pages/AdminDashboard");
+const loadProfileModal = () => import("./components/ProfileModal");
+
+const Dashboard = lazy(() => loadDashboard().then((m) => ({ default: m.Dashboard })));
+const CreatePot = lazy(() => loadCreatePot().then((m) => ({ default: m.CreatePot })));
+const PotDetail = lazy(() => loadPotDetail().then((m) => ({ default: m.PotDetail })));
+const Profile = lazy(() => loadProfile().then((m) => ({ default: m.Profile })));
+const AdminDashboard = lazy(() => loadAdminDashboard().then((m) => ({ default: m.AdminDashboard })));
+const ProfileModal = lazy(() => loadProfileModal().then((m) => ({ default: m.ProfileModal })));
+
+function RouteLoading() {
+  return (
+    <div className="min-h-[40vh] grid place-items-center py-8">
+      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[var(--accent-vivid)]"></div>
+    </div>
+  );
+}
+
+function AuthenticatedPrefetch() {
+  useEffect(() => {
+    let cancelled = false;
+    let idleId: number | null = null;
+
+    const prefetch = () => {
+      if (cancelled) return;
+      void loadCreatePot();
+      void loadProfile();
+      void loadProfileModal();
+    };
+
+    if ("requestIdleCallback" in window) {
+      idleId = (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number })
+        .requestIdleCallback(prefetch, { timeout: 1200 });
+    } else {
+      globalThis.setTimeout(prefetch, 400);
+    }
+
+    return () => {
+      cancelled = true;
+      if (idleId !== null && "cancelIdleCallback" in window) {
+        (window as Window & { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+      }
+    };
+  }, []);
+
+  return null;
+}
 
 function Landing() {
   return (
@@ -137,23 +184,28 @@ function App() {
 
       <Authenticated>
         <UserSync />
-        <ProfileModal />
+        <AuthenticatedPrefetch />
+        <Suspense fallback={null}>
+          <ProfileModal />
+        </Suspense>
         <MainLayout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/create" element={<CreatePot />} />
-            <Route path="/pot/:potId" element={<PotDetail />} />
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <Suspense fallback={<RouteLoading />}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/create" element={<CreatePot />} />
+              <Route path="/pot/:potId" element={<PotDetail />} />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </MainLayout>
       </Authenticated>
     </BrowserRouter>
