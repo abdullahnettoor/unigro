@@ -7,10 +7,19 @@ type BeforeInstallPromptEvent = Event & {
     userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
-export function PWAPrompt() {
-    const DISMISS_KEY = "pwa_prompt_dismissed_at";
-    const DISMISS_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
+type AnalyticsWindow = Window & {
+    gtag?: (eventName: string, action: string, details?: Record<string, unknown>) => void;
+    dataLayer?: Array<Record<string, unknown>>;
+};
 
+type IOSNavigator = Navigator & {
+    standalone?: boolean;
+};
+
+const DISMISS_KEY = "pwa_prompt_dismissed_at";
+const DISMISS_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
+
+export function PWAPrompt() {
     const {
         offlineReady: [offlineReady, setOfflineReady],
         needRefresh: [needRefresh, setNeedRefresh],
@@ -25,22 +34,18 @@ export function PWAPrompt() {
     });
 
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-    const [dismissed, setDismissed] = useState(false);
+    const [dismissed, setDismissed] = useState(() => {
+        const dismissedAtRaw = window.localStorage.getItem(DISMISS_KEY);
+        const dismissedAt = dismissedAtRaw ? Number(dismissedAtRaw) : 0;
+        return dismissedAt > 0 && Date.now() - dismissedAt < DISMISS_COOLDOWN_MS;
+    });
 
     const track = useCallback((event: string, details?: Record<string, unknown>) => {
-        const w = window as any;
+        const w = window as AnalyticsWindow;
         if (typeof w.gtag === "function") {
             w.gtag("event", event, details || {});
         } else if (Array.isArray(w.dataLayer)) {
             w.dataLayer.push({ event, ...(details || {}) });
-        }
-    }, []);
-
-    useEffect(() => {
-        const dismissedAtRaw = window.localStorage.getItem(DISMISS_KEY);
-        const dismissedAt = dismissedAtRaw ? Number(dismissedAtRaw) : 0;
-        if (dismissedAt > 0 && Date.now() - dismissedAt < DISMISS_COOLDOWN_MS) {
-            setDismissed(true);
         }
     }, []);
 
@@ -55,7 +60,7 @@ export function PWAPrompt() {
     }, [track]);
 
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as IOSNavigator).standalone;
     const showInstallHint = !dismissed && !isStandalone && (Boolean(deferredPrompt) || isIOS);
 
     const close = () => {
