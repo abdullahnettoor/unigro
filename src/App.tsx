@@ -93,7 +93,7 @@ function BottomNav() {
   const labelClass = "mt-1 text-[11px] font-semibold leading-none";
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-2 shadow-2xl backdrop-blur-md sm:hidden">
+    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-2 shadow-2xl backdrop-blur-md md:hidden">
       <div className="grid grid-cols-3 gap-2">
         <Link
           to="/"
@@ -135,9 +135,14 @@ function BottomNav() {
 }
 
 function MainLayout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  const hideTopNavForDashboard = location.pathname === "/";
+
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)] pb-24 sm:pb-0">
-      <nav className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/80 backdrop-blur-md">
+      <nav
+        className={`sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/80 backdrop-blur-md ${hideTopNavForDashboard ? "hidden" : ""}`}
+      >
         <div className="mx-auto flex max-w-6xl items-center justify-center sm:justify-between px-4 py-3 sm:px-6 relative">
           <Link to="/" className="transition-opacity hover:opacity-80">
             <h1 className="text-xl font-[family-name:var(--font-display)] font-bold sm:text-2xl">GrowPot</h1>

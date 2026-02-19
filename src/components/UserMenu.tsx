@@ -19,9 +19,10 @@ import { getThemePreference, setThemePreference, type ThemePreference } from "..
 interface UserMenuProps {
     trigger?: React.ReactNode;
     placement?: "bottom-end" | "top-end" | "top-center";
+    menuClassName?: string;
 }
 
-export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
+export function UserMenu({ trigger, placement = "bottom-end", menuClassName }: UserMenuProps) {
     const { user } = useUser();
     const { signOut, openUserProfile } = useClerk();
     const convexUser = useQuery(api.users.current);
@@ -72,7 +73,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
         positionClasses = "absolute right-0 bottom-full mb-3";
         animationClasses = "animate-in fade-in slide-in-from-bottom-2";
     } else if (placement === "top-center") {
-        positionClasses = "absolute left-1/2 -translate-x-1/2 bottom-full mb-3";
+        positionClasses = "absolute left-0 right-0 bottom-full mb-3";
         animationClasses = "animate-in fade-in slide-in-from-bottom-2";
     }
 
@@ -115,7 +116,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className={`${positionClasses} glass-3 w-72 rounded-2xl shadow-xl p-2 z-50 ${animationClasses} duration-200`}>
+                <div className={`${positionClasses} glass-3 w-72 rounded-2xl shadow-xl p-2 z-50 ${animationClasses} duration-200 ${menuClassName || ""}`}>
 
                     {/* User Header */}
                     <div className="px-4 py-3 border-b border-[var(--border-subtle)] mb-2">
@@ -146,7 +147,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[var(--text-primary)] rounded-xl hover:bg-[var(--surface-deep)] transition-colors group"
                         >
                             <Settings size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" />
-                            <span>Manage account</span>
+                            <span className="whitespace-nowrap">Manage account</span>
                         </button>
                     </div>
 
