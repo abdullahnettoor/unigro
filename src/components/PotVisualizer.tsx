@@ -15,12 +15,22 @@ interface PotVisualizerProps {
     // But passing `winnerId` (userId) is fine too if we want to highlight user.
 }
 
+type VisualizerSlot = (Doc<"slots"> & { user: Doc<"users"> | null }) | {
+    _id: string;
+    slotNumber: number;
+    status: "OPEN";
+    userId?: string;
+    isGhost: boolean;
+    user: null;
+    drawOrder?: number;
+};
+
 export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVisualizerProps) {
-    const orbitRadius = 140;
+    const orbitRadius = 120;
 
     // Generate full list of slots (Real + Virtual)
     const sortedSlots = useMemo(() => {
-        const fullSlots = [];
+        const fullSlots: VisualizerSlot[] = [];
         const slotMap = new Map(slots.map(s => [s.slotNumber, s]));
 
         for (let i = 1; i <= pot.config.totalSlots; i++) {
@@ -29,13 +39,13 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
             } else {
                 // Virtual Slot
                 fullSlots.push({
-                    _id: `virtual-${i}` as any, // Temporary ID for key
+                    _id: `virtual-${i}`,
                     slotNumber: i,
                     status: "OPEN",
                     userId: undefined,
                     isGhost: false,
                     user: null,
-                    drawOrder: undefined // Added missing property
+                    drawOrder: undefined,
                 });
             }
         }
@@ -45,10 +55,10 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
     const filledCount = slots.filter(s => s.status === "FILLED").length;
 
     return (
-        <div className="relative w-[360px] h-[360px] mx-auto flex items-center justify-center">
+        <div className="relative mx-auto flex h-[300px] w-[300px] items-center justify-center sm:h-[340px] sm:w-[340px]">
             {/* Orbit Path */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" viewBox="0 0 360 360">
-                <circle cx="180" cy="180" r={orbitRadius} fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="5,5" />
+            <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-20" viewBox="0 0 300 300">
+                <circle cx="150" cy="150" r={orbitRadius} fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="5,5" />
             </svg>
 
             {/* The Sun (Pot Center) */}
@@ -56,18 +66,18 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="absolute z-10 w-32 h-32 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--accent-secondary)] shadow-[0_0_50px_rgb(var(--accent-glow)/0.35)] flex flex-col items-center justify-center text-[var(--text-on-accent)] p-4 text-center"
+                className="absolute z-10 flex h-28 w-28 flex-col items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center text-[var(--text-primary)] shadow-lg sm:h-32 sm:w-32"
             >
-                <span className="text-[10px] font-bold tracking-widest uppercase opacity-80">Cycle {currentMonthIndex}</span>
-                <span className="text-2xl font-display font-bold leading-none">₹{pot.config.totalValue.toLocaleString()}</span>
-                <span className="text-[9px] mt-1 font-mono opacity-80">{filledCount} / {pot.config.totalSlots} Slots</span>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">Cycle {currentMonthIndex}</span>
+                <span className="font-display text-xl font-bold leading-none sm:text-2xl">₹{pot.config.totalValue.toLocaleString()}</span>
+                <span className="mt-1 font-mono text-[9px] text-[var(--text-muted)]">{filledCount} / {pot.config.totalSlots} slots</span>
             </motion.div>
 
             {/* Planets (Slots) */}
             {sortedSlots.map((slot, index) => {
                 const angle = (index / sortedSlots.length) * 2 * Math.PI - (Math.PI / 2); // Start from top
-                const x = 180 + orbitRadius * Math.cos(angle);
-                const y = 180 + orbitRadius * Math.sin(angle);
+                const x = 150 + orbitRadius * Math.cos(angle);
+                const y = 150 + orbitRadius * Math.sin(angle);
 
                 // Highlight if this slot is the winner of THIS displayed cycle (or passed winnerId match)
                 // Note: winnerId prop was userId. slot.userId check is ok.
@@ -80,7 +90,7 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1, x: x - 180, y: y - 180 }}
                         transition={{ duration: 0.5, delay: index * 0.05, type: "spring" }}
-                        className="absolute top-1/2 left-1/2 w-12 h-12 -ml-6 -mt-6 cursor-pointer group"
+                        className="group absolute left-1/2 top-1/2 -ml-5 -mt-5 h-10 w-10 cursor-pointer sm:-ml-6 sm:-mt-6 sm:h-12 sm:w-12"
                     >
                         {/* Planet Body */}
                         {isOpen ? (
@@ -93,7 +103,7 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
                                 {slot.user?.pictureUrl ? (
                                     <img src={slot.user.pictureUrl} alt={slot.user.name} className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-[var(--surface-deep)] text-xs font-bold text-[var(--text-muted)]">
+                                    <div className="flex h-full w-full items-center justify-center bg-[var(--surface-deep)] text-xs font-semibold text-[var(--text-muted)]">
                                         {slot.user?.name?.charAt(0) || slot.slotNumber}
                                     </div>
                                 )}
@@ -106,7 +116,7 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
                         )}
 
                         {/* Tooltip on Hover */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black/80 text-[var(--text-primary)] text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                        <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-max -translate-x-1/2 rounded bg-black/80 px-2 py-1 text-xs text-[var(--text-primary)] opacity-0 transition-opacity group-hover:opacity-100">
                             {isOpen ? `Slot #${slot.slotNumber}: OPEN` : `Slot #${slot.slotNumber}: ${slot.user?.name}`}
                             {isWinner && <span className="text-[var(--gold)] block text-[9px] font-bold">WINNER</span>}
                         </div>

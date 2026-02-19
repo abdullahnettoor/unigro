@@ -88,7 +88,7 @@ export function Profile() {
             <p className="text-[var(--text-muted)] mb-8">Manage your identity and trust settings.</p>
 
             {/* Profile Header */}
-            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-6 mb-6 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+            <div className="glass-2 rounded-2xl p-6 mb-6 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
                 <img src={user.pictureUrl} alt={user.name} className="w-20 h-20 rounded-full border-2 border-[var(--border-subtle)]" />
                 <div className="flex-1">
                     <h2 className="text-2xl font-bold flex items-center gap-2 justify-center sm:justify-start">
@@ -108,7 +108,7 @@ export function Profile() {
                 )}
             </div>
 
-            <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6 mb-8">
+            <section className="glass-2 rounded-2xl p-6 mb-8">
                 <h3 className="text-lg font-bold mb-2">Appearance</h3>
                 <p className="text-sm text-[var(--text-muted)] mb-4">Choose how GrowPot looks on this device.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -138,7 +138,7 @@ export function Profile() {
 
             {/* Verification Section */}
             {(status === "UNVERIFIED" || status === "REJECTED") && (
-                <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6 sm:p-8">
+                <section className="glass-2 rounded-2xl p-6 sm:p-8">
                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                         <ShieldCheck className="text-[var(--accent-vivid)]" /> Verify your identity
                     </h3>

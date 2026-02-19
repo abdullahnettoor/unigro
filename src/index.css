@@ -12,10 +12,10 @@
 
   --color-bg-app: #F6F5F2;
   --color-surface-elevated: #FFFFFF;
-  --color-accent-vivid: #2F7A5F;
-  --color-accent-secondary: #C8925A;
+  --color-accent-vivid: #2B6E57;
+  --color-accent-secondary: #B8834F;
   --color-text-primary: #1D2622;
-  --color-text-muted: #5B6A63;
+  --color-text-muted: #576A64;
 }
 
 :root {
@@ -30,39 +30,39 @@
   --surface-elevated: #FFFFFF;
   --surface-card: #F0F4F1;
   --surface-deep: #E7ECE9;
-  --accent-vivid: #2F7A5F;
-  --accent-soft: #D7F0E3;
-  --accent-secondary: #C8925A;
-  --accent-glow: 200 146 90;
+  --accent-vivid: #2B6E57;
+  --accent-soft: #D9F2E7;
+  --accent-secondary: #B8834F;
+  --accent-glow: 184 131 79;
   --text-primary: #1D2622;
-  --text-muted: #5B6A63;
+  --text-muted: #576A64;
   --text-on-accent: #F6F5F2;
-  --border-subtle: #D9E2DD;
+  --border-subtle: #D4DFDA;
   --success: #2F7A5F;
   --warning: #C9853B;
   --danger: #C8463A;
-  --gold: #C9A227;
+  --gold: #BF9B3F;
   --hero-gradient: radial-gradient(circle at top, #E8F2ED 0%, #F6F5F2 50%, #ECE8E1 100%);
   color-scheme: light;
 }
 
 [data-theme="dark"] {
   --bg-app: #0F1F1A;
-  --surface-elevated: #182923;
-  --surface-card: #1A2E27;
-  --surface-deep: #12231D;
-  --accent-vivid: #A6E6B0;
+  --surface-elevated: #152620;
+  --surface-card: #1B2D27;
+  --surface-deep: #12211D;
+  --accent-vivid: #99DBA6;
   --accent-soft: #1E3B30;
-  --accent-secondary: #E3A96A;
-  --accent-glow: 227 169 106;
+  --accent-secondary: #D89D62;
+  --accent-glow: 216 157 98;
   --text-primary: #E8F0EC;
   --text-muted: #A9B8B2;
   --text-on-accent: #0F1F1A;
-  --border-subtle: #2C3F38;
-  --success: #A6E6B0;
-  --warning: #E3A96A;
+  --border-subtle: #2A3D36;
+  --success: #99DBA6;
+  --warning: #D89D62;
   --danger: #E1675A;
-  --gold: #E5C36C;
+  --gold: #D7B765;
   --hero-gradient: radial-gradient(circle at top, #1F3A2E 0%, #0F1F1A 48%, #0B1814 100%);
   color-scheme: dark;
 }
@@ -138,4 +138,33 @@ input[type="submit"] {
 .theme-transition,
 .theme-transition * {
   transition: background-color var(--motion-normal) ease, color var(--motion-normal) ease, border-color var(--motion-normal) ease, box-shadow var(--motion-normal) ease, fill var(--motion-normal) ease, stroke var(--motion-normal) ease;
+}
+
+/* Moderate premium glass tiers */
+.glass-1 {
+  background: color-mix(in srgb, var(--surface-elevated) 80%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 82%, transparent);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.glass-2 {
+  background: color-mix(in srgb, var(--surface-elevated) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 78%, transparent);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+}
+
+.glass-3 {
+  background: color-mix(in srgb, var(--surface-elevated) 64%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
+}
+
+.sticky-safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }

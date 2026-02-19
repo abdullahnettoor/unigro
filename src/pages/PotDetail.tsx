@@ -322,12 +322,67 @@ export function PotDetail() {
                 : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         }`;
 
+    const myCurrentCycleUnpaidSlot = mySlots.find((slot) => {
+        const tx = transactions?.find((t) => t.slotId === slot._id && t.monthIndex === pot.currentMonth);
+        return !tx || tx.status === "UNPAID";
+    });
+
+    const primaryAction = (() => {
+        if (isForeman && isDraft) {
+            return {
+                label: "Activate pot",
+                helper: "All slots must be filled before activation.",
+                onClick: handleActivate,
+                tone: "primary",
+            };
+        }
+        if (isForeman && isActive && !currentWinnerSlot) {
+            return {
+                label: isDrawing ? "Running draw..." : "Run draw",
+                helper: "Select a winner for the current cycle.",
+                onClick: handleDraw,
+                disabled: isDrawing,
+                tone: "secondary",
+            };
+        }
+        if (isForeman && isActive && currentWinnerSlot) {
+            return {
+                label: "Next round",
+                helper: "Close this cycle and move to the next one.",
+                onClick: () => setShowNextRoundModal(true),
+                tone: "primary",
+            };
+        }
+        if (!isForeman && isMember && isActive && myCurrentCycleUnpaidSlot) {
+            return {
+                label: "Pay now",
+                helper: "Submit payment for your current cycle.",
+                onClick: () =>
+                    setGlobalPaymentState({
+                        slotId: myCurrentCycleUnpaidSlot._id,
+                        cycle: pot.currentMonth,
+                        amount: pot.config.contribution,
+                    }),
+                tone: "primary",
+            };
+        }
+        if (!isForeman && hasOpenSlots) {
+            return {
+                label: "Join Pot",
+                helper: "Choose your slots and join this pot.",
+                onClick: () => setShowJoinModal(true),
+                tone: "primary",
+            };
+        }
+        return null;
+    })();
+
 
     // --- RENDER ---
     return (
-        <div className="max-w-4xl mx-auto py-6 px-4 sm:py-8">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
             {/* Header */}
-            <header className="mb-6 border-b border-[var(--border-subtle)] pb-6 sm:mb-8 sm:pb-8">
+            <header className="glass-2 mb-6 rounded-2xl p-5 sm:mb-8 sm:p-6">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
@@ -399,28 +454,66 @@ export function PotDetail() {
                 </div>
 
                 {/* Pot Stats Grid - Keep as is, it uses pot.config */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
-                    <div className="bg-[var(--surface-elevated)]/50 p-4 rounded-xl border border-[var(--border-subtle)]">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 mt-6">
+                    <div className="glass-1 rounded-xl p-4">
                         <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Total Pool</div>
                         <div className="text-xl font-mono">₹{pot.config.totalValue.toLocaleString()}</div>
                     </div>
-                    <div className="bg-[var(--surface-elevated)]/50 p-4 rounded-xl border border-[var(--border-subtle)]">
+                    <div className="glass-1 rounded-xl p-4">
                         <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Winner Gets</div>
                         <div className="text-xl font-mono text-[var(--accent-secondary)]">₹{winningAmount.toLocaleString()}</div>
                     </div>
-                    <div className="bg-[var(--surface-elevated)]/50 p-4 rounded-xl border border-[var(--border-subtle)]">
+                    <div className="glass-1 rounded-xl p-4">
                         <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Next Payment</div>
                         <div className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1"><Clock size={12} className="text-[var(--accent-vivid)]" /> {nextDueDate}</div>
                     </div>
-                    <div className="bg-[var(--surface-elevated)]/50 p-4 rounded-xl border border-[var(--border-subtle)]">
+                    <div className="glass-1 rounded-xl p-4">
                         <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Next Draw</div>
                         <div className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1"><Calendar size={12} className="text-[var(--accent-secondary)]" /> {nextDrawDate}</div>
                     </div>
                 </div>
+
+                {(isMember || isForeman) && (
+                    <div className="glass-2 mt-6 rounded-2xl p-4">
+                        <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} />
+                    </div>
+                )}
+
+                <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
+                    <div className="glass-1 rounded-2xl p-4">
+                        <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] mb-1">Collection status</div>
+                        <div className="text-lg font-semibold text-[var(--text-primary)]">
+                            Round {pot.currentMonth} of {pot.config.duration}
+                        </div>
+                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--surface-deep)]">
+                            <div
+                                className="h-full bg-[var(--accent-vivid)] transition-all duration-300"
+                                style={{ width: `${Math.min(100, (filledCount / Math.max(pot.config.totalSlots, 1)) * 100)}%` }}
+                            />
+                        </div>
+                    </div>
+                    {primaryAction && (
+                        <div className="glass-2 rounded-2xl p-4 lg:sticky lg:top-24">
+                            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Primary action</div>
+                            <button
+                                onClick={primaryAction.onClick}
+                                disabled={primaryAction.disabled}
+                                className={`w-full rounded-full px-4 py-3 text-sm font-bold transition-opacity disabled:opacity-60 ${
+                                    primaryAction.tone === "secondary"
+                                        ? "bg-[var(--accent-secondary)] text-[var(--text-primary)] hover:opacity-90"
+                                        : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
+                                    }`}
+                            >
+                                {primaryAction.label}
+                            </button>
+                            <p className="mt-2 text-xs text-[var(--text-muted)]">{primaryAction.helper}</p>
+                        </div>
+                    )}
+                </div>
             </header>
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 sm:gap-3 border-b border-[var(--border-subtle)] mb-6 sm:mb-8 overflow-x-auto py-1 -mx-4 px-4">
+            <div className="glass-1 mb-6 flex gap-2 overflow-x-auto rounded-full p-1 sm:mb-8 sm:gap-3">
                 {(isMember || isForeman) && (
                     <button
                         onClick={() => setActiveTab('dashboard')}

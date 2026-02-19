@@ -52,9 +52,11 @@ Use cases:
 Anti-patterns:
 
 - Neon fintech aesthetics
-- High-gloss glassmorphism-heavy layouts
+- Heavy, high-gloss, neon glassmorphism that reduces readability
 - Saturated multi-color gradients as primary background language
 - Decorative motion that competes with financial data
+
+Moderate premium glass is approved for surfaces, navigation, and sheets when readability and contrast pass accessibility thresholds.
 
 ## 4. Color System (Semantic Tokens)
 
@@ -179,6 +181,27 @@ This section defines behavior and hierarchy, not only styling.
 - Mobile: centered brand/title, no clutter.
 - Desktop: left brand and right account controls.
 - Surface: elevated with subtle border and backdrop.
+
+### 7.10 Glass Surface Contract
+
+Use three standardized glass tiers only:
+
+- `glass-1`:
+- Use for chips, segmented controls, and compact badges.
+- Low blur, high readability.
+
+- `glass-2`:
+- Use for default cards, quick activity rail cards, and list rows.
+- Medium blur and balanced depth.
+
+- `glass-3`:
+- Use for overlays, sticky nav bars, sticky action bars, and sheet headers.
+- Strongest allowed blur with clear separators.
+
+Rules:
+
+- Do not define ad-hoc blur + opacity recipes in page files.
+- Glass surfaces must use semantic tokens and pass contrast checks in light and dark themes.
 
 ### 7.2 Bottom Navigation (3 Items)
 

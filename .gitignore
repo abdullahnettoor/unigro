@@ -27,3 +27,6 @@ dist-ssr
 .env
 .convex/
 convex/_generated/
+tmp
+docs/checkpoints/*
+docs/archive/*

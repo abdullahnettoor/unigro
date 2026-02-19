@@ -120,7 +120,8 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
-            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative">
+            <div className="glass-3 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative">
+                <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-[var(--border-subtle)] sm:hidden" />
                 <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
                     <button onClick={onClose} aria-label="Close payment modal" className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                         <X size={20} />
@@ -183,13 +184,15 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
 
                                 {error && <p className="text-[var(--danger)] text-sm text-center">{error}</p>}
 
-                                <button
-                                    type="submit"
-                                    disabled={isUploading || !file}
-                                    className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {isUploading ? "Uploading..." : "Submit proof"}
-                                </button>
+                                <div className="glass-2 sticky bottom-0 pt-2">
+                                    <button
+                                        type="submit"
+                                        disabled={isUploading || !file}
+                                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isUploading ? "Uploading..." : "Submit proof"}
+                                    </button>
+                                </div>
                             </form>
                         ) : (
 
@@ -215,13 +218,15 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                             </p>
                                         </div>
                                     )}
-                                <button
-                                    onClick={handleCashSubmit}
-                                    disabled={isUploading}
-                                    className={`w-full font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 ${isForeman ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)]" : "bg-[var(--warning)] text-[var(--text-on-accent)]"}`}
-                                >
-                                    {isUploading ? "Processing..." : (isForeman ? "Record received" : "Confirm cash payment")}
-                                </button>
+                                <div className="glass-2 sticky bottom-0 pt-2">
+                                    <button
+                                        onClick={handleCashSubmit}
+                                        disabled={isUploading}
+                                        className={`w-full font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 ${isForeman ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)]" : "bg-[var(--warning)] text-[var(--text-on-accent)]"}`}
+                                    >
+                                        {isUploading ? "Processing..." : (isForeman ? "Record received" : "Confirm cash payment")}
+                                    </button>
+                                </div>
                             </div>
                         )}
                         </>

@@ -28,9 +28,10 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
             await joinPot({ potId, slotCount: selectedSlotCount });
             feedback.toast.success("Joined pot", "You're in. Check your dashboard.");
             onClose();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error);
-            const msg = error.message.includes("unverified") ? "Cannot join: organizer is unverified." : "Failed to join pot.";
+            const message = error instanceof Error ? error.message : "";
+            const msg = message.includes("unverified") ? "Cannot join: organizer is unverified." : "Failed to join pot.";
             feedback.toast.error("Join failed", msg);
         } finally {
             setIsSubmitting(false);
@@ -43,7 +44,8 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-            <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden">
+            <div className="glass-3 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden">
+                <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-[var(--border-subtle)] sm:hidden" />
                 <div className="flex justify-between items-center p-6 pb-4 border-b border-[var(--border-subtle)]/80">
                     <h3 className="text-xl font-bold">Join Pot</h3>
                     <button onClick={onClose} aria-label="Close join pot" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><X size={20} /></button>
@@ -108,7 +110,7 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 border-t border-[var(--border-subtle)]/80 bg-[var(--surface-card)] p-4">
+                <div className="glass-2 sticky bottom-0 grid grid-cols-2 gap-2 border-t border-[var(--border-subtle)]/80 p-4">
                     <button onClick={onClose} className="flex-1 bg-[var(--surface-deep)] py-3 rounded-xl font-bold hover:bg-[var(--surface-deep)] transition-colors text-[var(--text-primary)]">
                         Cancel
                     </button>

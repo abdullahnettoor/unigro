@@ -18,15 +18,15 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, onPay }: PotH
     const cycles = Array.from({ length: pot.config.duration }, (_, i) => i + 1);
 
     return (
-        <section className="mt-12">
-            <h3 className="text-xl font-display font-bold flex items-center gap-2 mb-6">
+        <section>
+            <h3 className="mb-4 flex items-center gap-2 text-xl font-semibold font-display">
                 <Clock className="text-[var(--accent-vivid)]" /> Pot History
             </h3>
 
-            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl overflow-hidden">
+            <div className="glass-2 overflow-hidden rounded-2xl">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-[var(--surface-deep)]/60 text-[var(--text-muted)] font-mono text-xs uppercase">
+                        <thead className="bg-[var(--surface-deep)]/60 text-xs uppercase text-[var(--text-muted)]">
                             <tr>
                                 <th className="p-4 whitespace-nowrap">Cycle</th>
                                 <th className="p-4 whitespace-nowrap">Status</th>
@@ -78,7 +78,7 @@ export function PotHistory({ pot, allSlots, transactions, mySlots, onPay }: PotH
                                 const myPaymentStatus = getMyPaymentStatus(cycle, mySlots, transactions);
 
                                 return (
-                                    <tr key={cycle} className={`hover:bg-[var(--surface-deep)]/60 transition-colors ${isCurrent ? "bg-[var(--accent-vivid)]/5" : ""}`}>
+                                    <tr key={cycle} className={`transition-colors hover:bg-[var(--surface-deep)]/60 ${isCurrent ? "bg-[var(--accent-vivid)]/5" : ""}`}>
                                         <td className="p-4 font-mono text-[var(--text-muted)]">
                                             #{cycle}
                                             {isCurrent && <span className="ml-2 text-[10px] bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded font-bold">NOW</span>}

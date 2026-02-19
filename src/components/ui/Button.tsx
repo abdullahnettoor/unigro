@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from "react"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -10,7 +11,7 @@ function cn(...inputs: ClassValue[]) {
 export interface ButtonProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: "primary" | "accent" | "secondary" | "ghost" | "danger" | "link"
-    size?: "sm" | "md" | "lg" | "icon"
+    size?: "sm" | "md" | "lg" | "icon" | "pill"
     fullWidth?: boolean
 }
 
@@ -29,7 +30,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             accent: "bg-[var(--accent-secondary)] text-[var(--text-on-accent)] hover:opacity-90 shadow-md hover:shadow-lg",
 
             // Secondary: Glass Effect - Used for secondary options
-            secondary: "bg-[var(--surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-deep)]/80 hover:border-[var(--accent-vivid)]/30 backdrop-blur-md",
+            secondary: "glass-1 text-[var(--text-primary)] hover:border-[var(--accent-vivid)]/30",
 
             // Ghost: Subtle - Used for tertiary options
             ghost: "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-deep)]/50",
@@ -45,7 +46,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             sm: "h-8 px-3 text-xs",
             md: "h-11 px-6 text-sm", // Min 44px for touch
             lg: "h-14 px-8 text-base",
-            icon: "h-11 w-11"
+            icon: "h-11 w-11",
+            pill: "h-10 px-4 text-xs"
         }
 
         return (

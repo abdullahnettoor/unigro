@@ -115,7 +115,7 @@ export function UserMenu({ trigger, placement = "bottom-end" }: UserMenuProps) {
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className={`${positionClasses} w-72 bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl shadow-xl p-2 z-50 ${animationClasses} duration-200`}>
+                <div className={`${positionClasses} glass-3 w-72 rounded-2xl shadow-xl p-2 z-50 ${animationClasses} duration-200`}>
 
                     {/* User Header */}
                     <div className="px-4 py-3 border-b border-[var(--border-subtle)] mb-2">

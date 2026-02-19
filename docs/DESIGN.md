@@ -1,9 +1,12 @@
 # Design System Guidelines: GrowPot
 
+Legacy summary synced to `/Users/abdullahnettoor/Projects/GrowPot/docs/DESIGN_V2.md`. `DESIGN_V2.md` remains canonical.
+
 This document is the source of truth for visual design, theming, and UI decisions in GrowPot. Use it when generating new UI so styles remain consistent across light and dark modes.
 
 ## 1. Visual Theme & Atmosphere
 Calm, trustworthy, premium. The visual language is quiet and confident: soft surfaces, muted backgrounds, and gentle contrast. Accent colors are used sparingly for key actions and status signaling. The overall feel should read “responsible financial product” rather than “consumer social app.”
+Moderate premium glass is allowed where readability is preserved. Heavy or neon glass effects are not allowed.
 
 ## 2. Color Palette & Roles
 All colors are expressed through CSS variables. Do not hardcode hex colors in components.
@@ -74,6 +77,10 @@ All colors are expressed through CSS variables. Do not hardcode hex colors in co
 - Use `rounded-2xl` for premium softness
 - Background: `bg-[var(--surface-elevated)]` or `bg-[var(--surface-card)]`
 - Border: `border-[var(--border-subtle)]`
+- Glass tiers only:
+  - `glass-1`: chips and compact controls
+  - `glass-2`: default cards
+  - `glass-3`: overlays/sticky bars/sheet headers
 
 ### Inputs / Forms
 - Background: `bg-[var(--surface-card)]`

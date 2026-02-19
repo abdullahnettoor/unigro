@@ -76,7 +76,7 @@ export function PWAPrompt() {
 
     return (
         <div className="fixed inset-x-3 bottom-3 z-50 animate-in slide-in-from-bottom-5 sm:inset-x-auto sm:right-4 sm:bottom-4">
-            <div className="flex items-start gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-4 shadow-2xl sm:max-w-sm">
+            <div className="glass-3 flex items-start gap-3 rounded-2xl p-4 shadow-2xl sm:max-w-sm">
                 <div className="rounded-lg bg-[var(--accent-vivid)]/10 p-2 text-[var(--accent-vivid)]">
                     <Download size={20} />
                 </div>

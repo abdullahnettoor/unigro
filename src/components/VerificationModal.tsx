@@ -72,7 +72,8 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
 
     return (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-end justify-center p-3 sm:items-center sm:p-4 z-[100]">
-            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-300">
+            <div className="glass-3 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-300">
+                <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-[var(--border-subtle)] sm:hidden" />
                 <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
                     <button
                         onClick={onClose}
@@ -161,7 +162,7 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
                         </div>
                     )}
 
-                    <div className="sticky bottom-0 bg-[var(--surface-elevated)] pt-2">
+                    <div className="glass-2 sticky bottom-0 pt-2">
                         <button
                             type="submit"
                             disabled={loading || !file}

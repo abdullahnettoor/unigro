@@ -8,17 +8,18 @@ function cn(...inputs: ClassValue[]) {
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     glass?: boolean
+    tier?: "glass-1" | "glass-2" | "glass-3"
     hoverEffect?: boolean
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-    ({ className, glass = true, hoverEffect = false, ...props }, ref) => {
+    ({ className, glass = true, tier = "glass-2", hoverEffect = false, ...props }, ref) => {
         return (
             <div
                 ref={ref}
                 className={cn(
                     "rounded-2xl border border-[var(--border-subtle)] transition-all",
-                    glass ? "bg-[var(--surface-elevated)]/60 backdrop-blur-xl" : "bg-[var(--surface-elevated)]",
+                    glass ? tier : "bg-[var(--surface-elevated)]",
                     hoverEffect ? "hover:border-[var(--accent-vivid)]/50 hover:shadow-lg group" : "",
                     className
                 )}
