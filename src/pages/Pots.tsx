@@ -2,8 +2,10 @@ import { useMemo, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowDownAZ, ArrowUpAZ, Coins, Home, Plus, Search, Settings, WalletCards } from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, Coins, Filter, Home, Plus, Search, Settings, WalletCards, X } from "lucide-react";
+import { cn } from "../components/ui/Button";
 import { api } from "../../convex/_generated/api";
+import { AnimatePresence, motion } from "framer-motion";
 import { PotCard } from "../components/PotCard";
 import { GlassSurface } from "../components/ui/GlassSurface";
 import { UserMenu } from "../components/UserMenu";
@@ -112,10 +114,12 @@ function FilterPill({
         <button
             type="button"
             onClick={onClick}
-            className={`rounded-md border px-2 py-1 text-[10px] font-medium leading-none transition-colors sm:text-[11px] ${active
-                ? "border-[var(--accent-vivid)]/45 bg-[var(--accent-vivid)]/12 text-[var(--accent-vivid)]"
-                : "border-[var(--border-subtle)] bg-[var(--surface-card)]/45 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                }`}
+            className={cn(
+                "rounded-full border px-4 py-1.5 text-xs font-semibold transition-all duration-200 ease-in-out sm:text-sm",
+                active
+                    ? "border-transparent bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-md shadow-[var(--accent-vivid)]/20 ring-1 ring-[var(--accent-vivid)]"
+                    : "border-[var(--border-subtle)] bg-transparent text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/50 hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)]"
+            )}
         >
             {label}
         </button>
@@ -132,6 +136,9 @@ export function Pots() {
     const [sortFilter, setSortFilter] = useState<SortFilter>("most_recent");
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
     const [search, setSearch] = useState("");
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+    const activeFilterCount = (roleFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0);
 
     const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
 
@@ -182,15 +189,34 @@ export function Pots() {
                         <p className="mt-1 text-sm text-[var(--text-muted)]">View and filter the pots you organize or joined.</p>
                     </div>
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                        <div className="glass-1 flex min-w-0 flex-1 items-center gap-2 rounded-xl px-3 py-2">
-                            <Search size={16} className="text-[var(--text-muted)]" />
-                            <input
-                                type="text"
-                                placeholder="Search by pot or organizer"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
-                            />
+                        <div className="flex w-full items-center gap-2 lg:w-auto lg:flex-1">
+                            <div className="glass-1 flex min-w-0 flex-1 items-center gap-2 rounded-xl px-3 py-2 transition-all focus-within:ring-2 focus-within:ring-[var(--accent-vivid)]/20">
+                                <Search size={16} className="text-[var(--text-muted)]" />
+                                <input
+                                    type="text"
+                                    placeholder="Search pots..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
+                                />
+                            </div>
+                            <button
+                                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                                className={cn(
+                                    "glass-1 relative grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl border transition-colors hover:bg-[var(--surface-elevated)]",
+                                    isFiltersOpen || activeFilterCount > 0
+                                        ? "border-[var(--accent-vivid)] text-[var(--accent-vivid)]"
+                                        : "border-[var(--border-subtle)] text-[var(--text-muted)]"
+                                )}
+                                aria-label="Toggle filters"
+                            >
+                                {isFiltersOpen ? <X size={20} /> : <Filter size={20} />}
+                                {activeFilterCount > 0 && !isFiltersOpen && (
+                                    <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-[var(--accent-vivid)] text-[10px] font-bold text-white shadow-sm ring-2 ring-[var(--bg-app)]">
+                                        {activeFilterCount}
+                                    </span>
+                                )}
+                            </button>
                         </div>
                         <Link
                             to="/create"
@@ -202,57 +228,72 @@ export function Pots() {
                     </div>
                 </header>
 
-                <section className="mb-5">
-                    <div className="glass-1 rounded-2xl p-2.5 sm:p-3">
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-0.5">
-                                <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)] sm:text-[11px]">Role</span>
-                                <div className="inline-flex items-center gap-1.5">
-                                    <FilterPill label="All" active={roleFilter === "all"} onClick={() => setRoleFilter("all")} />
-                                    <FilterPill label="Organizing" active={roleFilter === "organizing"} onClick={() => setRoleFilter("organizing")} />
-                                    <FilterPill label="Joined" active={roleFilter === "joined"} onClick={() => setRoleFilter("joined")} />
+                <AnimatePresence>
+                    {isFiltersOpen && (
+                        <motion.section
+                            initial={{ height: 0, opacity: 0, scale: 0.98 }}
+                            animate={{ height: "auto", opacity: 1, scale: 1 }}
+                            exit={{ height: 0, opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            className="mb-5 overflow-hidden"
+                        >
+                            <div className="glass-1 rounded-2xl p-3 sm:p-4">
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+                                        <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar sm:pb-0">
+                                            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] opacity-80 min-w-[3rem]">Role</span>
+                                            <div className="flex items-center gap-2">
+                                                <FilterPill label="All" active={roleFilter === "all"} onClick={() => setRoleFilter("all")} />
+                                                <FilterPill label="Organizing" active={roleFilter === "organizing"} onClick={() => setRoleFilter("organizing")} />
+                                                <FilterPill label="Joined" active={roleFilter === "joined"} onClick={() => setRoleFilter("joined")} />
+                                            </div>
+                                        </div>
+
+                                        <div className="hidden h-8 w-px bg-[var(--border-subtle)] sm:block" />
+
+                                        <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar sm:pb-0">
+                                            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] opacity-80 min-w-[3rem]">Status</span>
+                                            <div className="flex items-center gap-2">
+                                                <FilterPill label="All" active={statusFilter === "all"} onClick={() => setStatusFilter("all")} />
+                                                <FilterPill label="Draft" active={statusFilter === "draft"} onClick={() => setStatusFilter("draft")} />
+                                                <FilterPill label="Active" active={statusFilter === "active"} onClick={() => setStatusFilter("active")} />
+                                                <FilterPill label="Completed" active={statusFilter === "completed"} onClick={() => setStatusFilter("completed")} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-1 flex flex-wrap items-center gap-3 border-t border-[var(--border-subtle)]/50 pt-3">
+                                        <label htmlFor="pots-sort" className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] opacity-80 min-w-[3rem]">
+                                            Sort
+                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <select
+                                                id="pots-sort"
+                                                value={sortFilter}
+                                                onChange={(e) => setSortFilter(e.target.value as SortFilter)}
+                                                className="h-9 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-3 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] sm:text-sm"
+                                            >
+                                                <option value="most_recent">Most recent</option>
+                                                <option value="pool_value">Pool value</option>
+                                                <option value="progress">Progress</option>
+                                            </select>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))}
+                                                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-3 text-xs font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent-vivid)]/50 hover:bg-[var(--surface-card)] sm:text-sm"
+                                                aria-label={sortDirection === "desc" ? "Sort descending" : "Sort ascending"}
+                                                title={sortDirection === "desc" ? "Descending" : "Ascending"}
+                                            >
+                                                {sortDirection === "desc" ? <ArrowDownAZ size={15} /> : <ArrowUpAZ size={15} />}
+                                                {sortDirection === "desc" ? "Desc" : "Asc"}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-0.5">
-                                <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)] sm:text-[11px]">Status</span>
-                                <div className="inline-flex items-center gap-1.5">
-                                    <FilterPill label="All" active={statusFilter === "all"} onClick={() => setStatusFilter("all")} />
-                                    <FilterPill label="Draft" active={statusFilter === "draft"} onClick={() => setStatusFilter("draft")} />
-                                    <FilterPill label="Active" active={statusFilter === "active"} onClick={() => setStatusFilter("active")} />
-                                    <FilterPill label="Completed" active={statusFilter === "completed"} onClick={() => setStatusFilter("completed")} />
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-2">
-                                <label htmlFor="pots-sort" className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                                    Sort by
-                                </label>
-                                <select
-                                    id="pots-sort"
-                                    value={sortFilter}
-                                    onChange={(e) => setSortFilter(e.target.value as SortFilter)}
-                                    className="min-h-8 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-2 text-[11px] text-[var(--text-primary)] outline-none"
-                                >
-                                    <option value="most_recent">Most recent</option>
-                                    <option value="pool_value">Pool value</option>
-                                    <option value="progress">Progress</option>
-                                </select>
-                                <button
-                                    type="button"
-                                    onClick={() => setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))}
-                                    className="inline-flex min-h-8 items-center gap-1 rounded-md border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-2 text-[11px] font-medium text-[var(--text-primary)] transition-colors hover:border-[var(--accent-vivid)]/35 hover:text-[var(--accent-vivid)]"
-                                    aria-label={sortDirection === "desc" ? "Sort descending" : "Sort ascending"}
-                                    title={sortDirection === "desc" ? "Descending" : "Ascending"}
-                                >
-                                    {sortDirection === "desc" ? <ArrowDownAZ size={14} /> : <ArrowUpAZ size={14} />}
-                                    {sortDirection === "desc" ? "Desc" : "Asc"}
-                                </button>
-                                <span className="text-[11px] text-[var(--text-muted)]">Discover coming soon</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                        </motion.section>
+                    )}
+                </AnimatePresence>
 
                 <section>
                     {!pots ? (
