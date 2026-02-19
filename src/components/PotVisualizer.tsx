@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { Doc } from "../../convex/_generated/dataModel";
+import { formatCurrency } from "../lib/utils";
 
 interface PotVisualizerProps {
     pot: Doc<"pots">;
@@ -69,7 +70,7 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId }: PotVi
                 className="absolute z-10 flex h-28 w-28 flex-col items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center text-[var(--text-primary)] shadow-lg sm:h-32 sm:w-32"
             >
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">Cycle {currentMonthIndex}</span>
-                <span className="font-display text-xl font-bold leading-none sm:text-2xl">₹{pot.config.totalValue.toLocaleString()}</span>
+                <span className="font-display text-xl font-bold leading-none sm:text-2xl">{formatCurrency(pot.config.totalValue, pot.config.currency)}</span>
                 <span className="mt-1 font-mono text-[9px] text-[var(--text-muted)]">{filledCount} / {pot.config.totalSlots} slots</span>
             </motion.div>
 

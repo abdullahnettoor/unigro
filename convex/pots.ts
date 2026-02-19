@@ -10,6 +10,7 @@ export const create = mutation({
         totalValue: v.number(),
         totalSlots: v.number(), // New
         contribution: v.number(),
+        currency: v.optional(v.string()), // New
         frequency: v.union(
             v.literal("monthly"),
             v.literal("weekly"),
@@ -46,6 +47,7 @@ export const create = mutation({
                 totalValue: args.totalValue,
                 totalSlots: args.totalSlots,
                 contribution: args.contribution,
+                currency: args.currency,
                 frequency: args.frequency,
                 duration: args.duration,
                 commission: args.commission,
@@ -453,6 +455,7 @@ export const updatePot = mutation({
         totalValue: v.optional(v.number()),
         totalSlots: v.optional(v.number()), // Added
         contribution: v.optional(v.number()),
+        currency: v.optional(v.string()),
         frequency: v.optional(v.string()),
         duration: v.optional(v.number()),
         commission: v.optional(v.number()),
@@ -479,6 +482,7 @@ export const updatePot = mutation({
             if (args.totalValue) configUpdates.totalValue = args.totalValue;
             if (args.totalSlots) configUpdates.totalSlots = args.totalSlots; // Update totalSlots
             if (args.contribution) configUpdates.contribution = args.contribution;
+            if (args.currency) configUpdates.currency = args.currency;
             // Validate frequency literal
             if (args.frequency && ["monthly", "weekly", "biweekly", "quarterly", "occasional"].includes(args.frequency)) {
                 configUpdates.frequency = args.frequency;

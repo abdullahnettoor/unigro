@@ -4,6 +4,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { X } from "lucide-react";
 import { useFeedback } from "./FeedbackProvider";
+import { formatCurrency } from "../lib/utils";
 
 interface JoinPotModalProps {
     potId: Id<"pots">;
@@ -13,9 +14,10 @@ interface JoinPotModalProps {
     filledSlots: number;
     onClose: () => void;
     onViewRules: () => void;
+    currency?: string;
 }
 
-export function JoinPotModal({ potId, contribution, totalValue, totalSlots, filledSlots, onClose, onViewRules }: JoinPotModalProps) {
+export function JoinPotModal({ potId, contribution, totalValue, totalSlots, filledSlots, onClose, onViewRules, currency }: JoinPotModalProps) {
     const joinPot = useMutation(api.pots.join);
     const feedback = useFeedback();
     const [selectedSlotCount, setSelectedSlotCount] = useState(1);
@@ -88,11 +90,11 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
                     <div className="bg-[var(--surface-deep)]/60 p-4 rounded-xl space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-[var(--text-muted)]">Per-cycle pay</span>
-                            <span className="font-bold text-[var(--text-primary)]">₹{totalCommitment.toLocaleString()}</span>
+                            <span className="font-bold text-[var(--text-primary)]">{formatCurrency(totalCommitment, currency)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-[var(--text-muted)]">Total Win Pool</span>
-                            <span className="font-bold text-[var(--accent-vivid)]">₹{potentialWin.toLocaleString()}</span>
+                            <span className="font-bold text-[var(--accent-vivid)]">{formatCurrency(potentialWin, currency)}</span>
                         </div>
                     </div>
 

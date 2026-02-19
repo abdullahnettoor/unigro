@@ -9,6 +9,7 @@ import { VerificationModal } from "../components/VerificationModal";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { GlassSurface } from "../components/ui/GlassSurface";
 import { UserMenu } from "../components/UserMenu";
+import { formatCurrency } from "../lib/utils";
 
 type VerificationStatus = "UNVERIFIED" | "PENDING" | "REJECTED";
 type DashboardMode = "joined" | "organized";
@@ -196,6 +197,7 @@ export function Dashboard() {
     }, [managedPots]);
 
     const nextPaymentAmount = joinedPots[0]?.config.contribution || managedPots[0]?.config.contribution || 0;
+    const nextPaymentCurrency = joinedPots[0]?.config.currency || managedPots[0]?.config.currency || "INR";
     const activeList = mode === "joined" ? joinedPots : managedPots;
 
     const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
@@ -299,7 +301,7 @@ export function Dashboard() {
                     <div className="flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3">
                         <QuickActivityCard
                             title="Next payment"
-                            value={`₹${nextPaymentAmount.toLocaleString()}`}
+                            value={formatCurrency(nextPaymentAmount, nextPaymentCurrency)}
                             hint={nextPaymentAmount > 0 ? "Your next due contribution" : "Join a pot to see upcoming dues"}
                             icon={CalendarClock}
                             accent
@@ -349,7 +351,7 @@ export function Dashboard() {
                         <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/30 py-12 text-center text-[var(--text-muted)]">
                             {mode === "organized" ? "You are not organizing any pots yet." : "You have not joined any pots yet."}
                         </div>
-                ) : (
+                    ) : (
                         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                             {activeList.map((pot) => (
                                 <PotCard key={pot._id} pot={pot} currentUserId={user?._id} />

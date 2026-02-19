@@ -1,0 +1,203 @@
+import { Percent, Users } from "lucide-react";
+import { GlassSurface } from "../../components/ui/GlassSurface";
+import { cn } from "../../components/ui/Button";
+import { useState } from "react";
+import { formatCurrency, getCurrencySymbol } from "../../lib/utils";
+
+type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
+
+interface PotSlotsStepProps {
+    formData: {
+        frequency: Frequency;
+        duration: number; // totalSlots
+        commission: number;
+        contribution: number;
+        totalValue: number;
+        currency: string;
+    };
+    onChange: (data: Partial<PotSlotsStepProps["formData"]>) => void;
+}
+
+export function PotSlotsStep({ formData, onChange }: PotSlotsStepProps) {
+    const [commissionType, setCommissionType] = useState<"PERCENTAGE" | "FIXED">("PERCENTAGE");
+
+    // Local state for fixed amount input to allow typing
+    // We convert to percentage on change
+    const [fixedCommission, setFixedCommission] = useState(() => {
+        return Math.round((formData.totalValue * formData.commission) / 100);
+    });
+
+    const frequencies: { value: Frequency; label: string }[] = [
+        { value: "weekly", label: "Weekly" },
+        { value: "biweekly", label: "Bi-weekly" },
+        { value: "monthly", label: "Monthly" },
+        { value: "quarterly", label: "Quarterly" },
+        { value: "occasional", label: "Occasional" },
+    ];
+
+    const setDuration = (val: number) => {
+        const nextDuration = Number.isFinite(val) ? Math.min(60, Math.max(2, val)) : 2;
+        const nextContribution = Math.max(1, Math.round(formData.totalValue / nextDuration));
+        onChange({
+            duration: nextDuration,
+            contribution: nextContribution,
+        });
+    };
+
+    const handleCommissionChange = (val: number, type: "PERCENTAGE" | "FIXED") => {
+        if (type === "PERCENTAGE") {
+            const nextCommission = Math.min(50, Math.max(0, val));
+            onChange({ commission: nextCommission });
+            // Update fixed amount counterpart
+            setFixedCommission(Math.round((formData.totalValue * nextCommission) / 100));
+        } else {
+            const nextFixed = Math.max(0, val);
+            setFixedCommission(nextFixed);
+            // Convert to percentage for parent state
+            // prevent division by zero
+            const percentage = formData.totalValue > 0 ? (nextFixed / formData.totalValue) * 100 : 0;
+            onChange({ commission: percentage });
+        }
+    };
+
+    const organizerFee = Math.round((formData.totalValue * formData.commission) / 100);
+    const payout = formData.totalValue - organizerFee;
+
+    const currencySymbol = getCurrencySymbol(formData.currency, true);
+
+    return (
+        <section className="space-y-6">
+            <GlassSurface tier="glass-2" className="p-5 sm:p-6 space-y-5">
+                <div>
+                    <h2 className="text-xl font-display font-bold text-[var(--text-primary)] mb-1">Schedule & Slots</h2>
+                    <p className="text-sm text-[var(--text-muted)]">Configure how often members contribute.</p>
+                </div>
+
+                <div className="space-y-5">
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-3">
+                            Contribution Frequency
+                        </label>
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            {frequencies.map((freq) => (
+                                <button
+                                    key={freq.value}
+                                    type="button"
+                                    onClick={() => onChange({ frequency: freq.value })}
+                                    className={cn(
+                                        "rounded-xl border px-3 py-3 text-sm font-semibold transition-all duration-200",
+                                        formData.frequency === freq.value
+                                            ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] shadow-sm"
+                                            : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/50 text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/40 hover:text-[var(--text-primary)]"
+                                    )}
+                                >
+                                    {freq.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <div className="flex items-center justify-between mb-2 h-8">
+                                <label className="block text-sm font-medium text-[var(--text-primary)]">
+                                    Total Slots (Participants)
+                                </label>
+                            </div>
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+                                    <Users size={18} />
+                                </div>
+                                <input
+                                    type="number"
+                                    min={2}
+                                    max={60}
+                                    value={formData.duration}
+                                    onChange={(e) => setDuration(Number(e.target.value))}
+                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)]"
+                                />
+                            </div>
+                            <p className="mt-2 text-xs text-[var(--text-muted)]">
+                                {formData.frequency === "occasional" ? "Duration depends on slots" : `Duration: ${formData.duration} ${formData.frequency.replace("ly", "s")}`}
+                            </p>
+                        </div>
+
+                        <div>
+                            <div className="flex items-center justify-between mb-2 h-8">
+                                <label className="block text-sm font-medium text-[var(--text-primary)]">
+                                    Organizer Commission
+                                </label>
+                                <div className="flex rounded-lg bg-[var(--surface-elevated)] p-0.5 border border-[var(--border-subtle)]">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCommissionType("PERCENTAGE")}
+                                        className={cn(
+                                            "btn-chip px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all",
+                                            commissionType === "PERCENTAGE"
+                                                ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
+                                                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                                        )}
+                                    >
+                                        %
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCommissionType("FIXED")}
+                                        className={cn(
+                                            "btn-chip px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all",
+                                            commissionType === "FIXED"
+                                                ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
+                                                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                                        )}
+                                    >
+                                        {currencySymbol}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] flex items-center justify-center w-5">
+                                    {commissionType === "PERCENTAGE" ? <Percent size={16} /> : <span className="text-sm font-bold">{currencySymbol}</span>}
+                                </div>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    {...(commissionType === "PERCENTAGE" ? { max: 50, step: 0.1 } : { max: formData.totalValue })}
+                                    value={commissionType === "PERCENTAGE" ? Number(formData.commission.toFixed(2)) : fixedCommission}
+                                    onChange={(e) => handleCommissionChange(Number(e.target.value), commissionType)}
+                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)]"
+                                />
+                            </div>
+                            <p className="mt-2 text-xs text-[var(--text-muted)]">
+                                {commissionType === "PERCENTAGE"
+                                    ? `≈ ${formatCurrency(organizerFee, formData.currency)} from total pool`
+                                    : `${formData.commission.toFixed(2)}% of total pool`
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </GlassSurface>
+
+            <GlassSurface tier="glass-1" className="p-5 overflow-hidden relative">
+                <div className="grid gap-4 sm:grid-cols-3 text-center sm:text-left">
+                    <div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-1">Contribution</div>
+                        <div className="text-2xl font-bold font-mono text-[var(--text-primary)]">{formatCurrency(formData.contribution, formData.currency)}</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">per member / cycle</div>
+                    </div>
+                    <div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-1">Organizer Fee</div>
+                        <div className="text-xl font-bold font-mono text-[var(--text-primary)]">{formatCurrency(organizerFee, formData.currency)}</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">total for the pot</div>
+                    </div>
+                    <div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-[var(--accent-vivid)] mb-1">Winner Payout</div>
+                        <div className="text-2xl font-bold font-mono text-[var(--accent-vivid)]">{formatCurrency(payout, formData.currency)}</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">take home amount</div>
+                    </div>
+                </div>
+            </GlassSurface>
+        </section>
+    );
+}

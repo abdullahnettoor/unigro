@@ -12,6 +12,7 @@ import { PotVisualizer } from "../components/PotVisualizer";
 import { PaymentModal } from "../components/PaymentComponents";
 import { PotHistory } from "../components/PotHistory"; // New
 import { Gavel, CheckCircle, Clock, Calendar, Coins, Share2, Layers, Play, ShieldCheck, Trash2, ArrowRight, Edit2, Info, EyeOff, ShieldAlert, PieChart, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { formatCurrency } from "../lib/utils";
 
 export function PotDetail() {
     const { potId } = useParams<{ potId: string }>();
@@ -184,7 +185,7 @@ export function PotDetail() {
     const handleShare = async () => {
         const shareData = {
             title: `Join my GrowPot: ${pot.title}`,
-            text: `Pool Value: ₹${pot.config.totalValue.toLocaleString()}. Join now!`,
+            text: `Pool Value: ${formatCurrency(pot.config.totalValue, pot.config.currency)}. Join now!`,
             url: window.location.href
         };
         if (navigator.share) await navigator.share(shareData);
@@ -316,10 +317,9 @@ export function PotDetail() {
     const memberList = Array.from(memberStats.values()).sort((a, b) => a.user.name.localeCompare(b.user.name));
     const pendingApprovalsCount = transactions?.filter((t) => t.status === "PENDING").length || 0;
     const tabButtonClass = (tab: Tab) =>
-        `px-3 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap rounded-full ${
-            activeTab === tab
-                ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        `px-3 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap rounded-full ${activeTab === tab
+            ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
+            : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         }`;
 
     const myCurrentCycleUnpaidSlot = mySlots.find((slot) => {
@@ -387,9 +387,9 @@ export function PotDetail() {
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <h1 className="text-4xl font-display font-bold">{pot.title}</h1>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-mono uppercase ${isDraft ? "bg-[var(--warning)]/20 text-[var(--warning)]" : "bg-[var(--accent-vivid)]/20 text-[var(--accent-vivid)]"}`}>
-                                                {pot.status}
-                                            </span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-mono uppercase ${isDraft ? "bg-[var(--warning)]/20 text-[var(--warning)]" : "bg-[var(--accent-vivid)]/20 text-[var(--accent-vivid)]"}`}>
+                                {pot.status}
+                            </span>
                         </div>
                         <OrganizerDisplay foremanId={pot.foremanId} />
                         {pot.foreman?.verificationStatus !== "VERIFIED" && (
@@ -442,9 +442,9 @@ export function PotDetail() {
                                                 </button>
                                             </div>
                                         ) : (
-                                                <button onClick={() => setShowNextRoundModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold min-h-11 px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
-                                                    <ArrowRight size={16} /> Next round
-                                                </button>
+                                            <button onClick={() => setShowNextRoundModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold min-h-11 px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
+                                                <ArrowRight size={16} /> Next round
+                                            </button>
                                         )}
                                     </>
                                 )}
@@ -457,11 +457,11 @@ export function PotDetail() {
                 <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 mt-6">
                     <div className="glass-1 rounded-xl p-4">
                         <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Total Pool</div>
-                        <div className="text-xl font-mono">₹{pot.config.totalValue.toLocaleString()}</div>
+                        <div className="text-xl font-mono">{formatCurrency(pot.config.totalValue, pot.config.currency)}</div>
                     </div>
                     <div className="glass-1 rounded-xl p-4">
                         <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Winner Gets</div>
-                        <div className="text-xl font-mono text-[var(--accent-secondary)]">₹{winningAmount.toLocaleString()}</div>
+                        <div className="text-xl font-mono text-[var(--accent-secondary)]">{formatCurrency(winningAmount, pot.config.currency)}</div>
                     </div>
                     <div className="glass-1 rounded-xl p-4">
                         <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Next Payment</div>
@@ -498,10 +498,9 @@ export function PotDetail() {
                             <button
                                 onClick={primaryAction.onClick}
                                 disabled={primaryAction.disabled}
-                                className={`w-full rounded-full px-4 py-3 text-sm font-bold transition-opacity disabled:opacity-60 ${
-                                    primaryAction.tone === "secondary"
-                                        ? "bg-[var(--accent-secondary)] text-[var(--text-primary)] hover:opacity-90"
-                                        : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
+                                className={`w-full rounded-full px-4 py-3 text-sm font-bold transition-opacity disabled:opacity-60 ${primaryAction.tone === "secondary"
+                                    ? "bg-[var(--accent-secondary)] text-[var(--text-primary)] hover:opacity-90"
+                                    : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
                                     }`}
                             >
                                 {primaryAction.label}
@@ -611,6 +610,7 @@ export function PotDetail() {
                         isForeman={isForeman}
                         isActive={isActive}
                         currentUserId={currentUser?._id} // Pass current user ID
+                        currency={pot.config.currency}
                     />
                 </div>
             )}
@@ -631,8 +631,8 @@ export function PotDetail() {
                             <div className="bg-[var(--surface-deep)]/60 p-6 rounded-xl space-y-4">
                                 <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Layers size={14} /> Pot configuration</h4>
                                 <div className="grid grid-cols-2 gap-y-3 text-sm">
-                                    <div className="text-[var(--text-muted)]">Total Value</div><div className="text-[var(--text-primary)] font-mono text-right">₹{pot.config.totalValue.toLocaleString()}</div>
-                                    <div className="text-[var(--text-muted)]">Contribution</div><div className="text-[var(--text-primary)] font-mono text-right">₹{pot.config.contribution.toLocaleString()}</div>
+                                    <div className="text-[var(--text-muted)]">Total Value</div><div className="text-[var(--text-primary)] font-mono text-right">{formatCurrency(pot.config.totalValue, pot.config.currency)}</div>
+                                    <div className="text-[var(--text-muted)]">Contribution</div><div className="text-[var(--text-primary)] font-mono text-right">{formatCurrency(pot.config.contribution, pot.config.currency)}</div>
                                     <div className="text-[var(--text-muted)]">Frequency</div><div className="text-[var(--text-primary)] capitalize text-right">{pot.config.frequency}</div>
                                     <div className="text-[var(--text-muted)]">Duration</div><div className="text-[var(--text-primary)] text-right">{pot.config.duration} Cycles</div>
                                     <div className="text-[var(--text-muted)]">Commission</div><div className="text-[var(--text-primary)] text-right">{pot.config.commission}%</div>
@@ -1055,6 +1055,7 @@ export function PotDetail() {
                         contribution={pot.config.contribution}
                         totalSlots={pot.config.totalSlots}
                         filledSlots={filledCount}
+                        currency={pot.config.currency}
                         onClose={() => setShowJoinModal(false)}
                         onViewRules={() => {
                             setShowJoinModal(false);
@@ -1074,7 +1075,7 @@ export function PotDetail() {
                     const share = (slot as any).splitOwners?.find((o: any) => o.userId === currentUser._id);
                     if (share) amount = (pot.config.contribution * share.sharePercentage) / 100;
                 }
-                return <PaymentModal potId={pot._id} slotId={showUploadModal} monthIndex={pot.currentMonth} amount={amount} onClose={() => setShowUploadModal(null)} />;
+                return <PaymentModal potId={pot._id} slotId={showUploadModal} monthIndex={pot.currentMonth} amount={amount} currency={pot.config.currency} onClose={() => setShowUploadModal(null)} />;
             })()}
 
             {
@@ -1125,6 +1126,7 @@ export function PotDetail() {
                     slotId={globalPaymentState.slotId}
                     monthIndex={globalPaymentState.cycle}
                     amount={globalPaymentState.amount}
+                    currency={pot.config.currency}
                     onClose={() => setGlobalPaymentState(null)}
                     isForeman={globalPaymentState.isForemanAction}
                     onForemanRecord={async (date) => {
@@ -1246,7 +1248,7 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
                             <div key={`${item.slot._id}-${item.cycle}`} className="flex justify-between items-center  bg-[var(--danger)]/5 p-3 rounded-lg border border-[var(--danger)]/10">
                                 <div>
                                     <div className="text-sm font-bold text-[var(--text-primary)]">Cycle {item.cycle} • Slot #{item.slot.slotNumber}</div>
-                                    <div className="text-xs text-[var(--danger)]">Missed Payment of ₹{item.amount.toLocaleString()}</div>
+                                    <div className="text-xs text-[var(--danger)]">Missed Payment of {formatCurrency(item.amount, pot.config.currency)}</div>
                                 </div>
                                 <button
                                     onClick={() => setPaymentModalState({ slotId: item.slot._id, cycle: item.cycle, amount: item.amount })}
@@ -1286,7 +1288,7 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
                                         {sharePct < 100 && <span className="ml-2 text-[var(--accent-vivid)] text-[10px] bg-[var(--accent-vivid)]/10 px-1.5 py-0.5 rounded-full">{sharePct}% Share</span>}
                                     </div>
                                     <div className="text-2xl font-bold font-mono text-[var(--text-primary)]">
-                                        {status === 'PAID' ? 'Paid' : `₹${dueAmount.toLocaleString()}`}
+                                        {status === 'PAID' ? 'Paid' : formatCurrency(dueAmount, pot.config.currency)}
                                     </div>
                                     {status !== 'PAID' && <div className="text-xs text-[var(--accent-secondary)]">Due by {nextDueDate}</div>}
                                 </div>
@@ -1315,7 +1317,7 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
                                     <span className="text-xs text-[var(--text-muted)]">Win Status</span>
                                     {isWinner ? (
                                         <span className="text-[var(--gold)] font-bold text-xs flex items-center gap-1">
-                                            Won Cycle {isWinner} (₹{wonAmount.toLocaleString()})
+                                            Won Cycle {isWinner} ({formatCurrency(wonAmount, pot.config.currency)})
                                         </span>
                                     ) : (
                                         <span className="text-[var(--text-muted)] text-xs">Not yet won</span>
@@ -1333,6 +1335,7 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
                     slotId={paymentModalState.slotId}
                     monthIndex={paymentModalState.cycle}
                     amount={paymentModalState.amount}
+                    currency={pot.config.currency}
                     onClose={() => setPaymentModalState(null)}
                     isForeman={false}
                     onForemanRecord={async (date) => {
@@ -1351,7 +1354,7 @@ function MemberDashboard({ pot, mySlots, transactions, nextDueDate, currentUserI
 }
 
 
-function MembersList({ members, potId, currentMonth, isForeman, isActive, currentUserId }: { members: any[], potId: Id<"pots">, currentMonth: number, isForeman: boolean, isActive: boolean, currentUserId?: string }) {
+function MembersList({ members, potId, currentMonth, isForeman, isActive, currentUserId, currency }: { members: any[], potId: Id<"pots">, currentMonth: number, isForeman: boolean, isActive: boolean, currentUserId?: string, currency?: string }) {
     const recordCashPayment = useMutation(api.transactions.recordCashPayment);
     const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
@@ -1430,7 +1433,7 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                     <div className="text-right">
 
                                         <div className={`font-bold font-mono ${isFullyPaid ? "text-[var(--accent-vivid)]" : "text-[var(--accent-secondary)]"}`}>
-                                            {isFullyPaid ? "PAID" : `Due: ₹${m.totalDue.toLocaleString()}`}
+                                            {isFullyPaid ? "PAID" : `Due: ${formatCurrency(m.totalDue, currency)}`}
                                         </div>
                                         {!isFullyPaid && (
                                             <div className="text-[10px] text-[var(--text-muted)]">{m.paidCount}/{m.slots.length} Paid</div>
@@ -1456,7 +1459,7 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                                             Cycle {missed.monthIndex + 1} • Slot #{missed.slotNumber}
                                                         </span>
                                                         <div className="flex items-center gap-3">
-                                                            <span className="font-bold text-[var(--danger)]">₹{missed.amount.toLocaleString()}</span>
+                                                            <span className="font-bold text-[var(--danger)]">{formatCurrency(missed.amount, currency)}</span>
 
                                                             {/* User Self-Pay Action */}
                                                             {missed.isMyPayment && missed.status === 'UNPAID' && (
@@ -1518,7 +1521,7 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <span className={`font-bold ${slot.isPaid ? 'text-[var(--accent-vivid)]' : 'text-[var(--text-muted)]'}`}>
-                                                        {slot.isPaid ? 'PAID' : `₹${slot.due.toLocaleString()}`}
+                                                        {slot.isPaid ? 'PAID' : formatCurrency(slot.due, currency)}
                                                     </span>
 
                                                     {/* Actions */}
@@ -1569,6 +1572,7 @@ function MembersList({ members, potId, currentMonth, isForeman, isActive, curren
                     slotId={paymentModalState.slotId}
                     monthIndex={paymentModalState.cycle}
                     amount={paymentModalState.amount}
+                    currency={currency}
                     onClose={() => setPaymentModalState(null)}
                     isForeman={paymentModalState.isForemanAction}
                     onForemanRecord={async (date) => {

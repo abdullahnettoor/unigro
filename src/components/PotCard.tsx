@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { Doc } from "../../convex/_generated/dataModel";
+import { formatCurrency } from "../lib/utils";
 
 interface PotCardProps {
     pot: Doc<"pots"> & { foreman?: { name: string } | null };
@@ -65,13 +66,17 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
                 <div className="grid grid-cols-2 gap-4 border-t border-[var(--border-subtle)] pt-4">
                     <div>
                         <div className="mb-1 text-[10px] uppercase text-[var(--text-muted)]">Pool value</div>
-                        <div className="text-lg font-semibold font-mono text-[var(--text-primary)]">₹{pot.config.totalValue.toLocaleString()}</div>
+                        <div className="text-lg font-semibold font-mono text-[var(--text-primary)]">
+                            {formatCurrency(pot.config.totalValue, pot.config.currency)}
+                        </div>
                     </div>
                     <div>
                         <div className="mb-1 text-[10px] uppercase text-[var(--text-muted)]">
                             Per {pot.config.frequency === "occasional" ? "round" : "cycle"}
                         </div>
-                        <div className="text-lg font-semibold font-mono text-[var(--accent-secondary)]">₹{pot.config.contribution.toLocaleString()}</div>
+                        <div className="text-lg font-semibold font-mono text-[var(--accent-secondary)]">
+                            {formatCurrency(pot.config.contribution, pot.config.currency)}
+                        </div>
                     </div>
                 </div>
             </div>

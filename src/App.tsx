@@ -88,12 +88,13 @@ function BottomNav() {
   const { user } = useUser();
   const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
   const itemClass = (active: boolean) =>
-    `flex min-h-11 flex-col items-center justify-center rounded-xl px-2 py-2 text-center transition-colors ${
-      active
-        ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
-        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+    `flex min-h-11 flex-col items-center justify-center rounded-xl px-2 py-2 text-center transition-colors ${active
+      ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
+      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
     }`;
   const labelClass = "mt-1 text-[11px] font-semibold leading-none";
+
+  if (location.pathname === "/create") return null;
 
   return (
     <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-2 shadow-2xl backdrop-blur-md md:hidden">

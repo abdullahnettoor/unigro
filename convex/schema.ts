@@ -34,6 +34,7 @@ export default defineSchema({
             totalValue: v.number(),
             totalSlots: v.number(), // New: Explicit Slot Count
             contribution: v.number(),
+            currency: v.optional(v.string()), // New: Currency (default INR)
             frequency: v.union(
                 v.literal("monthly"),
                 v.literal("weekly"),

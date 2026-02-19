@@ -13,9 +13,12 @@
     "@clerk/clerk-react": "^5.60.0",
     "clsx": "^2.1.1",
     "convex": "^1.31.7",
+    "country-currency-emoji-flags": "^1.1.1",
+    "currency-codes": "^2.2.0",
     "framer-motion": "^12.34.2",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
+    "react-currency-input-field": "^4.0.3",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.0",
     "tailwind-merge": "^3.4.0"
