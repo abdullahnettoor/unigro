@@ -3,12 +3,13 @@ import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { SignInButton, useUser } from "@clerk/clerk-react";
 import { UserSync } from "./components/UserSync";
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
-import { Home, PlusCircle, User } from "lucide-react";
+import { Home, User, WalletCards } from "lucide-react";
 import { PWAPrompt } from "./components/PWAPrompt";
 import { AdminRoute } from "./components/AdminRoute";
 import { UserMenu } from "./components/UserMenu";
 
 const loadDashboard = () => import("./pages/Dashboard");
+const loadPots = () => import("./pages/Pots");
 const loadCreatePot = () => import("./pages/CreatePot");
 const loadPotDetail = () => import("./pages/PotDetail");
 const loadProfile = () => import("./pages/Profile");
@@ -16,6 +17,7 @@ const loadAdminDashboard = () => import("./pages/AdminDashboard");
 const loadProfileModal = () => import("./components/ProfileModal");
 
 const Dashboard = lazy(() => loadDashboard().then((m) => ({ default: m.Dashboard })));
+const Pots = lazy(() => loadPots().then((m) => ({ default: m.Pots })));
 const CreatePot = lazy(() => loadCreatePot().then((m) => ({ default: m.CreatePot })));
 const PotDetail = lazy(() => loadPotDetail().then((m) => ({ default: m.PotDetail })));
 const Profile = lazy(() => loadProfile().then((m) => ({ default: m.Profile })));
@@ -37,6 +39,7 @@ function AuthenticatedPrefetch() {
 
     const prefetch = () => {
       if (cancelled) return;
+      void loadPots();
       void loadCreatePot();
       void loadProfile();
       void loadProfileModal();
@@ -104,12 +107,12 @@ function BottomNav() {
           <span className={labelClass}>Dashboard</span>
         </Link>
         <Link
-          to="/create"
-          className={itemClass(isActive("/create"))}
-          aria-current={isActive("/create") ? "page" : undefined}
+          to="/pots"
+          className={itemClass(isActive("/pots"))}
+          aria-current={isActive("/pots") ? "page" : undefined}
         >
-          <PlusCircle size={18} />
-          <span className={labelClass}>New Pot</span>
+          <WalletCards size={18} />
+          <span className={labelClass}>Pots</span>
         </Link>
 
         <UserMenu
@@ -135,23 +138,8 @@ function BottomNav() {
 }
 
 function MainLayout({ children }: { children: React.ReactNode }) {
-  const location = useLocation();
-  const hideTopNavForDashboard = location.pathname === "/";
-
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)] pb-24 sm:pb-0">
-      <nav
-        className={`sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/80 backdrop-blur-md ${hideTopNavForDashboard ? "hidden" : ""}`}
-      >
-        <div className="mx-auto flex max-w-6xl items-center justify-center sm:justify-between px-4 py-3 sm:px-6 relative">
-          <Link to="/" className="transition-opacity hover:opacity-80">
-            <h1 className="text-xl font-[family-name:var(--font-display)] font-bold sm:text-2xl">GrowPot</h1>
-          </Link>
-          <div className="hidden sm:flex items-center gap-3 sm:gap-4 absolute right-4 sm:static">
-            <UserMenu />
-          </div>
-        </div>
-      </nav>
       {children}
       <BottomNav />
     </main>
@@ -197,6 +185,7 @@ function App() {
           <Suspense fallback={<RouteLoading />}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/pots" element={<Pots />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/create" element={<CreatePot />} />
               <Route path="/pot/:potId" element={<PotDetail />} />

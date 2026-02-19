@@ -11,7 +11,16 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
     const isForeman = currentUserId && pot.foremanId === currentUserId;
     const slots = ((pot as unknown as { slots?: Array<{ status: string }> }).slots) || [];
     const filledSlots = slots.filter((slot) => slot.status === "FILLED" || slot.status === "RESERVED").length;
-    const progress = Math.min(100, Math.round((filledSlots / Math.max(pot.config.totalSlots, 1)) * 100));
+    const totalSlots = Math.max(pot.config.totalSlots, 1);
+    const totalCycles = Math.max(pot.config.duration, 1);
+    const cycleIndex = Math.min(Math.max(pot.currentMonth || 0, 0), totalCycles);
+
+    const progressCount = isDraft ? filledSlots : cycleIndex;
+    const progressTotal = isDraft ? totalSlots : totalCycles;
+    const progress = Math.min(100, Math.round((progressCount / progressTotal) * 100));
+    const progressLabel = isDraft
+        ? "Slot fill progress"
+        : (pot.config.frequency === "occasional" ? "Round progress" : "Cycle progress");
 
     return (
         <Link to={`/pot/${pot._id}`} className="block">
@@ -45,8 +54,8 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
 
                 <div className="mb-4">
                     <div className="mb-2 flex items-center justify-between text-xs text-[var(--text-muted)]">
-                        <span>Slot fill progress</span>
-                        <span>{filledSlots}/{pot.config.totalSlots}</span>
+                        <span>{progressLabel}</span>
+                        <span>{progressCount}/{progressTotal}</span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-deep)]/70">
                         <div className="h-full rounded-full bg-[var(--accent-vivid)] transition-all duration-300" style={{ width: `${progress}%` }} />

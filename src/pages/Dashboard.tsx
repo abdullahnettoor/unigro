@@ -1,7 +1,7 @@
 import { useMemo, useState, type ComponentType } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Bell, CalendarClock, CheckCircle2, Coins, Home, Plus, Search, Settings, ShieldAlert, ShieldCheck, WalletCards } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
 import { PotCard } from "../components/PotCard";
@@ -101,6 +101,14 @@ function DashboardSidebar({
     firstName: string;
     imageUrl?: string;
 }) {
+    const location = useLocation();
+    const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
+    const navItemClass = (active: boolean) =>
+        `flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${active
+            ? "bg-[var(--accent-vivid)]/12 font-semibold text-[var(--accent-vivid)]"
+            : "text-[var(--text-muted)] hover:bg-[var(--surface-card)]/60"
+        }`;
+
     return (
         <aside className="hidden md:block">
             <GlassSurface tier="glass-2" className="sticky top-3 flex h-[calc(100vh-1.5rem)] flex-col p-3 lg:p-4">
@@ -112,19 +120,19 @@ function DashboardSidebar({
                 </Link>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Workspace</p>
                 <div className="space-y-2">
-                    <div className="flex items-center gap-3 rounded-xl bg-[var(--accent-vivid)]/12 px-3 py-2 text-sm font-semibold text-[var(--accent-vivid)]">
+                    <Link to="/" className={navItemClass(isActive("/"))}>
                         <Home size={16} />
                         Dashboard
-                    </div>
-                    <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-[var(--text-muted)]">
+                    </Link>
+                    <Link to="/pots" className={navItemClass(isActive("/pots"))}>
                         <WalletCards size={16} />
                         Pots
-                    </div>
-                    <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-[var(--text-muted)]">
+                    </Link>
+                    <div className={navItemClass(false)}>
                         <Coins size={16} />
                         Rewards
                     </div>
-                    <div className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-[var(--text-muted)]">
+                    <div className={navItemClass(false)}>
                         <Settings size={16} />
                         Settings
                     </div>
