@@ -588,7 +588,7 @@ export function PotDetail() {
                                 </h3>
                                 <button onClick={() => setActiveTab('slots')} className="text-xs text-[var(--accent-vivid)] hover:underline">View all slots</button>
                             </div>
-                            <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} />
+                            <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} transactions={transactions || []} />
                             {currentWinnerSlot && (
                                 <div className="text-center mt-4 animate-bounce">
                                     <p className="text-[var(--text-muted)] text-sm">Winner of Cycle {pot.currentMonth}</p>
@@ -842,8 +842,17 @@ export function PotDetail() {
 
                                                                 return (
                                                                     <div key={owner.userId} className="text-xs text-[var(--text-muted)] flex justify-between items-center w-full bg-[var(--surface-deep)]/60 px-2 py-1.5 rounded">
-                                                                        <span>{owner.userName}</span>
                                                                         <div className="flex items-center gap-2">
+                                                                            {owner.pictureUrl ? (
+                                                                                <img src={owner.pictureUrl} alt={owner.name} className="w-4 h-4 rounded-full object-cover" />
+                                                                            ) : (
+                                                                                <div className="w-4 h-4 rounded-full bg-[var(--surface-deep)]/60 flex items-center justify-center font-bold text-[6px] text-[var(--text-muted)]">
+                                                                                    {owner.name?.charAt(0)}
+                                                                                </div>
+                                                                            )}
+                                                                            <span className="truncate">{owner.name}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 shrink-0">
                                                                             <span className="font-mono text-[var(--accent-vivid)] text-[10px]">{owner.sharePercentage}%</span>
                                                                             {isActive && (
                                                                                 <>
@@ -955,14 +964,14 @@ export function PotDetail() {
                                                                     return (
                                                                         <div key={owner.userId} className="text-xs text-[var(--text-muted)] flex justify-between items-center w-full bg-[var(--surface-deep)]/60 px-2 py-1.5 rounded border border-[var(--border-subtle)]">
                                                                             <div className="flex items-center gap-2 overflow-hidden">
-                                                                                {owner.userPictureUrl ? (
-                                                                                    <img src={owner.userPictureUrl} alt={owner.userName} className="w-5 h-5 rounded-full object-cover border border-[var(--border-subtle)]" />
+                                                                                {owner.pictureUrl ? (
+                                                                                    <img src={owner.pictureUrl} alt={owner.name} className="w-5 h-5 rounded-full object-cover border border-[var(--border-subtle)]" />
                                                                                 ) : (
-                                                                                    <div className="w-5 h-5 rounded-full bg-[var(--surface-deep)] flex items-center justify-center font-bold text-[8px] text-[var(--text-muted)]">
-                                                                                        {owner.userName?.charAt(0)}
+                                                                                    <div className="w-5 h-5 rounded-full bg-[var(--surface-deep)]/60 flex items-center justify-center font-bold text-[8px] text-[var(--text-muted)]">
+                                                                                        {owner.name?.charAt(0)}
                                                                                     </div>
                                                                                 )}
-                                                                                <span className="truncate">{owner.userName}</span>
+                                                                                <span className="truncate">{owner.name}</span>
                                                                             </div>
                                                                             <div className="flex items-center gap-2 shrink-0">
                                                                                 <span className="font-mono text-[var(--accent-vivid)] text-[10px]">{owner.sharePercentage}%</span>
