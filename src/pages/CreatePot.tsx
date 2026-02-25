@@ -72,7 +72,7 @@ export function CreatePot() {
 
     const validateStep = (stepIndex: number) => {
         if (stepIndex === 0) {
-            if (!formData.title.trim()) return "Pot name is required.";
+            if (!formData.title.trim() || formData.title.trim().length < 3) return "Pot name must be at least 3 characters.";
             if (!formData.startDate) return "Start date is required.";
             if (formData.totalValue < 1000) return "Total pool value must be at least 1,000.";
         }

@@ -2,7 +2,7 @@ import { useMemo, useState, type ComponentType } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, CalendarClock, CheckCircle2, Coins, Home, Plus, Search, Settings, ShieldAlert, ShieldCheck, WalletCards } from "lucide-react";
+import { Bell, CalendarClock, CheckCircle2, Home, Plus, Search, Settings as SettingsIcon, ShieldAlert, ShieldCheck, WalletCards } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
 import { PotCard } from "../components/PotCard";
 import { VerificationModal } from "../components/VerificationModal";
@@ -95,7 +95,7 @@ function QuickActivityCard({
     );
 }
 
-function DashboardSidebar({
+export function DashboardSidebar({
     firstName,
     imageUrl,
 }: {
@@ -129,14 +129,10 @@ function DashboardSidebar({
                         <WalletCards size={16} />
                         Pots
                     </Link>
-                    <div className={navItemClass(false)}>
-                        <Coins size={16} />
-                        Rewards
-                    </div>
-                    <div className={navItemClass(false)}>
-                        <Settings size={16} />
+                    <Link to="/settings" className={navItemClass(isActive("/settings"))}>
+                        <SettingsIcon size={16} />
                         Settings
-                    </div>
+                    </Link>
                 </div>
                 <div className="mt-5 rounded-xl bg-[var(--surface-card)]/65 p-3">
                     <p className="text-xs font-semibold text-[var(--text-muted)]">Desktop scaffold</p>

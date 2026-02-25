@@ -127,13 +127,13 @@ export function UserMenu({ trigger, placement = "bottom-end", menuClassName }: U
                     {/* Menu Items */}
                     <div className="space-y-1">
                         <Link
-                            to="/profile"
+                            to="/settings"
                             onClick={() => setIsOpen(false)}
                             className="flex items-center justify-between w-full px-4 py-2.5 text-sm rounded-xl hover:bg-[var(--surface-deep)] transition-colors group"
                         >
                             <div className="flex items-center gap-3 text-[var(--text-primary)]">
-                                <User size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" />
-                                <span>Profile</span>
+                                <Settings size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" />
+                                <span>Settings</span>
                             </div>
                             {/* Verification Badge */}
                             <div className={`flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full border bg-[var(--surface-card)] ${statusColor} border-[var(--border-subtle)]`}>
@@ -146,7 +146,7 @@ export function UserMenu({ trigger, placement = "bottom-end", menuClassName }: U
                             onClick={() => { openUserProfile(); setIsOpen(false); }}
                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[var(--text-primary)] rounded-xl hover:bg-[var(--surface-deep)] transition-colors group"
                         >
-                            <Settings size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" />
+                            <User size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" />
                             <span className="whitespace-nowrap">Manage account</span>
                         </button>
                     </div>

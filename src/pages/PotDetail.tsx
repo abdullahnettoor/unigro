@@ -1114,35 +1114,6 @@ export function PotDetail() {
         </div>
     );
 }
-function ApproveButton({ transactionId }: { transactionId: Id<"transactions"> }) {
-    const approvePayment = useMutation(api.transactions.approvePayment);
-    const [loading, setLoading] = useState(false);
-    const feedback = useFeedback();
-
-    const handleApprove = async () => {
-        const ok = await feedback.confirm({
-            title: "Confirm payment receipt?",
-            message: "This will mark the payment as received.",
-            confirmText: "Confirm",
-        });
-        if (!ok) return;
-        setLoading(true);
-        await approvePayment({ transactionId });
-        setLoading(false);
-        feedback.toast.success("Payment approved");
-    }
-
-    return (
-        <button
-            onClick={handleApprove}
-            disabled={loading}
-            className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] hover:bg-[var(--accent-vivid)] hover:text-[var(--text-on-accent)] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
-        >
-            {loading ? "..." : "Approve"}
-        </button>
-    );
-}
-
 
 
 function OrganizerDisplay({ foremanId }: { foremanId: Id<"users"> }) {

@@ -1,18 +1,18 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
-import { SignInButton, useUser } from "@clerk/clerk-react";
+import { SignInButton } from "@clerk/clerk-react";
 import { UserSync } from "./components/UserSync";
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
-import { Home, User, WalletCards } from "lucide-react";
+import { Home, WalletCards, Settings } from "lucide-react";
 import { PWAPrompt } from "./components/PWAPrompt";
 import { AdminRoute } from "./components/AdminRoute";
-import { UserMenu } from "./components/UserMenu";
+
 
 const loadDashboard = () => import("./pages/Dashboard");
 const loadPots = () => import("./pages/Pots");
 const loadCreatePot = () => import("./pages/CreatePot");
 const loadPotDetail = () => import("./pages/PotDetail");
-const loadProfile = () => import("./pages/Profile");
+const loadSettings = () => import("./pages/Settings");
 const loadAdminDashboard = () => import("./pages/AdminDashboard");
 const loadProfileModal = () => import("./components/ProfileModal");
 
@@ -20,7 +20,7 @@ const Dashboard = lazy(() => loadDashboard().then((m) => ({ default: m.Dashboard
 const Pots = lazy(() => loadPots().then((m) => ({ default: m.Pots })));
 const CreatePot = lazy(() => loadCreatePot().then((m) => ({ default: m.CreatePot })));
 const PotDetail = lazy(() => loadPotDetail().then((m) => ({ default: m.PotDetail })));
-const Profile = lazy(() => loadProfile().then((m) => ({ default: m.Profile })));
+const SettingsPage = lazy(() => loadSettings().then((m) => ({ default: m.Settings })));
 const AdminDashboard = lazy(() => loadAdminDashboard().then((m) => ({ default: m.AdminDashboard })));
 const ProfileModal = lazy(() => loadProfileModal().then((m) => ({ default: m.ProfileModal })));
 
@@ -41,7 +41,7 @@ function AuthenticatedPrefetch() {
       if (cancelled) return;
       void loadPots();
       void loadCreatePot();
-      void loadProfile();
+      void loadSettings();
       void loadProfileModal();
     };
 
@@ -85,7 +85,6 @@ function Landing() {
 
 function BottomNav() {
   const location = useLocation();
-  const { user } = useUser();
   const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
   const itemClass = (active: boolean) =>
     `flex min-h-11 flex-col items-center justify-center rounded-xl px-2 py-2 text-center transition-colors ${active
@@ -116,23 +115,14 @@ function BottomNav() {
           <span className={labelClass}>Pots</span>
         </Link>
 
-        <UserMenu
-          placement="top-end"
-          trigger={
-            <div className={itemClass(isActive("/profile"))}>
-              {user?.imageUrl ? (
-                <img
-                  src={user.imageUrl}
-                  alt="Profile"
-                  className={`w-[18px] h-[18px] rounded-full object-cover ${isActive("/profile") ? "ring-2 ring-[var(--accent-vivid)]" : ""}`}
-                />
-              ) : (
-                <User size={18} />
-              )}
-              <span className={labelClass}>Profile</span>
-            </div>
-          }
-        />
+        <Link
+          to="/settings"
+          className={itemClass(isActive("/settings"))}
+          aria-current={isActive("/settings") ? "page" : undefined}
+        >
+          <Settings size={18} />
+          <span className={labelClass}>Settings</span>
+        </Link>
       </div>
     </nav>
   );
@@ -187,7 +177,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/pots" element={<Pots />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/create" element={<CreatePot />} />
               <Route path="/pot/:potId" element={<PotDetail />} />
               <Route

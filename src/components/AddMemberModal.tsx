@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { X, UserPlus, Phone, Layers } from "lucide-react";
+import { X, UserPlus, Layers } from "lucide-react";
 import { useFeedback } from "./FeedbackProvider";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 interface AddMemberModalProps {
     potId: Id<"pots">;
@@ -29,6 +31,12 @@ export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProp
 
         if (!selectedSlotNum) {
             setError("Please select a slot.");
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (!phone || !isValidPhoneNumber(phone)) {
+            setError("Please enter a valid phone number with country code.");
             setIsSubmitting(false);
             return;
         }
@@ -115,18 +123,15 @@ export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProp
 
                     <div>
                         <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone Number</label>
-                        <div className="relative">
-                            <Phone className="absolute left-3 top-3.5 text-[var(--text-muted)]" size={16} />
-                            <input
-                                type="tel"
-                                required
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 pl-10 text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--accent-vivid)]"
-                                placeholder="+1234567890"
-                            />
-                        </div>
-                        <p className="text-xs text-[var(--text-muted)] mt-1">Required for account syncing.</p>
+                        <PhoneInput
+                            international
+                            defaultCountry="IN"
+                            value={phone}
+                            onChange={(v) => setPhone(v || "")}
+                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] font-mono focus-within:border-[var(--accent-vivid)] [&>input]:bg-transparent [&>input]:outline-none"
+                            placeholder="+91 1234567890"
+                        />
+                        <p className="text-xs text-[var(--text-muted)] mt-1">Required for account syncing. Preferably WhatsApp.</p>
                     </div>
 
                     {error && <p className="text-[var(--danger)] text-sm">{error}</p>}

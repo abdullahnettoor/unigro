@@ -1,91 +1,20 @@
 import { useMemo, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
-import { Link, useLocation } from "react-router-dom";
-import { ArrowDownAZ, ArrowUpAZ, Coins, Filter, Home, Plus, Search, Settings, WalletCards, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowDownAZ, ArrowUpAZ, Filter, Plus, Search, X } from "lucide-react";
 import { cn } from "../components/ui/Button";
 import { api } from "../../convex/_generated/api";
 import { AnimatePresence, motion } from "framer-motion";
 import { PotCard } from "../components/PotCard";
-import { GlassSurface } from "../components/ui/GlassSurface";
-import { UserMenu } from "../components/UserMenu";
+import { DashboardSidebar } from "./Dashboard";
 
 type RoleFilter = "all" | "organizing" | "joined";
 type StatusFilter = "all" | "draft" | "active" | "completed";
 type SortFilter = "most_recent" | "pool_value" | "progress";
 type SortDirection = "desc" | "asc";
 
-function PotsSidebar({
-    firstName,
-    imageUrl,
-}: {
-    firstName: string;
-    imageUrl?: string;
-}) {
-    const location = useLocation();
-    const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
-    const navItemClass = (active: boolean) =>
-        `flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${active
-            ? "bg-[var(--accent-vivid)]/12 font-semibold text-[var(--accent-vivid)]"
-            : "text-[var(--text-muted)] hover:bg-[var(--surface-card)]/60"
-        }`;
 
-    return (
-        <aside className="hidden md:block">
-            <GlassSurface tier="glass-2" className="sticky top-3 flex h-[calc(100vh-1.5rem)] flex-col p-3 lg:p-4">
-                <Link to="/" className="mb-4 flex items-center gap-2 rounded-xl px-2 py-1.5">
-                    <div className="grid h-6 w-6 place-items-center rounded-md bg-[var(--accent-vivid)] text-[var(--text-on-accent)] text-xs font-bold">
-                        G
-                    </div>
-                    <span className="text-base font-display font-bold text-[var(--text-primary)]">GrowPot</span>
-                </Link>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Workspace</p>
-                <div className="space-y-2">
-                    <Link to="/" className={navItemClass(isActive("/"))}>
-                        <Home size={16} />
-                        Dashboard
-                    </Link>
-                    <Link to="/pots" className={navItemClass(isActive("/pots"))}>
-                        <WalletCards size={16} />
-                        Pots
-                    </Link>
-                    <div className={navItemClass(false)}>
-                        <Coins size={16} />
-                        Rewards
-                    </div>
-                    <div className={navItemClass(false)}>
-                        <Settings size={16} />
-                        Settings
-                    </div>
-                </div>
-
-                <div className="mt-auto border-t border-[var(--border-subtle)]/70 pt-3">
-                    <UserMenu
-                        placement="top-center"
-                        menuClassName="w-full"
-                        trigger={
-                            <div className="flex w-full items-center gap-3 rounded-lg px-1 py-1 text-left">
-                                <div className="h-9 w-9 overflow-hidden rounded-full border border-[var(--border-subtle)]">
-                                    {imageUrl ? (
-                                        <img src={imageUrl} alt="Profile" className="h-full w-full object-cover" />
-                                    ) : (
-                                        <div className="grid h-full w-full place-items-center bg-[var(--surface-deep)] text-xs font-semibold text-[var(--text-muted)]">
-                                            {firstName.charAt(0)}
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="min-w-0 text-left">
-                                    <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{firstName}</p>
-                                    <p className="text-xs text-[var(--text-muted)]">Profile menu</p>
-                                </div>
-                            </div>
-                        }
-                    />
-                </div>
-            </GlassSurface>
-        </aside>
-    );
-}
 
 function getProgressScore(pot: {
     status: string;
@@ -180,7 +109,7 @@ export function Pots() {
 
     return (
         <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-5 md:py-3 lg:gap-6">
-            <PotsSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} />
+            <DashboardSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} />
 
             <div className="md:py-4">
                 <header className="mb-5 sm:mb-6">

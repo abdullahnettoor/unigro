@@ -144,10 +144,31 @@ export const updateProfile = mutation({
                 });
             }
 
-            // 2. Migrate Transactions? 
-            // Transactions are linked to Slot ID. Since we didn't change Slot ID, 
-            // and we updated the Slot's Owner, the transactions are effectively migrated.
-            // (Unless transaction table has userId? No, we removed it).
+            // 2. Migrate Transactions
+            // Update any transactions made by this ghost user to the actual user
+            // We can only query transactions by pot_month, so we might need a full table scan or add an index later.
+            // For now, let's collect all transactions and filter, or just query if there's an index.
+            // Actually, there's no ideal index for transactions by user. Let's do a full scan since it's a rare operation for a specific ghost.
+            const allTransactions = await ctx.db.query("transactions").collect();
+            for (const tx of allTransactions) {
+                if (tx.userId === ghost._id) {
+                    await ctx.db.patch(tx._id, {
+                        userId: user._id
+                    });
+                }
+            }
+
+            // 3. Migrate Split Ownership
+            const splitOwnerships = await ctx.db
+                .query("split_ownership")
+                .withIndex("by_user", (q) => q.eq("userId", ghost._id))
+                .collect();
+
+            for (const split of splitOwnerships) {
+                await ctx.db.patch(split._id, {
+                    userId: user._id
+                });
+            }
 
             // 3. Delete Ghost User
             await ctx.db.delete(ghost._id);
