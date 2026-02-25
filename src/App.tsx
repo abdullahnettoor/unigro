@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { SignInButton } from "@clerk/clerk-react";
-import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
-import { Home, WalletCards, Settings } from "lucide-react";
+import { Authenticated, AuthLoading,Unauthenticated } from "convex/react";
+import { Home, Settings,WalletCards } from "lucide-react";
+
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { UserSync } from "./components/auth/UserSync";
 import { PWAPrompt } from "./components/shared/PWAPrompt";

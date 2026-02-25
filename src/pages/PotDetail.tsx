@@ -1,29 +1,31 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
 import { useEffect, useState } from "react";
-import { useFeedback } from "@/components/shared/FeedbackProvider";
-import { SplitSlotModal } from "@/components/pot-detail/modals/SplitSlotModal"; // New
+import { useNavigate,useParams } from "react-router-dom";
+import { useMutation,useQuery } from "convex/react";
+import { ChevronLeft,Edit2, Gavel, ShieldAlert } from "lucide-react";
+
+import { DesktopSidebar } from "@/components/pot-detail/DesktopSidebar";
+import { MemberDashboard } from "@/components/pot-detail/MemberDashboard";
+import { MembersList } from "@/components/pot-detail/MembersList";
+import { MobileActionBar } from "@/components/pot-detail/MobileActionBar";
+import { MobileStats } from "@/components/pot-detail/MobileStats";
 import { AddMemberModal } from "@/components/pot-detail/modals/AddMemberModal";
 import { JoinPotModal } from "@/components/pot-detail/modals/JoinPotModal";
 import { NextRoundModal } from "@/components/pot-detail/modals/NextRoundModal"; // New
+import { SplitSlotModal } from "@/components/pot-detail/modals/SplitSlotModal"; // New
+import { WinnerSelectionModal } from "@/components/pot-detail/modals/WinnerSelectionModal";
+import { OrganizeTab } from "@/components/pot-detail/OrganizeTab";
 import { PaymentModal } from "@/components/pot-detail/PaymentComponents";
-import { PotHistory } from "@/components/pot-detail/PotHistory"; // New
-import { Gavel, Edit2, ShieldAlert, ChevronLeft } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
-import { getSlotStats, getPotDisplayProgress, getPotFinancials, getNextCycleDate, getVirtualOpenSlots } from "@/lib/pot";
 import { PotHero } from "@/components/pot-detail/PotHero";
-import { MobileStats } from "@/components/pot-detail/MobileStats";
-import { TabNav } from "@/components/pot-detail/TabNav";
+import { PotHistory } from "@/components/pot-detail/PotHistory"; // New
 import { RulesTab } from "@/components/pot-detail/RulesTab";
 import { SlotsTab } from "@/components/pot-detail/SlotsTab";
-import { OrganizeTab } from "@/components/pot-detail/OrganizeTab";
-import { DesktopSidebar } from "@/components/pot-detail/DesktopSidebar";
-import { MobileActionBar } from "@/components/pot-detail/MobileActionBar";
-import { WinnerSelectionModal } from "@/components/pot-detail/modals/WinnerSelectionModal";
-import { MemberDashboard } from "@/components/pot-detail/MemberDashboard";
-import { MembersList } from "@/components/pot-detail/MembersList";
+import { TabNav } from "@/components/pot-detail/TabNav";
+import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { getNextCycleDate, getPotDisplayProgress, getPotFinancials, getSlotStats, getVirtualOpenSlots } from "@/lib/pot";
+import { formatCurrency } from "@/lib/utils";
+
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 
 export type Tab = 'dashboard' | 'rules' | 'slots' | 'members' | 'history' | 'approvals' | 'organize';
 

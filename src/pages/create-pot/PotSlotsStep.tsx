@@ -1,7 +1,8 @@
-import { Percent, Users } from "lucide-react";
-import { GlassSurface } from "@/components/ui/GlassSurface";
-import { cn } from "@/components/ui/Button";
 import { useState } from "react";
+import { Percent, Users } from "lucide-react";
+
+import { cn } from "@/components/ui/Button";
+import { GlassSurface } from "@/components/ui/GlassSurface";
 import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";

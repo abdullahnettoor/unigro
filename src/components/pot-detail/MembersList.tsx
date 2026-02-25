@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { Users, ChevronUp, ChevronDown, ShieldAlert, Clock, CheckCircle } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { CheckCircle,ChevronDown, ChevronUp, Clock, ShieldAlert, Users } from "lucide-react";
+
 import { PaymentModal } from "@/components/pot-detail/PaymentComponents";
+import { formatCurrency } from "@/lib/utils";
+
+import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 interface MembersListProps {

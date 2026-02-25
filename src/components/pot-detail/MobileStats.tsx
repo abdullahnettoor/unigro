@@ -1,5 +1,7 @@
-import { PieChart, ChevronDown, Clock, Calendar, Share2 } from "lucide-react";
+import { Calendar, ChevronDown, Clock, PieChart, Share2 } from "lucide-react";
+
 import { formatCurrency } from "@/lib/utils";
+
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface MobileStatsProps {

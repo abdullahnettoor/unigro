@@ -28,7 +28,7 @@ type FeedbackContextValue = {
 
 const FeedbackContext = createContext<FeedbackContextValue | null>(null);
 
-function useFeedback() {
+export function useFeedback() {
   const ctx = useContext(FeedbackContext);
   if (!ctx) {
     throw new Error("useFeedback must be used within FeedbackProvider");
@@ -43,10 +43,10 @@ function Toasts({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: stri
         <div
           key={t.id}
           className={`rounded-xl border px-4 py-3 shadow-2xl backdrop-blur-md ${t.variant === "success"
-              ? "border-[var(--success)]/30 bg-[var(--success)]/10 text-[var(--success)]"
-              : t.variant === "error"
-                ? "border-[var(--danger)]/30 bg-[var(--danger)]/10 text-[var(--danger)]"
-                : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 text-[var(--text-primary)]"
+            ? "border-[var(--success)]/30 bg-[var(--success)]/10 text-[var(--success)]"
+            : t.variant === "error"
+              ? "border-[var(--danger)]/30 bg-[var(--danger)]/10 text-[var(--danger)]"
+              : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 text-[var(--text-primary)]"
             }`}
           role="status"
         >
@@ -97,8 +97,8 @@ function ConfirmDialog({
           <button
             onClick={onConfirm}
             className={`flex-1 rounded-xl py-2.5 text-sm font-semibold ${options.danger
-                ? "bg-[var(--danger)] text-[var(--text-on-accent)] hover:bg-[var(--danger)]/90"
-                : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
+              ? "bg-[var(--danger)] text-[var(--text-on-accent)] hover:bg-[var(--danger)]/90"
+              : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
               }`}
           >
             {options.confirmText || "Confirm"}
@@ -135,13 +135,13 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
 
   const handleConfirm = () => {
     setConfirmOpen(false);
-    confirmOptions && setConfirmOptions(null);
+    if (confirmOptions) setConfirmOptions(null);
     confirmResolver.current?.(true);
   };
 
   const handleCancel = () => {
     setConfirmOpen(false);
-    confirmOptions && setConfirmOptions(null);
+    if (confirmOptions) setConfirmOptions(null);
     confirmResolver.current?.(false);
   };
 
@@ -166,4 +166,3 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export { useFeedback };

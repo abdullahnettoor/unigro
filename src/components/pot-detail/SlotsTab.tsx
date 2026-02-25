@@ -1,4 +1,5 @@
 import { Trash2 } from "lucide-react";
+
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
 
 interface SlotsTabProps {

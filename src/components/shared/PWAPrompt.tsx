@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useRegisterSW } from 'virtual:pwa-register/react';
 import { Download, X } from 'lucide-react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 type BeforeInstallPromptEvent = Event & {
     prompt: () => Promise<void>;

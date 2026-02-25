@@ -1,8 +1,9 @@
 import CurrencyInput from "react-currency-input-field";
-import cc from "currency-codes";
 // @ts-ignore
 import { getEmojiByCurrencyCode } from "country-currency-emoji-flags";
+import cc from "currency-codes";
 import { Calendar, Info } from "lucide-react";
+
 import { GlassSurface } from "@/components/ui/GlassSurface";
 import { getCurrencySymbol } from "@/lib/utils";
 

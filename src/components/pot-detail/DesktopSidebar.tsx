@@ -1,5 +1,7 @@
-import { Layers, Clock, Calendar, Share2 } from "lucide-react";
+import { Calendar, Clock, Layers, Share2 } from "lucide-react";
+
 import { formatCurrency } from "@/lib/utils";
+
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface DesktopSidebarProps {

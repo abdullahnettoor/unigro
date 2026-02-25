@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+
 import { getCycleStats, getSlotStats } from "@/lib/pot";
 import { formatCurrency } from "@/lib/utils";
+
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface PotCardProps {

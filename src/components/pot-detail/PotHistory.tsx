@@ -1,6 +1,7 @@
 // import type { Doc, Id } from "../../../convex/_generated/dataModel";
+import { AlertCircle, CheckCircle, Clock, Lock, Trophy } from "lucide-react";
+
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
-import { CheckCircle, Clock, AlertCircle, Lock, Trophy } from "lucide-react";
 
 interface PotHistoryProps {
     pot: Doc<"pots">;

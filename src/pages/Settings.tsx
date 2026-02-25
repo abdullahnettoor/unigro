@@ -1,13 +1,16 @@
-import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import { Upload, AlertCircle, Clock, ShieldCheck, FileText, Smartphone, Mail, X, Loader2, Save, LogOut } from "lucide-react";
-import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
+import { useEffect,useRef, useState } from "react";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
-import "react-phone-number-input/style.css";
-import { useUser, useClerk } from "@clerk/clerk-react";
-import { DashboardSidebar } from "@/pages/Dashboard";
+import { useClerk,useUser } from "@clerk/clerk-react";
+import { useMutation,useQuery } from "convex/react";
+import { AlertCircle, Clock, FileText, Loader2, LogOut,Mail, Save, ShieldCheck, Smartphone, Upload, X } from "lucide-react";
+
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
+import { DashboardSidebar } from "@/pages/Dashboard";
+
+import { api } from "../../convex/_generated/api";
+
+import "react-phone-number-input/style.css";
 
 export function Settings() {
     const user = useQuery(api.users.current);

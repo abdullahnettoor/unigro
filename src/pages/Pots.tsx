@@ -1,15 +1,17 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
-import { Link } from "react-router-dom";
-import { ArrowDownAZ, ArrowUpAZ, Filter, Plus, Search, X } from "lucide-react";
-import { cn } from "@/components/ui/Button";
-import { api } from "../../convex/_generated/api";
 import { AnimatePresence, motion } from "framer-motion";
+import { ArrowDownAZ, ArrowUpAZ, Filter, Plus, Search, X } from "lucide-react";
+
 import { PotCard } from "@/components/shared/PotCard";
+import { cn } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { DashboardSidebar } from "@/pages/Dashboard";
 import { getProgressScore } from "@/lib/pot";
+import { DashboardSidebar } from "@/pages/Dashboard";
+
+import { api } from "../../convex/_generated/api";
 
 type RoleFilter = "all" | "organizing" | "joined";
 type StatusFilter = "all" | "draft" | "active" | "completed";

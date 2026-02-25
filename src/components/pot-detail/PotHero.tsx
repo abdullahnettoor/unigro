@@ -1,5 +1,6 @@
-import { PotVisualizer } from "@/components/pot-detail/PotVisualizer";
 import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
+import { PotVisualizer } from "@/components/pot-detail/PotVisualizer";
+
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface PotHeroProps {

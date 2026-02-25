@@ -1,20 +1,21 @@
-import { useState, useRef, useEffect } from "react";
-import { useUser, useClerk } from "@clerk/clerk-react";
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { useEffect,useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useClerk,useUser } from "@clerk/clerk-react";
+import { useQuery } from "convex/react";
 import {
-    User,
-    Settings,
-    LogOut,
-    Moon,
-    Sun,
-    ShieldCheck,
     AlertCircle,
     Clock,
-    Monitor
-} from "lucide-react";
+    LogOut,
+    Monitor,
+    Moon,
+    Settings,
+    ShieldCheck,
+    Sun,
+    User} from "lucide-react";
+
 import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
+
+import { api } from "../../../convex/_generated/api";
 
 interface UserMenuProps {
     trigger?: React.ReactNode;

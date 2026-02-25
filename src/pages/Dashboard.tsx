@@ -1,16 +1,18 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, CalendarClock, CheckCircle2, Home, Plus, Settings as SettingsIcon, ShieldAlert, WalletCards } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
+import { useQuery } from "convex/react";
+import { Bell, CalendarClock, CheckCircle2, Home, Plus, Settings as SettingsIcon, ShieldAlert, WalletCards } from "lucide-react";
+
+import { VerificationModal } from "@/components/auth/VerificationModal";
+import { QuickActivityCard } from "@/components/dashboard/QuickActivityCard";
+import { VerificationBanner } from "@/components/dashboard/VerificationBanner";
+import { UserMenu } from "@/components/layout/UserMenu";
 import { PotCard } from "@/components/shared/PotCard";
 import { GlassSurface } from "@/components/ui/GlassSurface";
 import { formatCurrency } from "@/lib/utils";
-import { VerificationBanner } from "@/components/dashboard/VerificationBanner";
-import { QuickActivityCard } from "@/components/dashboard/QuickActivityCard";
-import { UserMenu } from "@/components/layout/UserMenu";
-import { VerificationModal } from "@/components/auth/VerificationModal";
+
+import { api } from "../../convex/_generated/api";
 
 export function DashboardSidebar({
     firstName,

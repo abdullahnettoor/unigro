@@ -1,5 +1,7 @@
-import { ShieldCheck, Clock } from "lucide-react";
+import { Clock,ShieldCheck } from "lucide-react";
+
 import { formatCurrency } from "@/lib/utils";
+
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface OrganizeTabProps {

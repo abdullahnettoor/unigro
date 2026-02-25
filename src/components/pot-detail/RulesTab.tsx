@@ -1,4 +1,5 @@
-import { Info, Layers, Calendar, Coins } from "lucide-react";
+import { Calendar, Coins,Info, Layers } from "lucide-react";
+
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface RulesTabProps {

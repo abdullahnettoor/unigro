@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, ChevronLeft, Save } from "lucide-react";
-import type { Id } from "../../convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { PotFinancialsStep } from "@/pages/create-pot/PotFinancialsStep";
-import { PotSlotsStep } from "@/pages/create-pot/PotSlotsStep";
-import { PotRulesStep } from "@/pages/create-pot/PotRulesStep";
+import { ArrowRight, ChevronLeft, Save } from "lucide-react";
+
 import { cn } from "@/components/ui/Button";
+import { PotFinancialsStep } from "@/pages/create-pot/PotFinancialsStep";
+import { PotRulesStep } from "@/pages/create-pot/PotRulesStep";
+import { PotSlotsStep } from "@/pages/create-pot/PotSlotsStep";
+
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
 type DrawStrategy = "RANDOM" | "MANUAL";

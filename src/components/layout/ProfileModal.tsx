@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { Phone, Save,User } from "lucide-react";
+
 import { api } from "../../../convex/_generated/api";
-import { User, Phone, Save } from "lucide-react";
 
 export function ProfileModal() {
     const user = useQuery(api.users.current);

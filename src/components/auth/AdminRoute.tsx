@@ -1,7 +1,8 @@
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
 import { Navigate } from "react-router-dom";
+import { useQuery } from "convex/react";
 import { Loader2 } from "lucide-react";
+
+import { api } from "../../../convex/_generated/api";
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
     const isAdmin = useQuery(api.users.isAdmin);

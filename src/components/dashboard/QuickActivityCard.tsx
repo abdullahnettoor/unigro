@@ -1,4 +1,5 @@
 import { type ComponentType } from "react";
+
 import { GlassSurface } from "@/components/ui/GlassSurface";
 
 interface QuickActivityCardProps {

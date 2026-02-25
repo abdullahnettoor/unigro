@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/lib/utils";
+
 import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface MobileActionBarProps {

@@ -1,6 +1,7 @@
-import { Shuffle, UserCheck, Landmark } from "lucide-react";
-import { GlassSurface } from "@/components/ui/GlassSurface";
+import { Landmark,Shuffle, UserCheck } from "lucide-react";
+
 import { cn } from "@/components/ui/Button";
+import { GlassSurface } from "@/components/ui/GlassSurface";
 
 type DrawStrategy = "RANDOM" | "MANUAL";
 
