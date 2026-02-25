@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { formatCurrency } from "../lib/utils";
+import { getSlotStats, getCycleStats } from "../lib/pot";
 
 interface PotCardProps {
     pot: Doc<"pots"> & { foreman?: { name: string } | null };
@@ -11,17 +12,14 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
     const isDraft = pot.status === "DRAFT";
     const isForeman = currentUserId && pot.foremanId === currentUserId;
     const slots = ((pot as unknown as { slots?: Array<{ status: string }> }).slots) || [];
-    const filledSlots = slots.filter((slot) => slot.status === "FILLED" || slot.status === "RESERVED").length;
-    const totalSlots = Math.max(pot.config.totalSlots, 1);
-    const totalCycles = Math.max(pot.config.duration, 1);
-    const cycleIndex = Math.min(Math.max(pot.currentMonth || 0, 0), totalCycles);
+
+    const { filledSlots, totalSlots } = getSlotStats(pot, slots as any);
+    const { totalCycles, cycleIndex, cycleLabel } = getCycleStats(pot);
 
     const progressCount = isDraft ? filledSlots : cycleIndex;
     const progressTotal = isDraft ? totalSlots : totalCycles;
     const progress = Math.min(100, Math.round((progressCount / progressTotal) * 100));
-    const progressLabel = isDraft
-        ? "Slot fill progress"
-        : (pot.config.frequency === "occasional" ? "Round progress" : "Cycle progress");
+    const progressLabel = isDraft ? "Slot fill progress" : cycleLabel;
 
     return (
         <Link to={`/pot/${pot._id}`} className="block">

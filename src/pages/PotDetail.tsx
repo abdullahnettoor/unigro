@@ -13,6 +13,7 @@ import { PaymentModal } from "../components/PaymentComponents";
 import { PotHistory } from "../components/PotHistory"; // New
 import { Gavel, CheckCircle, Clock, Calendar, Coins, Share2, Layers, ShieldCheck, Trash2, Edit2, Info, ShieldAlert, PieChart, Users, ChevronDown, ChevronUp, ChevronLeft } from "lucide-react";
 import { formatCurrency } from "../lib/utils";
+import { getSlotStats, getPotDisplayProgress, getPotFinancials, getNextCycleDate, getVirtualOpenSlots } from "../lib/pot";
 
 export function PotDetail() {
     const { potId } = useParams<{ potId: string }>();
@@ -65,26 +66,21 @@ export function PotDetail() {
     const isMember = mySlots.length > 0;
     const activeSlots = allSlots.filter(s => s.status === "FILLED" || s.status === "RESERVED");
 
-    const filledCount = allSlots.filter((s: any) => s.status === 'FILLED' || s.userId).length;
-    const availableCount = (pot?.config?.totalSlots || 0) - filledCount;
-    const hasOpenSlots = availableCount > 0;
-    const filledSlotNumbers = new Set(allSlots.filter(s => s.userId).map(s => s.slotNumber));
-    const virtualOpenSlots = Array.from({ length: pot?.config?.totalSlots || 0 }, (_, i) => i + 1)
-        .filter(n => !filledSlotNumbers.has(n))
-        .map(n => ({ slotNumber: n, _id: `virtual-${n}` }));
+    // Use shared utilities for slot/progress calculations
+    const { filledSlots: filledCount, availableSlots: availableCount, hasOpenSlots } = getSlotStats(
+        pot || { status: "", currentMonth: 0, config: { totalSlots: 0, duration: 0, contribution: 0, totalValue: 0, frequency: "" } },
+        allSlots as any
+    );
+    const virtualOpenSlots = pot ? getVirtualOpenSlots(pot as any, allSlots as any) : [];
 
     const splitEligibleSlots = [
         ...virtualOpenSlots,
         ...allSlots.filter(s => s.isSplit && (s as any).remainingPercentage > 0)
     ];
 
-    // Fix Progress Bar Logic: Payment Progress if ACTIVE, Joining Progress if DRAFT
-    const roundTransactions = transactions?.filter(t => t.monthIndex === pot?.currentMonth) || [];
-    const paidCount = roundTransactions.filter(t => t.status === "PAID").length;
-    const totalExpectedOwners = activeSlots.length; // Number of unique slots occupied
-    const paymentProgress = totalExpectedOwners > 0 ? (paidCount / totalExpectedOwners) * 100 : 0;
-    const joiningProgress = (filledCount / Math.max(pot?.config?.totalSlots || 1, 1)) * 100;
-    const displayProgress = isActive ? paymentProgress : joiningProgress;
+    // Progress bar uses shared utility
+    const progressInfo = pot ? getPotDisplayProgress(pot as any, allSlots as any, (transactions || []) as any) : null;
+    const displayProgress = progressInfo?.percent ?? 0;
 
     // Keep default tab role-aware without state updates during render.
     useEffect(() => {
@@ -98,33 +94,12 @@ export function PotDetail() {
     if (!pot || transactions === undefined) return <div className="p-8 text-center animate-pulse">Loading pot details...</div>;
 
 
-    const commissionPct = pot.config.commission || 0;
-    const commissionAmount = (pot.config.totalValue * commissionPct) / 100;
-    const winningAmount = pot.config.totalValue - commissionAmount;
+    const { commissionPct, commissionAmount, winningAmount } = getPotFinancials(pot as any);
     const gracePeriod = pot.config.gracePeriodDays || 0;
 
-    // Date Logic
-    const getNextDate = (start: number | undefined, cycle: number, freq: string, grace: number = 0, nextDrawOverride?: number) => {
-        if (nextDrawOverride) return {
-            dateStr: new Date(nextDrawOverride).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-            isEvent: false
-        };
-        if (freq === 'occasional' || !start) return { dateStr: "On Demand", isEvent: true };
-        const date = new Date(start);
-        if (freq === 'monthly') date.setMonth(date.getMonth() + cycle);
-        else if (freq === 'quarterly') date.setMonth(date.getMonth() + (cycle * 3));
-        else if (freq === 'weekly') date.setDate(date.getDate() + (cycle * 7));
-        else if (freq === 'biweekly') date.setDate(date.getDate() + (cycle * 14));
-
-        date.setDate(date.getDate() + grace);
-        return {
-            dateStr: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-            isEvent: false
-        };
-    };
-
-    const nextDueDate = getNextDate(pot.startDate, pot.currentMonth, pot.config.frequency).dateStr;
-    const nextDrawDate = getNextDate(pot.startDate, pot.currentMonth, pot.config.frequency, gracePeriod, pot.nextDrawDate).dateStr;
+    // Date Logic — uses shared utility
+    const nextDueDate = getNextCycleDate(pot.startDate, pot.currentMonth, pot.config.frequency).dateStr;
+    const nextDrawDate = getNextCycleDate(pot.startDate, pot.currentMonth, pot.config.frequency, gracePeriod, pot.nextDrawDate).dateStr;
 
     // Actions
     const handleActivate = async () => {
@@ -490,7 +465,7 @@ export function PotDetail() {
                                     {isActive ? "Collection status" : "Filling status"}
                                 </div>
                                 <div className="text-xs font-mono text-[var(--text-primary)] font-bold">
-                                    {isActive ? `${paidCount} / ${totalExpectedOwners} paid` : `${filledCount} / ${pot.config.totalSlots} joined`}
+                                    {isActive ? `${progressInfo?.count ?? 0} / ${progressInfo?.total ?? 0} paid` : `${filledCount} / ${pot.config.totalSlots} joined`}
                                 </div>
                             </div>
                             <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-deep)] border border-[var(--border-subtle)]/30">

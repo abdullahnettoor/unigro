@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { PotCard } from "../components/PotCard";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { DashboardSidebar } from "./Dashboard";
+import { getProgressScore } from "../lib/pot";
 
 type RoleFilter = "all" | "organizing" | "joined";
 type StatusFilter = "all" | "draft" | "active" | "completed";
@@ -16,20 +17,6 @@ type SortFilter = "most_recent" | "pool_value" | "progress";
 type SortDirection = "desc" | "asc";
 
 
-
-function getProgressScore(pot: {
-    status: string;
-    currentMonth: number;
-    config: { duration: number; totalSlots: number };
-    slots?: Array<{ status: string }>;
-}) {
-    if (pot.status === "DRAFT") {
-        const slots = pot.slots || [];
-        const filled = slots.filter((slot) => slot.status === "FILLED" || slot.status === "RESERVED").length;
-        return filled / Math.max(pot.config.totalSlots, 1);
-    }
-    return Math.min(Math.max(pot.currentMonth, 0), pot.config.duration) / Math.max(pot.config.duration, 1);
-}
 
 function FilterPill({
     label,

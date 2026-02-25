@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Doc } from "../../convex/_generated/dataModel";
 import { Clock } from "lucide-react";
+import { getCollectionProgress } from "../lib/pot";
 
 interface PotVisualizerProps {
     pot: Doc<"pots">;
@@ -49,33 +50,11 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transac
         return fullSlots;
     }, [slots, pot.config.totalSlots]);
 
-    // Calculate collection progress for the current cycle
+    // Calculate collection progress for the current cycle using shared utility
     const collectionProgress = useMemo(() => {
         if (!transactions) return 0;
-        const currentCycleTxs = transactions.filter(t => t.monthIndex === currentMonthIndex && t.status === "PAID");
-        const totalExpected = pot.config.contribution * pot.config.totalSlots;
-        if (totalExpected === 0) return 0;
-
-        let collected = 0;
-        currentCycleTxs.forEach(tx => {
-            const slot = slots.find(s => s._id === tx.slotId);
-            if (!slot) return;
-
-            if (slot.isSplit && (slot as any).splitOwners) {
-                const owner = (slot as any).splitOwners.find((o: any) => o.userId === tx.userId);
-                if (owner) {
-                    collected += (pot.config.contribution * owner.sharePercentage) / 100;
-                } else if (!tx.userId) {
-                    // Fallback for legacy split payments without userId tracked
-                    collected += pot.config.contribution;
-                }
-            } else {
-                collected += pot.config.contribution;
-            }
-        });
-
-        return Math.min(100, (collected / totalExpected) * 100);
-    }, [transactions, currentMonthIndex, pot.config.contribution, pot.config.totalSlots, slots]);
+        return getCollectionProgress(pot as any, slots as any, transactions as any, currentMonthIndex);
+    }, [transactions, currentMonthIndex, pot, slots]);
 
     const paidCount = transactions?.filter(t => t.monthIndex === currentMonthIndex && t.status === "PAID").length || 0;
 
@@ -93,10 +72,10 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transac
             {/* The Sun (Pot Center) */}
             <div className="relative z-10 flex items-center justify-center">
                 {/* Collection Progress Ring */}
-                <svg className="absolute h-40 w-40 -rotate-90 transform" viewBox="0 0 100 100">
+                <svg className="absolute h-[180px] w-[180px] -rotate-90 transform overflow-visible" viewBox="0 0 110 110">
                     <circle
-                        cx="50"
-                        cy="50"
+                        cx="55"
+                        cy="55"
                         r="45"
                         stroke="var(--border-subtle)"
                         strokeWidth="1.5"
@@ -104,8 +83,8 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transac
                         className="opacity-20"
                     />
                     <motion.circle
-                        cx="50"
-                        cy="50"
+                        cx="55"
+                        cy="55"
                         r="45"
                         stroke="var(--accent-vivid)"
                         strokeWidth="2.5"
@@ -115,7 +94,7 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transac
                         transition={{ duration: 1.5, ease: "easeInOut" }}
                         fill="none"
                         strokeLinecap="round"
-                        className="drop-shadow-[0_0_8px_var(--accent-vivid)]"
+                        style={{ filter: "drop-shadow(0 0 8px var(--accent-vivid))" }}
                     />
                 </svg>
 
