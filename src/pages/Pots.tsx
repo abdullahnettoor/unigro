@@ -7,6 +7,7 @@ import { cn } from "../components/ui/Button";
 import { api } from "../../convex/_generated/api";
 import { AnimatePresence, motion } from "framer-motion";
 import { PotCard } from "../components/PotCard";
+import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { DashboardSidebar } from "./Dashboard";
 
 type RoleFilter = "all" | "organizing" | "joined";
@@ -44,10 +45,10 @@ function FilterPill({
             type="button"
             onClick={onClick}
             className={cn(
-                "rounded-full border px-4 py-1.5 text-xs font-semibold transition-all duration-200 ease-in-out sm:text-sm",
+                "rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200 ease-in-out",
                 active
-                    ? "border-transparent bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-md shadow-[var(--accent-vivid)]/20 ring-1 ring-[var(--accent-vivid)]"
-                    : "border-[var(--border-subtle)] bg-transparent text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/50 hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)]"
+                    ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm shadow-[var(--accent-vivid)]/20"
+                    : "border-[var(--border-subtle)] bg-[var(--surface-deep)]/30 text-[var(--text-primary)] hover:border-[var(--accent-vivid)]/50 hover:bg-[var(--surface-elevated)]"
             )}
         >
             {label}
@@ -67,7 +68,7 @@ export function Pots() {
     const [search, setSearch] = useState("");
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
-    const activeFilterCount = (roleFilter !== "all" ? 1 : 0) + (statusFilter !== "all" ? 1 : 0);
+    const activeFilterCount = statusFilter !== "all" ? 1 : 0;
 
     const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
 
@@ -157,6 +158,28 @@ export function Pots() {
                     </div>
                 </header>
 
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-semibold font-display">
+                            Your pots
+                        </h2>
+                        <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">
+                            {filteredPots.length}
+                        </span>
+                    </div>
+                    <SegmentedControl
+                        value={roleFilter}
+                        onChange={(val) => setRoleFilter(val as RoleFilter)}
+                        className="p-0.5"
+                        buttonClassName="min-h-7 px-3 text-[11px]"
+                        options={[
+                            { value: "all", label: "All" },
+                            { value: "joined", label: "Participating" },
+                            { value: "organizing", label: "Organizing" },
+                        ]}
+                    />
+                </div>
+
                 <AnimatePresence>
                     {isFiltersOpen && (
                         <motion.section
@@ -169,17 +192,6 @@ export function Pots() {
                             <div className="glass-1 rounded-2xl p-3 sm:p-4">
                                 <div className="flex flex-col gap-4">
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-                                        <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar sm:pb-0">
-                                            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] opacity-80 min-w-[3rem]">Role</span>
-                                            <div className="flex items-center gap-2">
-                                                <FilterPill label="All" active={roleFilter === "all"} onClick={() => setRoleFilter("all")} />
-                                                <FilterPill label="Organizing" active={roleFilter === "organizing"} onClick={() => setRoleFilter("organizing")} />
-                                                <FilterPill label="Joined" active={roleFilter === "joined"} onClick={() => setRoleFilter("joined")} />
-                                            </div>
-                                        </div>
-
-                                        <div className="hidden h-8 w-px bg-[var(--border-subtle)] sm:block" />
-
                                         <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar sm:pb-0">
                                             <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] opacity-80 min-w-[3rem]">Status</span>
                                             <div className="flex items-center gap-2">

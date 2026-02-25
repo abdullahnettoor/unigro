@@ -2,17 +2,15 @@ import { useMemo, useState, type ComponentType } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, CalendarClock, CheckCircle2, Home, Plus, Search, Settings as SettingsIcon, ShieldAlert, ShieldCheck, WalletCards } from "lucide-react";
+import { Bell, CalendarClock, CheckCircle2, Home, Plus, Settings as SettingsIcon, ShieldAlert, ShieldCheck, WalletCards } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
 import { PotCard } from "../components/PotCard";
 import { VerificationModal } from "../components/VerificationModal";
-import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { GlassSurface } from "../components/ui/GlassSurface";
 import { UserMenu } from "../components/UserMenu";
 import { formatCurrency } from "../lib/utils";
 
 type VerificationStatus = "UNVERIFIED" | "PENDING" | "REJECTED";
-type DashboardMode = "joined" | "organized";
 
 function VerificationBanner({
     status,
@@ -121,6 +119,12 @@ export function DashboardSidebar({
                 </Link>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Workspace</p>
                 <div className="space-y-2">
+                    {firstName === "Admin" && (
+                        <Link to="/admin" className={navItemClass(isActive("/admin"))}>
+                            <ShieldAlert size={16} />
+                            Admin
+                        </Link>
+                    )}
                     <Link to="/" className={navItemClass(isActive("/"))}>
                         <Home size={16} />
                         Dashboard
@@ -179,7 +183,6 @@ export function Dashboard() {
     const user = useQuery(api.users.current);
     const { user: clerkUser } = useUser();
     const [showVerificationModal, setShowVerificationModal] = useState(false);
-    const [mode, setMode] = useState<DashboardMode>("joined");
 
     const managedPots = useMemo(() => pots?.filter((p) => p.foremanId === user?._id) || [], [pots, user?._id]);
     const joinedPots = useMemo(() => pots?.filter((p) => p.foremanId !== user?._id) || [], [pots, user?._id]);
@@ -194,7 +197,7 @@ export function Dashboard() {
 
     const nextPaymentAmount = joinedPots[0]?.config.contribution || managedPots[0]?.config.contribution || 0;
     const nextPaymentCurrency = joinedPots[0]?.config.currency || managedPots[0]?.config.currency || "INR";
-    const activeList = mode === "joined" ? joinedPots : managedPots;
+    const recentPots = pots?.slice(0, 4) || [];
 
     const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
     const greeting = getGreeting();
@@ -246,32 +249,19 @@ export function Dashboard() {
                     </div>
 
                     <div className="hidden md:block">
-                        <div className="mb-4 space-y-3">
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="min-w-0 flex-1">
-                                    <h1 className="truncate text-3xl font-display font-bold tracking-tight lg:text-4xl">{greeting}, {firstName}</h1>
-                                    <p className="mt-1 text-sm text-[var(--accent-vivid)]">Your GrowPot is thriving</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        aria-label="Notifications"
-                                        className="glass-1 relative inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--text-primary)]"
-                                    >
-                                        <Bell size={18} />
-                                        <span className="absolute right-3 top-3 h-1.5 w-1.5 rounded-full bg-[var(--danger)]" />
-                                    </button>
-                                </div>
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                                <h1 className="truncate text-3xl font-display font-bold tracking-tight lg:text-4xl">{greeting}, {firstName}</h1>
+                                <p className="mt-1 text-sm text-[var(--accent-vivid)]">Your GrowPot is thriving</p>
                             </div>
-
-                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                                <div className="glass-1 flex min-w-0 flex-1 items-center gap-2 rounded-2xl px-3 py-2">
-                                    <Search size={16} className="text-[var(--text-muted)]" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search pots or rewards..."
-                                        className="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
-                                    />
-                                </div>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    aria-label="Notifications"
+                                    className="glass-1 relative inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--text-primary)]"
+                                >
+                                    <Bell size={18} />
+                                    <span className="absolute right-3 top-3 h-1.5 w-1.5 rounded-full bg-[var(--danger)]" />
+                                </button>
                                 <Link
                                     to="/create"
                                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--accent-vivid)] px-5 py-2 font-semibold text-[var(--text-on-accent)] shadow-[0_8px_20px_rgba(43,110,87,0.20)] transition-opacity hover:opacity-90"
@@ -279,12 +269,6 @@ export function Dashboard() {
                                     <Plus size={18} />
                                     Create New Pot
                                 </Link>
-                            </div>
-                        </div>
-                        <div className="glass-1 rounded-2xl p-5">
-                            <div>
-                                <h1 className="text-3xl font-bold font-display">Dashboard</h1>
-                                <p className="text-[var(--text-muted)]">Track your pots, payments, and next actions.</p>
                             </div>
                         </div>
                     </div>
@@ -321,20 +305,15 @@ export function Dashboard() {
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                             <h2 className="text-2xl font-semibold font-display">
-                                {mode === "organized" ? "Pots you organize" : "Pots you joined"}
+                                Recent pots
                             </h2>
                             <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">
-                                {activeList.length}
+                                {pots?.length || 0}
                             </span>
                         </div>
-                        <SegmentedControl
-                            value={mode}
-                            onChange={setMode}
-                            options={[
-                                { value: "joined", label: "Participating" },
-                                { value: "organized", label: "Organizing" },
-                            ]}
-                        />
+                        <Link to="/pots" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--surface-deep)]/50 px-3 py-1.5 text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-elevated)] border border-[var(--border-subtle)]">
+                            View All Pots
+                        </Link>
                     </div>
 
                     {!pots ? (
@@ -343,13 +322,13 @@ export function Dashboard() {
                                 <div key={i} className="glass-2 h-48 animate-pulse rounded-2xl" />
                             ))}
                         </div>
-                    ) : activeList.length === 0 ? (
+                    ) : recentPots.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/30 py-12 text-center text-[var(--text-muted)]">
-                            {mode === "organized" ? "You are not organizing any pots yet." : "You have not joined any pots yet."}
+                            You have not joined or organized any pots yet.
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                            {activeList.map((pot) => (
+                            {recentPots.map((pot) => (
                                 <PotCard key={pot._id} pot={pot} currentUserId={user?._id} />
                             ))}
                         </div>
