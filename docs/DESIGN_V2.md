@@ -164,8 +164,10 @@ Guidelines:
 ### 6.3 Breakpoints and Grid
 
 - Mobile-first by default (single column baseline).
-- Avoid two-column financial data layouts below small tablet widths.
-- Any horizontal tab/segment bar must support `overflow-x-auto`.
+- **Desktop (lg >= 1024px)**: Transition to a 2-column grid (e.g., `grid-cols-[1fr_340px]`) for complex detail views (like Pot Detail). Main content lives in the left fluid column, while contextual stats and primary actions live in a sticky right sidebar.
+- **Tablet (sm/md)**: Maintain a single-column layout but allow content to comfortably breathe. Use expandable content areas to manage vertical height.
+- Any horizontal tab/segment bar must support `overflow-x-auto` and hide scrollbars visually.
+- Responsive elements should dynamically hide/show (e.g., hiding mobile sticky bars on desktop and showing desktop sidebars).
 
 ### 6.4 Safe Area Rules
 
@@ -275,6 +277,28 @@ Contracts:
 - Toasts for low-friction feedback.
 - Confirmation dialogs for destructive or irreversible actions.
 - Copy must state what will happen after confirmation.
+
+### 7.11 Sticky Bars (Mobile & Tablet)
+
+- **Top Sticky Navigation**: Use on detail pages to provide quick back access and contextual status (e.g., Pot Title & Status) to avoid consuming scrolling space. Must be hidden on large screens in favor of standard text-based back links. Uses `glass-3` with high z-index.
+- **Bottom Action Bar**: Used on mobile/tablet to anchor the primary CTA (e.g., Join, Pay, Invite) so users don't have to scroll to take action. Disappears on desktop where the sticky sidebar serves this purpose.
+
+### 7.12 Expandable Mobile Cards
+
+- For dense secondary information (e.g., Financial Summaries, Dates), use a unified expandable card on smaller screens to preserve vertical space.
+- A single full-width button acts as the header, toggling the content area inside the same container.
+- Animation must be smooth, using CSS Grid transitions (`grid-rows-[0fr]` to `grid-rows-[1fr]`) along with opacity fades.
+
+### 7.13 Progress & Visualizer Components
+
+- **Progress Bars**: Must clearly label the metric (e.g., "Collection status" vs "Filling status"). Use right-aligned textual fractions (e.g., "5 / 8 paid") above the bar. Bars should use a horizontal gradient fill (`--accent-vivid` to `--accent-secondary`) and a subtle glow.
+- **Visualizers**: Must be fluid and responsive. Use flex or grid layouts that adapt to container width, scaling gracefully from 320px mobile properties up to large desktop heroic headers.
+
+### 7.14 Information Banners
+
+- Used for contextual warnings or instructions (e.g., "Pot is full", "Overdue Payment").
+- Use `glass-3` with a left border accent (e.g., `border-l-[var(--warning)]`) and matching background tint.
+- Layout: Icon on the left, Title & Description in the center, and an optional textual action button (e.g., "Contact") on the far right.
 
 ## 8. Content and Terminology Contract
 
