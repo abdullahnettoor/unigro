@@ -11,7 +11,7 @@ import { NextRoundModal } from "../components/NextRoundModal"; // New
 import { PotVisualizer } from "../components/PotVisualizer";
 import { PaymentModal } from "../components/PaymentComponents";
 import { PotHistory } from "../components/PotHistory"; // New
-import { Gavel, CheckCircle, Clock, Calendar, Coins, Share2, Layers, Play, ShieldCheck, Trash2, ArrowRight, Edit2, Info, EyeOff, ShieldAlert, PieChart, Users, ChevronDown, ChevronUp, ChevronLeft } from "lucide-react";
+import { Gavel, CheckCircle, Clock, Calendar, Coins, Share2, Layers, ShieldCheck, Trash2, Edit2, Info, ShieldAlert, PieChart, Users, ChevronDown, ChevronUp, ChevronLeft } from "lucide-react";
 import { formatCurrency } from "../lib/utils";
 
 export function PotDetail() {
@@ -25,8 +25,8 @@ export function PotDetail() {
     const activatePot = useMutation(api.pots.activate);
     const runDraw = useMutation(api.pots.runDraw);
     const deleteSlot = useMutation(api.pots.deleteSlot);
-    const recordPayout = useMutation(api.transactions.recordPayout);
     const recordCashPayment = useMutation(api.transactions.recordCashPayment); // Hoisted for Foreman Action
+    const foremanDetails = useQuery(api.users.get, { userId: pot?.foremanId || "" as any });
     const feedback = useFeedback();
 
     // UI State
@@ -34,13 +34,12 @@ export function PotDetail() {
     const [showSplitModal, setShowSplitModal] = useState(false); // New
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [showNextRoundModal, setShowNextRoundModal] = useState(false);
-    const [showUploadModal, setShowUploadModal] = useState<Id<"slots"> | null>(null);
     const [isDrawing, setIsDrawing] = useState(false);
+    const [showMobileStats, setShowMobileStats] = useState(false);
 
     const [showWinnerSelection, setShowWinnerSelection] = useState(false);
     const [selectedWinnerSlotNum, setSelectedWinnerSlotNum] = useState<number | null>(null);
 
-    const [showPayoutModal, setShowPayoutModal] = useState<Id<"slots"> | null>(null);
     // Global Payment Modal State (for History & Foreman actions)
     const [globalPaymentState, setGlobalPaymentState] = useState<{
         slotId: Id<"slots">,
@@ -50,7 +49,7 @@ export function PotDetail() {
         userId?: Id<"users"> // For Foreman to know who he is marking for
     } | null>(null);
 
-    type Tab = 'dashboard' | 'rules' | 'slots' | 'members' | 'history' | 'approvals';
+    type Tab = 'dashboard' | 'rules' | 'slots' | 'members' | 'history' | 'approvals' | 'organize';
     const [activeTab, setActiveTab] = useState<Tab>('rules');
 
     // Computed State
@@ -59,52 +58,44 @@ export function PotDetail() {
 
     const isForeman = currentUser?._id === pot?.foremanId;
     const allSlots = pot?.slots || [];
-    const activeSlots = allSlots.filter(s => s.status === "FILLED" || s.status === "RESERVED");
-
     const mySlots = currentUser ? allSlots.filter(s =>
         s.userId === currentUser._id ||
         (s.isSplit && (s as any).splitOwners?.some((o: any) => o.userId === currentUser._id))
     ) : [];
     const isMember = mySlots.length > 0;
+    const activeSlots = allSlots.filter(s => s.status === "FILLED" || s.status === "RESERVED");
+
+    const filledCount = allSlots.filter((s: any) => s.status === 'FILLED' || s.userId).length;
+    const availableCount = (pot?.config?.totalSlots || 0) - filledCount;
+    const hasOpenSlots = availableCount > 0;
+    const filledSlotNumbers = new Set(allSlots.filter(s => s.userId).map(s => s.slotNumber));
+    const virtualOpenSlots = Array.from({ length: pot?.config?.totalSlots || 0 }, (_, i) => i + 1)
+        .filter(n => !filledSlotNumbers.has(n))
+        .map(n => ({ slotNumber: n, _id: `virtual-${n}` }));
+
+    const splitEligibleSlots = [
+        ...virtualOpenSlots,
+        ...allSlots.filter(s => s.isSplit && (s as any).remainingPercentage > 0)
+    ];
+
+    // Fix Progress Bar Logic: Payment Progress if ACTIVE, Joining Progress if DRAFT
+    const roundTransactions = transactions?.filter(t => t.monthIndex === pot?.currentMonth) || [];
+    const paidCount = roundTransactions.filter(t => t.status === "PAID").length;
+    const totalExpectedOwners = activeSlots.length; // Number of unique slots occupied
+    const paymentProgress = totalExpectedOwners > 0 ? (paidCount / totalExpectedOwners) * 100 : 0;
+    const joiningProgress = (filledCount / Math.max(pot?.config?.totalSlots || 1, 1)) * 100;
+    const displayProgress = isActive ? paymentProgress : joiningProgress;
 
     // Keep default tab role-aware without state updates during render.
     useEffect(() => {
         setActiveTab((prev) => {
             if (prev !== "rules") return prev;
-            return currentUser && (isMember || isForeman) ? "dashboard" : "rules";
+            if (currentUser && isForeman) return "organize";
+            return currentUser && isMember ? "dashboard" : "rules";
         });
     }, [currentUser, isMember, isForeman]);
 
     if (!pot || transactions === undefined) return <div className="p-8 text-center animate-pulse">Loading pot details...</div>;
-
-    // Constants
-    const filledSlotNumbers = new Set(activeSlots.map(s => s.slotNumber));
-    const virtualOpenSlots = Array.from({ length: pot.config.totalSlots }, (_, i) => i + 1)
-        .filter(n => !filledSlotNumbers.has(n))
-        .map(n => ({ slotNumber: n, _id: `virtual-${n}` }));
-
-    // Split Slots Logic
-    const reservedSlots = activeSlots.filter(s => s.status === "RESERVED");
-
-
-    const splitEligibleSlots = [
-        ...reservedSlots.map(s => {
-            const currentPct = (s as any).splitOwners?.reduce((sum: number, o: any) => sum + o.sharePercentage, 0) || 0;
-            return {
-                slotNumber: s.slotNumber,
-                _id: s._id,
-                isReserved: true,
-                remainingPercentage: 100 - currentPct
-            };
-        }),
-        ...virtualOpenSlots.map(s => ({ ...s, remainingPercentage: 100 }))
-    ].sort((a, b) => a.slotNumber - b.slotNumber);
-
-
-    const filledCount = activeSlots.length;
-    const availableCount = pot.config.totalSlots - filledCount;
-    const hasOpenSlots = availableCount > 0;
-
 
 
     const commissionPct = pot.config.commission || 0;
@@ -154,6 +145,21 @@ export function PotDetail() {
             console.error(error);
             const msg = error.message.includes("Verified") ? "You must be verified to activate a pot." : "Failed to activate pot.";
             feedback.toast.error("Activation failed", msg);
+        }
+    };
+
+    const handleContactOrganizer = () => {
+        if (!foremanDetails) return;
+        const body = `Hi ${foremanDetails.name}, I'm interested in joining your pot "${pot.title}", but it appears to be full. Please let me know if a slot becomes available.`;
+        const encodedBody = encodeURIComponent(body);
+        const subject = encodeURIComponent(`Inquiry about GrowPot: ${pot.title}`);
+
+        if (foremanDetails.phone) {
+            window.open(`https://wa.me/${foremanDetails.phone.replace(/\D/g, '')}?text=${encodedBody}`, '_blank');
+        } else if (foremanDetails.email) {
+            window.location.href = `mailto:${foremanDetails.email}?subject=${subject}&body=${encodedBody}`;
+        } else {
+            feedback.toast.info("Contact Organizer", `Please contact ${foremanDetails.name} directly.`);
         }
     };
 
@@ -310,13 +316,13 @@ export function PotDetail() {
                 stats.slots.push({ ...slot, share: owner.sharePercentage, isPaid, due });
                 stats.totalShare += owner.sharePercentage;
                 if (!isPaid) stats.totalDue += due;
-                else stats.paidCount++;
             });
         }
     });
 
     const memberList = Array.from(memberStats.values()).sort((a, b) => a.user.name.localeCompare(b.user.name));
     const pendingApprovalsCount = transactions?.filter((t) => t.status === "PENDING").length || 0;
+
     const tabButtonClass = (tab: Tab) =>
         `px-3 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap rounded-full ${activeTab === tab
             ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
@@ -328,33 +334,68 @@ export function PotDetail() {
         return !tx || tx.status === "UNPAID";
     });
 
+    const isAnyModalOpen = showAddMember || showSplitModal || showJoinModal || showNextRoundModal || !!globalPaymentState || showWinnerSelection;
+
     const primaryAction = (() => {
-        if (isForeman && isDraft) {
+        // Visitor/Non-member viewing pot with space
+        if (!isMember && !isForeman && hasOpenSlots) {
             return {
-                label: "Activate pot",
-                helper: "All slots must be filled before activation.",
-                onClick: handleActivate,
+                label: "Join Pot",
+                helper: "Choose your slots and join this pot.",
+                onClick: () => setShowJoinModal(true),
                 tone: "primary",
             };
         }
-        if (isForeman && isActive && !currentWinnerSlot) {
+
+        // Visitor/Non-member viewing full pot
+        if (!isMember && !isForeman && !hasOpenSlots) {
             return {
-                label: isDrawing ? "Running draw..." : "Run draw",
-                helper: "Select a winner for the current cycle.",
-                onClick: handleDraw,
-                disabled: isDrawing,
+                label: "Contact Organizer",
+                helper: "This pot is currently full. Contact the manager for updates.",
+                onClick: handleContactOrganizer,
                 tone: "secondary",
             };
         }
-        if (isForeman && isActive && currentWinnerSlot) {
-            return {
-                label: "Next round",
-                helper: "Close this cycle and move to the next one.",
-                onClick: () => setShowNextRoundModal(true),
-                tone: "primary",
-            };
+
+        // Foreman case
+        if (isForeman) {
+            if (hasOpenSlots) {
+                return {
+                    label: "Invite Members",
+                    helper: "Share this pot to fill remaining slots.",
+                    onClick: handleShare,
+                    tone: "primary",
+                };
+            }
+            if (isDraft) {
+                return {
+                    label: "Activate Pot",
+                    helper: "All slots filled. Ready to start.",
+                    onClick: handleActivate,
+                    tone: "primary",
+                };
+            }
+            if (isActive && !currentWinnerSlot) {
+                return {
+                    label: isDrawing ? "Running draw..." : "Run draw",
+                    helper: "Select a winner for the current cycle.",
+                    onClick: handleDraw,
+                    disabled: isDrawing,
+                    tone: "secondary",
+                };
+            }
+            if (isActive && currentWinnerSlot) {
+                return {
+                    label: "Next round",
+                    helper: "Close this cycle and move to the next one.",
+                    onClick: () => setShowNextRoundModal(true),
+                    tone: "primary",
+                };
+            }
         }
-        if (!isForeman && isMember && isActive && myCurrentCycleUnpaidSlot) {
+
+        // Member case
+        if (isMember && isActive && myCurrentCycleUnpaidSlot) {
             return {
                 label: "Pay now",
                 helper: "Submit payment for your current cycle.",
@@ -367,780 +408,622 @@ export function PotDetail() {
                 tone: "primary",
             };
         }
-        if (!isForeman && hasOpenSlots) {
-            return {
-                label: "Join Pot",
-                helper: "Choose your slots and join this pot.",
-                onClick: () => setShowJoinModal(true),
-                tone: "primary",
-            };
-        }
+
         return null;
     })();
 
 
+
     // --- RENDER ---
     return (
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6 lg:px-8 bg-[var(--bg-app)] min-h-screen">
             {/* Mobile Sticky Topbar */}
-            <div className="sticky top-0 z-50 -mx-4 -mt-6 mb-6 flex items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md sm:hidden">
+            <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">
                 <button onClick={() => navigate(-1)} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
                     <ChevronLeft size={20} />
                 </button>
-                <h2 className="flex-1 truncate font-display text-lg font-bold">{pot.title}</h2>
+                <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold text-[var(--accent-vivid)] uppercase tracking-widest leading-none mb-0.5">GrowPot {pot.status}</p>
+                    <h2 className="truncate font-display text-base font-bold text-[var(--text-primary)]">{pot.title}</h2>
+                </div>
+                {isForeman && (
+                    <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="rounded-full p-2 hover:bg-[var(--surface-deep)] text-[var(--text-muted)]">
+                        <Edit2 size={18} />
+                    </button>
+                )}
             </div>
 
-            {/* Desktop Back Button */}
+            {/* Desktop Back Link */}
             <button
                 onClick={() => navigate('/pots')}
-                className="mb-6 hidden shrink-0 items-center gap-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] sm:flex"
+                className="mb-4 hidden lg:flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
             >
                 <ChevronLeft size={16} /> Back to pots
             </button>
 
-            {/* Header */}
-            <header className="glass-2 mb-6 rounded-2xl p-5 sm:mb-8 sm:p-6">
-                <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-4xl font-display font-bold">{pot.title}</h1>
-                            <span className={`px-3 py-1 rounded-full text-xs font-mono uppercase ${isDraft ? "bg-[var(--warning)]/20 text-[var(--warning)]" : "bg-[var(--accent-vivid)]/20 text-[var(--accent-vivid)]"}`}>
-                                {pot.status}
+            {/* Full Pot Banner for Visitors */}
+            {!isMember && !isForeman && !hasOpenSlots && (
+                <div className="mb-6 glass-3 border-l-4 border-l-[var(--warning)] p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <div className="bg-[var(--warning)]/20 p-2 rounded-full text-[var(--warning)]">
+                        <ShieldAlert size={20} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-[var(--text-primary)]">Pot is currently full</p>
+                        <p className="text-xs text-[var(--text-muted)]">All slots have been taken. Contact the organizer to request an opening.</p>
+                    </div>
+                    <button
+                        onClick={handleContactOrganizer}
+                        className="text-xs font-bold text-[var(--accent-vivid)] hover:underline whitespace-nowrap"
+                    >
+                        Contact
+                    </button>
+                </div>
+            )}
+
+            {/* MAIN 2-COLUMN GRID */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start pb-24 lg:pb-8">
+
+                {/* LEFT COLUMN: Hero & Content */}
+                <div className="space-y-6">
+                    {/* Hero Visualizer Section */}
+                    <div className="glass-3 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+                        <div className="absolute top-4 right-4 z-20 hidden sm:block">
+                            <OrganizerDisplay foremanId={pot.foremanId} />
+                        </div>
+                        <div className="mb-2 text-center sm:text-left">
+                            <span className="text-[10px] font-bold text-[var(--accent-vivid)] uppercase tracking-widest bg-[var(--accent-vivid)]/10 px-2 py-0.5 rounded-full mb-2 inline-block">
+                                GrowPot {pot.status}
                             </span>
+                            <h1 className="text-3xl sm:text-4xl font-display font-black text-[var(--text-primary)]">{pot.title}</h1>
                         </div>
-                        <OrganizerDisplay foremanId={pot.foremanId} />
-                        {pot.foreman?.verificationStatus !== "VERIFIED" && (
-                            <div className="mt-3 bg-[var(--warning)]/10 border border-[var(--warning)]/20 text-[var(--warning)] text-xs px-3 py-2 rounded-lg flex items-center gap-2">
-                                <ShieldAlert size={14} className="text-[var(--warning)]" />
-                                <span><strong>Caution:</strong> Organizer is not verified yet.</span>
+
+                        {(isMember || isForeman || (isActive && hasOpenSlots)) && (
+                            <div className="mt-4">
+                                <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} transactions={transactions || []} />
                             </div>
                         )}
-                    </div>
 
-
-                    <div className="flex flex-wrap items-center gap-2">
-                        {/* Action Buttons */}
-                        {(isActive || isDraft) && hasOpenSlots && (
-                            <button onClick={() => setShowJoinModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold min-h-11 px-6 py-2 rounded-full hover:opacity-90 shadow-lg">
-                                Join Pot
-                            </button>
-                        )}
-
-                        <button onClick={handleShare} className="bg-[var(--surface-deep)]/80 text-[var(--text-primary)] font-semibold min-h-11 px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/90 flex items-center gap-2 text-sm">
-                            <Share2 size={16} /> Share
-                        </button>
-
-                        {isForeman && (
-                            <>
-                                {isDraft && (
-                                    <>
-                                        <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold min-h-11 px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
-                                            <Edit2 size={16} /> Edit pot
-                                        </button>
-                                        <button onClick={handleActivate} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold min-h-11 px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
-                                            <Play size={16} /> Activate pot
-                                        </button>
-                                    </>
-                                )}
-                                {isActive && (
-                                    <>
-                                        {pendingApprovalsCount > 0 && (
-                                            <button onClick={() => setActiveTab("approvals")} className="bg-[var(--warning)]/15 text-[var(--warning)] border border-[var(--warning)]/30 font-semibold min-h-11 px-4 py-2 rounded-full hover:bg-[var(--warning)]/20 flex items-center gap-2 text-sm">
-                                                <ShieldCheck size={16} /> Review approvals ({pendingApprovalsCount})
-                                            </button>
-                                        )}
-                                        {!currentWinnerSlot ? (
-                                            <div className="flex gap-2">
-                                                <button onClick={() => setShowWinnerSelection(true)} className="bg-[var(--surface-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] font-semibold min-h-11 px-4 py-2 rounded-full hover:bg-[var(--surface-deep)]/80 flex items-center gap-2 text-sm">
-                                                    Manual winner
-                                                </button>
-                                                <button onClick={handleDraw} disabled={isDrawing} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] font-bold min-h-11 px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
-                                                    <Gavel size={16} /> {isDrawing ? "Rolling..." : "Run draw"}
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <button onClick={() => setShowNextRoundModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold min-h-11 px-4 py-2 rounded-full hover:opacity-90 flex items-center gap-2 text-sm">
-                                                <ArrowRight size={16} /> Next round
-                                            </button>
-                                        )}
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-
-                {/* Pot Stats Grid - Keep as is, it uses pot.config */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4 mt-6">
-                    <div className="glass-1 rounded-xl p-4">
-                        <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Total Pool</div>
-                        <div className="text-xl font-mono">{formatCurrency(pot.config.totalValue, pot.config.currency)}</div>
-                    </div>
-                    <div className="glass-1 rounded-xl p-4">
-                        <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Winner Gets</div>
-                        <div className="text-xl font-mono text-[var(--accent-secondary)]">{formatCurrency(winningAmount, pot.config.currency)}</div>
-                    </div>
-                    <div className="glass-1 rounded-xl p-4">
-                        <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Next Payment</div>
-                        <div className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1"><Clock size={12} className="text-[var(--accent-vivid)]" /> {nextDueDate}</div>
-                    </div>
-                    <div className="glass-1 rounded-xl p-4">
-                        <div className="text-xs text-[var(--text-muted)] uppercase mb-1">Next Draw</div>
-                        <div className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1"><Calendar size={12} className="text-[var(--accent-secondary)]" /> {nextDrawDate}</div>
-                    </div>
-                </div>
-
-
-                <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
-                    <div className="glass-1 rounded-2xl p-4">
-                        <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] mb-1">Collection status</div>
-                        <div className="text-lg font-semibold text-[var(--text-primary)]">
-                            Round {pot.currentMonth} of {pot.config.duration}
-                        </div>
-                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--surface-deep)]">
-                            <div
-                                className="h-full bg-[var(--accent-vivid)] transition-all duration-300"
-                                style={{ width: `${Math.min(100, (filledCount / Math.max(pot.config.totalSlots, 1)) * 100)}%` }}
-                            />
+                        {/* Quick Progress Bar for small screens/non-members */}
+                        <div className="mt-8 border-t border-[var(--border-subtle)] pt-6">
+                            <div className="flex justify-between items-end mb-2">
+                                <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] font-bold">
+                                    {isActive ? "Collection status" : "Filling status"}
+                                </div>
+                                <div className="text-xs font-mono text-[var(--text-primary)] font-bold">
+                                    {isActive ? `${paidCount} / ${totalExpectedOwners} paid` : `${filledCount} / ${pot.config.totalSlots} joined`}
+                                </div>
+                            </div>
+                            <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-deep)] border border-[var(--border-subtle)]/30">
+                                <div
+                                    className="h-full bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)] transition-all duration-500 shadow-[0_0_10px_var(--accent-vivid)]"
+                                    style={{ width: `${Math.min(100, displayProgress)}%` }}
+                                />
+                            </div>
                         </div>
                     </div>
-                    {primaryAction && (
-                        <div className="glass-2 rounded-2xl p-4 lg:sticky lg:top-24">
-                            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] mb-2">Primary action</div>
+
+                    {/* MOBILE/TABLET EXPANDABLE STATS & CONTROLS */}
+                    <div className="lg:hidden">
+                        <div className={`glass-3 rounded-3xl overflow-hidden transition-all duration-500 ${showMobileStats ? 'pb-6' : ''}`}>
                             <button
-                                onClick={primaryAction.onClick}
-                                disabled={primaryAction.disabled}
-                                className={`w-full rounded-full px-4 py-3 text-sm font-bold transition-opacity disabled:opacity-60 ${primaryAction.tone === "secondary"
-                                    ? "bg-[var(--accent-secondary)] text-[var(--text-primary)] hover:opacity-90"
-                                    : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
-                                    }`}
+                                onClick={() => setShowMobileStats(!showMobileStats)}
+                                className="w-full p-4 flex items-center justify-between text-sm font-bold transition-all hover:bg-[var(--surface-elevated)] border-none bg-transparent"
                             >
-                                {primaryAction.label}
-                            </button>
-                            <p className="mt-2 text-xs text-[var(--text-muted)]">{primaryAction.helper}</p>
-                        </div>
-                    )}
-                </div>
-            </header>
-
-            {/* Tab Navigation */}
-            <div className="glass-1 mb-6 flex gap-2 overflow-x-auto rounded-full p-1 sm:mb-8 sm:gap-3">
-                {(isMember || isForeman) && (
-                    <button
-                        onClick={() => setActiveTab('dashboard')}
-                        className={tabButtonClass("dashboard")}
-                    >
-                        Overview
-                    </button>
-                )}
-
-                {isForeman && isActive && (
-                    <button
-                        onClick={() => setActiveTab('approvals')}
-                        className={tabButtonClass("approvals")}
-                    >
-                        Approvals {pendingApprovalsCount > 0 && <span className="ml-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded-full text-[10px]">{pendingApprovalsCount}</span>}
-                    </button>
-                )}
-
-                {(isMember || isForeman) && (
-                    <button
-                        onClick={() => setActiveTab('members')}
-                        className={tabButtonClass("members")}
-                    >
-                        Members <span className="ml-1 bg-[var(--surface-deep)]/80 px-1.5 py-0.5 rounded-full text-[10px] text-[var(--text-muted)]">{memberList.length}</span>
-                    </button>
-                )}
-
-                <button
-                    onClick={() => setActiveTab('rules')}
-                    className={tabButtonClass("rules")}
-                >
-                    Rules and info
-                </button>
-
-                {(isMember || isForeman) && (
-                    <>
-                        <button
-                            onClick={() => setActiveTab('slots')}
-                            className={tabButtonClass("slots")}
-                        >
-                            Slots ({activeSlots.length}/{pot.config.totalSlots})
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('history')}
-                            className={tabButtonClass("history")}
-                        >
-                            History
-                        </button>
-                    </>
-                )}
-            </div>
-
-            {/* TAB CONTENT: DASHBOARD */}
-            {activeTab === 'dashboard' && (isMember || isForeman) && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    {/* Member Dashboard */}
-                    {isMember && !isDraft && (
-                        <MemberDashboard
-                            pot={pot}
-                            mySlots={mySlots}
-                            transactions={transactions || []}
-                            nextDueDate={nextDueDate}
-                            currentUserId={currentUser?._id || ""}
-                        />
-                    )}
-
-                    {/* Visualizer */}
-                    {(isMember || isForeman) && (
-                        <section>
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xl font-display font-bold flex items-center gap-2">
-                                    <Clock className="text-[var(--accent-vivid)]" /> Current Cycle
-                                </h3>
-                                <button onClick={() => setActiveTab('slots')} className="text-xs text-[var(--accent-vivid)] hover:underline">View all slots</button>
-                            </div>
-                            <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} transactions={transactions || []} />
-                            {currentWinnerSlot && (
-                                <div className="text-center mt-4 animate-bounce">
-                                    <p className="text-[var(--text-muted)] text-sm">Winner of Cycle {pot.currentMonth}</p>
-                                    <p className="text-2xl font-display font-bold text-[var(--gold)]">Slot #{currentWinnerSlot.slotNumber}: {currentWinnerSlot.user?.name}</p>
-                                </div>
-                            )}
-                        </section>
-                    )}
-                </div>
-            )}
-
-            {/* TAB CONTENT: MEMBERS (NEW) */}
-            {activeTab === 'members' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <MembersList
-                        members={memberList}
-                        potId={pot._id}
-                        currentMonth={pot.currentMonth}
-                        isForeman={isForeman}
-                        isActive={isActive}
-                        currentUserId={currentUser?._id} // Pass current user ID
-                        currency={pot.config.currency}
-                    />
-                </div>
-            )}
-
-            {/* TAB CONTENT: RULES & INFO */}
-            {activeTab === 'rules' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-6">
-                        <h3 className="text-xl font-display font-bold flex items-center gap-2 mb-6">
-                            <Info className="text-[var(--accent-vivid)]" /> Rules and description
-                        </h3>
-                        <div className="prose prose-invert prose-sm max-w-none mb-8">
-                            <p className="whitespace-pre-wrap">{pot.description || "No specific description provided by the organizer."}</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Configuration */}
-                            <div className="bg-[var(--surface-deep)]/60 p-6 rounded-xl space-y-4">
-                                <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Layers size={14} /> Pot configuration</h4>
-                                <div className="grid grid-cols-2 gap-y-3 text-sm">
-                                    <div className="text-[var(--text-muted)]">Total Value</div><div className="text-[var(--text-primary)] font-mono text-right">{formatCurrency(pot.config.totalValue, pot.config.currency)}</div>
-                                    <div className="text-[var(--text-muted)]">Contribution</div><div className="text-[var(--text-primary)] font-mono text-right">{formatCurrency(pot.config.contribution, pot.config.currency)}</div>
-                                    <div className="text-[var(--text-muted)]">Frequency</div><div className="text-[var(--text-primary)] capitalize text-right">{pot.config.frequency}</div>
-                                    <div className="text-[var(--text-muted)]">Duration</div><div className="text-[var(--text-primary)] text-right">{pot.config.duration} Cycles</div>
-                                    <div className="text-[var(--text-muted)]">Commission</div><div className="text-[var(--text-primary)] text-right">{pot.config.commission}%</div>
-                                    <div className="text-[var(--text-muted)]">Total Slots</div><div className="text-[var(--text-primary)] text-right">{pot.config.totalSlots}</div>
-                                </div>
-                            </div>
-
-                            {/* Bank Details */}
-                            {pot.bankDetails && (
-                                <div className="bg-[var(--surface-deep)]/60 p-6 rounded-xl space-y-4">
-                                    <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Coins size={14} /> Bank details</h4>
-                                    <div className="whitespace-pre-wrap text-sm text-[var(--text-muted)] font-mono bg-[var(--surface-deep)]/60 p-4 rounded-lg">
-                                        {pot.bankDetails}
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-[var(--accent-secondary)]/20 p-2 rounded-xl text-[var(--accent-secondary)]">
+                                        <PieChart size={18} />
                                     </div>
-                                    <p className="text-xs text-[var(--text-muted)] mt-2">
-                                        * Please make payments to the account above and upload proof for approval.
-                                    </p>
+                                    <span>Pot Details & Stats</span>
                                 </div>
-                            )}
+                                <div className={`transition-transform duration-300 ${showMobileStats ? 'rotate-180' : ''}`}>
+                                    <ChevronDown size={20} />
+                                </div>
+                            </button>
+
+                            {/* Collapsible Content Area */}
+                            <div className={`grid transition-all duration-500 ease-in-out ${showMobileStats ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'}`}>
+                                <div className="overflow-hidden">
+                                    <div className="px-6 py-2 space-y-6">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-1">Winning Pot</p>
+                                                <p className="text-4xl font-display font-black text-[var(--accent-secondary)]">{formatCurrency(winningAmount, pot.config.currency)}</p>
+                                                <p className="text-[10px] text-[var(--text-muted)]">After {commissionPct.toFixed(2)}% commission ({formatCurrency(commissionAmount, pot.config.currency)})</p>
+                                            </div>
+
+                                            <div className="h-px bg-[var(--border-subtle)] opacity-20" />
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-1">Round Pool</p>
+                                                    <p className="text-lg font-mono font-bold">{formatCurrency(pot.config.totalValue, pot.config.currency)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-1">EMI</p>
+                                                    <p className="text-lg font-mono font-bold">{formatCurrency(pot.config.contribution, pot.config.currency)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3 bg-[var(--surface-deep)]/60 p-3 rounded-2xl border border-[var(--border-subtle)]/30">
+                                                <div className="bg-[var(--accent-vivid)]/20 p-2 rounded-xl text-[var(--accent-vivid)]">
+                                                    <Clock size={16} />
+                                                </div>
+                                                <div className="flex-1 flex justify-between items-center min-w-0">
+                                                    <p className="text-[9px] uppercase font-bold text-[var(--text-muted)]">Next Payment</p>
+                                                    <p className="text-xs font-bold truncate ml-2">{nextDueDate}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 bg-[var(--surface-deep)]/60 p-3 rounded-2xl border border-[var(--border-subtle)]/30">
+                                                <div className="bg-[var(--accent-secondary)]/20 p-2 rounded-xl text-[var(--accent-secondary)]">
+                                                    <Calendar size={16} />
+                                                </div>
+                                                <div className="flex-1 flex justify-between items-center min-w-0">
+                                                    <p className="text-[9px] uppercase font-bold text-[var(--text-muted)]">Next Draw</p>
+                                                    <p className="text-xs font-bold truncate ml-2">{nextDrawDate}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={handleShare}
+                                            className="w-full flex items-center justify-center gap-2 py-3 rounded-full hover:bg-[var(--surface-deep)] text-xs font-bold transition-colors text-[var(--text-muted)]"
+                                        >
+                                            <Share2 size={14} /> Share details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
 
-            {/* TAB CONTENT: APPROVALS (FOREMAN) */}
-            {activeTab === 'approvals' && isForeman && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <section>
-                        <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
-                            <ShieldCheck className="text-[var(--accent-vivid)]" /> Pending Approvals
-                        </h3>
-                        {transactions && transactions.filter(t => t.status === "PENDING").length > 0 ? (
-                            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-xl overflow-hidden divide-y divide-[var(--border-subtle)]">
-                                {transactions.filter(t => t.status === "PENDING").map(tx => (
-                                    <div key={tx._id} className="p-4 flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-[var(--surface-deep)] flex items-center justify-center font-bold">
-                                                #{tx.slot?.slotNumber}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-sm">{tx.user?.name || "Unknown User"}</div>
-                                                <div className="text-xs text-[var(--text-muted)]">Slot #{tx.slot?.slotNumber} • Cycle {tx.monthIndex}</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            {tx.proofUrl && (
-                                                <a href={tx.proofUrl} target="_blank" rel="noreferrer" className="text-xs text-[var(--accent-vivid)] hover:underline">View Proof</a>
-                                            )}
-                                            <ApproveButton transactionId={tx._id} />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-12 text-[var(--text-muted)]">
-                                <CheckCircle size={48} className="mx-auto mb-4 opacity-20" />
-                                <p>No pending approvals.</p>
-                            </div>
-                        )}
-                    </section>
-                </div>
-            )}
+                    {/* Tab Navigation */}
+                    <div className="sticky top-0 sm:top-4 z-40 -mx-4 sm:mx-0 px-4 sm:px-0 bg-[var(--bg-app)]/50 backdrop-blur-sm py-2">
+                        <div className="glass-2 flex gap-1 overflow-x-auto rounded-full p-1 scrollbar-hide">
+                            {(isMember || isForeman) && (
+                                <button
+                                    onClick={() => setActiveTab('dashboard')}
+                                    className={tabButtonClass("dashboard")}
+                                >
+                                    Overview
+                                </button>
+                            )}
 
-            {/* TAB CONTENT: SLOTS */}
-            {activeTab === 'slots' && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <section>
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-display font-bold flex items-center gap-2">
-                                <Layers className="text-[var(--accent-vivid)]" /> All Slots
-                            </h2>
                             {isForeman && (
+                                <button
+                                    onClick={() => setActiveTab('organize')}
+                                    className={tabButtonClass("organize")}
+                                >
+                                    Organize {pendingApprovalsCount > 0 && <span className="ml-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded-full text-[10px]">{pendingApprovalsCount}</span>}
+                                </button>
+                            )}
+
+                            {(isMember || isForeman) && (
+                                <button
+                                    onClick={() => setActiveTab('members')}
+                                    className={tabButtonClass("members")}
+                                >
+                                    Members <span className="ml-1 opacity-50 text-[10px]">{memberList.length}</span>
+                                </button>
+                            )}
+
+                            <button
+                                onClick={() => setActiveTab('rules')}
+                                className={tabButtonClass("rules")}
+                            >
+                                Rules & Info
+                            </button>
+
+                            {(isMember || isForeman) && (
                                 <>
-                                    {availableCount > 0 && (
-                                        <button onClick={() => setShowAddMember(true)} className="text-sm bg-[var(--surface-elevated)] border border-[var(--border-subtle)] px-4 py-2 rounded-lg hover:border-[var(--border-subtle)] transition-all">
-                                            + Assign Slot
-                                        </button>
-                                    )}
-                                    {(availableCount > 0 || reservedSlots.length > 0) && (
-                                        <button onClick={() => setShowSplitModal(true)} className="text-sm bg-[var(--surface-elevated)] border border-[var(--border-subtle)] px-4 py-2 rounded-lg hover:border-[var(--border-subtle)] transition-all ml-2">
-                                            <PieChart size={14} className="inline mr-1" /> Split Slot
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setActiveTab('slots')}
+                                        className={tabButtonClass("slots")}
+                                    >
+                                        Slots
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('history')}
+                                        className={tabButtonClass("history")}
+                                    >
+                                        History
+                                    </button>
                                 </>
                             )}
                         </div>
+                    </div>
 
-                        {(!isMember && !isForeman) ? (
-                            <div className="bg-[var(--surface-elevated)]/50 border border-[var(--border-subtle)] rounded-2xl p-8 text-center">
-                                <div className="w-16 h-16 bg-[var(--surface-deep)]/60 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <EyeOff size={32} className="text-[var(--text-muted)]" />
-                                </div>
-                                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">Member List Hidden</h3>
-                                <p className="text-[var(--text-muted)] mb-6 max-w-md mx-auto">
-                                    To protect the privacy of our members, the full participant list is only visible to joined members.
-                                </p>
-                                {(isActive || isDraft) && hasOpenSlots ? (
-                                    <button onClick={() => setShowJoinModal(true)} className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold px-8 py-3 rounded-full hover:opacity-90 shadow-lg">
-                                        Join Pot to view
-                                    </button>
-                                ) : (
-                                    <div className="text-[var(--accent-secondary)] font-bold">Pot Full</div>
+                    {/* TAB CONTENT AREAS */}
+                    <div className="min-h-[400px]">
+                        {/* TAB CONTENT: DASHBOARD */}
+                        {activeTab === 'dashboard' && (isMember || isForeman) && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                {isMember && !isDraft && (
+                                    <MemberDashboard
+                                        pot={pot}
+                                        mySlots={mySlots}
+                                        transactions={transactions || []}
+                                        nextDueDate={nextDueDate}
+                                        currentUserId={currentUser?._id || ""}
+                                    />
                                 )}
-                            </div>
-                        ) : (
-                            <><div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {(() => {
-                                    // Generate Grid including virtuals
-                                    const gridSlots = [];
-                                    const slotMap = new Map(allSlots.map(s => [s.slotNumber, s]));
 
-                                    for (let i = 1; i <= pot.config.totalSlots; i++) {
-                                        if (slotMap.has(i)) {
-                                            gridSlots.push(slotMap.get(i)!);
-                                        } else {
-                                            gridSlots.push({
-                                                _id: `virtual-${i}` as any,
-                                                slotNumber: i,
-                                                status: "OPEN" as const,
-                                                user: null,
-                                                drawOrder: undefined,
-                                                isGhost: false
-                                            });
-                                        }
-                                    }
-
-                                    return gridSlots.map(slot => {
-                                        if (slot.status === "OPEN") {
-                                            return (
-                                                <div key={slot._id} className="p-4 rounded-xl border border-dashed border-[var(--border-subtle)] flex items-center justify-between opacity-50">
-                                                    <span className="font-mono">Slot #{slot.slotNumber}</span>
-                                                    <span className="text-xs text-[var(--text-muted)]">Available</span>
-                                                </div>
-                                            );
-                                        }
-
-                                        const user = slot.user;
-                                        // Check Payment Status
-                                        const slotTx = transactions?.find(t => t.slotId === slot._id && t.monthIndex === pot.currentMonth);
-                                        const isPaid = slotTx?.status === "PAID";
-                                        const isPending = slotTx?.status === "PENDING";
-
-                                        // Check Win Status
-                                        const isWinner = slot.drawOrder;
-                                        const payoutTx = isWinner ? transactions?.find(t => t.slotId === slot._id && t.type === 'payout' && t.monthIndex === slot.drawOrder) : null;
-
-                                        // COMPACT VIEW FOR SPLIT SLOTS
-                                        if (slot.isSplit) {
-                                            return (
-                                                <div
-                                                    key={slot._id}
-                                                    onClick={() => {
-                                                        const el = document.getElementById(`split-detail-${slot._id}`);
-                                                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                                                    }}
-                                                    className="bg-[var(--surface-elevated)] p-4 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--accent-vivid)] transition-colors cursor-pointer relative group flex flex-col gap-3"
-                                                >
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="font-bold text-[var(--text-primary)] flex items-center gap-2">
-                                                            Slot #{slot.slotNumber}
-                                                            {isWinner && <span className="text-[10px] text-[var(--gold)] border border-[var(--gold)] px-1 rounded">WINNER</span>}
-                                                        </span>
-                                                        <span className="text-[10px] bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Split</span>
-                                                    </div>
-                                                    {/* Visual Bar */}
-                                                    <div className="flex h-2 w-full rounded-full overflow-hidden bg-[var(--surface-deep)]/70">
-                                                        {(slot as any).splitOwners?.map((owner: any, idx: number) => (
-                                                            <div
-                                                                key={idx}
-                                                                style={{ width: `${owner.sharePercentage}%` }}
-                                                                className={`h-full ${idx % 2 === 0 ? 'bg-[var(--accent-vivid)]' : 'bg-[var(--accent-soft)]'} border-r border-black/20`}
-                                                            />
-                                                        ))}
-                                                        {/* Remaining space */}
-                                                        {(slot as any).splitOwners?.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0) < 100 && (
-                                                            <div className="h-full bg-[var(--surface-deep)]/60 flex-1" />
-                                                        )}
-                                                    </div>
-                                                    <div className="text-[10px] text-[var(--text-muted)] flex justify-between">
-                                                        <span>{(slot as any).splitOwners?.length || 0} Owners</span>
-                                                        <span className="group-hover:text-[var(--accent-vivid)] transition-colors">View Details ↓</span>
-                                                    </div>
-                                                </div>
-                                            )
-                                        }
-
-                                        return (
-                                            <div key={slot._id} className={`bg-[var(--surface-elevated)] p-4 rounded-xl flex items-center gap-4 border ${isWinner ? "border-[var(--gold)]" : "border-[var(--border-subtle)]"} relative group`}>
-                                                {user?.pictureUrl ? <img src={user.pictureUrl} className="w-10 h-10 rounded-full" /> : <div className="w-10 h-10 rounded-full bg-[var(--surface-deep)] flex items-center justify-center font-bold text-[var(--text-muted)]">#{slot.slotNumber}</div>}
-
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-bold flex items-center gap-2 truncate">
-                                                        {user ? user.name : (slot.isSplit ? "Split Slot" : `Slot #${slot.slotNumber}`)}
-                                                        {user && slot.isGhost && <span className="text-[10px] bg-[var(--surface-deep)] px-1.5 rounded text-[var(--text-muted)]">GHOST</span>}
-                                                        {isWinner && <span className="text-xs text-[var(--gold)] border border-[var(--gold)] px-1 rounded">WINNER (C{slot.drawOrder})</span>}
-                                                        {!slot.isSplit && isPaid && <span className="text-[10px] bg-[var(--accent-vivid)]/20 text-[var(--accent-vivid)] px-1.5 rounded font-bold">PAID</span>}
-                                                    </div>
-
-                                                    {/* Split Owners Display */}
-                                                    {slot.isSplit && (slot as any).splitOwners && (
-                                                        <div className="flex flex-col gap-1 mt-1">
-                                                            {(slot as any).splitOwners.map((owner: any) => {
-                                                                // Check individual payment status
-                                                                const ownerTx = transactions?.find(t => t.slotId === slot._id && t.monthIndex === pot.currentMonth && t.userId === owner.userId);
-                                                                const isOwnerPaid = ownerTx?.status === "PAID";
-                                                                const isOwnerPending = ownerTx?.status === "PENDING";
-
-                                                                return (
-                                                                    <div key={owner.userId} className="text-xs text-[var(--text-muted)] flex justify-between items-center w-full bg-[var(--surface-deep)]/60 px-2 py-1.5 rounded">
-                                                                        <div className="flex items-center gap-2">
-                                                                            {owner.pictureUrl ? (
-                                                                                <img src={owner.pictureUrl} alt={owner.name} className="w-4 h-4 rounded-full object-cover" />
-                                                                            ) : (
-                                                                                <div className="w-4 h-4 rounded-full bg-[var(--surface-deep)]/60 flex items-center justify-center font-bold text-[6px] text-[var(--text-muted)]">
-                                                                                    {owner.name?.charAt(0)}
-                                                                                </div>
-                                                                            )}
-                                                                            <span className="truncate">{owner.name}</span>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2 shrink-0">
-                                                                            <span className="font-mono text-[var(--accent-vivid)] text-[10px]">{owner.sharePercentage}%</span>
-                                                                            {isActive && (
-                                                                                <>
-                                                                                    {isOwnerPaid ? (
-                                                                                        <CheckCircle size={10} className="text-[var(--accent-vivid)]" />
-                                                                                    ) : isOwnerPending ? (
-                                                                                        <Clock size={10} className="text-[var(--warning)]" />
-                                                                                    ) : (
-                                                                                        <div className="w-2.5 h-2.5 rounded-full border border-[var(--danger)]/50  bg-[var(--danger)]/20" title="Unpaid" />
-                                                                                    )}
-                                                                                </>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                            {(slot as any).splitOwners.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0) < 100 && (
-                                                                <div className="text-[10px] text-[var(--text-muted)] italic mt-1 px-1">
-                                                                    {100 - (slot as any).splitOwners.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0)}% available
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-
-                                                    {!slot.isSplit && (
-                                                        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
-                                                            Slot #{slot.slotNumber} • {user?.phone}
-                                                            {isPaid && <span className="text-[var(--accent-vivid)] flex items-center gap-1"><CheckCircle size={10} /> Paid</span>}
-                                                            {isPending && <span className="text-[var(--warning)] flex items-center gap-1"><Clock size={10} /> Pending</span>}
-                                                            {payoutTx && <span className="text-[var(--accent-vivid)] ml-2 font-bold">Payout Done</span>}
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Foreman Actions */}
-                                                {isForeman && (
-                                                    <div className="flex flex-col gap-1 items-end">
-                                                        {/* Delete Slot (Draft only) */}
-                                                        {isDraft && (
-                                                            <button
-                                                                onClick={async () => {
-                                                                    const ok = await feedback.confirm({
-                                                                        title: `Remove Slot #${slot.slotNumber}?`,
-                                                                        message: "This will remove the member and free the slot.",
-                                                                        confirmText: "Remove",
-                                                                        danger: true,
-                                                                    });
-                                                                    if (ok) {
-                                                                        await deleteSlot({ potId: pot._id, slotNumber: slot.slotNumber });
-                                                                        feedback.toast.success("Slot removed");
-                                                                    }
-                                                                }}
-                                                                className="text-[var(--danger)] hover:text-[var(--danger)] p-1"
-                                                                title="Remove Slot"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        )}
-
-                                                        {isActive && (
-                                                            <>
-                                                                {/* Removed MarkPaidButton - Use Members Tab */}
-                                                                {isWinner && !payoutTx && (
-                                                                    <button onClick={() => setShowPayoutModal(slot._id)} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] text-[10px] font-bold px-2 py-1 rounded">
-                                                                        Record payout
-                                                                    </button>
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )
-                                    })
-                                })()}
-                            </div>
-
-                                {/* SECTION: DETAILED SPLIT SLOTS */}
-                                {allSlots.some(s => s.isSplit) && (
-                                    <div className="mt-12 pt-8 border-t border-[var(--border-subtle)]">
-                                        <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
-                                            <PieChart className="text-[var(--accent-vivid)]" /> Shared / Split Slots
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {allSlots.filter(s => s.isSplit).map(slot => {
-
-                                                // Check Win Status
-                                                const isWinner = slot.drawOrder;
-                                                const payoutTx = isWinner ? transactions?.find(t => t.slotId === slot._id && t.type === 'payout' && t.monthIndex === slot.drawOrder) : null;
-
-                                                return (
-                                                    <div id={`split-detail-${slot._id}`} key={slot._id} className={`bg-[var(--surface-elevated)] p-4 rounded-xl flex items-center gap-4 border ${isWinner ? "border-[var(--gold)]" : "border-[var(--border-subtle)]"} relative group`}>
-                                                        <div className="w-10 h-10 rounded-full bg-[var(--surface-card)] border border-[var(--border-subtle)] flex items-center justify-center font-bold text-[var(--accent-vivid)]">
-                                                            #{slot.slotNumber}
-                                                        </div>
-
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="font-bold flex items-center gap-2 truncate text-[var(--text-primary)] mb-2">
-                                                                Split Slot #{slot.slotNumber}
-                                                                {isWinner && <span className="text-xs text-[var(--gold)] border border-[var(--gold)] px-1 rounded">WINNER (C{slot.drawOrder})</span>}
-                                                            </div>
-
-                                                            <div className="flex flex-col gap-1 mt-1">
-                                                                {(slot as any).splitOwners?.map((owner: any) => {
-                                                                    const ownerTx = transactions?.find(t => t.slotId === slot._id && t.monthIndex === pot.currentMonth && t.userId === owner.userId);
-                                                                    const isOwnerPaid = ownerTx?.status === "PAID";
-                                                                    const isOwnerPending = ownerTx?.status === "PENDING";
-
-                                                                    return (
-                                                                        <div key={owner.userId} className="text-xs text-[var(--text-muted)] flex justify-between items-center w-full bg-[var(--surface-deep)]/60 px-2 py-1.5 rounded border border-[var(--border-subtle)]">
-                                                                            <div className="flex items-center gap-2 overflow-hidden">
-                                                                                {owner.pictureUrl ? (
-                                                                                    <img src={owner.pictureUrl} alt={owner.name} className="w-5 h-5 rounded-full object-cover border border-[var(--border-subtle)]" />
-                                                                                ) : (
-                                                                                    <div className="w-5 h-5 rounded-full bg-[var(--surface-deep)]/60 flex items-center justify-center font-bold text-[8px] text-[var(--text-muted)]">
-                                                                                        {owner.name?.charAt(0)}
-                                                                                    </div>
-                                                                                )}
-                                                                                <span className="truncate">{owner.name}</span>
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2 shrink-0">
-                                                                                <span className="font-mono text-[var(--accent-vivid)] text-[10px]">{owner.sharePercentage}%</span>
-                                                                                {isActive && (
-                                                                                    <>
-                                                                                        {isOwnerPaid ? (
-                                                                                            <CheckCircle size={10} className="text-[var(--accent-vivid)]" />
-                                                                                        ) : isOwnerPending ? (
-                                                                                            <Clock size={10} className="text-[var(--warning)]" />
-                                                                                        ) : (
-                                                                                            <div className="w-2.5 h-2.5 rounded-full border border-[var(--danger)]/50  bg-[var(--danger)]/20" title="Unpaid" />
-                                                                                        )}
-                                                                                    </>
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-
-                                                                })}
-                                                                {(slot as any).splitOwners?.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0) < 100 && (
-                                                                    <div className="text-[10px] text-[var(--text-muted)] italic mt-1 px-1">
-                                                                        {100 - (slot as any).splitOwners?.reduce((acc: number, curr: any) => acc + curr.sharePercentage, 0)}% available
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Foreman Actions for Split Slots */}
-                                                        {isForeman && isActive && isWinner && !payoutTx && (
-                                                            <div className="absolute top-2 right-2">
-                                                                <button onClick={() => setShowPayoutModal(slot._id)} className="bg-[var(--accent-secondary)] text-[var(--text-primary)] text-[10px] font-bold px-2 py-1 rounded">
-                                                                    Record payout
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )
-                                            })}
+                                {currentWinnerSlot && (
+                                    <div className="glass-2 border-l-4 border-l-[var(--gold)] rounded-2xl p-5 flex items-center gap-4">
+                                        <div className="bg-[var(--gold)]/20 p-3 rounded-full text-[var(--gold)]">
+                                            <Gavel size={24} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Cycle {pot.currentMonth} Winner</p>
+                                            <p className="text-xl font-display font-black text-[var(--gold)]">#{currentWinnerSlot.slotNumber} • {currentWinnerSlot.user?.name}</p>
                                         </div>
                                     </div>
                                 )}
-                            </>
+                            </div>
                         )}
-                    </section>
-                </div >
-            )
-            }
 
-            {/* TAB CONTENT: HISTORY */}
-            {
-                activeTab === 'history' && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <PotHistory
-                            pot={pot}
-                            allSlots={allSlots}
-                            transactions={transactions || []}
-                            mySlots={mySlots}
+                        {/* TAB CONTENT: MEMBERS */}
+                        {activeTab === 'members' && (
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                <MembersList
+                                    members={memberList}
+                                    potId={pot._id}
+                                    currentMonth={pot.currentMonth}
+                                    isForeman={isForeman}
+                                    isActive={isActive}
+                                    currentUserId={currentUser?._id}
+                                    currency={pot.config.currency}
+                                />
+                            </div>
+                        )}
 
-                            onPay={(slotId, cycle, amount) => {
-                                setGlobalPaymentState({
-                                    slotId,
-                                    cycle,
-                                    amount
-                                });
-                            }}
-                        />
+                        {/* TAB CONTENT: RULES & INFO */}
+                        {activeTab === 'rules' && (
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                                <div className="glass-1 rounded-2xl p-6">
+                                    <h3 className="text-lg font-display font-bold flex items-center gap-2 mb-4">
+                                        <Info className="text-[var(--accent-vivid)]" size={18} /> Description
+                                    </h3>
+                                    <p className="text-[var(--text-muted)] text-sm whitespace-pre-wrap leading-relaxed">
+                                        {pot.description || "No specific description provided by the organizer."}
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="glass-1 p-5 rounded-2xl space-y-4">
+                                        <h4 className="font-bold text-[var(--text-primary)] text-[10px] uppercase tracking-widest flex items-center gap-2 mb-2"><Layers size={14} className="text-[var(--accent-vivid)]" /> Configuration</h4>
+                                        <div className="space-y-2 text-sm font-medium">
+                                            <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                                                <span className="text-[var(--text-muted)]">Frequency</span>
+                                                <span className="capitalize">{pot.config.frequency}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                                                <span className="text-[var(--text-muted)]">Duration</span>
+                                                <span>{pot.config.duration} Rounds</span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                                                <span className="text-[var(--text-muted)]">Commission</span>
+                                                <span>{pot.config.commission}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="glass-1 p-5 rounded-2xl space-y-4">
+                                        <h4 className="font-bold text-[var(--text-primary)] text-[10px] uppercase tracking-widest flex items-center gap-2 mb-2"><Calendar size={14} className="text-[var(--accent-secondary)]" /> Timeline</h4>
+                                        <div className="space-y-2 text-sm font-medium">
+                                            <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                                                <span className="text-[var(--text-muted)]">Grace Period</span>
+                                                <span>{gracePeriod} Days</span>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                                                <span className="text-[var(--text-muted)]">Start Date</span>
+                                                <span>{pot.startDate ? new Date(pot.startDate).toLocaleDateString() : 'N/A'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {pot.bankDetails && (
+                                    <div className="glass-1 p-6 rounded-2xl space-y-4">
+                                        <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Coins size={14} className="text-[var(--accent-vivid)]" /> Payment Details</h4>
+                                        <div className="p-4 bg-[var(--surface-deep)]/60 rounded-xl font-mono text-sm whitespace-pre-wrap border border-[var(--border-subtle)]/30">
+                                            {pot.bankDetails}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* TAB CONTENT: SLOTS */}
+                        {activeTab === 'slots' && (
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-xl font-display font-bold">Pot Slots</h3>
+                                    {isForeman && isDraft && (
+                                        <div className="flex gap-2">
+                                            <button onClick={() => setShowAddMember(true)} className="px-4 py-2 bg-[var(--surface-deep)] text-xs font-bold rounded-full hover:bg-[var(--surface-card)] transition-colors">+ Add Member</button>
+                                            <button onClick={() => setShowSplitModal(true)} className="px-4 py-2 bg-[var(--surface-deep)] text-xs font-bold rounded-full hover:bg-[var(--surface-card)] transition-colors">Split Slot</button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {allSlots.map((slot) => {
+                                        const isMySlot = slot.userId === currentUser?._id ||
+                                            (slot.isSplit && (slot as any).splitOwners?.some((o: any) => o.userId === currentUser?._id));
+                                        return (
+                                            <div key={slot._id} className={`glass-1 rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${isMySlot ? 'border-[var(--accent-vivid)]/40' : 'border-transparent'}`}>
+                                                <div className="relative">
+                                                    <div className="h-10 w-10 rounded-full bg-[var(--surface-deep)] flex items-center justify-center font-bold text-sm">
+                                                        {slot.user?.name?.charAt(0) || slot.slotNumber}
+                                                    </div>
+                                                    {isMySlot && <div className="absolute -top-1 -right-1 h-3 w-3 bg-[var(--accent-vivid)] rounded-full border-2 border-[var(--surface-card)]" />}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-bold truncate">{slot.user?.name || `Slot #${slot.slotNumber}`}</p>
+                                                    <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wide">
+                                                        {slot.isGhost ? 'Ghost User' : slot.isSplit ? 'Split Slot' : 'Participant'}
+                                                    </p>
+                                                </div>
+                                                {isForeman && isDraft && (
+                                                    <button onClick={() => deleteSlot({ potId: pot._id, slotNumber: slot.slotNumber })} className="p-2 text-[var(--warning)] hover:bg-[var(--warning)]/10 rounded-full">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB CONTENT: HISTORY */}
+                        {activeTab === 'history' && (
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                <PotHistory
+                                    pot={pot}
+                                    allSlots={allSlots}
+                                    transactions={transactions || []}
+                                    mySlots={mySlots}
+                                    onPay={(slotId, cycle, amount) => {
+                                        setGlobalPaymentState({
+                                            slotId,
+                                            cycle,
+                                            amount
+                                        });
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        {/* TAB CONTENT: ORGANIZE (Foreman only) */}
+                        {activeTab === 'organize' && isForeman && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                {/* Quick Management Card */}
+                                <section className="glass-3 rounded-3xl p-6 border border-[var(--accent-vivid)]/20 shadow-xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-2 opacity-5">
+                                        <ShieldCheck size={100} />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <h3 className="text-xl font-display font-black text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                                            <ShieldCheck className="text-[var(--accent-vivid)]" size={24} /> Organizer Controls
+                                        </h3>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                                            <div className="glass-1 p-4 rounded-2xl">
+                                                <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Pot Status</p>
+                                                <p className="text-lg font-black text-[var(--accent-vivid)] uppercase">{pot.status}</p>
+                                            </div>
+                                            <div className="glass-1 p-4 rounded-2xl">
+                                                <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Round Pool</p>
+                                                <p className="text-lg font-black">{formatCurrency(pot.config.totalValue, pot.config.currency)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            {isDraft && (
+                                                <button
+                                                    onClick={handleActivate}
+                                                    className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] py-4 rounded-2xl font-black shadow-[0_10px_30px_rgba(var(--accent-vivid-rgb),0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                                >
+                                                    ACTIVATE POT
+                                                </button>
+                                            )}
+
+                                            {isActive && !currentWinnerSlot && (
+                                                <div className="flex gap-3">
+                                                    <button
+                                                        onClick={() => setShowWinnerSelection(true)}
+                                                        className="flex-1 bg-[var(--surface-elevated)] border border-[var(--border-subtle)] py-3 rounded-2xl text-xs font-bold hover:bg-[var(--surface-deep)] transition-colors"
+                                                    >
+                                                        Manual Winner
+                                                    </button>
+                                                    <button
+                                                        onClick={handleDraw}
+                                                        disabled={isDrawing}
+                                                        className="flex-1 bg-[var(--accent-secondary)] text-[var(--text-primary)] py-3 rounded-2xl text-xs font-black shadow-[0_10px_30px_rgba(var(--accent-secondary-rgb),0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                                                    >
+                                                        RUN DRAW
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Pending Approvals Section */}
+                                <section className="glass-2 rounded-3xl p-6">
+                                    <h3 className="text-lg font-display font-bold flex items-center gap-2 mb-6 text-[var(--warning)]">
+                                        <Clock size={20} /> Pending Approvals
+                                    </h3>
+                                    {transactions?.filter(t => t.status === "PENDING").length === 0 ? (
+                                        <div className="text-center py-12 text-[var(--text-muted)] glass-1 rounded-2xl border border-dashed border-[var(--border-subtle)]">
+                                            No pending approvals for now.
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {transactions?.filter(t => t.status === "PENDING").map(tx => {
+                                                const slot = allSlots.find(s => s._id === tx.slotId);
+                                                return (
+                                                    <div key={tx._id} className="glass-1 p-4 rounded-xl flex items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-10 w-10 bg-[var(--surface-deep)] rounded-full flex items-center justify-center font-bold">
+                                                                {slot?.slotNumber || tx.monthIndex}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-bold">Round {tx.monthIndex} Payment</p>
+                                                                <p className="text-xs text-[var(--text-muted)]">{tx.user?.name || 'Member'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            {tx.proofUrl && <a href={tx.proofUrl} target="_blank" rel="noreferrer" className="text-xs text-[var(--accent-vivid)] hover:underline mr-2">View Proof</a>}
+                                                            <button
+                                                                onClick={() => setGlobalPaymentState({ slotId: tx.slotId, cycle: tx.monthIndex, amount: pot.config.contribution, isForemanAction: true, userId: tx.userId })}
+                                                                className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] text-xs font-bold px-4 py-2 rounded-full hover:opacity-90"
+                                                            >
+                                                                Review
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </section>
+
+                                {/* Round Details / Rules Summary */}
+                                <div className="glass-1 rounded-3xl p-6">
+                                    <h4 className="text-xs uppercase font-black tracking-widest text-[var(--text-muted)] mb-4">Pot Configuration</h4>
+                                    <dl className="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Target Slots</dt>
+                                            <dd className="font-bold">{pot.config.totalSlots}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Duration</dt>
+                                            <dd className="font-bold">{pot.config.duration} Months</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">EMI</dt>
+                                            <dd className="font-bold">{formatCurrency(pot.config.contribution, pot.config.currency)}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Commission</dt>
+                                            <dd className="font-bold">{commissionPct.toFixed(2)}%</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                )
-            }
+                </div>
+
+                {/* RIGHT COLUMN: SIDEBAR STATS & DESKTOP PRIMARY ACTION */}
+                <aside className="space-y-6 lg:sticky lg:top-8 hidden lg:block">
+                    {/* Primary Action Card (Desktop) */}
+                    {primaryAction && (
+                        <div className="glass-3 border border-[var(--accent-vivid)]/20 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-2 opacity-5">
+                                <Layers size={100} />
+                            </div>
+                            <div className="relative z-10">
+                                <p className="text-[10px] uppercase font-bold text-[var(--accent-vivid)] tracking-widest mb-2 px-2 py-0.5 bg-[var(--accent-vivid)]/10 rounded-full inline-block">Action Required</p>
+                                <h3 className="text-xl font-display font-black text-[var(--text-primary)] mb-2">{primaryAction.label}</h3>
+                                <p className="text-xs text-[var(--text-muted)] mb-6 leading-relaxed">{primaryAction.helper}</p>
+                                <button
+                                    onClick={primaryAction.onClick}
+                                    disabled={primaryAction.disabled}
+                                    className={`w-full relative z-10 rounded-full px-6 py-4 text-sm font-black transition-all ${primaryAction.tone === "secondary"
+                                        ? "bg-[var(--accent-secondary)] text-[var(--text-primary)] hover:scale-[1.02] active:scale-[0.98]"
+                                        : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_30px_rgba(var(--accent-vivid-rgb),0.3)]"
+                                        } disabled:opacity-50 disabled:scale-100`}
+                                >
+                                    {primaryAction.label.toUpperCase()}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Stats Sidebar */}
+                    <div className="glass-2 rounded-3xl p-6 space-y-6">
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-1">Winning Pot</p>
+                                <p className="text-4xl font-display font-black text-[var(--accent-secondary)]">{formatCurrency(winningAmount, pot.config.currency)}</p>
+                                <p className="text-[10px] text-[var(--text-muted)]">After {commissionPct.toFixed(2)}% commission ({formatCurrency(commissionAmount, pot.config.currency)})</p>
+                            </div>
+
+                            <div className="h-px bg-[var(--border-subtle)] opacity-20" />
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-1">Round Pool</p>
+                                    <p className="text-lg font-mono font-bold">{formatCurrency(pot.config.totalValue, pot.config.currency)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-1">EMI</p>
+                                    <p className="text-lg font-mono font-bold">{formatCurrency(pot.config.contribution, pot.config.currency)}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3 bg-[var(--surface-deep)]/60 p-3 rounded-2xl border border-[var(--border-subtle)]/30">
+                                <div className="bg-[var(--accent-vivid)]/20 p-2 rounded-xl text-[var(--accent-vivid)]">
+                                    <Clock size={16} />
+                                </div>
+                                <div className="flex-1 flex justify-between items-center min-w-0">
+                                    <p className="text-[9px] uppercase font-bold text-[var(--text-muted)]">Next Payment</p>
+                                    <p className="text-xs font-bold truncate ml-2">{nextDueDate}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 bg-[var(--surface-deep)]/60 p-3 rounded-2xl border border-[var(--border-subtle)]/30">
+                                <div className="bg-[var(--accent-secondary)]/20 p-2 rounded-xl text-[var(--accent-secondary)]">
+                                    <Calendar size={16} />
+                                </div>
+                                <div className="flex-1 flex justify-between items-center min-w-0">
+                                    <p className="text-[9px] uppercase font-bold text-[var(--text-muted)]">Next Draw</p>
+                                    <p className="text-xs font-bold truncate ml-2">{nextDrawDate}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Share Action */}
+                        <button
+                            onClick={handleShare}
+                            className="w-full flex items-center justify-center gap-2 py-3 rounded-full hover:bg-[var(--surface-deep)] text-xs font-bold transition-colors text-[var(--text-muted)]"
+                        >
+                            <Share2 size={14} /> Share details
+                        </button>
+                    </div>
+                </aside>
+            </div>
+
+            {/* MOBILE & TABLET STICKY BOTTOM ACTION BAR */}
+            {primaryAction && !isAnyModalOpen && (
+                <div className="fixed bottom-0 left-0 right-0 z-[70] p-4 lg:hidden pointer-events-none">
+                    <div className="glass-3 rounded-3xl p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border border-[var(--border-subtle)]/30 flex items-center justify-between gap-4 pointer-events-auto animate-in slide-in-from-bottom-10 duration-500">
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">{primaryAction.label === "Join Pot" ? "Starts at" : "EMI Amount"}</p>
+                            <p className="text-lg font-display font-black text-[var(--text-primary)] leading-tight">{formatCurrency(pot.config.contribution, pot.config.currency)}</p>
+                        </div>
+                        <button
+                            onClick={primaryAction.onClick}
+                            disabled={primaryAction.disabled}
+                            className={`px-8 h-14 rounded-2xl text-sm font-black transition-all active:scale-95 whitespace-nowrap ${primaryAction.tone === "secondary"
+                                ? "bg-[var(--accent-secondary)] text-[var(--text-primary)]"
+                                : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[0_8px_20px_rgba(var(--accent-vivid-rgb),0.3)]"
+                                } disabled:opacity-50`}
+                        >
+                            {primaryAction.label.toUpperCase()}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Modals */}
-            {
-                showNextRoundModal && (
-                    <NextRoundModal
-                        potId={pot._id}
-                        currentMonth={pot.currentMonth}
-                        totalMonths={pot.config.duration}
-                        defaultNextDate={new Date().toISOString().split('T')[0]}
-                        isOccasional={pot.config.frequency === 'occasional'}
-                        onClose={() => setShowNextRoundModal(false)}
-                    />
-                )
-            }
-
-            {
-                showJoinModal && (
-                    <JoinPotModal
-                        potId={pot._id}
-                        totalValue={pot.config.totalValue}
-                        contribution={pot.config.contribution}
-                        totalSlots={pot.config.totalSlots}
-                        filledSlots={filledCount}
-                        currency={pot.config.currency}
-                        onClose={() => setShowJoinModal(false)}
-                        onViewRules={() => {
-                            setShowJoinModal(false);
-                            setActiveTab('rules');
-                        }}
-                    />
-                )
-            }
-
-            {showAddMember && <AddMemberModal potId={pot._id} openSlots={virtualOpenSlots} onClose={() => setShowAddMember(false)} />}
-            {showSplitModal && <SplitSlotModal potId={pot._id} openSlots={splitEligibleSlots} onClose={() => setShowSplitModal(false)} />}
-
-            {showUploadModal && (() => {
-                const slot = allSlots.find(s => s._id === showUploadModal);
-                let amount = pot.config.contribution;
-                if (slot?.isSplit && currentUser) {
-                    const share = (slot as any).splitOwners?.find((o: any) => o.userId === currentUser._id);
-                    if (share) amount = (pot.config.contribution * share.sharePercentage) / 100;
-                }
-                return <PaymentModal potId={pot._id} slotId={showUploadModal} monthIndex={pot.currentMonth} amount={amount} currency={pot.config.currency} onClose={() => setShowUploadModal(null)} />;
-            })()}
-
-            {
-                showPayoutModal && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-                        <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
-                            <h3 className="text-xl font-bold mb-4">Record payout</h3>
-                            <p className="text-[var(--text-muted)] text-sm mb-4">Confirm payout for Slot winner.</p>
-                            <button onClick={async () => {
-                                await recordPayout({ potId: pot._id, slotId: showPayoutModal, monthIndex: pot.currentMonth, amount: winningAmount });
-                                setShowPayoutModal(null);
-                            }} className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl mb-2">Confirm Paid</button>
-                            <button onClick={() => setShowPayoutModal(null)} className="w-full bg-[var(--surface-deep)] text-[var(--text-primary)] font-bold py-3 rounded-xl">Cancel</button>
-                        </div>
-                    </div>
-                )
-            }
-
-            {
-                showWinnerSelection && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-                        <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
-                            <h3 className="text-xl font-bold mb-4">Select Winner Manually</h3>
-                            <div className="space-y-2 max-h-60 overflow-y-auto mb-4">
-                                {activeSlots.filter(s => !s.drawOrder).map(s => (
-                                    <button
-                                        key={s._id}
-                                        onClick={() => setSelectedWinnerSlotNum(s.slotNumber)}
-                                        className={`w-full p-3 rounded-lg text-left border ${selectedWinnerSlotNum === s.slotNumber ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/10" : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]"}`}
-                                    >
-                                        Slot #{s.slotNumber} - {s.user?.name}
-                                    </button>
-                                ))}
-                            </div>
-                            <div className="flex gap-2">
-                                <button onClick={() => setShowWinnerSelection(false)} className="flex-1 bg-[var(--surface-deep)] py-2 rounded-lg">Cancel</button>
-                                <button onClick={handleDraw} disabled={!selectedWinnerSlotNum} className="flex-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-2 rounded-lg">Confirm</button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
-            {/* Generic Payment Modal (History / Foreman) */}
             {globalPaymentState && (
                 <PaymentModal
                     potId={pot._id}
@@ -1155,18 +1038,82 @@ export function PotDetail() {
                             potId: pot._id,
                             slotId: globalPaymentState.slotId,
                             monthIndex: globalPaymentState.cycle,
-                            userId: globalPaymentState.userId,
+                            userId: globalPaymentState.userId as Id<"users">,
                             paidAt: date
                         });
                     }}
                 />
             )}
 
-            {/* Edit Pot / Next Round modals omitted for brevity, logic is same as before but using updatePot/advanceCycle from simple form */}
-        </div >
+            {showJoinModal && (
+                <JoinPotModal
+                    potId={pot._id}
+                    totalValue={pot.config.totalValue}
+                    contribution={pot.config.contribution}
+                    totalSlots={pot.config.totalSlots}
+                    filledSlots={filledCount}
+                    currency={pot.config.currency}
+                    onClose={() => setShowJoinModal(false)}
+                    onViewRules={() => {
+                        setShowJoinModal(false);
+                        setActiveTab('rules');
+                    }}
+                />
+            )}
+
+            {showAddMember && (
+                <AddMemberModal
+                    potId={pot._id}
+                    openSlots={virtualOpenSlots as any}
+                    onClose={() => setShowAddMember(false)}
+                />
+            )}
+
+            {showSplitModal && (
+                <SplitSlotModal
+                    potId={pot._id}
+                    openSlots={splitEligibleSlots as any}
+                    onClose={() => setShowSplitModal(false)}
+                />
+            )}
+
+            {showNextRoundModal && (
+                <NextRoundModal
+                    potId={pot._id}
+                    currentMonth={pot.currentMonth}
+                    totalMonths={pot.config.duration}
+                    defaultNextDate={new Date().toISOString().split('T')[0]}
+                    isOccasional={pot.config.frequency === 'occasional'}
+                    onClose={() => setShowNextRoundModal(false)}
+                />
+            )}
+
+            {showWinnerSelection && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-end justify-center p-3 sm:items-center sm:p-4">
+                    <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
+                        <h3 className="text-xl font-display font-black mb-4">Select Winner Manually</h3>
+                        <div className="space-y-2 max-h-60 overflow-y-auto mb-6 scrollbar-hide">
+                            {activeSlots.filter(s => !s.drawOrder).map(s => (
+                                <button
+                                    key={s._id}
+                                    onClick={() => setSelectedWinnerSlotNum(s.slotNumber)}
+                                    className={`w-full p-4 rounded-xl text-left border-2 transition-all ${selectedWinnerSlotNum === s.slotNumber ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/10" : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]"}`}
+                                >
+                                    <div className="font-bold text-sm">Slot #{s.slotNumber}</div>
+                                    <div className="text-xs text-[var(--text-muted)]">{s.user?.name || "Shared Slot"}</div>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-3">
+                            <button onClick={() => setShowWinnerSelection(false)} className="flex-1 bg-[var(--surface-deep)] py-4 rounded-2xl font-bold text-sm">Cancel</button>
+                            <button onClick={handleDraw} disabled={!selectedWinnerSlotNum} className="flex-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-4 rounded-2xl text-sm shadow-xl disabled:opacity-50">Confirm Winner</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
-
 function ApproveButton({ transactionId }: { transactionId: Id<"transactions"> }) {
     const approvePayment = useMutation(api.transactions.approvePayment);
     const [loading, setLoading] = useState(false);

@@ -94,7 +94,7 @@ function BottomNav() {
     }`;
   const labelClass = "mt-1 text-[11px] font-semibold leading-none";
 
-  if (location.pathname === "/create") return null;
+  if (location.pathname === "/create" || location.pathname.startsWith("/pot/")) return null;
 
   return (
     <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-2 shadow-2xl backdrop-blur-md md:hidden">
