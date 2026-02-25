@@ -11,7 +11,7 @@ interface PotVisualizerProps {
     transactions?: any[]; // Using any[] to bypass strict Doc typing for enriched fields
 }
 
-type VisualizerSlot = (Doc<"slots"> & { user: Doc<"users"> | null }) | {
+type VisualizerSlot = (Doc<"slots"> & { user: Doc<"users"> | null; splitOwners?: any[] }) | {
     _id: string;
     slotNumber: number;
     status: "OPEN";
@@ -174,11 +174,29 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transac
                                 </div>
                             ) : (
                                 <div className={`h-full w-full rounded-full border-2 bg-[var(--surface-card)] transition-all ${isWinner ? "border-[var(--gold)] shadow-[0_0_15px_var(--gold)]" :
-                                        isPaid ? "border-[var(--accent-vivid)] shadow-sm" :
-                                            isPending ? "border-[var(--warning)]" :
-                                                "border-[var(--border-subtle)]"
-                                    } overflow-hidden group-hover:scale-110 relative`}>
-                                    {slot.user?.pictureUrl ? (
+                                    isPaid ? "border-[var(--accent-vivid)] shadow-sm" :
+                                        isPending ? "border-[var(--warning)]" :
+                                            "border-[var(--border-subtle)]"
+                                    } overflow-hidden group-hover:scale-110 relative flex flex-wrap`}>
+                                    {slot.isSplit && slot.splitOwners && slot.splitOwners.length > 0 ? (
+                                        <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-[1px]">
+                                            {slot.splitOwners.slice(0, 4).map((owner: any, idx) => (
+                                                <div key={owner.userId || idx} className="h-full w-full overflow-hidden bg-[var(--surface-deep)]">
+                                                    {owner.userPictureUrl ? (
+                                                        <img src={owner.userPictureUrl} alt={owner.userName} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <div className="flex h-full w-full items-center justify-center text-[6px] font-bold text-[var(--text-muted)]">
+                                                            {owner.userName?.charAt(0)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                            {/* Fill empty spots in grid if less than 4 owners */}
+                                            {slot.splitOwners.length < 4 && Array.from({ length: 4 - slot.splitOwners.length }).map((_, i) => (
+                                                <div key={`empty-${i}`} className="h-full w-full bg-[var(--surface-deep)]/20" />
+                                            ))}
+                                        </div>
+                                    ) : slot.user?.pictureUrl ? (
                                         <img src={slot.user.pictureUrl} alt={slot.user.name} className="h-full w-full object-cover" />
                                     ) : (
                                         <div className="flex h-full w-full items-center justify-center text-xs font-bold text-[var(--text-muted)] bg-[var(--surface-deep)]">
@@ -188,7 +206,7 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transac
 
                                     {/* Winner Pulse */}
                                     {isWinner && (
-                                        <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                             <div className="w-full h-full bg-[var(--gold)]/20 animate-pulse" />
                                         </div>
                                     )}

@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id, Doc } from "../../convex/_generated/dataModel";
@@ -11,11 +11,12 @@ import { NextRoundModal } from "../components/NextRoundModal"; // New
 import { PotVisualizer } from "../components/PotVisualizer";
 import { PaymentModal } from "../components/PaymentComponents";
 import { PotHistory } from "../components/PotHistory"; // New
-import { Gavel, CheckCircle, Clock, Calendar, Coins, Share2, Layers, Play, ShieldCheck, Trash2, ArrowRight, Edit2, Info, EyeOff, ShieldAlert, PieChart, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Gavel, CheckCircle, Clock, Calendar, Coins, Share2, Layers, Play, ShieldCheck, Trash2, ArrowRight, Edit2, Info, EyeOff, ShieldAlert, PieChart, Users, ChevronDown, ChevronUp, ChevronLeft } from "lucide-react";
 import { formatCurrency } from "../lib/utils";
 
 export function PotDetail() {
     const { potId } = useParams<{ potId: string }>();
+    const navigate = useNavigate();
 
     const pot = useQuery(api.pots.get, { potId: potId as Id<"pots"> });
     const currentUser = useQuery(api.users.current);
@@ -380,7 +381,23 @@ export function PotDetail() {
 
     // --- RENDER ---
     return (
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8 lg:px-8">
+            {/* Mobile Sticky Topbar */}
+            <div className="sticky top-0 z-50 -mx-4 -mt-6 mb-6 flex items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md sm:hidden">
+                <button onClick={() => navigate(-1)} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
+                    <ChevronLeft size={20} />
+                </button>
+                <h2 className="flex-1 truncate font-display text-lg font-bold">{pot.title}</h2>
+            </div>
+
+            {/* Desktop Back Button */}
+            <button
+                onClick={() => navigate('/pots')}
+                className="mb-6 hidden shrink-0 items-center gap-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] sm:flex"
+            >
+                <ChevronLeft size={16} /> Back to pots
+            </button>
+
             {/* Header */}
             <header className="glass-2 mb-6 rounded-2xl p-5 sm:mb-8 sm:p-6">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -473,11 +490,6 @@ export function PotDetail() {
                     </div>
                 </div>
 
-                {(isMember || isForeman) && (
-                    <div className="glass-2 mt-6 rounded-2xl p-4">
-                        <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} />
-                    </div>
-                )}
 
                 <div className="mt-6 grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
                     <div className="glass-1 rounded-2xl p-4">
