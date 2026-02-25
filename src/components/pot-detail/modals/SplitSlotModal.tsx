@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { X, UserPlus, Layers, PieChart } from "lucide-react";
-import { useFeedback } from "./FeedbackProvider";
+import { useFeedback } from "@/components/shared/FeedbackProvider";
 
 interface SplitSlotModalProps {
     potId: Id<"pots">;

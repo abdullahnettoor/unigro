@@ -1,6 +1,6 @@
 import { useMutation } from "convex/react";
 import { useEffect, useState } from "react";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 
 export function UserSync() {
     const storeUser = useMutation(api.users.store);

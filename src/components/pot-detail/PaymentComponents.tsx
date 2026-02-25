@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { Upload, CheckCircle, Clock, AlertCircle, X, Image as ImageIcon, Banknote, Smartphone } from "lucide-react";
-import { useFeedback } from "./FeedbackProvider";
-import { formatCurrency } from "../lib/utils";
+import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { formatCurrency } from "@/lib/utils";
 
 interface PaymentModalProps {
     potId: Id<"pots">;

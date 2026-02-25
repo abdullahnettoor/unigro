@@ -3,13 +3,13 @@ import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { Link } from "react-router-dom";
 import { ArrowDownAZ, ArrowUpAZ, Filter, Plus, Search, X } from "lucide-react";
-import { cn } from "../components/ui/Button";
+import { cn } from "@/components/ui/Button";
 import { api } from "../../convex/_generated/api";
 import { AnimatePresence, motion } from "framer-motion";
-import { PotCard } from "../components/PotCard";
-import { SegmentedControl } from "../components/ui/SegmentedControl";
-import { DashboardSidebar } from "./Dashboard";
-import { getProgressScore } from "../lib/pot";
+import { PotCard } from "@/components/shared/PotCard";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { DashboardSidebar } from "@/pages/Dashboard";
+import { getProgressScore } from "@/lib/pot";
 
 type RoleFilter = "all" | "organizing" | "joined";
 type StatusFilter = "all" | "draft" | "active" | "completed";

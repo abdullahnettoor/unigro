@@ -3,8 +3,8 @@ import cc from "currency-codes";
 // @ts-ignore
 import { getEmojiByCurrencyCode } from "country-currency-emoji-flags";
 import { Calendar, Info } from "lucide-react";
-import { GlassSurface } from "../../components/ui/GlassSurface";
-import { getCurrencySymbol } from "../../lib/utils";
+import { GlassSurface } from "@/components/ui/GlassSurface";
+import { getCurrencySymbol } from "@/lib/utils";
 
 interface PotFinancialsStepProps {
     formData: {

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "./Button";
+import { cn } from "@/components/ui/Button";
 
 interface GlassSurfaceProps extends React.HTMLAttributes<HTMLDivElement> {
     tier?: "glass-1" | "glass-2" | "glass-3";

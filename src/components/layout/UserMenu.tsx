@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useUser, useClerk } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { Link } from "react-router-dom";
 import {
     User,
@@ -14,7 +14,7 @@ import {
     Clock,
     Monitor
 } from "lucide-react";
-import { getThemePreference, setThemePreference, type ThemePreference } from "../lib/theme";
+import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
 
 interface UserMenuProps {
     trigger?: React.ReactNode;

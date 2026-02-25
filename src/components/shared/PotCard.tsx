@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import type { Doc } from "../../convex/_generated/dataModel";
-import { formatCurrency } from "../lib/utils";
-import { getSlotStats, getCycleStats } from "../lib/pot";
+import { getCycleStats, getSlotStats } from "@/lib/pot";
+import { formatCurrency } from "@/lib/utils";
+import type { Doc } from "../../../convex/_generated/dataModel";
 
 interface PotCardProps {
     pot: Doc<"pots"> & { foreman?: { name: string } | null };

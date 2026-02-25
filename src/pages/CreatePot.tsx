@@ -5,10 +5,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, ChevronLeft, Save } from "lucide-react";
 import type { Id } from "../../convex/_generated/dataModel";
 import { AnimatePresence, motion } from "framer-motion";
-import { PotFinancialsStep } from "./create-pot/PotFinancialsStep";
-import { PotSlotsStep } from "./create-pot/PotSlotsStep";
-import { PotRulesStep } from "./create-pot/PotRulesStep";
-import { cn } from "../components/ui/Button";
+import { PotFinancialsStep } from "@/pages/create-pot/PotFinancialsStep";
+import { PotSlotsStep } from "@/pages/create-pot/PotSlotsStep";
+import { PotRulesStep } from "@/pages/create-pot/PotRulesStep";
+import { cn } from "@/components/ui/Button";
 
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
 type DrawStrategy = "RANDOM" | "MANUAL";

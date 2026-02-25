@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { Upload, X, ShieldCheck, AlertCircle } from "lucide-react";
 
 interface VerificationModalProps {

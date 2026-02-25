@@ -1,97 +1,16 @@
-import { useMemo, useState, type ComponentType } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, CalendarClock, CheckCircle2, Home, Plus, Settings as SettingsIcon, ShieldAlert, ShieldCheck, WalletCards } from "lucide-react";
+import { Bell, CalendarClock, CheckCircle2, Home, Plus, Settings as SettingsIcon, ShieldAlert, WalletCards } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
-import { PotCard } from "../components/PotCard";
-import { VerificationModal } from "../components/VerificationModal";
-import { GlassSurface } from "../components/ui/GlassSurface";
-import { UserMenu } from "../components/UserMenu";
-import { formatCurrency } from "../lib/utils";
-
-type VerificationStatus = "UNVERIFIED" | "PENDING" | "REJECTED";
-
-function VerificationBanner({
-    status,
-    onClick,
-}: {
-    status: VerificationStatus;
-    onClick?: () => void;
-}) {
-    const config = {
-        UNVERIFIED: {
-            title: "Verify your identity",
-            message: "Upload a government ID to unlock full features and build trust.",
-            icon: ShieldAlert,
-            tone: "warning",
-            interactive: true,
-        },
-        PENDING: {
-            title: "Verification pending",
-            message: "Your documents are under review. This usually takes up to 24 hours.",
-            icon: ShieldCheck,
-            tone: "warning",
-            interactive: false,
-        },
-        REJECTED: {
-            title: "Verification rejected",
-            message: "Action required. Open this alert to view the reason and submit again.",
-            icon: ShieldAlert,
-            tone: "danger",
-            interactive: true,
-        },
-    } as const;
-    const c = config[status];
-    const toneClass = c.tone === "warning"
-        ? "bg-[var(--warning)]/10 border-[var(--warning)]/20 text-[var(--warning)]"
-        : "bg-[var(--danger)]/10 border-[var(--danger)]/20 text-[var(--danger)]";
-    const hoverClass = c.interactive ? (c.tone === "warning" ? "hover:bg-[var(--warning)]/15" : "hover:bg-[var(--danger)]/15") : "";
-    const Icon = c.icon;
-
-    return (
-        <div
-            onClick={c.interactive ? onClick : undefined}
-            className={`mb-6 flex items-center gap-4 rounded-2xl border p-4 sm:mb-8 ${toneClass} ${hoverClass} ${c.interactive ? "cursor-pointer transition-colors" : ""}`}
-        >
-            <div className="shrink-0 rounded-full bg-black/5 p-2">
-                <Icon size={22} />
-            </div>
-            <div>
-                <h3 className="mb-1 font-semibold">{c.title}</h3>
-                <p className="text-sm text-[var(--text-muted)]">{c.message}</p>
-            </div>
-        </div>
-    );
-}
-
-function QuickActivityCard({
-    title,
-    value,
-    hint,
-    icon: Icon,
-    accent = false,
-}: {
-    title: string;
-    value: string;
-    hint: string;
-    icon: ComponentType<{ size?: number; className?: string }>;
-    accent?: boolean;
-}) {
-    return (
-        <GlassSurface
-            tier="glass-2"
-            className={`min-w-[240px] p-5 ${accent ? "border-[var(--accent-vivid)]/35 bg-[var(--accent-soft)]/35" : ""}`}
-        >
-            <div className="mb-3 flex items-center justify-between">
-                <span className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{title}</span>
-                <Icon size={16} className={accent ? "text-[var(--accent-vivid)]" : "text-[var(--text-muted)]"} />
-            </div>
-            <div className="text-2xl font-semibold font-mono text-[var(--text-primary)]">{value}</div>
-            <p className="mt-1 text-xs text-[var(--text-muted)]">{hint}</p>
-        </GlassSurface>
-    );
-}
+import { PotCard } from "@/components/shared/PotCard";
+import { GlassSurface } from "@/components/ui/GlassSurface";
+import { formatCurrency } from "@/lib/utils";
+import { VerificationBanner } from "@/components/dashboard/VerificationBanner";
+import { QuickActivityCard } from "@/components/dashboard/QuickActivityCard";
+import { UserMenu } from "@/components/layout/UserMenu";
+import { VerificationModal } from "@/components/auth/VerificationModal";
 
 export function DashboardSidebar({
     firstName,

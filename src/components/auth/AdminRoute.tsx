@@ -1,5 +1,5 @@
 import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 

@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Doc } from "../../convex/_generated/dataModel";
 import { Clock } from "lucide-react";
-import { getCollectionProgress } from "../lib/pot";
+import type { Doc } from "../../../convex/_generated/dataModel";
+import { getCollectionProgress } from "@/lib/pot";
 
 interface PotVisualizerProps {
     pot: Doc<"pots">;

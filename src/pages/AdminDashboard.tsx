@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Check, X, CreditCard, Loader2 } from "lucide-react";
-import { useFeedback } from "../components/FeedbackProvider";
+import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { useUser } from "@clerk/clerk-react";
-import { DashboardSidebar } from "./Dashboard";
+import { DashboardSidebar } from "@/pages/Dashboard";
 
 export function AdminDashboard() {
     const { user } = useUser();

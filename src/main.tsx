@@ -1,10 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import { ConvexClientProvider } from './providers/ConvexClientProvider'
-import { FeedbackProvider } from './components/FeedbackProvider'
-import { initTheme } from './lib/theme'
+import "@/index.css"
+import App from "@/App.tsx"
+import { ConvexClientProvider } from "@/providers/ConvexClientProvider"
+import { initTheme } from "@/lib/theme"
+import { FeedbackProvider } from "@/components/shared/FeedbackProvider.tsx"
 
 initTheme()
 

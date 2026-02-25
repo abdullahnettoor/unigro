@@ -1,11 +1,11 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { SignInButton } from "@clerk/clerk-react";
-import { UserSync } from "./components/UserSync";
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { Home, WalletCards, Settings } from "lucide-react";
-import { PWAPrompt } from "./components/PWAPrompt";
-import { AdminRoute } from "./components/AdminRoute";
+import { AdminRoute } from "./components/auth/AdminRoute";
+import { UserSync } from "./components/auth/UserSync";
+import { PWAPrompt } from "./components/shared/PWAPrompt";
 
 
 const loadDashboard = () => import("./pages/Dashboard");
@@ -14,7 +14,7 @@ const loadCreatePot = () => import("./pages/CreatePot");
 const loadPotDetail = () => import("./pages/PotDetail");
 const loadSettings = () => import("./pages/Settings");
 const loadAdminDashboard = () => import("./pages/AdminDashboard");
-const loadProfileModal = () => import("./components/ProfileModal");
+const loadProfileModal = () => import("@/components/layout/ProfileModal");
 
 const Dashboard = lazy(() => loadDashboard().then((m) => ({ default: m.Dashboard })));
 const Pots = lazy(() => loadPots().then((m) => ({ default: m.Pots })));
