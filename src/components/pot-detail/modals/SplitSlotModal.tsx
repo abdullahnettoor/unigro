@@ -1,11 +1,14 @@
 import React, { useState } from "react";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import { useMutation, useQuery } from "convex/react";
-import { Layers, PieChart,UserPlus, X } from "lucide-react";
+import { Layers, PieChart, UserPlus, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
+
+import "react-phone-number-input/style.css";
 
 interface SplitSlotModalProps {
     potId: Id<"pots">;
@@ -18,15 +21,18 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
     const currentUser = useQuery(api.users.current);
     const feedback = useFeedback();
 
+    const initialSlot = openSlots.find(s => s.remainingPercentage !== undefined && s.remainingPercentage < 100) || openSlots[0];
+    const initialPercentage = Math.min(50, initialSlot?.remainingPercentage ?? 100);
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
-    const [percentage, setPercentage] = useState(50);
-    const [selectedSlotNum, setSelectedSlotNum] = useState<number | "">(openSlots[0]?.slotNumber || "");
+    const [percentage, setPercentage] = useState(initialPercentage);
+    const [selectedSlotNum, setSelectedSlotNum] = useState<number | "">(initialSlot?.slotNumber || "");
 
     // Derived state
     const selectedSlot = openSlots.find(s => s.slotNumber === selectedSlotNum);
     const maxShare = selectedSlot?.remainingPercentage ?? 100;
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
 
@@ -40,6 +46,20 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
             setIsSubmitting(false);
             return;
         }
+
+        if (percentage > maxShare) {
+            setError(`Cannot assign more than ${maxShare}% for this slot.`);
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (!phone || !isValidPhoneNumber(phone)) {
+            setError("Please enter a valid phone number with country code.");
+            setIsSubmitting(false);
+            return;
+        }
+
+
 
         try {
             await assignSplitSlot({
@@ -95,7 +115,7 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
                             >
                                 {openSlots.map(s => (
                                     <option key={s._id} value={s.slotNumber} className="bg-[var(--surface-elevated)]">
-                                        Slot #{s.slotNumber} {s.isReserved ? "(Partial)" : ""}
+                                        Slot #{s.slotNumber} {s.remainingPercentage !== undefined && s.remainingPercentage < 100 ? "(Partial)" : ""}
                                     </option>
                                 ))}
                             </select>
@@ -113,7 +133,7 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
                                 max={maxShare}
                                 value={percentage}
                                 onChange={(e) => setPercentage(Number(e.target.value))}
-                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]"
+                                className={`w-full bg-[var(--surface-deep)]/60 border rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)] ${percentage > maxShare ? 'border-[var(--danger)] focus:border-[var(--danger)]' : 'border-[var(--border-subtle)]'}`}
                             />
                         </div>
                         <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -136,13 +156,13 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone</label>
-                            <input
-                                type="tel"
-                                required
+                            <PhoneInput
+                                international
+                                defaultCountry="IN"
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]"
-                                placeholder="+1234567890"
+                                onChange={(v) => setPhone(v || "")}
+                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] font-mono focus-within:border-[var(--accent-vivid)] [&>input]:bg-transparent [&>input]:outline-none"
+                                placeholder="+91 1234567890"
                             />
                         </div>
                     </div>

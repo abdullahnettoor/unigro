@@ -1,4 +1,5 @@
-import { Calendar, Coins,Info, Layers } from "lucide-react";
+import { Calendar, Coins, Info, Layers } from "lucide-react";
+import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
 
 import type { Doc } from "../../../convex/_generated/dataModel";
 
@@ -11,6 +12,9 @@ export function RulesTab({ pot, gracePeriod }: RulesTabProps) {
     return (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
             <div className="glass-1 rounded-2xl p-6">
+                <div className="mb-6 -mt-2">
+                    <OrganizerDisplay foremanId={pot.foremanId} />
+                </div>
                 <h3 className="text-lg font-display font-bold flex items-center gap-2 mb-4">
                     <Info className="text-[var(--accent-vivid)]" size={18} /> Description
                 </h3>

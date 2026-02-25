@@ -249,7 +249,7 @@ export interface VirtualSlot {
  */
 export function getVirtualOpenSlots(pot: SlimPot, slots: SlimSlot[]): VirtualSlot[] {
     const filledNumbers = new Set(
-        slots.filter((s) => s.userId).map((s) => s.slotNumber)
+        slots.filter((s) => s.userId || s.isSplit).map((s) => s.slotNumber)
     );
     return Array.from({ length: pot.config.totalSlots }, (_, i) => i + 1)
         .filter((n) => !filledNumbers.has(n))

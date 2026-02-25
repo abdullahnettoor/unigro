@@ -14,6 +14,8 @@ interface PotHeroProps {
     progressInfo: { count: number; total: number } | null;
     filledCount: number;
     displayProgress: number;
+    onOrganizerClick: () => void;
+    onSlotClick?: (slotId: string, slotNumber: number, isOpen: boolean, isSplit: boolean) => void;
 }
 
 export function PotHero({
@@ -26,42 +28,76 @@ export function PotHero({
     isForeman,
     progressInfo,
     filledCount,
-    displayProgress
+    displayProgress,
+    onOrganizerClick,
+    onSlotClick
 }: PotHeroProps) {
     return (
         <div className="glass-3 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
-            <div className="absolute top-4 right-4 z-20 hidden sm:block">
-                <OrganizerDisplay foremanId={pot.foremanId} />
+            <div className="absolute top-4 right-4 z-20 hidden lg:block cursor-pointer hover:scale-105 transition-transform" onClick={onOrganizerClick}>
+                <OrganizerDisplay foremanId={pot.foremanId} avatarOnly={true} />
             </div>
-            <div className="mb-2 text-center sm:text-left">
+
+            {/* Desktop Title & Status */}
+            <div className="hidden lg:block mb-6 text-left">
                 <span className="text-[10px] font-bold text-[var(--accent-vivid)] uppercase tracking-widest bg-[var(--accent-vivid)]/10 px-2 py-0.5 rounded-full mb-2 inline-block">
-                    GrowPot {pot.status}
+                    {pot.status}
                 </span>
-                <h1 className="text-3xl sm:text-4xl font-display font-black text-[var(--text-primary)]">{pot.title}</h1>
+                <h1 className="text-4xl font-display font-black text-[var(--text-primary)] truncate">{pot.title}</h1>
+            </div>
+
+            {/* Mobile/Tablet Status Badge */}
+            <div className="lg:hidden flex justify-center mb-4 relative z-10 animate-in fade-in duration-300">
+                <span className="text-[10px] sm:text-xs font-bold text-[var(--accent-vivid)] uppercase tracking-widest bg-[var(--accent-vivid)]/10 px-3 py-1 rounded-full border border-[var(--accent-vivid)]/20 shadow-sm backdrop-blur-md">
+                    {pot.status}
+                </span>
             </div>
 
             {(isMember || isForeman || (isActive && hasOpenSlots)) && (
                 <div className="mt-4">
-                    <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} transactions={transactions} />
+                    <PotVisualizer pot={pot} slots={allSlots} currentMonthIndex={pot.currentMonth} transactions={transactions} onSlotClick={onSlotClick} />
                 </div>
             )}
 
-            {/* Quick Progress Bar for small screens/non-members */}
-            <div className="mt-8 border-t border-[var(--border-subtle)] pt-6">
-                <div className="flex justify-between items-end mb-2">
-                    <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] font-bold">
-                        {isActive ? "Collection status" : "Filling status"}
+            {/* Progress Bars */}
+            <div className="mt-8 border-t border-[var(--border-subtle)] pt-6 space-y-6">
+                {/* Collection/Filling Status */}
+                <div>
+                    <div className="flex justify-between items-end mb-2">
+                        <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] font-bold">
+                            {isActive ? "Cycle collection status" : "Filling status"}
+                        </div>
+                        <div className="text-xs font-mono text-[var(--text-primary)] font-bold">
+                            {isActive ? `${progressInfo?.count ?? 0} / ${progressInfo?.total ?? 0} paid` : `${filledCount} / ${pot.config.totalSlots} joined`}
+                        </div>
                     </div>
-                    <div className="text-xs font-mono text-[var(--text-primary)] font-bold">
-                        {isActive ? `${progressInfo?.count ?? 0} / ${progressInfo?.total ?? 0} paid` : `${filledCount} / ${pot.config.totalSlots} joined`}
+                    <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-deep)] border border-[var(--border-subtle)]/30">
+                        <div
+                            className="h-full bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)] transition-all duration-500 shadow-[0_0_10px_var(--accent-vivid)]"
+                            style={{ width: `${Math.min(100, displayProgress)}%` }}
+                        />
                     </div>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-deep)] border border-[var(--border-subtle)]/30">
-                    <div
-                        className="h-full bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)] transition-all duration-500 shadow-[0_0_10px_var(--accent-vivid)]"
-                        style={{ width: `${Math.min(100, displayProgress)}%` }}
-                    />
-                </div>
+
+                {/* Overall Pot Cycle Progress (Only for Active Pots) */}
+                {isActive && (
+                    <div className="animate-in fade-in slide-in-from-top-1 duration-500">
+                        <div className="flex justify-between items-end mb-2">
+                            <div className="text-xs uppercase tracking-wide text-[var(--text-muted)] font-bold">
+                                Overall Cycle Progress
+                            </div>
+                            <div className="text-xs font-mono text-[var(--text-primary)] font-bold">
+                                {pot.currentMonth} / {pot.config.duration} rounds
+                            </div>
+                        </div>
+                        <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-deep)] border border-[var(--border-subtle)]/30">
+                            <div
+                                className="h-full bg-gradient-to-r from-[var(--gold)] to-[var(--accent-vivid)] transition-all duration-700 shadow-[0_0_10px_rgba(255,215,0,0.3)]"
+                                style={{ width: `${(pot.currentMonth / pot.config.duration) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

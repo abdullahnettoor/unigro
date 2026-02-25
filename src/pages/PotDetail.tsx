@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate,useParams } from "react-router-dom";
-import { useMutation,useQuery } from "convex/react";
-import { ChevronLeft,Edit2, Gavel, ShieldAlert } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery } from "convex/react";
+import { ChevronLeft, Edit2, Gavel, ShieldAlert } from "lucide-react";
 
 import { DesktopSidebar } from "@/components/pot-detail/DesktopSidebar";
 import { MemberDashboard } from "@/components/pot-detail/MemberDashboard";
@@ -28,6 +28,8 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 
 export type Tab = 'dashboard' | 'rules' | 'slots' | 'members' | 'history' | 'approvals' | 'organize';
+
+import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
 
 export function PotDetail() {
     const { potId } = useParams<{ potId: string }>();
@@ -88,8 +90,19 @@ export function PotDetail() {
     const virtualOpenSlots = pot ? getVirtualOpenSlots(pot as any, allSlots as any) : [];
 
     const splitEligibleSlots = [
-        ...virtualOpenSlots,
-        ...allSlots.filter(s => s.isSplit && (s as any).remainingPercentage > 0)
+        ...virtualOpenSlots.map(s => ({ ...s, remainingPercentage: 100 })),
+        ...allSlots
+            .filter(s => s.isSplit)
+            .map(s => {
+                const filledShares = (s as any).splitOwners
+                    ?.filter((o: any) => o.status === "ACTIVE")
+                    .reduce((sum: number, o: any) => sum + o.sharePercentage, 0) || 0;
+                return {
+                    ...s,
+                    remainingPercentage: 100 - filledShares
+                };
+            })
+            .filter(s => s.remainingPercentage > 0)
     ];
 
     // Progress bar uses shared utility
@@ -396,24 +409,47 @@ export function PotDetail() {
         return null;
     })();
 
+    const handleOrganizerClick = () => {
+        setActiveTab("rules");
+        setTimeout(() => {
+            document.getElementById('tabs-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    };
+
+    const handleSlotClick = (_: string, slotNumber: number, isOpen: boolean, isSplit: boolean) => {
+        if (!isDraft) return;
+
+        if (isOpen) {
+            setShowAddMember(true);
+        } else if (isSplit) {
+            // Find the slot to verify it's partially filled
+            const slotData = allSlots.find(s => s.slotNumber === slotNumber);
+            if (slotData && (slotData as any).remainingPercentage !== undefined && (slotData as any).remainingPercentage > 0) {
+                setShowSplitModal(true);
+            }
+        }
+    }
 
 
     // --- RENDER ---
     return (
         <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6 lg:px-8 bg-[var(--bg-app)] min-h-screen">
             {/* Mobile Sticky Topbar */}
-            <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">
-                <button onClick={() => navigate(-1)} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
+            <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">
+                <button onClick={() => navigate('/pots')} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
                     <ChevronLeft size={20} />
                 </button>
-                <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold text-[var(--accent-vivid)] uppercase tracking-widest leading-none mb-0.5">GrowPot {pot.status}</p>
-                    <h2 className="truncate font-display text-base font-bold text-[var(--text-primary)]">{pot.title}</h2>
+                <div className="flex-1 min-w-0 text-center flex flex-col items-center justify-center">
+                    <h2 className="truncate font-display text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-tight">{pot.title}</h2>
                 </div>
-                {isForeman && (
-                    <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="rounded-full p-2 hover:bg-[var(--surface-deep)] text-[var(--text-muted)]">
+                {isForeman && !isActive ? (
+                    <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="rounded-full p-2 hover:bg-[var(--surface-deep)] text-[var(--text-muted)] flex-shrink-0">
                         <Edit2 size={18} />
                     </button>
+                ) : (
+                    <div className="flex-shrink-0 p-1 cursor-pointer hover:scale-105 transition-transform" onClick={handleOrganizerClick}>
+                        <OrganizerDisplay foremanId={pot.foremanId} avatarOnly={true} />
+                    </div>
                 )}
             </div>
 
@@ -461,6 +497,8 @@ export function PotDetail() {
                         progressInfo={progressInfo}
                         filledCount={filledCount}
                         displayProgress={displayProgress}
+                        onOrganizerClick={handleOrganizerClick}
+                        onSlotClick={handleSlotClick}
                     />
 
                     {/* MOBILE/TABLET EXPANDABLE STATS & CONTROLS */}
@@ -477,14 +515,16 @@ export function PotDetail() {
                     />
 
                     {/* Tab Navigation */}
-                    <TabNav
-                        isMember={isMember}
-                        isForeman={isForeman}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        pendingApprovalsCount={pendingApprovalsCount}
-                        memberListLength={memberList.length}
-                    />
+                    <div id="tabs-section" className="scroll-mt-24">
+                        <TabNav
+                            isMember={isMember}
+                            isForeman={isForeman}
+                            activeTab={activeTab}
+                            setActiveTab={setActiveTab}
+                            pendingApprovalsCount={pendingApprovalsCount}
+                            memberListLength={memberList.length}
+                        />
+                    </div>
 
                     {/* TAB CONTENT AREAS */}
                     <div className="min-h-[400px]">

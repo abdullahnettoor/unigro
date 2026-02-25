@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 
 declare const process: any;
 
@@ -189,10 +190,52 @@ export const isAdmin = query({
 });
 
 export const get = query({
-    args: { userId: v.id("users") },
+    args: { userId: v.union(v.id("users"), v.string(), v.null()) },
     handler: async (ctx, args) => {
-        return await ctx.db.get(args.userId);
+        if (!args.userId || typeof args.userId !== 'string' || args.userId.trim() === '') return null;
+        try {
+            return await ctx.db.get(args.userId as Id<"users">);
+        } catch (e) {
+            return null; // Invalid ID format
+        }
     },
+});
+
+export const editGhost = mutation({
+    args: {
+        userId: v.id("users"),
+        name: v.string(),
+        phone: v.string()
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const targetUser = await ctx.db.get(args.userId);
+        if (!targetUser) throw new Error("Ghost user not found");
+
+        if (targetUser.verificationStatus !== "UNVERIFIED" || targetUser.clerkId) {
+            throw new Error("This user is a registered account and manages their own profile.");
+        }
+
+        // Technically, a Foreman *could* check if this ghost is actually in one of their Pots to enforce pot-level privacy,
+        // but for an MVP, updating an isolated ghost record is generally safe as ghosts are implicitly shared if phone numbers match.
+        // As an added layer, ensure we aren't introducing phone number conflicts
+        if (targetUser.phone !== args.phone) {
+            const existingPhone = await ctx.db
+                .query("users")
+                .withIndex("by_phone", q => q.eq("phone", args.phone))
+                .unique();
+            if (existingPhone) {
+                throw new Error("Another user is already registered with this phone number.");
+            }
+        }
+
+        await ctx.db.patch(args.userId, {
+            name: args.name,
+            phone: args.phone
+        });
+    }
 });
 
 

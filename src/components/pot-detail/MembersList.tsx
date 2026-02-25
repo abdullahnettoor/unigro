@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
-import { CheckCircle,ChevronDown, ChevronUp, Clock, ShieldAlert, Users } from "lucide-react";
+import { CheckCircle, ChevronDown, ChevronUp, Clock, ShieldAlert, Users, UserPen } from "lucide-react";
 
 import { PaymentModal } from "@/components/pot-detail/PaymentComponents";
 import { formatCurrency } from "@/lib/utils";
+import { EditGhostModal } from "./modals/EditGhostModal";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -21,6 +22,7 @@ interface MembersListProps {
 export function MembersList({ members, potId, currentMonth, isForeman, isActive, currentUserId, currency }: MembersListProps) {
     const recordCashPayment = useMutation(api.transactions.recordCashPayment);
     const [expandedUser, setExpandedUser] = useState<string | null>(null);
+    const [editingGhost, setEditingGhost] = useState<{ _id: Id<"users">, name: string, phone: string } | null>(null);
 
     const [paymentModalState, setPaymentModalState] = useState<{
         slotId: Id<"slots">,
@@ -92,7 +94,11 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
 
                                 <div className="flex items-center gap-4">
                                     <div className="text-right">
-
+                                        {m.user.verificationStatus === "UNVERIFIED" && !m.user.clerkId && isForeman && (
+                                            <div className="text-[10px] text-[var(--accent-vivid)] font-bold mb-1 flex items-center justify-end gap-1">
+                                                Ghost User
+                                            </div>
+                                        )}
                                         <div className={`font-bold font-mono ${isFullyPaid ? "text-[var(--accent-vivid)]" : "text-[var(--accent-secondary)]"}`}>
                                             {isFullyPaid ? "PAID" : `Due: ${formatCurrency(m.totalDue, currency)}`}
                                         </div>
@@ -100,13 +106,23 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
                                             <div className="text-[10px] text-[var(--text-muted)]">{m.paidCount}/{m.slots.length} Paid</div>
                                         )}
                                     </div>
-                                    {expandedUser === m.userId ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
+                                    <div className="flex flex-col items-center gap-2">
+                                        {expandedUser === m.userId ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Expanded Details */}
                             {expandedUser === m.userId && (
-                                <div className="bg-[var(--surface-deep)]/60 p-4 border-t border-[var(--border-subtle)] space-y-2">
+                                <div className="bg-[var(--surface-deep)]/60 p-4 border-t border-[var(--border-subtle)] space-y-2 relative">
+                                    {m.user.verificationStatus === "UNVERIFIED" && !m.user.clerkId && isForeman && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setEditingGhost({ _id: m.userId, name: m.user.name, phone: m.user.phone }); }}
+                                            className="absolute top-4 right-4 bg-[var(--surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-[10px] px-2 py-1 rounded hover:bg-[var(--surface-card)] transition-colors flex items-center gap-1 shadow-sm"
+                                        >
+                                            <UserPen size={12} /> Edit Details
+                                        </button>
+                                    )}
                                     {/* Missed Payments Section */}
                                     {m.missedPayments?.length > 0 && (
                                         <div className="mb-4  bg-[var(--danger)]/10 rounded-lg p-3 border border-[var(--danger)]/20">
@@ -234,6 +250,13 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
                             });
                         }
                     }}
+                />
+            )}
+
+            {editingGhost && (
+                <EditGhostModal
+                    ghostUser={editingGhost}
+                    onClose={() => setEditingGhost(null)}
                 />
             )}
         </div>

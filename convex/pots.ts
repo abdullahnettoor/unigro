@@ -135,6 +135,7 @@ export const get = query({
                 }
 
                 let splitOwners: any[] = [];
+                let remainingPercentage = 100;
                 if (slot.isSplit) {
                     const shares = await ctx.db
                         .query("split_ownership")
@@ -143,14 +144,24 @@ export const get = query({
 
                     splitOwners = await Promise.all(shares.map(async (share) => {
                         const u = await ctx.db.get(share.userId);
-                        return { ...share, userName: u?.name, userPhone: u?.phone, userPictureUrl: u?.pictureUrl };
+                        return {
+                            ...share,
+                            userName: u?.name,
+                            userPhone: u?.phone,
+                            userPictureUrl: u?.pictureUrl,
+                            isGhost: u?.verificationStatus === "UNVERIFIED" && !u?.clerkId
+                        };
                     }));
+
+                    const filledShares = shares.filter(s => s.status === "ACTIVE").reduce((sum, s) => sum + s.sharePercentage, 0);
+                    remainingPercentage = 100 - filledShares;
                 }
 
                 return {
                     ...slot,
                     user,
-                    splitOwners
+                    splitOwners,
+                    remainingPercentage
                 };
             })
         );
@@ -590,16 +601,44 @@ export const assignSplitSlot = mutation({
             throw new Error(`Cannot assign ${args.sharePercentage}% share. Only ${100 - currentTotal}% remaining.`);
         }
 
-        // Add Share
-        await ctx.db.insert("split_ownership", {
-            slotId: slot._id,
-            userId: user._id,
-            sharePercentage: args.sharePercentage,
-            status: "ACTIVE"
-        });
+        const newTotal = currentTotal + args.sharePercentage;
+        const activeExistingShares = existingShares.filter(s => s.status === "ACTIVE");
+        const isOnlyOwner = activeExistingShares.every(s => s.userId === user._id);
+
+        if (newTotal === 100 && isOnlyOwner) {
+            // 100% aggregated share by a single user means it's a full slot. Turn off split properties and assign directly.
+            await ctx.db.patch(slot._id, {
+                status: "FILLED",
+                userId: user._id,
+                isSplit: false,
+                isGhost: !user.clerkId
+            });
+
+            // Clean up old split records
+            for (const s of activeExistingShares) {
+                await ctx.db.delete(s._id);
+            }
+            return;
+        }
+
+        const existingShare = activeExistingShares.find(s => s.userId === user._id);
+
+        if (existingShare) {
+            // Update existing share
+            await ctx.db.patch(existingShare._id, {
+                sharePercentage: existingShare.sharePercentage + args.sharePercentage
+            });
+        } else {
+            // Add Share
+            await ctx.db.insert("split_ownership", {
+                slotId: slot._id,
+                userId: user._id,
+                sharePercentage: args.sharePercentage,
+                status: "ACTIVE"
+            });
+        }
 
         // Update Slot Status
-        const newTotal = currentTotal + args.sharePercentage;
         if (newTotal === 100) {
             await ctx.db.patch(slot._id, {
                 status: "FILLED",

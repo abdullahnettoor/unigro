@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { AnimatePresence,motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Clock } from "lucide-react";
 
 import { getCollectionProgress } from "@/lib/pot";
@@ -12,6 +12,7 @@ interface PotVisualizerProps {
     currentMonthIndex: number;
     winnerId?: string;
     transactions?: any[]; // Using any[] to bypass strict Doc typing for enriched fields
+    onSlotClick?: (slotId: string, slotNumber: number, isOpen: boolean, isSplit: boolean) => void;
 }
 
 type VisualizerSlot = (Doc<"slots"> & { user: Doc<"users"> | null; splitOwners?: any[] }) | {
@@ -26,7 +27,7 @@ type VisualizerSlot = (Doc<"slots"> & { user: Doc<"users"> | null; splitOwners?:
     splitOwners?: any[];
 };
 
-export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transactions }: PotVisualizerProps) {
+export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transactions, onSlotClick }: PotVisualizerProps) {
     const orbitRadius = 135; // Increased slightly for more air
 
     // Generate full list of slots (Real + Virtual)
@@ -134,7 +135,8 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transac
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1, x: x - 200, y: y - 200 }}
                         transition={{ duration: 0.6, delay: index * 0.04, type: "spring", damping: 15 }}
-                        className="group absolute left-1/2 top-1/2 -ml-6 -mt-6 h-12 w-12 cursor-pointer transition-transform hover:z-20"
+                        onClick={() => onSlotClick?.(slot._id, slot.slotNumber, isOpen, !!slot.isSplit)}
+                        className={`group absolute left-1/2 top-1/2 -ml-6 -mt-6 h-12 w-12 transition-transform hover:z-20 ${onSlotClick ? 'cursor-pointer' : ''}`}
                     >
                         <div className="relative h-full w-full">
                             {/* Inner highlight for paid state */}
