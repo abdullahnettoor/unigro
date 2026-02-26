@@ -111,32 +111,31 @@ function BottomNav() {
   if (location.pathname === "/create" || location.pathname.startsWith("/pot/")) return null;
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 p-2 shadow-2xl backdrop-blur-md md:hidden">
-      <div className="grid grid-cols-3 gap-2">
+    <nav className="fixed left-1/2 bottom-5 z-40 -translate-x-1/2 px-2 py-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/90 shadow-[0_12px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden w-fit min-w-[280px]">
+      <div className="flex items-center justify-around gap-1">
         <Link
           to="/"
           className={itemClass(isActive("/"))}
           aria-current={isActive("/") ? "page" : undefined}
         >
-          <Home size={18} />
-          <span className={labelClass}>Dashboard</span>
+          <Home size={19} className={isActive("/") ? "scale-110" : ""} />
+          <span className={labelClass}>Home</span>
         </Link>
         <Link
           to="/pots"
           className={itemClass(isActive("/pots"))}
           aria-current={isActive("/pots") ? "page" : undefined}
         >
-          <WalletCards size={18} />
-          <span className={labelClass}>Pots</span>
+          <WalletCards size={19} className={isActive("/pots") ? "scale-110" : ""} />
+          <span className={labelClass}>My Pots</span>
         </Link>
-
         <Link
           to="/settings"
           className={itemClass(isActive("/settings"))}
           aria-current={isActive("/settings") ? "page" : undefined}
         >
-          <Settings size={18} />
-          <span className={labelClass}>Settings</span>
+          <Settings size={19} className={isActive("/settings") ? "scale-110" : ""} />
+          <span className={labelClass}>Profile</span>
         </Link>
       </div>
     </nav>
