@@ -21,7 +21,7 @@ export function SegmentedControl<T extends string>({
     buttonClassName,
 }: SegmentedControlProps<T>) {
     return (
-        <div className={cn("glass-1 inline-flex rounded-full p-1", className)}>
+        <div className={cn("glass-1 inline-flex rounded-full p-0.5", className)}>
             {options.map((opt) => {
                 const active = value === opt.value;
                 return (
@@ -31,7 +31,7 @@ export function SegmentedControl<T extends string>({
                         onClick={() => onChange(opt.value)}
                         aria-pressed={active}
                         className={cn(
-                            "min-h-9 rounded-full px-4 text-xs font-semibold transition-colors",
+                            "btn-chip rounded-full px-4 text-xs font-semibold transition-colors",
                             buttonClassName,
                             active
                                 ? "bg-[var(--surface-elevated)] text-[var(--text-primary)] shadow-sm"

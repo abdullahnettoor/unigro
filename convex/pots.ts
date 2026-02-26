@@ -754,3 +754,74 @@ export const assignSplitSlot = mutation({
         }
     }
 });
+
+// ── Archive Pot ───────────────────────────────────────────────────────────────
+export const archivePot = mutation({
+    args: { potId: v.id("pots") },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const pot = await ctx.db.get(args.potId);
+        if (!pot) throw new Error("Pot not found");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", q => q.eq("clerkId", identity.subject))
+            .unique();
+        if (!user || user._id !== pot.foremanId) throw new Error("Only the Foreman can archive this pot");
+
+        await ctx.db.patch(args.potId, { status: "ARCHIVED" });
+    },
+});
+
+// ── Delete Pot (cascade) ──────────────────────────────────────────────────────
+export const deletePot = mutation({
+    args: { potId: v.id("pots") },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const pot = await ctx.db.get(args.potId);
+        if (!pot) throw new Error("Pot not found");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", q => q.eq("clerkId", identity.subject))
+            .unique();
+        if (!user || user._id !== pot.foremanId) throw new Error("Only the Foreman can delete this pot");
+
+        // 1. Delete split_ownership rows for every slot in this pot
+        const slots = await ctx.db
+            .query("slots")
+            .withIndex("by_pot", q => q.eq("potId", args.potId))
+            .collect();
+
+        for (const slot of slots) {
+            const shares = await ctx.db
+                .query("split_ownership")
+                .withIndex("by_slot", q => q.eq("slotId", slot._id))
+                .collect();
+            for (const share of shares) {
+                await ctx.db.delete(share._id);
+            }
+        }
+
+        // 2. Delete all transactions for this pot
+        const transactions = await ctx.db
+            .query("transactions")
+            .withIndex("by_pot_month", q => q.eq("potId", args.potId))
+            .collect();
+        for (const tx of transactions) {
+            await ctx.db.delete(tx._id);
+        }
+
+        // 3. Delete all slots
+        for (const slot of slots) {
+            await ctx.db.delete(slot._id);
+        }
+
+        // 4. Delete the pot itself
+        await ctx.db.delete(args.potId);
+    },
+});

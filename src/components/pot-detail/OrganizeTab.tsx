@@ -1,4 +1,4 @@
-import { Clock,ShieldCheck } from "lucide-react";
+import { Clock, ShieldCheck, Trash2 } from "lucide-react";
 
 import { formatCurrency } from "@/lib/utils";
 
@@ -8,6 +8,7 @@ interface OrganizeTabProps {
     pot: Doc<"pots">;
     isDraft: boolean;
     isActive: boolean;
+    isForeman: boolean;
     currentWinnerSlot: any;
     isDrawing: boolean;
     transactions: any[];
@@ -17,12 +18,14 @@ interface OrganizeTabProps {
     handleDraw: () => void;
     setShowWinnerSelection: (show: boolean) => void;
     setGlobalPaymentState: (state: any) => void;
+    onDeletePot: () => void;
 }
 
 export function OrganizeTab({
     pot,
     isDraft,
     isActive,
+    isForeman,
     currentWinnerSlot,
     isDrawing,
     transactions,
@@ -31,7 +34,8 @@ export function OrganizeTab({
     handleActivate,
     handleDraw,
     setShowWinnerSelection,
-    setGlobalPaymentState
+    setGlobalPaymentState,
+    onDeletePot,
 }: OrganizeTabProps) {
     const pendingTransactions = transactions?.filter(t => t.status === "PENDING") || [];
 
@@ -151,6 +155,28 @@ export function OrganizeTab({
                     </div>
                 </dl>
             </div>
+
+            {/* Danger Zone — foreman only */}
+            {isForeman && (
+                <div className="glass-1 rounded-3xl p-6 border border-red-500/20">
+                    <h4 className="text-xs uppercase font-black tracking-widest text-red-400 mb-3 flex items-center gap-2">
+                        <Trash2 size={14} /> Danger Zone
+                    </h4>
+                    <p className="text-xs text-[var(--text-muted)] mb-4 leading-relaxed">
+                        {isDraft
+                            ? "Permanently delete this pot and all its slots. This cannot be undone."
+                            : "Archive or permanently delete this pot. Archived pots preserve history."
+                        }
+                    </p>
+                    <button
+                        onClick={onDeletePot}
+                        className="w-full border border-red-500/30 hover:border-red-500/60 text-red-400 hover:text-red-300 font-bold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Trash2 size={14} />
+                        {isDraft ? "Delete pot" : "Archive / Delete pot"}
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

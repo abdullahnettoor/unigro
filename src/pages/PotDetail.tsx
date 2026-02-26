@@ -15,6 +15,7 @@ import { NextRoundModal } from "@/components/pot-detail/modals/NextRoundModal"; 
 import { SplitSlotModal } from "@/components/pot-detail/modals/SplitSlotModal"; // New
 import { RunDrawAnimationModal } from "@/components/pot-detail/modals/RunDrawAnimationModal";
 import { WinnerSelectionModal } from "@/components/pot-detail/modals/WinnerSelectionModal";
+import { DeletePotModal } from "@/components/pot-detail/modals/DeletePotModal";
 import { OrganizeTab } from "@/components/pot-detail/OrganizeTab";
 import { PaymentModal } from "@/components/pot-detail/PaymentComponents";
 import { PotHero } from "@/components/pot-detail/PotHero";
@@ -53,6 +54,7 @@ export function PotDetail() {
     const [showSplitModal, setShowSplitModal] = useState(false); // New
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [showNextRoundModal, setShowNextRoundModal] = useState(false);
+    const [showDeletePotModal, setShowDeletePotModal] = useState(false);
     const [isDrawing, setIsDrawing] = useState(false);
     const [showMobileStats, setShowMobileStats] = useState(false);
     const [showRunDrawAnimation, setShowRunDrawAnimation] = useState(false);
@@ -365,7 +367,7 @@ export function PotDetail() {
         return !tx || tx.status === "UNPAID";
     });
 
-    const isAnyModalOpen = showAddMember || showSplitModal || showJoinModal || showNextRoundModal || !!globalPaymentState || showWinnerSelection || showRunDrawAnimation;
+    const isAnyModalOpen = showAddMember || showSplitModal || showJoinModal || showNextRoundModal || showDeletePotModal || !!globalPaymentState || showWinnerSelection || showRunDrawAnimation;
 
     const primaryAction = (() => {
         // Visitor/Non-member viewing pot with space
@@ -649,6 +651,7 @@ export function PotDetail() {
                                 pot={pot}
                                 isDraft={isDraft}
                                 isActive={isActive}
+                                isForeman={isForeman}
                                 currentWinnerSlot={currentWinnerSlot}
                                 isDrawing={isDrawing}
                                 transactions={transactions || []}
@@ -658,6 +661,7 @@ export function PotDetail() {
                                 handleDraw={handleDraw}
                                 setShowWinnerSelection={setShowWinnerSelection}
                                 setGlobalPaymentState={setGlobalPaymentState}
+                                onDeletePot={() => setShowDeletePotModal(true)}
                             />
                         )}
                     </div>
@@ -739,16 +743,26 @@ export function PotDetail() {
                 />
             )}
 
-            {showNextRoundModal && (
-                <NextRoundModal
-                    potId={pot._id}
-                    currentMonth={pot.currentMonth}
-                    totalMonths={pot.config.duration}
-                    defaultNextDate={new Date().toISOString().split('T')[0]}
-                    isOccasional={pot.config.frequency === 'occasional'}
-                    onClose={() => setShowNextRoundModal(false)}
-                />
-            )}
+            {showNextRoundModal && (() => {
+                const currentMonthTxs = (transactions || []).filter(t => t.monthIndex === pot.currentMonth);
+                const paidSlotIds = new Set(currentMonthTxs.filter(t => t.status === "PAID").map(t => t.slotId));
+                const pendingSlotIds = new Set(currentMonthTxs.filter(t => t.status === "PENDING").map(t => t.slotId));
+                const eligibleForPayment = allSlots.filter(s => s.status === "FILLED");
+                const unpaidCount = eligibleForPayment.filter(s => !paidSlotIds.has(s._id) && !pendingSlotIds.has(s._id)).length;
+                const pendingCount = eligibleForPayment.filter(s => pendingSlotIds.has(s._id)).length;
+                return (
+                    <NextRoundModal
+                        potId={pot._id}
+                        currentMonth={pot.currentMonth}
+                        totalMonths={pot.config.duration}
+                        defaultNextDate={new Date().toISOString().split('T')[0]}
+                        isOccasional={pot.config.frequency === 'occasional'}
+                        unpaidCount={unpaidCount}
+                        pendingCount={pendingCount}
+                        onClose={() => setShowNextRoundModal(false)}
+                    />
+                );
+            })()}
 
             {showWinnerSelection && (
                 <WinnerSelectionModal
@@ -768,6 +782,15 @@ export function PotDetail() {
                     currency={pot.config.currency || "USD"}
                     winningAmount={winningAmount}
                     currentMonth={pot.currentMonth}
+                />
+            )}
+
+            {showDeletePotModal && (
+                <DeletePotModal
+                    potId={pot._id}
+                    potTitle={pot.title}
+                    potStatus={pot.status}
+                    onClose={() => setShowDeletePotModal(false)}
                 />
             )}
 

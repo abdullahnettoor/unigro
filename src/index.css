@@ -183,7 +183,7 @@ input[type="submit"] {
   /* Firefox */
 }
 
-/* Compact button/chip override */
+/* Compact button/chip override — fully cancels the 44px min-height rule */
 .btn-chip {
-  min-height: 26px;
+  min-height: 0;
 }
