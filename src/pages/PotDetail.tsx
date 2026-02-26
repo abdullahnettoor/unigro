@@ -13,6 +13,7 @@ import { AddMemberModal } from "@/components/pot-detail/modals/AddMemberModal";
 import { JoinPotModal } from "@/components/pot-detail/modals/JoinPotModal";
 import { NextRoundModal } from "@/components/pot-detail/modals/NextRoundModal"; // New
 import { SplitSlotModal } from "@/components/pot-detail/modals/SplitSlotModal"; // New
+import { RunDrawAnimationModal } from "@/components/pot-detail/modals/RunDrawAnimationModal";
 import { WinnerSelectionModal } from "@/components/pot-detail/modals/WinnerSelectionModal";
 import { OrganizeTab } from "@/components/pot-detail/OrganizeTab";
 import { PaymentModal } from "@/components/pot-detail/PaymentComponents";
@@ -54,6 +55,7 @@ export function PotDetail() {
     const [showNextRoundModal, setShowNextRoundModal] = useState(false);
     const [isDrawing, setIsDrawing] = useState(false);
     const [showMobileStats, setShowMobileStats] = useState(false);
+    const [showRunDrawAnimation, setShowRunDrawAnimation] = useState(false);
 
     const [showWinnerSelection, setShowWinnerSelection] = useState(false);
     const [selectedWinnerSlotNum, setSelectedWinnerSlotNum] = useState<number | null>(null);
@@ -182,20 +184,26 @@ export function PotDetail() {
     };
 
 
-    const handleDraw = async () => {
-        const ok = await feedback.confirm({
-            title: "Run the draw?",
-            message: "This will select the winner for the current cycle.",
-            confirmText: "Run draw",
-        });
-        if (!ok) return;
+    /** Used by RunDrawAnimationModal — fires the mutation and returns the winning slot number */
+    const executeRandomDraw = async (): Promise<number> => {
         setIsDrawing(true);
         try {
-            if (selectedWinnerSlotNum) {
-                await runDraw({ potId: pot._id, customWinnerSlotNumber: selectedWinnerSlotNum });
-            } else {
-                await runDraw({ potId: pot._id });
-            }
+            const winningSlotNumber = await runDraw({ potId: pot._id });
+            return winningSlotNumber;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            setIsDrawing(false);
+        }
+    };
+
+    /** Used by WinnerSelectionModal for manual override */
+    const handleManualDraw = async () => {
+        if (!selectedWinnerSlotNum) return;
+        setIsDrawing(true);
+        try {
+            await runDraw({ potId: pot._id, customWinnerSlotNumber: selectedWinnerSlotNum });
             setShowWinnerSelection(false);
             setSelectedWinnerSlotNum(null);
             feedback.toast.success("Draw completed", "Winner has been selected.");
@@ -206,6 +214,9 @@ export function PotDetail() {
             setIsDrawing(false);
         }
     };
+
+    /** Legacy alias kept for OrganizeTab / DesktopSidebar primary action */
+    const handleDraw = () => setShowRunDrawAnimation(true);
 
     const handleShare = async () => {
         const shareData = {
@@ -354,7 +365,7 @@ export function PotDetail() {
         return !tx || tx.status === "UNPAID";
     });
 
-    const isAnyModalOpen = showAddMember || showSplitModal || showJoinModal || showNextRoundModal || !!globalPaymentState || showWinnerSelection;
+    const isAnyModalOpen = showAddMember || showSplitModal || showJoinModal || showNextRoundModal || !!globalPaymentState || showWinnerSelection || showRunDrawAnimation;
 
     const primaryAction = (() => {
         // Visitor/Non-member viewing pot with space
@@ -745,7 +756,18 @@ export function PotDetail() {
                     selectedWinnerSlotNum={selectedWinnerSlotNum}
                     setSelectedWinnerSlotNum={setSelectedWinnerSlotNum}
                     setShowWinnerSelection={setShowWinnerSelection}
-                    handleDraw={handleDraw}
+                    handleDraw={handleManualDraw}
+                />
+            )}
+
+            {showRunDrawAnimation && (
+                <RunDrawAnimationModal
+                    eligibleSlots={activeSlots.filter(s => !s.drawOrder)}
+                    onRunDraw={executeRandomDraw}
+                    onClose={() => setShowRunDrawAnimation(false)}
+                    currency={pot.config.currency || "USD"}
+                    winningAmount={winningAmount}
+                    currentMonth={pot.currentMonth}
                 />
             )}
 

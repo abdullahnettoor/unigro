@@ -452,8 +452,8 @@ export const runDraw = mutation({
             .withIndex("by_pot_slotNumber", q => q.eq("potId", args.potId))
             .collect();
 
-        // Elgible: Filled, Has User, No Draw Order
-        const eligibleSlots = slots.filter(s => s.status === "FILLED" && s.userId && !s.drawOrder);
+        // Eligible: Filled, Has User OR is a multi-owner split slot, No Draw Order yet
+        const eligibleSlots = slots.filter(s => s.status === "FILLED" && (s.userId || s.isSplit) && !s.drawOrder);
 
         if (eligibleSlots.length === 0) throw new Error("No eligible slots left");
 
@@ -524,7 +524,7 @@ export const advanceCycle = mutation({
             .query("slots")
             .withIndex("by_pot", q => q.eq("potId", args.potId))
             .filter(q => q.eq(q.field("drawOrder"), pot.currentMonth))
-            .unique();
+            .first();
 
         if (!winner) throw new Error("No winner selected for current cycle");
 
