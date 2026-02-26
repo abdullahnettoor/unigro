@@ -67,7 +67,6 @@ export function PotDetail() {
         userId?: Id<"users"> // For Foreman to know who he is marking for
     } | null>(null);
 
-    type Tab = 'dashboard' | 'rules' | 'slots' | 'members' | 'history' | 'approvals' | 'organize';
     const [activeTab, setActiveTab] = useState<Tab>('rules');
 
     // Computed State
@@ -75,7 +74,10 @@ export function PotDetail() {
     const isActive = pot?.status === "ACTIVE";
 
     const isForeman = currentUser?._id === pot?.foremanId;
-    const allSlots = pot?.slots || [];
+    // Source Deduplication: Ensure allSlots contains unique items by _id
+    const dbSlots = pot?.slots || [];
+    const allSlots = Array.from(new Map(dbSlots.map(s => [s._id, s])).values());
+
     const mySlots = currentUser ? allSlots.filter(s =>
         s.userId === currentUser._id ||
         (s.isSplit && (s as any).splitOwners?.some((o: any) => o.userId === currentUser._id))
@@ -225,9 +227,9 @@ export function PotDetail() {
     const memberStats = new Map<string, any>();
 
     allSlots.forEach(slot => {
-        // 1. Process Full Owner
-        if (slot.userId && slot.user) {
-            const userId = slot.userId;
+        // 1. Process Full Owner (Only if not split)
+        if (slot.userId && slot.user && !slot.isSplit) {
+            const userId = String(slot.userId);
             if (!memberStats.has(userId)) {
                 memberStats.set(userId, {
                     userId: userId,
@@ -273,7 +275,9 @@ export function PotDetail() {
             }
 
 
-            stats.slots.push({ ...slot, share: 100, isPaid, due });
+            if (!stats.slots.some((s: any) => s._id === slot._id)) {
+                stats.slots.push({ ...slot, share: 100, isPaid, due });
+            }
             stats.totalShare += 100;
             if (!isPaid) stats.totalDue += due;
             else stats.paidCount++;
@@ -282,7 +286,7 @@ export function PotDetail() {
         // 2. Process Split Owners
         if (slot.isSplit && slot.splitOwners) {
             slot.splitOwners.forEach((owner: any) => {
-                const userId = owner.userId;
+                const userId = String(owner.userId);
                 if (!memberStats.has(userId)) {
                     memberStats.set(userId, {
                         userId: userId,
@@ -329,14 +333,19 @@ export function PotDetail() {
 
 
 
-                stats.slots.push({ ...slot, share: owner.sharePercentage, isPaid, due });
+                if (!stats.slots.some((s: any) => s._id === slot._id)) {
+                    stats.slots.push({ ...slot, share: owner.sharePercentage, isPaid, due });
+                }
                 stats.totalShare += owner.sharePercentage;
                 if (!isPaid) stats.totalDue += due;
             });
         }
     });
 
-    const memberList = Array.from(memberStats.values()).sort((a, b) => a.user.name.localeCompare(b.user.name));
+    // Final Deduplication of memberList by userId just in case
+    const memberListMap = new Map();
+    Array.from(memberStats.values()).forEach(m => memberListMap.set(String(m.userId), m));
+    const memberList = Array.from(memberListMap.values()).sort((a, b) => a.user.name.localeCompare(b.user.name));
     const pendingApprovalsCount = transactions?.filter((t) => t.status === "PENDING").length || 0;
 
 

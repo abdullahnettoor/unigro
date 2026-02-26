@@ -1,8 +1,9 @@
-import { useEffect,useRef, useState } from "react";
-import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
-import { useClerk,useUser } from "@clerk/clerk-react";
-import { useMutation,useQuery } from "convex/react";
-import { AlertCircle, Clock, FileText, Loader2, LogOut,Mail, Save, ShieldCheck, Smartphone, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { isValidPhoneNumber } from "react-phone-number-input";
+import { PhoneInputField } from "@/components/ui/PhoneInputField";
+import { useClerk, useUser } from "@clerk/clerk-react";
+import { useMutation, useQuery } from "convex/react";
+import { AlertCircle, Clock, FileText, Loader2, LogOut, Mail, Save, ShieldCheck, Smartphone, Upload, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
@@ -10,7 +11,7 @@ import { DashboardSidebar } from "@/pages/Dashboard";
 
 import { api } from "../../convex/_generated/api";
 
-import "react-phone-number-input/style.css";
+
 
 export function Settings() {
     const user = useQuery(api.users.current);
@@ -161,12 +162,9 @@ export function Settings() {
                                     </div>
                                     <div>
                                         <label className="block text-xs uppercase text-[var(--text-muted)] font-bold mb-1">Phone Number</label>
-                                        <PhoneInput
-                                            international
-                                            defaultCountry="IN"
+                                        <PhoneInputField
                                             value={editPhone}
-                                            onChange={(v) => setEditPhone(v || "")}
-                                            className="w-full bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-xl p-3 text-[var(--text-primary)] focus-within:border-[var(--accent-vivid)]"
+                                            onChange={setEditPhone}
                                         />
                                         <p className="text-xs text-[var(--text-muted)] mt-1">Preferably a WhatsApp-linked number for easy contact.</p>
                                     </div>

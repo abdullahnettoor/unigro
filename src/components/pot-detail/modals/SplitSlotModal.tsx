@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import { isValidPhoneNumber } from "react-phone-number-input";
+import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { useMutation, useQuery } from "convex/react";
 import { Layers, PieChart, UserPlus, X } from "lucide-react";
 
@@ -8,7 +9,7 @@ import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 
-import "react-phone-number-input/style.css";
+
 
 interface SplitSlotModalProps {
     potId: Id<"pots">;
@@ -156,13 +157,10 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone</label>
-                            <PhoneInput
-                                international
-                                defaultCountry="IN"
+                            <PhoneInputField
                                 value={phone}
-                                onChange={(v) => setPhone(v || "")}
-                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] font-mono focus-within:border-[var(--accent-vivid)] [&>input]:bg-transparent [&>input]:outline-none"
-                                placeholder="+91 1234567890"
+                                onChange={setPhone}
+                                error={!!error && error.includes("phone")}
                             />
                         </div>
                     </div>

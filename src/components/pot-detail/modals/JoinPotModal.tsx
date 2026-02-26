@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { User, Phone, X, AlertCircle } from "lucide-react";
+import { isValidPhoneNumber } from "react-phone-number-input";
+import { PhoneInputField } from "@/components/ui/PhoneInputField";
+import { User, X, AlertCircle } from "lucide-react";
+
+
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { formatCurrency } from "@/lib/utils";
@@ -45,8 +49,14 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
                 onClose();
             } else {
                 // Ghost Join
-                if (!guestName.trim() || !guestPhone.trim()) {
-                    feedback.toast.error("Missing Info", "Please provide your name and phone number.");
+                if (!guestName.trim()) {
+                    feedback.toast.error("Missing Info", "Please provide your name.");
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                if (!guestPhone || !isValidPhoneNumber(guestPhone)) {
+                    feedback.toast.error("Invalid Phone", "Please enter a valid phone number with country code.");
                     setIsSubmitting(false);
                     return;
                 }
@@ -122,16 +132,11 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
 
                                 <div>
                                     <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 ml-1">Mobile Number</label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
-                                        <input
-                                            type="tel"
-                                            value={guestPhone}
-                                            onChange={(e) => setGuestPhone(e.target.value)}
-                                            placeholder="Enter phone number"
-                                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-2xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-[var(--accent-vivid)] outline-none transition-all"
-                                        />
-                                    </div>
+                                    <PhoneInputField
+                                        value={guestPhone}
+                                        onChange={setGuestPhone}
+                                        error={!!authError}
+                                    />
                                 </div>
 
                                 {authError && (
