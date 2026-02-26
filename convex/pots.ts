@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 export const create = mutation({
     args: {
@@ -254,6 +255,75 @@ export const join = mutation({
         }
 
         return availableNumbers[0]; // Return first assigned slot number
+    },
+});
+
+export const joinAsGhost = mutation({
+    args: {
+        potId: v.id("pots"),
+        name: v.string(),
+        phone: v.string(),
+        slotCount: v.optional(v.number()),
+    },
+    handler: async (ctx, args) => {
+        const pot = await ctx.db.get(args.potId);
+        if (!pot) throw new Error("Pot not found");
+
+        const foreman = await ctx.db.get(pot.foremanId);
+        if (!foreman || foreman.verificationStatus !== "VERIFIED") {
+            throw new Error("Cannot join: Pot Foreman is unverified.");
+        }
+
+        let userId: Id<"users">;
+        const existingUser = await ctx.db
+            .query("users")
+            .withIndex("by_phone", (q) => q.eq("phone", args.phone))
+            .unique();
+
+        if (existingUser) {
+            if (existingUser.clerkId) {
+                throw new Error("ALREADY_REGISTERED");
+            }
+            userId = existingUser._id;
+        } else {
+            userId = await ctx.db.insert("users", {
+                name: args.name,
+                phone: args.phone,
+                verificationStatus: "UNVERIFIED",
+            });
+        }
+
+        const count = args.slotCount || 1;
+        const existingSlots = await ctx.db
+            .query("slots")
+            .withIndex("by_pot_slotNumber", q => q.eq("potId", args.potId))
+            .collect();
+
+        const usedNumbers = new Set(existingSlots.map(s => s.slotNumber));
+        const availableNumbers = [];
+
+        for (let i = 1; i <= pot.config.totalSlots; i++) {
+            if (!usedNumbers.has(i)) {
+                availableNumbers.push(i);
+            }
+            if (availableNumbers.length === count) break;
+        }
+
+        if (availableNumbers.length < count) {
+            throw new Error(`Only ${availableNumbers.length} slots available.`);
+        }
+
+        for (const num of availableNumbers) {
+            await ctx.db.insert("slots", {
+                potId: args.potId,
+                slotNumber: num,
+                userId: userId,
+                status: "RESERVED",
+                isGhost: true,
+            });
+        }
+
+        return { success: true, userId, firstSlot: availableNumbers[0] };
     },
 });
 

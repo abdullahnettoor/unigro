@@ -1,13 +1,12 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { SignInButton } from "@clerk/clerk-react";
-import { Authenticated, AuthLoading,Unauthenticated } from "convex/react";
-import { Home, Settings,WalletCards } from "lucide-react";
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
+import { Home, Settings, WalletCards } from "lucide-react";
 
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { UserSync } from "./components/auth/UserSync";
 import { PWAPrompt } from "./components/shared/PWAPrompt";
-
 
 const loadDashboard = () => import("./pages/Dashboard");
 const loadPots = () => import("./pages/Pots");
@@ -66,21 +65,36 @@ function AuthenticatedPrefetch() {
 
 function Landing() {
   return (
-    <section className="mx-auto mt-12 w-full max-w-4xl px-4 text-center sm:mt-16 sm:px-6">
-      <h2 className="text-4xl font-[family-name:var(--font-display)] font-bold leading-tight sm:text-5xl md:text-6xl">
-        Communal Finance,<br />Reimagined.
-      </h2>
-      <p className="mx-auto mb-8 mt-4 max-w-2xl text-base text-[var(--text-muted)] sm:text-lg md:text-xl">
-        A verified, transparent, and beautiful way to manage your chit funds.
-      </p>
-      <div className="mx-auto flex max-w-xs justify-center gap-4 sm:max-w-none">
-        <SignInButton mode="modal">
-          <button className="w-full rounded-full bg-[var(--accent-vivid)] px-8 py-3 text-base font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-lg">
-            Get Started
-          </button>
-        </SignInButton>
-      </div>
-    </section>
+    <main className="min-h-screen bg-[var(--hero-gradient)] px-4 py-6 text-[var(--text-primary)] sm:px-6 sm:py-8">
+      <header className="mb-8 flex flex-col items-start gap-4 sm:mb-12 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-[family-name:var(--font-display)] font-bold sm:text-4xl">GrowPot</h1>
+          <p className="mt-1 text-sm text-[var(--text-muted)] sm:text-base">Community savings made transparent.</p>
+        </div>
+        <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
+          <SignInButton mode="modal">
+            <button className="w-full rounded-full bg-[var(--accent-vivid)] px-6 py-2.5 font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto">
+              Sign In
+            </button>
+          </SignInButton>
+        </div>
+      </header>
+      <section className="mx-auto mt-12 w-full max-w-4xl px-4 text-center sm:mt-16 sm:px-6">
+        <h2 className="text-4xl font-[family-name:var(--font-display)] font-bold leading-tight sm:text-5xl md:text-6xl">
+          Communal Finance,<br />Reimagined.
+        </h2>
+        <p className="mx-auto mb-8 mt-4 max-w-2xl text-base text-[var(--text-muted)] sm:text-lg md:text-xl">
+          A verified, transparent, and beautiful way to manage your chit funds.
+        </p>
+        <div className="mx-auto flex max-w-xs justify-center gap-4 sm:max-w-none">
+          <SignInButton mode="modal">
+            <button className="w-full rounded-full bg-[var(--accent-vivid)] px-8 py-3 text-base font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-lg">
+              Get Started
+            </button>
+          </SignInButton>
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -132,8 +146,17 @@ function BottomNav() {
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)] pb-24 sm:pb-0">
+      <Authenticated>
+        <UserSync />
+        <AuthenticatedPrefetch />
+        <Suspense fallback={null}>
+          <ProfileModal />
+        </Suspense>
+      </Authenticated>
       {children}
-      <BottomNav />
+      <Authenticated>
+        <BottomNav />
+      </Authenticated>
     </main>
   );
 }
@@ -148,52 +171,97 @@ function App() {
         </div>
       </AuthLoading>
 
-      <Unauthenticated>
-        <main className="min-h-screen bg-[var(--hero-gradient)] px-4 py-6 text-[var(--text-primary)] sm:px-6 sm:py-8">
-          <header className="mb-8 flex flex-col items-start gap-4 sm:mb-12 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-[family-name:var(--font-display)] font-bold sm:text-4xl">GrowPot</h1>
-              <p className="mt-1 text-sm text-[var(--text-muted)] sm:text-base">Community savings made transparent.</p>
-            </div>
-            <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
-              <SignInButton mode="modal">
-                <button className="w-full rounded-full bg-[var(--accent-vivid)] px-6 py-2.5 font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto">
-                  Sign In
-                </button>
-              </SignInButton>
-            </div>
-          </header>
-          <Landing />
-        </main>
-      </Unauthenticated>
+      <div className="bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)]">
+        <Suspense fallback={<RouteLoading />}>
+          <Routes>
+            {/* The root route handles Landing vs Dashboard */}
+            <Route
+              path="/"
+              element={
+                <>
+                  <Unauthenticated>
+                    <Landing />
+                  </Unauthenticated>
+                  <Authenticated>
+                    <MainLayout>
+                      <Dashboard />
+                    </MainLayout>
+                  </Authenticated>
+                </>
+              }
+            />
 
-      <Authenticated>
-        <UserSync />
-        <AuthenticatedPrefetch />
-        <Suspense fallback={null}>
-          <ProfileModal />
-        </Suspense>
-        <MainLayout>
-          <Suspense fallback={<RouteLoading />}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/pots" element={<Pots />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/create" element={<CreatePot />} />
-              <Route path="/pot/:potId" element={<PotDetail />} />
-              <Route
-                path="/admin"
-                element={
+            {/* Publicly accessible route */}
+            <Route
+              path="/pot/:potId"
+              element={
+                <MainLayout>
+                  <PotDetail />
+                </MainLayout>
+              }
+            />
+
+            {/* Protected routes */}
+            <Route
+              path="/pots"
+              element={
+                <Authenticated>
+                  <MainLayout>
+                    <Pots />
+                  </MainLayout>
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <Authenticated>
+                  <MainLayout>
+                    <SettingsPage />
+                  </MainLayout>
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/create"
+              element={
+                <Authenticated>
+                  <MainLayout>
+                    <CreatePot />
+                  </MainLayout>
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <Authenticated>
                   <AdminRoute>
-                    <AdminDashboard />
+                    <MainLayout>
+                      <AdminDashboard />
+                    </MainLayout>
                   </AdminRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        </MainLayout>
-      </Authenticated>
+                </Authenticated>
+              }
+            />
+
+            {/* Default redirect for unauthenticated or unknown routes */}
+            <Route
+              path="*"
+              element={
+                <>
+                  <Unauthenticated>
+                    <Navigate to="/" replace />
+                  </Unauthenticated>
+                  <Authenticated>
+                    <Navigate to="/" replace />
+                  </Authenticated>
+                </>
+              }
+            />
+          </Routes>
+        </Suspense>
+      </div>
     </BrowserRouter>
   );
 }

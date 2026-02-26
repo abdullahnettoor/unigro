@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronLeft, Edit2, Gavel, ShieldAlert } from "lucide-react";
+import { ChevronLeft, ChevronRight, Coins, Edit2, Gavel, ShieldAlert } from "lucide-react";
+import { SignInButton } from "@clerk/clerk-react";
 
 import { DesktopSidebar } from "@/components/pot-detail/DesktopSidebar";
 import { MemberDashboard } from "@/components/pot-detail/MemberDashboard";
@@ -79,7 +80,20 @@ export function PotDetail() {
         s.userId === currentUser._id ||
         (s.isSplit && (s as any).splitOwners?.some((o: any) => o.userId === currentUser._id))
     ) : [];
-    const isMember = mySlots.length > 0;
+
+    // Ghost Membership Recognition
+    const [isGhostMember, setIsGhostMember] = useState(false);
+    useEffect(() => {
+        const guestIds = JSON.parse(localStorage.getItem("growpot_ghost_memberships") || "[]");
+        if (guestIds.length > 0 && !currentUser) {
+            const joinedAsGhost = allSlots.some(s => s.userId && guestIds.includes(s.userId));
+            setIsGhostMember(joinedAsGhost);
+        } else {
+            setIsGhostMember(false);
+        }
+    }, [allSlots, currentUser]);
+
+    const isMember = mySlots.length > 0 || isGhostMember;
     const activeSlots = allSlots.filter(s => s.status === "FILLED" || s.status === "RESERVED");
 
     // Use shared utilities for slot/progress calculations
@@ -643,12 +657,13 @@ export function PotDetail() {
             </div>
 
             {/* MOBILE & TABLET STICKY BOTTOM ACTION BAR */}
-            {/* MOBILE & TABLET STICKY BOTTOM ACTION BAR */}
-            <MobileActionBar
-                pot={pot}
-                primaryAction={primaryAction}
-                isAnyModalOpen={isAnyModalOpen}
-            />
+            {currentUser && (
+                <MobileActionBar
+                    pot={pot}
+                    primaryAction={primaryAction}
+                    isAnyModalOpen={isAnyModalOpen}
+                />
+            )}
 
             {/* Modals */}
             {globalPaymentState && (
@@ -724,6 +739,63 @@ export function PotDetail() {
                     handleDraw={handleDraw}
                 />
             )}
+
+            {/* Visitor/Guest CTA Banners */}
+            {!currentUser && !isAnyModalOpen && !showMobileStats && (
+                isGhostMember ? <SecureAccountBanner /> : <VisitorBanner />
+            )}
+        </div>
+    );
+}
+
+function VisitorBanner() {
+    return (
+        <div className="fixed inset-x-4 bottom-6 z-50 animate-in slide-in-from-bottom-8 duration-500">
+            <div className="mx-auto max-w-md glass-3 border border-[var(--accent-vivid)]/30 rounded-3xl p-6 shadow-2xl overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)]" />
+                <div className="flex flex-col gap-4 relative z-10">
+                    <div>
+                        <h4 className="text-xl font-display font-black text-[var(--accent-vivid)] mb-1">Join this Pot!</h4>
+                        <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                            You've been invited to participate in this group savings. Log in to reserve your slot and start saving together.
+                        </p>
+                    </div>
+                    <SignInButton mode="modal">
+                        <button className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[var(--accent-vivid)]/20">
+                            Get Started Now <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </SignInButton>
+                </div>
+                <div className="absolute -bottom-6 -right-6 opacity-10">
+                    <Coins size={120} className="text-[var(--accent-vivid)]" />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SecureAccountBanner() {
+    return (
+        <div className="fixed inset-x-4 bottom-6 z-50 animate-in slide-in-from-bottom-8 duration-500">
+            <div className="mx-auto max-w-md glass-3 border border-[var(--accent-secondary)]/30 rounded-3xl p-6 shadow-2xl overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-secondary)] to-[var(--accent-vivid)]" />
+                <div className="flex flex-col gap-4 relative z-10">
+                    <div>
+                        <h4 className="text-xl font-display font-black text-[var(--accent-secondary)] mb-1">Secure your slots!</h4>
+                        <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                            You've reserved your place in this pot. Sign up officially to track your payments and participate in the draw.
+                        </p>
+                    </div>
+                    <SignInButton mode="modal">
+                        <button className="w-full bg-[var(--accent-secondary)] text-[var(--text-primary)] font-bold py-3 rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[var(--accent-secondary)]/20">
+                            Create Account <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </SignInButton>
+                </div>
+                <div className="absolute -bottom-6 -right-6 opacity-10">
+                    <ShieldAlert size={120} className="text-[var(--accent-secondary)]" />
+                </div>
+            </div>
         </div>
     );
 }
