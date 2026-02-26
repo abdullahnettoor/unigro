@@ -1,4 +1,4 @@
-import { Landmark,Shuffle, UserCheck } from "lucide-react";
+import { Landmark, Shuffle, UserCheck } from "lucide-react";
 
 import { cn } from "@/components/ui/Button";
 import { GlassSurface } from "@/components/ui/GlassSurface";
@@ -12,9 +12,10 @@ interface PotRulesStepProps {
         bankDetails: string;
     };
     onChange: (data: Partial<PotRulesStepProps["formData"]>) => void;
+    disabled?: boolean;
 }
 
-export function PotRulesStep({ formData, onChange }: PotRulesStepProps) {
+export function PotRulesStep({ formData, onChange, disabled }: PotRulesStepProps) {
     return (
         <section className="space-y-6">
             <GlassSurface tier="glass-2" className="p-5 sm:p-6 space-y-5">
@@ -47,11 +48,13 @@ export function PotRulesStep({ formData, onChange }: PotRulesStepProps) {
                                     key={strategy.id}
                                     type="button"
                                     onClick={() => onChange({ drawStrategy: strategy.id as DrawStrategy })}
+                                    disabled={disabled}
                                     className={cn(
                                         "relative flex flex-col gap-2 rounded-xl border p-4 text-left transition-all",
                                         formData.drawStrategy === strategy.id
                                             ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/10"
-                                            : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/50 hover:border-[var(--accent-vivid)]/40 hover:bg-[var(--surface-elevated)]"
+                                            : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/50 hover:border-[var(--accent-vivid)]/40 hover:bg-[var(--surface-elevated)]",
+                                        disabled && "opacity-50 cursor-not-allowed"
                                     )}
                                 >
                                     <div className="flex items-center gap-2 font-semibold text-[var(--text-primary)]">
@@ -79,7 +82,8 @@ export function PotRulesStep({ formData, onChange }: PotRulesStepProps) {
                             max={30}
                             value={formData.gracePeriodDays}
                             onChange={(e) => onChange({ gracePeriodDays: Number(e.target.value) })}
-                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 p-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)]"
+                            disabled={disabled}
+                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 p-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] disabled:opacity-50"
                         />
                         <p className="mt-2 text-xs text-[var(--text-muted)]">
                             Number of days members have to pay after the due date before late fees apply (if any).

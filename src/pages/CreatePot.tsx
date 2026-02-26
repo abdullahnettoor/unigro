@@ -42,7 +42,7 @@ export function CreatePot() {
         duration: 10,
         frequency: "monthly" as Frequency,
         commission: 0,
-        gracePeriodDays: 3,
+        gracePeriodDays: 5,
         drawStrategy: "RANDOM" as DrawStrategy,
         startDate: new Date().toISOString().split("T")[0],
     });
@@ -70,6 +70,12 @@ export function CreatePot() {
         return () => window.cancelAnimationFrame(frame);
     }, [existingPot]);
 
+    const isLocked = !!existingPot && (existingPot as any).slots?.some((slot: any) => {
+        if (slot.status !== "OPEN" && !slot.isGhost) return true;
+        if (slot.isSplit && slot.splitOwners?.some((owner: any) => !owner.isGhost)) return true;
+        return false;
+    });
+
     const completionPercent = ((step + 1) / STEPS.length) * 100;
 
     const validateStep = (stepIndex: number) => {
@@ -80,7 +86,7 @@ export function CreatePot() {
         }
         if (stepIndex === 1) {
             if (formData.duration < 2) return "Total slots must be at least 2.";
-            if (formData.duration > 60) return "Total slots cannot exceed 60.";
+            if (formData.duration > 50) return "Total slots cannot exceed 50.";
             if (formData.contribution < 1) return "Contribution must be greater than 0.";
             if (formData.commission < 0 || formData.commission > 50) return "Organizer commission must be between 0% and 50%.";
         }
@@ -137,7 +143,7 @@ export function CreatePot() {
             } else {
                 potId = await createPot(payload);
             }
-            navigate(`/pot/${potId}`);
+            navigate(`/pot/${potId}`, { replace: true });
         } catch (submitError) {
             console.error("Failed to save pot:", submitError);
             setError("Failed to save pot. Please try again.");
@@ -209,9 +215,9 @@ export function CreatePot() {
                             exit={{ opacity: 0, x: -10 }}
                             transition={{ duration: 0.2 }}
                         >
-                            {step === 0 && <PotFinancialsStep formData={formData} onChange={updateFormData} />}
-                            {step === 1 && <PotSlotsStep formData={formData} onChange={updateFormData} />}
-                            {step === 2 && <PotRulesStep formData={formData} onChange={updateFormData} />}
+                            {step === 0 && <PotFinancialsStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
+                            {step === 1 && <PotSlotsStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
+                            {step === 2 && <PotRulesStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
                         </motion.div>
                     </AnimatePresence>
                 </form>

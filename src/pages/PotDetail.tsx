@@ -538,6 +538,7 @@ export function PotDetail() {
                                         transactions={transactions || []}
                                         nextDueDate={nextDueDate}
                                         currentUserId={currentUser?._id || ""}
+                                        onPay={(slotId, cycle, amount) => setGlobalPaymentState({ slotId, cycle, amount })}
                                     />
                                 )}
 

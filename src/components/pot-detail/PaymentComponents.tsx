@@ -1,6 +1,6 @@
-import { useRef,useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "convex/react";
-import { AlertCircle, Banknote, CheckCircle, Clock, Image as ImageIcon, Smartphone,Upload, X } from "lucide-react";
+import { AlertCircle, Banknote, CheckCircle, Clock, Image as ImageIcon, Smartphone, Upload, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { formatCurrency } from "@/lib/utils";
@@ -123,8 +123,8 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
-            <div className="glass-3 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm shadow-2xl flex items-end justify-center p-3 sm:items-center sm:p-4 z-[100] animate-in fade-in duration-200">
+            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
                 <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-[var(--border-subtle)] sm:hidden" />
                 <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
                     <button onClick={onClose} aria-label="Close payment modal" className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
@@ -188,11 +188,11 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
 
                                     {error && <p className="text-[var(--danger)] text-sm text-center">{error}</p>}
 
-                                    <div className="glass-2 sticky bottom-0 pt-2">
+                                    <div className="sticky bottom-0 pt-4 pb-2 mt-4 flex items-center justify-center">
                                         <button
                                             type="submit"
                                             disabled={isUploading || !file}
-                                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--accent-vivid)]/10"
                                         >
                                             {isUploading ? "Uploading..." : "Submit proof"}
                                         </button>
@@ -216,17 +216,17 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                                 </p>
                                             </div>
                                         ) : (
-                                            <div className="bg-[var(--warning)]/10 p-4 rounded-xl mb-6 border border-[var(--warning)]/20">
-                                                <p className="text-[var(--warning)] text-sm">
+                                            <div className="bg-[var(--warning)]/15 p-5 rounded-xl mb-6 border border-[var(--warning)]/30 backdrop-blur-sm">
+                                                <p className="text-[var(--text-primary)] font-medium text-sm leading-relaxed">
                                                     Please confirm that you have handed cash to the organizer. The organizer will need to approve this request.
                                                 </p>
                                             </div>
                                         )}
-                                    <div className="glass-2 sticky bottom-0 pt-2">
+                                    <div className="sticky bottom-0 pt-4 pb-2 mt-4 flex items-center justify-center">
                                         <button
                                             onClick={handleCashSubmit}
                                             disabled={isUploading}
-                                            className={`w-full font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 ${isForeman ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)]" : "bg-[var(--warning)] text-[var(--text-on-accent)]"}`}
+                                            className={`w-full font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg ${isForeman ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[var(--accent-vivid)]/10" : "bg-[var(--warning)] text-[var(--text-on-accent)] shadow-[var(--warning)]/10"}`}
                                         >
                                             {isUploading ? "Processing..." : (isForeman ? "Record received" : "Confirm cash payment")}
                                         </button>

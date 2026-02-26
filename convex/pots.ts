@@ -35,6 +35,20 @@ export const create = mutation({
 
         if (!user) throw new Error("User not found");
 
+        // Restriction: Max 5 pots per user
+        const userPotsCount = await ctx.db
+            .query("pots")
+            .filter((q) => q.eq(q.field("foremanId"), user._id))
+            .collect();
+        if (userPotsCount.length >= 5) {
+            throw new Error("You can only create up to 5 pots.");
+        }
+
+        // Restriction: Slots between 1 and 50
+        if (args.totalSlots < 1 || args.totalSlots > 50) {
+            throw new Error("Number of slots must be between 1 and 50.");
+        }
+
         // Create Pot
         const potId = await ctx.db.insert("pots", {
             title: args.title,
@@ -488,19 +502,37 @@ export const updatePot = mutation({
         if (!user || user._id !== pot.foremanId) throw new Error("Unauthorized");
 
         if (pot.status === "DRAFT") {
-            // Allow full update
+            // Restriction: Check if any real (non-ghost) member has joined
+            const joinedMembers = await ctx.db
+                .query("slots")
+                .withIndex("by_pot", (q) => q.eq("potId", pot._id))
+                .filter((q) => q.and(
+                    q.neq(q.field("status"), "OPEN"),
+                    q.eq(q.field("isGhost"), false)
+                ))
+                .collect();
+
+            const isConfigLocked = joinedMembers.length > 0;
+
             const configUpdates: any = {};
-            if (args.totalValue) configUpdates.totalValue = args.totalValue;
-            if (args.totalSlots) configUpdates.totalSlots = args.totalSlots; // Update totalSlots
-            if (args.contribution) configUpdates.contribution = args.contribution;
-            if (args.currency) configUpdates.currency = args.currency;
-            // Validate frequency literal
-            if (args.frequency && ["monthly", "weekly", "biweekly", "quarterly", "occasional"].includes(args.frequency)) {
-                configUpdates.frequency = args.frequency;
+            if (!isConfigLocked) {
+                if (args.totalValue) configUpdates.totalValue = args.totalValue;
+                if (args.totalSlots) {
+                    if (args.totalSlots < 1 || args.totalSlots > 50) {
+                        throw new Error("Number of slots must be between 1 and 50.");
+                    }
+                    configUpdates.totalSlots = args.totalSlots;
+                }
+                if (args.contribution) configUpdates.contribution = args.contribution;
+                if (args.currency) configUpdates.currency = args.currency;
+                if (args.frequency && ["monthly", "weekly", "biweekly", "quarterly", "occasional"].includes(args.frequency)) {
+                    configUpdates.frequency = args.frequency;
+                }
+                if (args.duration) configUpdates.duration = args.duration;
+                if (args.gracePeriodDays !== undefined) configUpdates.gracePeriodDays = args.gracePeriodDays;
             }
-            if (args.duration) configUpdates.duration = args.duration;
+
             if (args.commission !== undefined) configUpdates.commission = args.commission;
-            if (args.gracePeriodDays !== undefined) configUpdates.gracePeriodDays = args.gracePeriodDays;
 
             await ctx.db.patch(args.potId, {
                 title: args.title ?? pot.title,

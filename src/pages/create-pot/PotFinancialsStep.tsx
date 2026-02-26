@@ -16,9 +16,10 @@ interface PotFinancialsStepProps {
         startDate: string;
     };
     onChange: (data: Partial<PotFinancialsStepProps["formData"]>) => void;
+    disabled?: boolean;
 }
 
-export function PotFinancialsStep({ formData, onChange }: PotFinancialsStepProps) {
+export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancialsStepProps) {
     const currencies = cc.codes().map((code) => ({
         code,
         label: `${getEmojiByCurrencyCode(code) || ""} ${code}`,
@@ -57,7 +58,8 @@ export function PotFinancialsStep({ formData, onChange }: PotFinancialsStepProps
                             value={formData.title}
                             onChange={(e) => onChange({ title: e.target.value })}
                             placeholder="e.g. Family Vacation Fund"
-                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 p-3 text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] placeholder:text-[var(--text-muted)]"
+                            disabled={disabled}
+                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 p-3 text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] placeholder:text-[var(--text-muted)] disabled:opacity-50"
                         />
                     </div>
 
@@ -94,7 +96,8 @@ export function PotFinancialsStep({ formData, onChange }: PotFinancialsStepProps
                                     id="currency"
                                     value={formData.currency}
                                     onChange={(e) => onChange({ currency: e.target.value })}
-                                    className="w-full h-full appearance-none bg-transparent py-3 pl-3 pr-8 text-sm font-semibold text-[var(--text-primary)] outline-none cursor-pointer"
+                                    disabled={disabled}
+                                    className="w-full h-full appearance-none bg-transparent py-3 pl-3 pr-8 text-sm font-semibold text-[var(--text-primary)] outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                     style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", inherit' }}
                                 >
                                     {currencies.map((c) => (
@@ -121,7 +124,8 @@ export function PotFinancialsStep({ formData, onChange }: PotFinancialsStepProps
                                     onValueChange={(_value, _name, values) => {
                                         onChange({ totalValue: values?.float || 0 });
                                     }}
-                                    className="w-full h-full bg-transparent py-3 px-4 font-mono text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
+                                    disabled={disabled}
+                                    className="w-full h-full bg-transparent py-3 px-4 font-mono text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] disabled:opacity-50"
                                     decimalSeparator="."
                                     groupSeparator=","
                                     prefix={currentCurrencySymbol}
@@ -144,7 +148,8 @@ export function PotFinancialsStep({ formData, onChange }: PotFinancialsStepProps
                                 required
                                 value={formData.startDate}
                                 onChange={(e) => onChange({ startDate: e.target.value })}
-                                className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)]"
+                                disabled={disabled}
+                                className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] disabled:opacity-50"
                             />
                         </div>
                         <p className="mt-2 text-xs text-[var(--text-muted)] flex items-center gap-1.5">

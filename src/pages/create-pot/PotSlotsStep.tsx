@@ -17,9 +17,10 @@ interface PotSlotsStepProps {
         currency: string;
     };
     onChange: (data: Partial<PotSlotsStepProps["formData"]>) => void;
+    disabled?: boolean;
 }
 
-export function PotSlotsStep({ formData, onChange }: PotSlotsStepProps) {
+export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps) {
     const [commissionType, setCommissionType] = useState<"PERCENTAGE" | "FIXED">("PERCENTAGE");
 
     // Local state for fixed amount input to allow typing
@@ -85,11 +86,13 @@ export function PotSlotsStep({ formData, onChange }: PotSlotsStepProps) {
                                     key={freq.value}
                                     type="button"
                                     onClick={() => onChange({ frequency: freq.value })}
+                                    disabled={disabled}
                                     className={cn(
                                         "rounded-xl border px-3 py-3 text-sm font-semibold transition-all duration-200",
                                         formData.frequency === freq.value
                                             ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] shadow-sm"
-                                            : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/50 text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/40 hover:text-[var(--text-primary)]"
+                                            : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/50 text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/40 hover:text-[var(--text-primary)]",
+                                        disabled && "opacity-50 cursor-not-allowed"
                                     )}
                                 >
                                     {freq.label}
@@ -112,10 +115,11 @@ export function PotSlotsStep({ formData, onChange }: PotSlotsStepProps) {
                                 <input
                                     type="number"
                                     min={2}
-                                    max={60}
+                                    max={50}
                                     value={formData.duration}
                                     onChange={(e) => setDuration(Number(e.target.value))}
-                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)]"
+                                    disabled={disabled}
+                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] disabled:opacity-50"
                                 />
                             </div>
                             <p className="mt-2 text-xs text-[var(--text-muted)]">
@@ -144,11 +148,13 @@ export function PotSlotsStep({ formData, onChange }: PotSlotsStepProps) {
                                     <button
                                         type="button"
                                         onClick={() => setCommissionType("FIXED")}
+                                        disabled={disabled}
                                         className={cn(
                                             "btn-chip px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all",
                                             commissionType === "FIXED"
                                                 ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
-                                                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                                                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
+                                            disabled && "opacity-50 cursor-not-allowed"
                                         )}
                                     >
                                         {currencySymbol}
@@ -166,7 +172,8 @@ export function PotSlotsStep({ formData, onChange }: PotSlotsStepProps) {
                                     {...(commissionType === "PERCENTAGE" ? { max: 50, step: 0.1 } : { max: formData.totalValue })}
                                     value={commissionType === "PERCENTAGE" ? Number(formData.commission.toFixed(2)) : fixedCommission}
                                     onChange={(e) => handleCommissionChange(Number(e.target.value), commissionType)}
-                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)]"
+                                    disabled={disabled}
+                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] disabled:opacity-50"
                                 />
                             </div>
                             <p className="mt-2 text-xs text-[var(--text-muted)]">
