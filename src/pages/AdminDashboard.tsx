@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
-import { useMutation,useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Check, CreditCard, Loader2,X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { PageShell } from "@/components/layout/PageShell";
+import { MediaPreviewDialog } from "@/components/shared/MediaPreviewDialog";
+import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
 import { Textarea } from "@/components/ui/Textarea";
-import { DashboardSidebar } from "@/pages/Dashboard";
 
 import { api } from "../../convex/_generated/api";
 
@@ -19,6 +23,7 @@ export function AdminDashboard() {
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [rejectingId, setRejectingId] = useState<string | null>(null);
     const [rejectionNote, setRejectionNote] = useState("");
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const handleReview = async (userId: any, status: "VERIFIED" | "REJECTED") => {
         if (status === "REJECTED" && rejectingId !== userId) {
@@ -44,49 +49,68 @@ export function AdminDashboard() {
         }
     };
 
-    if (pendingRequests === undefined) {
-        return (
-            <div className="max-w-4xl mx-auto py-8 px-4 flex justify-center">
-                <Loader2 className="animate-spin text-[var(--accent-vivid)]" />
-            </div>
-        );
-    }
-
     const clerkUser = user;
     const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
 
-    return (
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-5 md:py-3 lg:gap-6">
-            <DashboardSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} />
-            <div className="md:py-4">
-                <header className="mb-8">
-                    <h1 className="text-3xl font-display font-bold">Admin dashboard</h1>
-                    <p className="text-[var(--text-muted)]">Review identity verification requests.</p>
-                </header>
+    if (pendingRequests === undefined) {
+        return (
+            <PageShell
+                maxWidth="xl"
+                sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin />}
+                title="Admin dashboard"
+                subtitle="Review identity verification requests."
+            >
+                <div className="max-w-5xl w-full py-8 flex justify-center">
+                    <Loader2 className="animate-spin text-[var(--accent-vivid)]" />
+                </div>
+            </PageShell>
+        );
+    }
 
+    return (
+        <PageShell
+            maxWidth="xl"
+            sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin />}
+            title="Admin dashboard"
+            subtitle="Review identity verification requests."
+        >
+            <div className="max-w-5xl w-full">
                 {pendingRequests.length === 0 ? (
-                    <div className="text-center py-20 border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--surface-elevated)]/30">
+                    <Surface tier={1} className="text-center py-20 border border-dashed border-[var(--border-subtle)] rounded-2xl bg-[var(--surface-elevated)]/30">
                         <p className="text-[var(--text-muted)]">No pending verification requests.</p>
-                    </div>
+                    </Surface>
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
                         {pendingRequests.map((req) => (
-                            <div key={req._id} className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-6 flex flex-col md:flex-row gap-6">
+                            <Surface key={req._id} tier={2} className="rounded-2xl p-6 flex flex-col md:flex-row gap-6">
                                 {/* Document Preview */}
-                                <div className="w-full md:w-1/3 bg-[var(--surface-deep)]/70 rounded-xl h-64 flex items-center justify-center overflow-hidden border border-[var(--border-subtle)]">
+                                <Surface
+                                    tier={1}
+                                    className="w-full md:w-1/3 rounded-xl h-64 flex items-center justify-center overflow-hidden border border-[var(--border-subtle)]"
+                                >
                                     {req.docUrl ? (
-                                        <img
-                                            src={req.docUrl}
-                                            alt="ID Document"
-                                            className="max-w-full max-h-full object-contain"
-                                        />
+                                        <button
+                                            type="button"
+                                            className="group relative h-full w-full"
+                                            onClick={() => setPreviewUrl(req.docUrl)}
+                                            aria-label="View document"
+                                        >
+                                            <img
+                                                src={req.docUrl}
+                                                alt="ID Document"
+                                                className="h-full w-full object-contain"
+                                            />
+                                            <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                                View full size
+                                            </span>
+                                        </button>
                                     ) : (
                                         <div className="text-[var(--text-muted)] flex flex-col items-center">
                                             <CreditCard size={40} className="mb-2 opacity-50" />
                                             <span>No document</span>
                                         </div>
                                     )}
-                                </div>
+                                </Surface>
 
                                 {/* User Details & Actions */}
                                 <div className="flex-1 flex flex-col justify-between">
@@ -120,48 +144,65 @@ export function AdminDashboard() {
                                                     className="bg-[var(--surface-deep)]/60 border border-[var(--danger)]/30 h-24 resize-none"
                                                 />
                                                 <div className="flex gap-2">
-                                                    <button
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        fullWidth
                                                         onClick={() => setRejectingId(null)}
-                                                        className="flex-1 bg-[var(--surface-deep)] hover:bg-[var(--surface-deep)]/80 py-2 rounded-lg font-bold text-sm"
                                                     >
                                                         Cancel
-                                                    </button>
-                                                    <button
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="danger"
+                                                        fullWidth
                                                         onClick={() => handleReview(req._id, "REJECTED")}
                                                         disabled={!rejectionNote.trim() || actionLoading === req._id}
-                                                        className="flex-1  bg-[var(--danger)] text-[var(--text-on-accent)] hover:bg-[var(--danger)]/90 py-2 rounded-lg font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                                                        className="gap-2"
                                                     >
                                                         {actionLoading === req._id && <Loader2 className="animate-spin" size={14} />}
                                                         Confirm reject
-                                                    </button>
+                                                    </Button>
                                                 </div>
                                             </div>
                                         ) : (
                                             <div className="flex gap-4">
-                                                <button
+                                                <Button
+                                                    type="button"
+                                                    variant="danger"
+                                                    fullWidth
                                                     onClick={() => handleReview(req._id, "REJECTED")}
                                                     disabled={actionLoading === req._id}
-                                                    className="flex-1 bg-[var(--danger)]/10 text-[var(--danger)] border border-[var(--danger)]/20 py-3 rounded-xl font-bold hover:bg-[var(--danger)]/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                                                    className="gap-2"
                                                 >
                                                     <X size={18} /> Reject
-                                                </button>
-                                                <button
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    variant="primary"
+                                                    fullWidth
                                                     onClick={() => handleReview(req._id, "VERIFIED")}
                                                     disabled={actionLoading === req._id}
-                                                    className="flex-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] py-3 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
+                                                    className="gap-2"
                                                 >
                                                     {actionLoading === req._id ? <Loader2 className="animate-spin" size={18} /> : <Check size={18} />}
                                                     Approve
-                                                </button>
+                                                </Button>
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         ))}
                     </div>
                 )}
             </div>
-        </div>
+
+            <MediaPreviewDialog
+                url={previewUrl}
+                onClose={() => setPreviewUrl(null)}
+                alt="ID Document Preview"
+            />
+        </PageShell>
     );
 }

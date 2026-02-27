@@ -1,30 +1,48 @@
 import * as React from "react";
 
+import { Surface } from "@/components/ui/Surface";
 import { cn } from "@/lib/utils";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-    glass?: boolean
-    tier?: "glass-1" | "glass-2" | "glass-3"
-    hoverEffect?: boolean
+  glass?: boolean;
+  tier?: "glass-1" | "glass-2" | "glass-3";
+  hoverEffect?: boolean;
 }
 
+const tierMap = {
+  "glass-1": 1,
+  "glass-2": 2,
+  "glass-3": 3,
+} as const;
+
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-    ({ className, glass = true, tier = "glass-2", hoverEffect = false, ...props }, ref) => {
-        return (
-            <div
-                ref={ref}
-                className={cn(
-                    "rounded-2xl border border-[var(--border-subtle)] transition-all",
-                    glass ? tier : "bg-[var(--surface-elevated)]",
-                    hoverEffect ? "hover:border-[var(--accent-vivid)]/50 hover:shadow-lg group" : "",
-                    className
-                )}
-                {...props}
-            />
-        )
+  ({ className, glass = true, tier = "glass-2", hoverEffect = false, ...props }, ref) => {
+    if (!glass) {
+      return (
+        <div
+          ref={ref}
+          className={cn(
+            "rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)] transition-all",
+            hoverEffect ? "hover:border-[var(--accent-vivid)]/50 hover:shadow-lg group" : "",
+            className
+          )}
+          {...props}
+        />
+      );
     }
-)
-Card.displayName = "Card"
+
+    return (
+      <Surface
+        ref={ref}
+        tier={tierMap[tier]}
+        interactive={hoverEffect}
+        className={cn("rounded-2xl transition-all", className)}
+        {...props}
+      />
+    );
+  }
+);
+Card.displayName = "Card";
 
 export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
     ({ className, ...props }, ref) => (

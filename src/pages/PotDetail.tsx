@@ -23,8 +23,9 @@ import { PotHistory } from "@/components/pot-detail/PotHistory"; // New
 import { RulesTab } from "@/components/pot-detail/RulesTab";
 import { SlotsTab } from "@/components/pot-detail/SlotsTab";
 import { TabNav } from "@/components/pot-detail/TabNav";
+import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
-import { GlassSurface } from "@/components/ui/GlassSurface";
+import { Surface } from "@/components/ui/Surface";
 import { getNextCycleDate, getPotDisplayProgress, getPotFinancials, getSlotStats, getVirtualOpenSlots } from "@/lib/pot";
 import { formatCurrency } from "@/lib/utils";
 
@@ -470,7 +471,8 @@ export function PotDetail() {
 
     // --- RENDER ---
     return (
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6 lg:px-8 bg-[var(--bg-app)] min-h-screen">
+        <div className="min-h-dvh bg-[var(--bg-app)]">
+            <PageShell maxWidth="xl" className="py-4 sm:py-6 lg:px-8">
             {/* Mobile Sticky Topbar */}
             <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">
                 <button onClick={() => navigate('/pots')} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
@@ -500,7 +502,7 @@ export function PotDetail() {
 
             {/* Full Pot Banner for Visitors */}
             {!isMember && !isForeman && !hasOpenSlots && (
-                <div className="mb-6 glass-3 border-l-4 border-l-[var(--warning)] p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                <Surface tier={3} className="mb-6 border-l-4 border-l-[var(--warning)] p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
                     <div className="bg-[var(--warning)]/20 p-2 rounded-full text-[var(--warning)]">
                         <ShieldAlert size={20} />
                     </div>
@@ -514,7 +516,7 @@ export function PotDetail() {
                     >
                         Contact
                     </button>
-                </div>
+                </Surface>
             )}
 
             {/* MAIN 2-COLUMN GRID */}
@@ -540,17 +542,17 @@ export function PotDetail() {
 
                     {/* Desktop / Tablet Status Cards */}
                     <div className="hidden md:grid md:grid-cols-3 gap-4">
-                        <GlassSurface tier="glass-2" className="p-4">
+                        <Surface tier={2} className="p-4">
                             <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Next payment</p>
                             <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{nextDueDate}</p>
                             <p className="mt-1 text-xs text-[var(--text-muted)]">Member contribution due</p>
-                        </GlassSurface>
-                        <GlassSurface tier="glass-2" className="p-4">
+                        </Surface>
+                        <Surface tier={2} className="p-4">
                             <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Next draw</p>
                             <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{nextDrawDate}</p>
                             <p className="mt-1 text-xs text-[var(--text-muted)]">Payout schedule</p>
-                        </GlassSurface>
-                        <GlassSurface tier="glass-2" className="p-4">
+                        </Surface>
+                        <Surface tier={2} className="p-4">
                             <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Winning pot</p>
                             <p className="mt-2 text-lg font-semibold text-[var(--accent-secondary)]">
                                 {formatCurrency(winningAmount, pot.config.currency)}
@@ -558,7 +560,7 @@ export function PotDetail() {
                             <p className="mt-1 text-xs text-[var(--text-muted)]">
                                 After {commissionPct.toFixed(2)}% fee
                             </p>
-                        </GlassSurface>
+                        </Surface>
                     </div>
 
                     {/* MOBILE/TABLET EXPANDABLE STATS & CONTROLS */}
@@ -603,7 +605,7 @@ export function PotDetail() {
                                 )}
 
                                 {currentWinnerSlot && (
-                                    <div className="glass-2 border-l-4 border-l-[var(--gold)] rounded-2xl p-5 flex items-center gap-4">
+                                    <Surface tier={2} className="border-l-4 border-l-[var(--gold)] rounded-2xl p-5 flex items-center gap-4">
                                         <div className="bg-[var(--gold)]/20 p-3 rounded-full text-[var(--gold)]">
                                             <Gavel size={24} />
                                         </div>
@@ -611,7 +613,7 @@ export function PotDetail() {
                                             <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Cycle {pot.currentMonth} Winner</p>
                                             <p className="text-xl font-display font-black text-[var(--gold)]">#{currentWinnerSlot.slotNumber} • {currentWinnerSlot.user?.name}</p>
                                         </div>
-                                    </div>
+                                    </Surface>
                                 )}
                             </div>
                         )}
@@ -822,6 +824,7 @@ export function PotDetail() {
             {!currentUser && !isAnyModalOpen && !showMobileStats && (
                 isGhostMember ? <SecureAccountBanner /> : <VisitorBanner />
             )}
+            </PageShell>
         </div>
     );
 }

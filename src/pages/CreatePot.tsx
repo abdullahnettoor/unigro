@@ -9,6 +9,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { PotFinancialsStep } from "@/pages/create-pot/PotFinancialsStep";
 import { PotRulesStep } from "@/pages/create-pot/PotRulesStep";
 import { PotSlotsStep } from "@/pages/create-pot/PotSlotsStep";
+import { PageShell } from "@/components/layout/PageShell";
 import { GlassSurface } from "@/components/ui/GlassSurface";
 
 import { api } from "../../convex/_generated/api";
@@ -169,7 +170,7 @@ export function CreatePot() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--bg-app)] pb-24 relative">
+        <div className="min-h-dvh bg-[var(--bg-app)] pb-24 relative">
             {/* Header / Progress */}
             <header className="sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 px-4 pt-12 pb-4 backdrop-blur-md sm:pt-6">
                 <div className="mx-auto max-w-2xl">
@@ -204,7 +205,7 @@ export function CreatePot() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-6xl px-4 py-6">
+            <PageShell maxWidth="xl" className="py-6">
                 <AnimatePresence mode="wait">
                     {error && (
                         <motion.div
@@ -310,7 +311,7 @@ export function CreatePot() {
                         </div>
                     </aside>
                 </div>
-            </main>
+            </PageShell>
 
             {/* Bottom Action Bar */}
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)] p-4 pb-safe-offset-4 shadow-lg sm:pb-4">

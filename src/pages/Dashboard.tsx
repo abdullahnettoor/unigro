@@ -1,97 +1,20 @@
 import { useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
-import { Bell, CalendarClock, CheckCircle2, Home, Plus, Settings as SettingsIcon, ShieldAlert, WalletCards } from "lucide-react";
+import { CalendarClock, CheckCircle2, ChevronRight, Plus, WalletCards } from "lucide-react";
 
 import { VerificationModal } from "@/components/auth/VerificationModal";
 import { QuickActivityCard } from "@/components/dashboard/QuickActivityCard";
 import { VerificationBanner } from "@/components/dashboard/VerificationBanner";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { PageShell } from "@/components/layout/PageShell";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { PotCard } from "@/components/shared/PotCard";
-import { GlassSurface } from "@/components/ui/GlassSurface";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { formatCurrency } from "@/lib/utils";
 
 import { api } from "../../convex/_generated/api";
-
-export function DashboardSidebar({
-    firstName,
-    imageUrl,
-}: {
-    firstName: string;
-    imageUrl?: string;
-}) {
-    const location = useLocation();
-    const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
-    const navItemClass = (active: boolean) =>
-        `flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${active
-            ? "bg-[var(--accent-vivid)]/12 font-semibold text-[var(--accent-vivid)]"
-            : "text-[var(--text-muted)] hover:bg-[var(--surface-card)]/60"
-        }`;
-
-    return (
-        <aside className="hidden md:block">
-            <GlassSurface tier="glass-2" className="sticky top-3 flex h-[calc(100vh-1.5rem)] flex-col p-3 lg:p-4">
-                <Link to="/" className="mb-4 flex items-center gap-2 rounded-xl px-2 py-1.5">
-                    <div className="grid h-6 w-6 place-items-center rounded-md bg-[var(--accent-vivid)] text-[var(--text-on-accent)] text-xs font-bold">
-                        G
-                    </div>
-                    <span className="text-base font-display font-bold text-[var(--text-primary)]">GrowPot</span>
-                </Link>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Workspace</p>
-                <div className="space-y-2">
-                    {firstName === "Admin" && (
-                        <Link to="/admin" className={navItemClass(isActive("/admin"))}>
-                            <ShieldAlert size={16} />
-                            Admin
-                        </Link>
-                    )}
-                    <Link to="/" className={navItemClass(isActive("/"))}>
-                        <Home size={16} />
-                        Dashboard
-                    </Link>
-                    <Link to="/pots" className={navItemClass(isActive("/pots"))}>
-                        <WalletCards size={16} />
-                        Pots
-                    </Link>
-                    <Link to="/settings" className={navItemClass(isActive("/settings"))}>
-                        <SettingsIcon size={16} />
-                        Settings
-                    </Link>
-                </div>
-                <div className="mt-5 rounded-xl bg-[var(--surface-card)]/65 p-3">
-                    <p className="text-xs font-semibold text-[var(--text-muted)]">Desktop scaffold</p>
-                    <p className="mt-1 text-xs text-[var(--text-muted)]">Data-backed widgets can be added here as backend endpoints expand.</p>
-                </div>
-
-                <div className="mt-auto border-t border-[var(--border-subtle)]/70 pt-3">
-                    <UserMenu
-                        placement="top-center"
-                        menuClassName="w-full"
-                        trigger={
-                            <div className="flex w-full items-center gap-3 rounded-lg px-1 py-1 text-left">
-                                <div className="h-9 w-9 overflow-hidden rounded-full border border-[var(--border-subtle)]">
-                                    {imageUrl ? (
-                                        <img src={imageUrl} alt="Profile" className="h-full w-full object-cover" />
-                                    ) : (
-                                        <div className="grid h-full w-full place-items-center bg-[var(--surface-deep)] text-xs font-semibold text-[var(--text-muted)]">
-                                            {firstName.charAt(0)}
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="min-w-0 text-left">
-                                    <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{firstName}</p>
-                                    <p className="text-xs text-[var(--text-muted)]">Profile menu</p>
-                                </div>
-                            </div>
-                        }
-                    />
-                </div>
-            </GlassSurface>
-        </aside>
-    );
-}
 
 function getGreeting() {
     const hour = new Date().getHours();
@@ -127,10 +50,36 @@ export function Dashboard() {
     const greeting = getGreeting();
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-5 md:py-3 lg:gap-6">
-            <DashboardSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} />
-
-            <div className="md:py-4">
+        <PageShell
+            maxWidth="xl"
+            sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />}
+            title={`${greeting}, ${firstName}`}
+            subtitle="Your GrowPot is thriving"
+            titleClassName="text-3xl sm:text-4xl"
+            subtitleClassName="text-sm text-[var(--accent-vivid)]"
+            headerClassName="relative"
+            actionsClassName="absolute right-0 top-0"
+            actions={
+                <>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <UserMenu
+                            placement="bottom-end"
+                            trigger={
+                                <div className="h-11 w-11 overflow-hidden rounded-full border-2 border-[var(--accent-vivid)]/25">
+                                    {clerkUser?.imageUrl ? (
+                                        <img src={clerkUser.imageUrl} alt="Profile" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="grid h-full w-full place-items-center bg-[var(--surface-deep)] text-sm font-semibold text-[var(--text-muted)]">
+                                            {firstName.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
+                            }
+                        />
+                    </div>
+                </>
+            }
+        >
                 {user && user.verificationStatus === "UNVERIFIED" && (
                     <VerificationBanner status="UNVERIFIED" onClick={() => setShowVerificationModal(true)} />
                 )}
@@ -139,70 +88,11 @@ export function Dashboard() {
                     <VerificationBanner status="REJECTED" onClick={() => setShowVerificationModal(true)} />
                 )}
 
-                <header className="mb-6 sm:mb-8">
-                    <div className="rounded-2xl p-1 md:hidden">
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <h1 className="text-3xl font-display font-bold tracking-tight">{greeting}, {firstName}</h1>
-                                <p className="mt-1 text-sm text-[var(--accent-vivid)]">Your GrowPot is thriving</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    aria-label="Notifications"
-                                    className="relative flex h-10 w-10 items-center justify-center rounded-full text-[var(--text-primary)] hover:bg-[var(--surface-deep)]/70"
-                                >
-                                    <Bell size={18} />
-                                    <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[var(--danger)]" />
-                                </button>
-                                <UserMenu
-                                    placement="bottom-end"
-                                    trigger={
-                                        <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-[var(--accent-vivid)]/25">
-                                            {clerkUser?.imageUrl ? (
-                                                <img src={clerkUser.imageUrl} alt="Profile" className="h-full w-full object-cover" />
-                                            ) : (
-                                                <div className="grid h-full w-full place-items-center bg-[var(--surface-deep)] text-sm font-semibold text-[var(--text-muted)]">
-                                                    {firstName.charAt(0)}
-                                                </div>
-                                            )}
-                                        </div>
-                                    }
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="hidden md:block">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0 flex-1">
-                                <h1 className="truncate text-3xl font-display font-bold tracking-tight lg:text-4xl">{greeting}, {firstName}</h1>
-                                <p className="mt-1 text-sm text-[var(--accent-vivid)]">Your GrowPot is thriving</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <button
-                                    aria-label="Notifications"
-                                    className="glass-1 relative inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--text-primary)]"
-                                >
-                                    <Bell size={18} />
-                                    <span className="absolute right-3 top-3 h-1.5 w-1.5 rounded-full bg-[var(--danger)]" />
-                                </button>
-                                <Link
-                                    to="/create"
-                                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--accent-vivid)] px-5 py-2 font-semibold text-[var(--text-on-accent)] shadow-[0_8px_20px_rgba(43,110,87,0.20)] transition-opacity hover:opacity-90"
-                                >
-                                    <Plus size={18} />
-                                    Create New Pot
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
                 <section className="mb-8">
                     <div className="mb-3 flex items-center justify-between">
                         <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">Quick activity</h2>
                     </div>
-                    <div className="flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3">
+                    <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3">
                         <QuickActivityCard
                             title="Next payment"
                             value={formatCurrency(nextPaymentAmount, nextPaymentCurrency)}
@@ -222,31 +112,37 @@ export function Dashboard() {
                             hint={`${managedPots.length} organized · ${joinedPots.length} joined`}
                             icon={WalletCards}
                         />
+                        <Link
+                            to="/create"
+                            className="group min-w-[240px] rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/20 p-5 text-left transition-colors hover:border-[var(--accent-vivid)]/40 hover:bg-[var(--accent-vivid)]/8"
+                        >
+                            <div className="mb-3 flex items-center justify-between">
+                                <span className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Create pot</span>
+                                <Plus size={16} className="text-[var(--accent-vivid)]" />
+                            </div>
+                            <div className="text-xl font-semibold text-[var(--text-primary)]">Start a new pot</div>
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">Set up members, payouts, and schedule.</p>
+                        </Link>
                     </div>
                 </section>
 
                 <section className="mb-6">
-                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-2xl font-semibold font-display">
-                                Your pots
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                        <Link to="/pots" className="group inline-flex items-center gap-2">
+                            <h2 className="text-2xl font-semibold font-display text-[var(--text-primary)] group-hover:text-[var(--accent-vivid)] transition-colors">
+                                My pots
                             </h2>
-                            <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">
-                                {filteredPots.length}
-                            </span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3">
+                            <ChevronRight size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)] transition-colors" />
+                        </Link>
+                        <div className="ml-auto flex items-center gap-2">
                             <SegmentedControl
                                 value={potView}
                                 onChange={setPotView}
                                 options={[
-                                    { value: "participating", label: "Participating" },
-                                    { value: "organizing", label: "Organizing" },
+                                    { value: "participating", label: "Participating", count: joinedPots.length },
+                                    { value: "organizing", label: "Organizing", count: managedPots.length },
                                 ]}
                             />
-                            <Link to="/pots" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--surface-deep)]/50 px-3 py-1.5 text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-elevated)] border border-[var(--border-subtle)]">
-                                View All Pots
-                            </Link>
                         </div>
                     </div>
 
@@ -263,16 +159,25 @@ export function Dashboard() {
                                 : "You have not joined any pots yet."}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                            {recentPots.map((pot) => (
-                                <PotCard key={pot._id} pot={pot} currentUserId={user?._id} />
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                                {recentPots.map((pot) => (
+                                    <PotCard key={pot._id} pot={pot} currentUserId={user?._id} />
+                                ))}
+                            </div>
+                            {filteredPots.length > recentPots.length ? (
+                                <div className="mt-3 flex items-center justify-between text-xs text-[var(--text-muted)]">
+                                    <span>Showing {recentPots.length} of {filteredPots.length} pots</span>
+                                    <Link to="/pots" className="font-semibold text-[var(--accent-vivid)] hover:underline">
+                                        See all
+                                    </Link>
+                                </div>
+                            ) : null}
+                        </>
                     )}
                 </section>
 
                 {showVerificationModal && <VerificationModal onClose={() => setShowVerificationModal(false)} />}
-            </div>
-        </div>
+        </PageShell>
     );
 }

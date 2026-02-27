@@ -1,4 +1,5 @@
 import { type Tab } from "@/pages/PotDetail";
+import { Surface } from "@/components/ui/Surface";
 
 interface TabNavProps {
     activeTab: Tab;
@@ -24,8 +25,8 @@ export function TabNav({
         }`;
 
     return (
-        <div className="sticky top-0 sm:top-4 z-40 -mx-4 sm:mx-0 px-4 sm:px-0 bg-[var(--bg-app)]/50 backdrop-blur-sm py-2">
-            <div className="glass-2 flex gap-1 overflow-x-auto rounded-full p-1 scrollbar-hide">
+        <div className="sticky top-0 sm:top-4 z-40 -mx-4 sm:mx-0 px-4 sm:px-0 bg-[var(--bg-app)]/60 backdrop-blur-sm py-2">
+            <Surface tier={1} className="flex gap-1 overflow-x-auto rounded-full p-1 scrollbar-hide">
                 {(isMember || isForeman) && (
                     <button
                         onClick={() => setActiveTab('dashboard')}
@@ -40,7 +41,14 @@ export function TabNav({
                         onClick={() => setActiveTab('organize')}
                         className={tabButtonClass("organize")}
                     >
-                        Approvals {pendingApprovalsCount > 0 && <span className="ml-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded-full text-[10px]">{pendingApprovalsCount}</span>}
+                        <span className="inline-flex items-center gap-2">
+                            <span>Approvals</span>
+                            {pendingApprovalsCount > 0 && (
+                                <span className="grid h-5 min-w-[20px] place-items-center rounded-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1 text-[10px] font-semibold">
+                                    {pendingApprovalsCount}
+                                </span>
+                            )}
+                        </span>
                     </button>
                 )}
 
@@ -49,16 +57,21 @@ export function TabNav({
                         onClick={() => setActiveTab('members')}
                         className={tabButtonClass("members")}
                     >
-                        Members <span className="ml-1 opacity-50 text-[10px]">{memberListLength}</span>
+                        <span className="inline-flex items-center gap-2">
+                            <span>Members</span>
+                            <span className="grid h-5 min-w-[20px] place-items-center rounded-full bg-[var(--surface-deep)]/80 px-1 text-[10px] font-semibold text-[var(--text-muted)]">
+                                {memberListLength}
+                            </span>
+                        </span>
                     </button>
                 )}
 
-                <button
-                    onClick={() => setActiveTab('rules')}
-                    className={tabButtonClass("rules")}
-                >
-                    Rules & Info
-                </button>
+                    <button
+                        onClick={() => setActiveTab('rules')}
+                        className={tabButtonClass("rules")}
+                    >
+                        Rules & Info
+                    </button>
 
                 {(isMember || isForeman) && (
                     <>
@@ -76,7 +89,7 @@ export function TabNav({
                         </button>
                     </>
                 )}
-            </div>
+            </Surface>
         </div>
     );
 }

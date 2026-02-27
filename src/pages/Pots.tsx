@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/Select";
 import { getProgressScore } from "@/lib/pot";
 import { cn } from "@/lib/utils";
-import { DashboardSidebar } from "@/pages/Dashboard";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { PageShell } from "@/components/layout/PageShell";
 
 import { api } from "../../convex/_generated/api";
 
@@ -89,53 +90,53 @@ export function Pots() {
     }, [currentUserId, pots, roleFilter, search, sortDirection, sortFilter, selectedStatuses]);
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-5 md:py-3 lg:gap-6">
-            <DashboardSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} />
+        <PageShell
+            maxWidth="xl"
+            sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />}
+            title="Pots"
+            subtitle="View and filter the pots you organize or joined."
+            headerClassName="relative"
+            actionsClassName="absolute right-0 top-0"
+            titleClassName="pr-16"
+            subtitleClassName="pr-16"
+            actions={
+                <Link
+                    to="/create"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[0_8px_20px_rgba(43,110,87,0.20)] transition-opacity hover:opacity-90 sm:w-auto sm:gap-2 sm:px-5"
+                    aria-label="Create pot"
+                >
+                    <Plus size={16} />
+                    <span className="hidden sm:inline text-sm font-semibold">Create pot</span>
+                </Link>
+            }
+        >
+            {/* ── Search ── */}
+            <div className="mb-4">
+                <div className="relative min-w-0 flex-1">
+                    <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                    <Input
+                        type="text"
+                        placeholder="Search pots..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="pl-9"
+                    />
+                </div>
+            </div>
 
-            <div className="md:py-4">
-                {/* ── Page Header ── */}
-                <header className="mb-4 sm:mb-5">
-                    <div className="mb-3">
-                        <h1 className="text-2xl font-display font-bold tracking-tight sm:text-3xl">Pots</h1>
-                        <p className="mt-1 text-sm text-[var(--text-muted)]">View and filter the pots you organize or joined.</p>
-                    </div>
-                    {/* Search + Create */}
-                    <div className="flex w-full items-center gap-2">
-                        <div className="relative min-w-0 flex-1">
-                            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-                            <Input
-                                type="text"
-                                placeholder="Search pots..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9"
-                            />
-                        </div>
-                        <Link
-                            to="/create"
-                            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--accent-vivid)] px-4 py-2 text-sm font-semibold text-[var(--text-on-accent)] transition-opacity hover:opacity-90"
-                        >
-                            <Plus size={15} /> Create
-                        </Link>
-                    </div>
-                </header>
-
-                {/* ── Heading row + Sort ── */}
-                <div className="mb-2 flex items-center justify-between gap-3">
-                    {/* Left: heading + count */}
-                    <div className="flex items-center gap-2 shrink-0">
+                {/* ── Title + Quick Filter ── */}
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2">
                         <h2 className="text-xl font-semibold font-display">Your pots</h2>
                         <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">
                             {filteredPots.length}
                         </span>
                     </div>
-
-                    {/* Right: Role segmented control */}
-                    <div className="flex items-center shrink-0">
+                    <div className="ml-auto">
                         <SegmentedControl
                             value={roleFilter}
                             onChange={(val) => setRoleFilter(val as RoleFilter)}
-                            buttonClassName="h-[24px] sm:h-[28px] px-2 sm:px-3 text-[10px] sm:text-[11px]"
+                            density="compact"
                             options={[
                                 { value: "all", label: "All" },
                                 { value: "joined", label: "Joined" },
@@ -146,7 +147,7 @@ export function Pots() {
                 </div>
 
                 {/* ── Status filter chips + sticky sort ── */}
-                <div className="mb-4 flex items-center h-[26px]">
+                <div className="mb-4 flex items-center h-[30px]">
                     {/* Scrollable Chips */}
                     <div className="flex flex-1 items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
                         {STATUS_CHIPS.map(({ value, label }) => (
@@ -166,11 +167,11 @@ export function Pots() {
                         ))}
                     </div>
 
-                    {/* Sticky Sort — right-aligned, same height as chips */}
+                    {/* Sticky Sort — right-aligned */}
                     <div className="flex items-center gap-1 shrink-0 bg-[var(--bg-app)] pl-2 h-full ml-1">
                         <div className="h-3 w-px bg-[var(--border-subtle)] mr-1" />
                         <Select value={sortFilter} onValueChange={(val) => setSortFilter(val as SortFilter)}>
-                            <SelectTrigger className="h-[26px] rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-2 text-[11px] leading-none">
+                            <SelectTrigger density="compact" className="h-[26px] rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-2 text-[11px] leading-none">
                                 <SelectValue placeholder="Sort" />
                             </SelectTrigger>
                             <SelectContent>
@@ -179,7 +180,6 @@ export function Pots() {
                                 <SelectItem value="progress">Progress</SelectItem>
                             </SelectContent>
                         </Select>
-
                         <button
                             type="button"
                             onClick={() => setSortDirection(prev => prev === "desc" ? "asc" : "desc")}
@@ -191,31 +191,30 @@ export function Pots() {
                     </div>
                 </div>
 
-                {/* ── Pot grid ── */}
-                <section>
-                    {!pots ? (
-                        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="glass-2 h-48 animate-pulse rounded-2xl" />
-                            ))}
-                        </div>
-                    ) : pots.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/30 py-14 text-center text-[var(--text-muted)]">
-                            You do not have any pots yet.
-                        </div>
-                    ) : filteredPots.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/30 py-14 text-center text-[var(--text-muted)]">
-                            No pots match the selected filters.
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                            {filteredPots.map((pot) => (
-                                <PotCard key={pot._id} pot={pot} currentUserId={currentUserId} />
-                            ))}
-                        </div>
-                    )}
-                </section>
-            </div>
-        </div>
+            {/* ── Pot grid ── */}
+            <section>
+                {!pots ? (
+                    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="glass-2 h-48 animate-pulse rounded-2xl" />
+                        ))}
+                    </div>
+                ) : pots.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/30 py-14 text-center text-[var(--text-muted)]">
+                        You do not have any pots yet.
+                    </div>
+                ) : filteredPots.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/30 py-14 text-center text-[var(--text-muted)]">
+                        No pots match the selected filters.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                        {filteredPots.map((pot) => (
+                            <PotCard key={pot._id} pot={pot} currentUserId={currentUserId} />
+                        ))}
+                    </div>
+                )}
+            </section>
+        </PageShell>
     );
 }

@@ -1,6 +1,7 @@
 export type ThemePreference = "system" | "dark" | "light";
-
+export type ThemeVariant = "default" | "ocean" | "clay" | "dusk";
 const THEME_KEY = "theme-preference";
+const VARIANT_KEY = "theme-variant";
 const DARK_COLOR = "#0F1F1A";
 const LIGHT_COLOR = "#F6F5F2";
 
@@ -38,6 +39,22 @@ export const applyThemePreference = (pref: ThemePreference) => {
   });
 };
 
+export const getThemeVariant = (): ThemeVariant => {
+  const stored = localStorage.getItem(VARIANT_KEY);
+  if (stored === "default" || stored === "ocean" || stored === "clay" || stored === "dusk") {
+    return stored;
+  }
+  return "default";
+};
+
+export const applyThemeVariant = (variant: ThemeVariant) => {
+  if (variant !== "default") {
+    document.documentElement.setAttribute("data-theme-variant", variant);
+  } else {
+    document.documentElement.removeAttribute("data-theme-variant");
+  }
+};
+
 export const getThemePreference = (): ThemePreference => {
   const stored = localStorage.getItem(THEME_KEY);
   if (stored === "light" || stored === "dark" || stored === "system") {
@@ -50,6 +67,11 @@ export const setThemePreference = (pref: ThemePreference) => {
   localStorage.setItem(THEME_KEY, pref);
   applyThemePreference(pref);
   setupSystemListener(pref);
+};
+
+export const setThemeVariant = (variant: ThemeVariant) => {
+  localStorage.setItem(VARIANT_KEY, variant);
+  applyThemeVariant(variant);
 };
 
 const setupSystemListener = (pref: ThemePreference) => {
@@ -71,5 +93,6 @@ export const initTheme = (): ThemePreference => {
   const pref = getThemePreference();
   applyThemePreference(pref);
   setupSystemListener(pref);
+  applyThemeVariant(getThemeVariant());
   return pref;
 };

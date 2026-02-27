@@ -1,5 +1,7 @@
 import { Calendar, Clock, Layers, Share2 } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
 import { formatCurrency } from "@/lib/utils";
 
 import type { Doc } from "../../../convex/_generated/dataModel";
@@ -29,7 +31,7 @@ export function DesktopSidebar({
         <aside className="space-y-6 lg:sticky lg:top-8 hidden lg:block">
             {/* Primary Action Card (Desktop) */}
             {primaryAction && (
-                <div className="glass-3 border border-[var(--accent-vivid)]/20 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
+                <Surface tier={3} className="border border-[var(--accent-vivid)]/20 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-2 opacity-5">
                         <Layers size={100} />
                     </div>
@@ -37,22 +39,21 @@ export function DesktopSidebar({
                         <p className="text-[10px] uppercase font-bold text-[var(--accent-vivid)] tracking-widest mb-2 px-2 py-0.5 bg-[var(--accent-vivid)]/10 rounded-full inline-block">Action Required</p>
                         <h3 className="text-xl font-display font-black text-[var(--text-primary)] mb-2">{primaryAction.label}</h3>
                         <p className="text-xs text-[var(--text-muted)] mb-6 leading-relaxed">{primaryAction.helper}</p>
-                        <button
+                        <Button
                             onClick={primaryAction.onClick}
                             disabled={primaryAction.disabled}
-                            className={`w-full relative z-10 rounded-full px-6 py-4 text-sm font-black transition-all ${primaryAction.tone === "secondary"
-                                ? "bg-[var(--accent-secondary)] text-[var(--text-primary)] hover:scale-[1.02] active:scale-[0.98]"
-                                : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_30px_rgba(var(--accent-vivid-rgb),0.3)]"
-                                } disabled:opacity-50 disabled:scale-100`}
+                            size="lg"
+                            className="w-full relative z-10"
+                            variant={primaryAction.tone === "secondary" ? "accent" : "primary"}
                         >
                             {primaryAction.label.toUpperCase()}
-                        </button>
+                        </Button>
                     </div>
-                </div>
+                </Surface>
             )}
 
             {/* Stats Sidebar */}
-            <div className="glass-2 rounded-3xl p-6 space-y-6">
+            <Surface tier={2} className="rounded-3xl p-6 space-y-6">
                 <div className="space-y-4">
                     <div>
                         <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-1">Winning Pot</p>
@@ -103,7 +104,7 @@ export function DesktopSidebar({
                 >
                     <Share2 size={14} /> Share details
                 </button>
-            </div>
+            </Surface>
         </aside>
     );
 }

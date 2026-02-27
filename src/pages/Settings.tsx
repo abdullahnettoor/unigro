@@ -6,10 +6,13 @@ import { useMutation, useQuery } from "convex/react";
 import { AlertCircle, Clock, FileText, Loader2, LogOut, Mail, Save, ShieldCheck, Smartphone, Upload, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
-import { DashboardSidebar } from "@/pages/Dashboard";
+import { getThemePreference, getThemeVariant, setThemePreference, setThemeVariant, type ThemePreference, type ThemeVariant } from "@/lib/theme";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { PageShell } from "@/components/layout/PageShell";
+import { Surface } from "@/components/ui/Surface";
 
 import { api } from "../../convex/_generated/api";
 
@@ -30,6 +33,7 @@ export function Settings() {
     const [idNumber, setIdNumber] = useState("");
     const [error, setError] = useState("");
     const [themePref, setThemePref] = useState<ThemePreference>(() => getThemePreference());
+    const [themeVariant, setThemeVariantState] = useState<ThemeVariant>(() => getThemeVariant());
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Profile Edit State
@@ -45,7 +49,7 @@ export function Settings() {
         }
     }, [user, isEditingProfile]);
 
-    if (!user) return <div className="min-h-screen grid place-items-center"><Loader2 className="animate-spin text-[var(--accent-vivid)]" /></div>;
+    if (!user) return <div className="min-h-dvh grid place-items-center"><Loader2 className="animate-spin text-[var(--accent-vivid)]" /></div>;
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
@@ -136,17 +140,16 @@ export function Settings() {
     const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-5 md:py-3 lg:gap-6">
-            <DashboardSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} />
-
-            <div className="md:py-4 max-w-3xl mx-auto w-full space-y-8 animate-in fade-in duration-500">
-                <div>
-                    <h1 className="text-3xl font-display font-bold mb-2">Settings</h1>
-                    <p className="text-[var(--text-muted)]">Manage your identity, preferences, and account details.</p>
-                </div>
+        <PageShell
+            maxWidth="xl"
+            sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />}
+            title="Settings"
+            subtitle="Manage your identity, preferences, and account details."
+        >
+            <div className="w-full max-w-5xl space-y-8 animate-in fade-in duration-500">
 
                 {/* Profile Info Card */}
-                <section className="glass-2 rounded-2xl p-6 relative">
+                <Surface tier={2} className="rounded-2xl p-6 relative">
                     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                         <img src={user.pictureUrl} alt={user.name} className="w-20 h-20 rounded-full border-2 border-[var(--border-subtle)]" />
 
@@ -171,20 +174,12 @@ export function Settings() {
                                         <p className="text-xs text-[var(--text-muted)] mt-1">Preferably a WhatsApp-linked number for easy contact.</p>
                                     </div>
                                     <div className="flex items-center gap-3 pt-2">
-                                        <button
-                                            type="submit"
-                                            disabled={isSavingProfile}
-                                            className="flex items-center gap-2 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-4 py-2 rounded-xl text-sm font-bold hover:opacity-90 disabled:opacity-50"
-                                        >
+                                        <Button type="submit" disabled={isSavingProfile} className="gap-2">
                                             <Save size={16} /> {isSavingProfile ? "Saving..." : "Save Changes"}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsEditingProfile(false)}
-                                            className="px-4 py-2 rounded-xl text-sm font-bold text-[var(--text-muted)] hover:bg-[var(--surface-deep)]"
-                                        >
+                                        </Button>
+                                        <Button type="button" variant="ghost" onClick={() => setIsEditingProfile(false)}>
                                             Cancel
-                                        </button>
+                                        </Button>
                                     </div>
                                 </form>
                             ) : (
@@ -209,47 +204,19 @@ export function Settings() {
                     </div>
 
                     {!isEditingProfile && (
-                        <button
+                        <Button
                             onClick={() => setIsEditingProfile(true)}
-                            className="mt-6 w-full sm:w-auto sm:absolute top-6 right-6 px-4 py-2 bg-[var(--surface-deep)] text-sm font-bold rounded-xl hover:bg-[var(--border-subtle)] transition-colors"
+                            variant="secondary"
+                            className="mt-6 w-full sm:w-auto sm:absolute top-6 right-6 text-sm"
                         >
                             Edit Profile
-                        </button>
+                        </Button>
                     )}
-                </section>
-
-                {/* Appearance Section */}
-                <section className="glass-2 rounded-2xl p-6">
-                    <h3 className="text-lg font-bold mb-2">Appearance</h3>
-                    <p className="text-sm text-[var(--text-muted)] mb-4">Choose how GrowPot looks on this device.</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {[
-                            { id: "system", label: "System Default" },
-                            { id: "dark", label: "Dark Mode" },
-                            { id: "light", label: "Light Mode" },
-                        ].map((opt) => (
-                            <button
-                                key={opt.id}
-                                onClick={() => {
-                                    const next = opt.id as ThemePreference;
-                                    setThemePref(next);
-                                    setThemePreference(next);
-                                }}
-                                aria-pressed={themePref === opt.id}
-                                className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${themePref === opt.id
-                                    ? "border-[var(--accent-vivid)]/40 bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)]"
-                                    : "border-[var(--border-subtle)] bg-[var(--surface-deep)]/40 text-[var(--text-primary)] hover:bg-[var(--surface-deep)]"
-                                    }`}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                    </div>
-                </section>
+                </Surface>
 
                 {/* Verification Section */}
                 {(status === "UNVERIFIED" || status === "REJECTED") && (
-                    <section className="glass-2 rounded-2xl p-6 sm:p-8">
+                    <Surface tier={2} className="rounded-2xl p-6 sm:p-8">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-xl font-bold flex items-center gap-2">
                                 <ShieldCheck className="text-[var(--accent-vivid)]" /> Verify Identity
@@ -345,11 +312,11 @@ export function Settings() {
                                 {isUploading ? "Uploading..." : "Submit for Verification"}
                             </button>
                         </form>
-                    </section>
+                    </Surface>
                 )}
 
                 {status === "PENDING" && (
-                    <section className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-2xl p-8 sm:p-12 text-center">
+                    <Surface tier={2} className="rounded-2xl p-8 sm:p-12 text-center">
                         <div className="w-16 h-16 bg-[var(--warning)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Clock size={32} className="text-[var(--warning)]" />
                         </div>
@@ -357,30 +324,117 @@ export function Settings() {
                         <p className="text-[var(--text-muted)] max-w-md mx-auto text-sm">
                             Your documents have been submitted and are under review. This usually takes 24-48 hours.
                         </p>
-                    </section>
+                    </Surface>
                 )}
 
-                {status === "VERIFIED" && (
-                    <section className="glass-2 rounded-2xl p-6 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[var(--success)]/10 rounded-full flex items-center justify-center shrink-0">
-                            <ShieldCheck size={24} className="text-[var(--success)]" />
+                {/* Appearance Section */}
+                <Surface tier={2} className="rounded-2xl p-6">
+                    <h3 className="text-lg font-bold mb-2">Appearance</h3>
+                    <p className="text-sm text-[var(--text-muted)] mb-4">Choose how GrowPot looks on this device.</p>
+                    <div className="mb-6">
+                        <p className="text-xs uppercase font-semibold text-[var(--text-muted)] mb-2">Mode</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {[
+                            { id: "system", label: "System Default" },
+                            { id: "dark", label: "Dark Mode" },
+                            { id: "light", label: "Light Mode" },
+                        ].map((opt) => (
+                            <button
+                                key={opt.id}
+                                onClick={() => {
+                                    const next = opt.id as ThemePreference;
+                                    setThemePref(next);
+                                    setThemePreference(next);
+                                }}
+                                aria-pressed={themePref === opt.id}
+                                className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${themePref === opt.id
+                                    ? "border-[var(--accent-vivid)]/40 bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)]"
+                                    : "border-[var(--border-subtle)] bg-[var(--surface-deep)]/40 text-[var(--text-primary)] hover:bg-[var(--surface-deep)]"
+                                    }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
                         </div>
-                        <div>
-                            <h3 className="font-bold text-[var(--text-primary)]">Verified Account</h3>
-                            <p className="text-[var(--text-muted)] text-sm">Your identity has been fully verified. You can now host and join any pots.</p>
+                    </div>
+                    <div>
+                        <p className="text-xs uppercase font-semibold text-[var(--text-muted)] mb-2">Theme variant</p>
+                        <div className="max-w-sm">
+                            <Select
+                                value={themeVariant}
+                                onValueChange={(val) => {
+                                    const next = val as ThemeVariant;
+                                    setThemeVariantState(next);
+                                    setThemeVariant(next);
+                                }}
+                            >
+                                <SelectTrigger className="bg-[var(--surface-card)]">
+                                    <SelectValue placeholder="Select a variant" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="default">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span>Earthy Glass</span>
+                                            <span className="flex items-center gap-1">
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#2B6E57" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#B8834F" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#F6F5F2" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#1D2622" }} />
+                                            </span>
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="ocean">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span>Ocean Ledger</span>
+                                            <span className="flex items-center gap-1">
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#1F6AA5" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#E07A5F" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#F1F4F7" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#1E2933" }} />
+                                            </span>
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="clay">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span>Clay Studio</span>
+                                            <span className="flex items-center gap-1">
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#7A4E2F" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#C46B4E" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#F7F1EA" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#2A211B" }} />
+                                            </span>
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="dusk">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span>Dusk Violet</span>
+                                            <span className="flex items-center gap-1">
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#6A4DA3" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#E2836A" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#F4EEF6" }} />
+                                                <span className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: "#2A1F33" }} />
+                                            </span>
+                                        </div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="mt-2 text-xs text-[var(--text-muted)]">
+                                Variants update the color palette across the app.
+                            </p>
                         </div>
-                    </section>
-                )}
+                    </div>
+                </Surface>
 
-                <div className="pt-8 flex justify-center pb-12">
-                    <button
+                <div className="pt-6 flex justify-center pb-12">
+                    <Button
+                        variant="ghost"
                         onClick={() => signOut()}
-                        className="flex items-center gap-2 text-[var(--danger)] hover:bg-[var(--danger)]/10 px-6 py-3 rounded-full font-bold transition-colors"
+                        className="text-[var(--danger)] hover:bg-[var(--danger)]/10 px-6"
                     >
-                        <LogOut size={20} /> Sign Out of GrowPot
-                    </button>
+                        <LogOut size={18} /> Sign Out
+                    </Button>
                 </div>
             </div>
-        </div>
+        </PageShell>
     );
 }

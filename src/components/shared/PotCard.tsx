@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+import { Surface } from "@/components/ui/Surface";
 import { getCycleStats, getSlotStats } from "@/lib/pot";
 import { formatCurrency } from "@/lib/utils";
 
@@ -25,7 +26,11 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
 
     return (
         <Link to={`/pot/${pot._id}`} className="block">
-            <div className="glass-2 group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl p-5 transition-all hover:border-[var(--accent-vivid)]/40 hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)]">
+            <Surface
+                tier={2}
+                interactive
+                className="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl p-5"
+            >
                 <div className="mb-4 flex items-start justify-between gap-3">
                     <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${isDraft ? "bg-[var(--warning)]/10 text-[var(--warning)]" : "bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)]"
                         }`}>
@@ -79,7 +84,7 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </Surface>
         </Link>
     );
 }

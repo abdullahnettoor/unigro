@@ -6,6 +6,7 @@ import { Home, Settings, WalletCards } from "lucide-react";
 
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { UserSync } from "./components/auth/UserSync";
+import { AppShell } from "./components/layout/AppShell";
 import { PWAPrompt } from "./components/shared/PWAPrompt";
 import { Toaster } from "./components/ui/Sonner";
 
@@ -66,10 +67,10 @@ function AuthenticatedPrefetch() {
 
 function Landing() {
   return (
-    <main className="min-h-screen bg-[var(--hero-gradient)] px-4 py-6 text-[var(--text-primary)] sm:px-6 sm:py-8">
+    <main className="min-h-dvh bg-[var(--hero-gradient)] px-4 py-6 text-[var(--text-primary)] sm:px-6 sm:py-8">
       <header className="mb-8 flex flex-col items-start gap-4 sm:mb-12 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-[family-name:var(--font-display)] font-bold sm:text-4xl">GrowPot</h1>
+          <h1 className="text-3xl font-display font-bold sm:text-4xl">GrowPot</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)] sm:text-base">Community savings made transparent.</p>
         </div>
         <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
@@ -81,7 +82,7 @@ function Landing() {
         </div>
       </header>
       <section className="mx-auto mt-12 w-full max-w-4xl px-4 text-center sm:mt-16 sm:px-6">
-        <h2 className="text-4xl font-[family-name:var(--font-display)] font-bold leading-tight sm:text-5xl md:text-6xl">
+        <h2 className="text-4xl font-display font-bold leading-tight sm:text-5xl md:text-6xl">
           Communal Finance,<br />Reimagined.
         </h2>
         <p className="mx-auto mb-8 mt-4 max-w-2xl text-base text-[var(--text-muted)] sm:text-lg md:text-xl">
@@ -145,7 +146,14 @@ function BottomNav() {
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)] pb-24 sm:pb-0">
+    <AppShell
+      className="pb-24 sm:pb-0"
+      bottomNav={
+        <Authenticated>
+          <BottomNav />
+        </Authenticated>
+      }
+    >
       <Toaster />
       <Authenticated>
         <UserSync />
@@ -155,19 +163,33 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         </Suspense>
       </Authenticated>
       {children}
-      <Authenticated>
-        <BottomNav />
-      </Authenticated>
-    </main>
+    </AppShell>
   );
+}
+
+function ThemeVariantSync() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const themeVariant = params.get("variant");
+    if (themeVariant === "ocean" || themeVariant === "clay" || themeVariant === "dusk") {
+      document.documentElement.setAttribute("data-theme-variant", themeVariant);
+    } else if (themeVariant === "default") {
+      document.documentElement.removeAttribute("data-theme-variant");
+    }
+  }, [location.search]);
+
+  return null;
 }
 
 function App() {
   return (
     <BrowserRouter>
       <PWAPrompt />
+      <ThemeVariantSync />
       <AuthLoading>
-        <div className="min-h-screen grid place-items-center bg-[var(--bg-app)]">
+        <div className="min-h-dvh grid place-items-center bg-[var(--bg-app)]">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-vivid)]"></div>
         </div>
       </AuthLoading>

@@ -11,7 +11,7 @@ const convex = convexUrl ? new ConvexReactClient(convexUrl) : undefined;
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
     if (!convex || !convexUrl || !clerkKey) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] p-4">
+            <div className="flex flex-col items-center justify-center min-h-dvh bg-[var(--bg-app)] text-[var(--text-primary)] p-4">
                 <div className="max-w-md bg-[var(--surface-elevated)] p-8 rounded-xl border border-[var(--danger)]/20 shadow-2xl">
                     <h2 className="text-2xl font-bold mb-4 text-[var(--danger)]">Configuration Missing</h2>
                     <p className="mb-4 text-[var(--text-muted)]">The application cannot start because some environment variables are missing.</p>

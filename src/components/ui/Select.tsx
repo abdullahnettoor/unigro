@@ -8,14 +8,20 @@ const Select = SelectPrimitive.Root;
 const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 
+interface SelectTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
+  density?: "comfortable" | "compact";
+}
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, children, density = "comfortable", ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "glass-1 flex h-11 w-full items-center justify-between rounded-xl px-3 text-sm text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-vivid)] disabled:cursor-not-allowed disabled:opacity-60",
+      "glass-1 control-base flex w-full items-center justify-between text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-vivid)] disabled:cursor-not-allowed disabled:opacity-60",
+      density === "compact" ? "control-compact" : "",
       className
     )}
     {...props}
@@ -36,7 +42,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "glass-3 z-50 max-h-64 min-w-[8rem] overflow-hidden rounded-2xl text-[var(--text-primary)]",
+        "glass-3 z-[200] max-h-64 min-w-[8rem] overflow-hidden rounded-2xl text-[var(--text-primary)]",
         position === "popper" && "translate-y-1",
         className
       )}

@@ -1,5 +1,6 @@
 import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
 import { PotVisualizer } from "@/components/pot-detail/PotVisualizer";
+import { Surface } from "@/components/ui/Surface";
 
 import type { Doc } from "../../../convex/_generated/dataModel";
 
@@ -33,7 +34,7 @@ export function PotHero({
     onSlotClick
 }: PotHeroProps) {
     return (
-        <div className="glass-3 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+        <Surface tier={3} className="grain rounded-3xl p-6 sm:p-8 relative overflow-hidden">
             <div className="absolute top-4 right-4 z-20 hidden lg:block cursor-pointer hover:scale-105 transition-transform" onClick={onOrganizerClick}>
                 <OrganizerDisplay foremanId={pot.foremanId} avatarOnly={true} />
             </div>
@@ -73,7 +74,7 @@ export function PotHero({
                     </div>
                     <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-deep)] border border-[var(--border-subtle)]/30">
                         <div
-                            className="h-full bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)] transition-all duration-500 shadow-[0_0_10px_var(--accent-vivid)]"
+                            className="h-full bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)] transition-all duration-500 shadow-[0_0_6px_rgba(0,0,0,0.2)]"
                             style={{ width: `${Math.min(100, displayProgress)}%` }}
                         />
                     </div>
@@ -92,13 +93,13 @@ export function PotHero({
                         </div>
                         <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-deep)] border border-[var(--border-subtle)]/30">
                             <div
-                                className="h-full bg-gradient-to-r from-[var(--gold)] to-[var(--accent-vivid)] transition-all duration-700 shadow-[0_0_10px_rgba(255,215,0,0.3)]"
+                                className="h-full bg-gradient-to-r from-[var(--gold)] to-[var(--accent-vivid)] transition-all duration-700 shadow-[0_0_6px_rgba(0,0,0,0.2)]"
                                 style={{ width: `${(pot.currentMonth / pot.config.duration) * 100}%` }}
                             />
                         </div>
                     </div>
                 )}
             </div>
-        </div>
+        </Surface>
     );
 }

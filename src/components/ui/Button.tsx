@@ -17,11 +17,15 @@ const buttonVariants = cva(
         link: "text-[var(--accent-vivid)] hover:underline p-0 h-auto",
       },
       size: {
-        sm: "h-8 px-3 text-xs",
+        sm: "h-10 px-4 text-xs",
         md: "h-11 px-6 text-sm",
-        lg: "h-14 px-8 text-base",
+        lg: "h-12 px-8 text-base",
         icon: "h-11 w-11",
         pill: "h-10 px-4 text-xs",
+      },
+      density: {
+        comfortable: "",
+        compact: "btn-chip",
       },
       fullWidth: {
         true: "w-full",
@@ -31,6 +35,7 @@ const buttonVariants = cva(
     defaultVariants: {
       variant: "primary",
       size: "md",
+      density: "comfortable",
       fullWidth: false,
     },
   }
@@ -41,11 +46,11 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, fullWidth, ...props }, ref) => {
+  ({ className, variant, size, density, fullWidth, ...props }, ref) => {
     return (
       <button
         ref={ref}
-        className={cn(buttonVariants({ variant, size, fullWidth }), className)}
+        className={cn(buttonVariants({ variant, size, density, fullWidth }), className)}
         {...props}
       />
     );
