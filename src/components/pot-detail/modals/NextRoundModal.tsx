@@ -3,6 +3,9 @@ import { useMutation } from "convex/react";
 import { AlertTriangle, ArrowRight, CheckCircle2, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { ModalCloseButton, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
+
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 
@@ -52,19 +55,17 @@ export function NextRoundModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-            <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-display font-bold text-[var(--text-primary)]">
-                        {isLastRound ? "Complete pot" : "Start next round"}
-                    </h3>
-                    <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
-                        <X size={20} />
-                    </button>
-                </div>
+        <ModalShell zIndex={100} showHandle={false}>
+            <ModalHeader className="flex justify-between items-center">
+                <h3 className="text-xl font-display font-bold text-[var(--text-primary)]">
+                    {isLastRound ? "Complete pot" : "Start next round"}
+                </h3>
+                <ModalCloseButton onClick={onClose}>
+                    <X size={20} />
+                </ModalCloseButton>
+            </ModalHeader>
 
-                <div className="space-y-5">
+            <div className="p-6 space-y-5">
                     <p className="text-[var(--text-muted)] text-sm">
                         Winner for cycle {currentMonth} has been selected.
                         {isLastRound
@@ -76,20 +77,20 @@ export function NextRoundModal({
                     {/* ── Payment Warning ── */}
                     {hasPaymentWarning && (
                         <div className={`rounded-xl p-4 border flex gap-3 transition-colors ${warningAcknowledged
-                            ? "bg-green-500/10 border-green-500/25"
-                            : "bg-amber-500/10 border-amber-500/30"
+                            ? "bg-[var(--accent-vivid)]/10 border-[var(--accent-vivid)]/30"
+                            : "bg-[var(--warning)]/10 border-[var(--warning)]/30"
                             }`}>
                             {warningAcknowledged
-                                ? <CheckCircle2 size={16} className="text-green-400 shrink-0 mt-0.5" />
-                                : <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                                ? <CheckCircle2 size={16} className="text-[var(--accent-vivid)] shrink-0 mt-0.5" />
+                                : <AlertTriangle size={16} className="text-[var(--warning)] shrink-0 mt-0.5" />
                             }
                             <div className="flex-1 min-w-0">
                                 {warningAcknowledged ? (
-                                    <p className="text-sm text-green-300 font-medium">Acknowledged — you can proceed.</p>
+                                    <p className="text-sm text-[var(--accent-vivid)] font-medium">Acknowledged — you can proceed.</p>
                                 ) : (
                                     <>
-                                        <p className="text-sm text-amber-300 font-bold mb-1">Payments not complete</p>
-                                        <ul className="text-xs text-amber-200/80 space-y-0.5 mb-3">
+                                        <p className="text-sm text-[var(--warning)] font-bold mb-1">Payments not complete</p>
+                                        <ul className="text-xs text-[var(--text-muted)] space-y-0.5 mb-3">
                                             {unpaidCount > 0 && (
                                                 <li>• {unpaidCount} slot{unpaidCount > 1 ? "s" : ""} with no payment submitted</li>
                                             )}
@@ -99,7 +100,7 @@ export function NextRoundModal({
                                         </ul>
                                         <button
                                             onClick={() => setWarningAcknowledged(true)}
-                                            className="text-xs font-bold text-amber-300 underline underline-offset-2 hover:text-amber-200"
+                                            className="text-xs font-bold text-[var(--warning)] underline underline-offset-2 hover:text-[var(--text-primary)]"
                                         >
                                             Proceed anyway
                                         </button>
@@ -115,11 +116,11 @@ export function NextRoundModal({
                             <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
                                 Next Draw Date {isOccasional && "(Required)"}
                             </label>
-                            <input
-                                type="date"
+                            <DatePicker
                                 value={nextDate}
-                                onChange={(e) => setNextDate(e.target.value)}
-                                className="w-full bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]"
+                                onChange={setNextDate}
+                                disabled={false}
+                                className="bg-[var(--surface-elevated)]"
                             />
                             {isOccasional && (
                                 <p className="text-xs text-[var(--accent-vivid)] mt-1">Set the date for the next occasional draw.</p>
@@ -144,8 +145,7 @@ export function NextRoundModal({
                             Acknowledge the payment warning above to proceed.
                         </p>
                     )}
-                </div>
             </div>
-        </div>
+        </ModalShell>
     );
 }

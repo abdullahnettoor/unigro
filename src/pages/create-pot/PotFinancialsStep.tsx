@@ -2,9 +2,19 @@ import CurrencyInput from "react-currency-input-field";
 // @ts-ignore
 import { getEmojiByCurrencyCode } from "country-currency-emoji-flags";
 import cc from "currency-codes";
-import { Calendar, Info } from "lucide-react";
+import { Info } from "lucide-react";
 
+import { DatePicker } from "@/components/ui/DatePicker";
 import { GlassSurface } from "@/components/ui/GlassSurface";
+import { Input } from "@/components/ui/Input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import { getCurrencySymbol } from "@/lib/utils";
 
 interface PotFinancialsStepProps {
@@ -51,7 +61,7 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
                         <label htmlFor="title" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                             Pot Name <span className="text-[var(--accent-vivid)]">*</span>
                         </label>
-                        <input
+                        <Input
                             id="title"
                             type="text"
                             required
@@ -59,7 +69,7 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
                             onChange={(e) => onChange({ title: e.target.value })}
                             placeholder="e.g. Family Vacation Fund"
                             disabled={disabled}
-                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 p-3 text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] placeholder:text-[var(--text-muted)] disabled:opacity-50"
+                            className="bg-[var(--surface-deep)]/50"
                         />
                     </div>
 
@@ -67,13 +77,13 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
                         <label htmlFor="description" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                             Description <span className="text-[var(--text-muted)] font-normal">(Optional)</span>
                         </label>
-                        <textarea
+                        <Textarea
                             id="description"
                             rows={3}
                             value={formData.description}
                             onChange={(e) => onChange({ description: e.target.value })}
                             placeholder="What is this pot for?"
-                            className="w-full resize-none rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 p-3 text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] placeholder:text-[var(--text-muted)]"
+                            className="resize-none bg-[var(--surface-deep)]/50"
                         />
                     </div>
                 </div>
@@ -92,26 +102,25 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
                         </label>
                         <div className="flex rounded-xl bg-[var(--surface-deep)]/50 border border-[var(--border-subtle)] focus-within:border-[var(--accent-vivid)] focus-within:ring-1 focus-within:ring-[var(--accent-vivid)] transition-all overflow-hidden">
                             <div className="relative border-r border-[var(--border-subtle)] bg-[var(--surface-elevated)]/30 min-w-[100px]">
-                                <select
-                                    id="currency"
+                                <Select
                                     value={formData.currency}
-                                    onChange={(e) => onChange({ currency: e.target.value })}
+                                    onValueChange={(value) => onChange({ currency: value })}
                                     disabled={disabled}
-                                    className="w-full h-full appearance-none bg-transparent py-3 pl-3 pr-8 text-sm font-semibold text-[var(--text-primary)] outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                    style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", inherit' }}
                                 >
-                                    {currencies.map((c) => (
-                                        <option key={c.code} value={c.code}>
-                                            {c.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]">
-                                    {/* Chevron down or similar if needed, currently reusing IndianRupee slot but better empty or chevron */}
-                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </div>
+                                    <SelectTrigger
+                                        className="h-full rounded-none border-0 !bg-transparent !shadow-none !ring-0 px-3 text-sm font-semibold"
+                                        style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", inherit' }}
+                                    >
+                                        <SelectValue placeholder="Currency" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {currencies.map((c) => (
+                                            <SelectItem key={c.code} value={c.code}>
+                                                {c.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="relative flex-1">
                                 <CurrencyInput
@@ -138,20 +147,11 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
                         <label htmlFor="startDate" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                             Start Date <span className="text-[var(--accent-vivid)]">*</span>
                         </label>
-                        <div className="relative">
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
-                                <Calendar size={18} />
-                            </div>
-                            <input
-                                id="startDate"
-                                type="date"
-                                required
-                                value={formData.startDate}
-                                onChange={(e) => onChange({ startDate: e.target.value })}
-                                disabled={disabled}
-                                className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] disabled:opacity-50"
-                            />
-                        </div>
+                        <DatePicker
+                            value={formData.startDate}
+                            onChange={(value) => onChange({ startDate: value })}
+                            disabled={disabled}
+                        />
                         <p className="mt-2 text-xs text-[var(--text-muted)] flex items-center gap-1.5">
                             <Info size={12} />
                             First payment is typically collected on or before this date.

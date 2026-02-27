@@ -5,9 +5,17 @@ import { useQuery } from "convex/react";
 import { ArrowDownAZ, ArrowUpAZ, Plus, Search } from "lucide-react";
 
 import { PotCard } from "@/components/shared/PotCard";
-import { cn } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/Select";
 import { getProgressScore } from "@/lib/pot";
+import { cn } from "@/lib/utils";
 import { DashboardSidebar } from "@/pages/Dashboard";
 
 import { api } from "../../convex/_generated/api";
@@ -93,14 +101,14 @@ export function Pots() {
                     </div>
                     {/* Search + Create */}
                     <div className="flex w-full items-center gap-2">
-                        <div className="glass-1 flex min-w-0 flex-1 items-center gap-2 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-[var(--accent-vivid)]/20">
-                            <Search size={15} className="shrink-0 text-[var(--text-muted)]" />
-                            <input
+                        <div className="relative min-w-0 flex-1">
+                            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                            <Input
                                 type="text"
                                 placeholder="Search pots..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full bg-transparent text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
+                                className="pl-9"
                             />
                         </div>
                         <Link
@@ -161,15 +169,16 @@ export function Pots() {
                     {/* Sticky Sort — right-aligned, same height as chips */}
                     <div className="flex items-center gap-1 shrink-0 bg-[var(--bg-app)] pl-2 h-full ml-1">
                         <div className="h-3 w-px bg-[var(--border-subtle)] mr-1" />
-                        <select
-                            value={sortFilter}
-                            onChange={(e) => setSortFilter(e.target.value as SortFilter)}
-                            className="btn-chip h-[26px] rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-2 text-[11px] leading-none text-[var(--text-primary)] outline-none focus:border-[var(--accent-vivid)]"
-                        >
-                            <option value="most_recent">Recent</option>
-                            <option value="pool_value">Pool</option>
-                            <option value="progress">Progress</option>
-                        </select>
+                        <Select value={sortFilter} onValueChange={(val) => setSortFilter(val as SortFilter)}>
+                            <SelectTrigger className="h-[26px] rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-2 text-[11px] leading-none">
+                                <SelectValue placeholder="Sort" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="most_recent">Recent</SelectItem>
+                                <SelectItem value="pool_value">Pool</SelectItem>
+                                <SelectItem value="progress">Progress</SelectItem>
+                            </SelectContent>
+                        </Select>
 
                         <button
                             type="button"

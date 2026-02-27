@@ -6,6 +6,8 @@ import { useMutation, useQuery } from "convex/react";
 import { AlertCircle, Clock, FileText, Loader2, LogOut, Mail, Save, ShieldCheck, Smartphone, Upload, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Input } from "@/components/ui/Input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
 import { DashboardSidebar } from "@/pages/Dashboard";
 
@@ -153,11 +155,11 @@ export function Settings() {
                                 <form onSubmit={handleSaveProfile} className="space-y-4">
                                     <div>
                                         <label className="block text-xs uppercase text-[var(--text-muted)] font-bold mb-1">Full Name</label>
-                                        <input
+                                        <Input
                                             type="text"
                                             value={editName}
-                                            onChange={e => setEditName(e.target.value)}
-                                            className="w-full bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-xl p-3 text-[var(--text-primary)] focus:border-[var(--accent-vivid)] outline-none"
+                                            onChange={(e) => setEditName(e.target.value)}
+                                            className="bg-[var(--surface-card)]"
                                         />
                                     </div>
                                     <div>
@@ -272,32 +274,33 @@ export function Settings() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs uppercase text-[var(--text-muted)] font-bold mb-2">ID Type</label>
-                                    <select
-                                        value={idType}
-                                        onChange={(e) => setIdType(e.target.value)}
-                                        className="w-full bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-xl p-3 text-[var(--text-primary)] focus:border-[var(--accent-vivid)] outline-none"
-                                    >
-                                        <option value="Aadhaar">Aadhaar Card</option>
-                                        <option value="PAN">PAN Card</option>
-                                        <option value="Driving License">Driving License</option>
-                                    </select>
+                                    <Select value={idType} onValueChange={setIdType}>
+                                        <SelectTrigger className="bg-[var(--surface-card)]">
+                                            <SelectValue placeholder="Select ID type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Aadhaar">Aadhaar Card</SelectItem>
+                                            <SelectItem value="PAN">PAN Card</SelectItem>
+                                            <SelectItem value="Driving License">Driving License</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div>
                                     <label className="block text-xs uppercase text-[var(--text-muted)] font-bold mb-2">ID Number</label>
-                                    <input
+                                    <Input
                                         type="text"
                                         value={idNumber}
                                         onChange={(e) => {
                                             let val = e.target.value;
                                             if (idType === "Aadhaar") {
-                                                val = val.replace(/\D/g, '').slice(0, 12);
+                                                val = val.replace(/\D/g, "").slice(0, 12);
                                             } else if (idType === "PAN") {
                                                 val = val.toUpperCase().slice(0, 10);
                                             }
                                             setIdNumber(val);
                                         }}
                                         placeholder={idType === "Aadhaar" ? "xxxx xxxx xxxx" : "ABCDE1234F"}
-                                        className="w-full bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-xl p-3 text-[var(--text-primary)] focus:border-[var(--accent-vivid)] outline-none"
+                                        className="bg-[var(--surface-card)]"
                                     />
                                 </div>
                             </div>

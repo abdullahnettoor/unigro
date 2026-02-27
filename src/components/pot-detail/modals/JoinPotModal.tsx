@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useMutation, useQuery } from "convex/react";
 import { isValidPhoneNumber } from "react-phone-number-input";
-import { PhoneInputField } from "@/components/ui/PhoneInputField";
-import { User, X, AlertCircle } from "lucide-react";
-
-
+import { useMutation, useQuery } from "convex/react";
+import { AlertCircle, User, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Input } from "@/components/ui/Input";
+import { PhoneInputField } from "@/components/ui/PhoneInputField";
+import { ModalBody, ModalCloseButton, ModalFooter, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
 import { formatCurrency } from "@/lib/utils";
 
 import { api } from "../../../../convex/_generated/api";
@@ -98,15 +98,15 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
     const potentialWin = totalValue * selectedSlotCount;
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-            <div className="glass-3 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden">
-                <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-[var(--border-subtle)] sm:hidden" />
-                <div className="flex justify-between items-center p-6 pb-4 border-b border-[var(--border-subtle)]/80">
-                    <h3 className="text-xl font-bold">Join Pot</h3>
-                    <button onClick={onClose} aria-label="Close join pot" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><X size={20} /></button>
-                </div>
+        <ModalShell zIndex={100}>
+            <ModalHeader className="flex items-center justify-between">
+                <h3 className="text-xl font-bold">Join Pot</h3>
+                <ModalCloseButton onClick={onClose}>
+                    <X size={20} />
+                </ModalCloseButton>
+            </ModalHeader>
 
-                <div className="overflow-y-auto px-6 py-4 space-y-6">
+            <ModalBody className="px-6 py-4 space-y-6">
                     {/* Guest Form if unauthenticated */}
                     {!currentUser && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -120,12 +120,12 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
                                     <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 ml-1">Full Name</label>
                                     <div className="relative">
                                         <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
-                                        <input
+                                        <Input
                                             type="text"
                                             value={guestName}
                                             onChange={(e) => setGuestName(e.target.value)}
                                             placeholder="Enter your name"
-                                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-2xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-[var(--accent-vivid)] outline-none transition-all"
+                                            className="bg-[var(--surface-deep)]/60 pl-11 pr-4"
                                         />
                                     </div>
                                 </div>
@@ -200,27 +200,26 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
                             id="terms"
                             checked={agreed}
                             onChange={(e) => setAgreed(e.target.checked)}
-                            className="w-5 h-5 rounded-lg border-[var(--border-subtle)] bg-[var(--surface-deep)] text-[var(--accent-vivid)] focus:ring-[var(--accent-vivid)] shrink-0 transition-all cursor-pointer"
+                            className="h-5 w-5 rounded-lg border-[var(--border-subtle)] bg-[var(--surface-deep)] text-[var(--accent-vivid)] focus:ring-[var(--accent-vivid)] shrink-0 transition-all cursor-pointer"
                         />
                         <label htmlFor="terms" className="text-xs text-[var(--text-muted)] select-none leading-relaxed cursor-pointer font-medium">
                             I agree to the <button onClick={(e) => { e.preventDefault(); onViewRules(); }} className="text-[var(--accent-vivid)] font-bold underline decoration-[var(--accent-vivid)]/30 underline-offset-4 hover:decoration-[var(--accent-vivid)] transition-all">Rules & Regulations</button> of this pot.
                         </label>
                     </div>
-                </div>
+            </ModalBody>
 
-                <div className="glass-2 sticky bottom-0 grid grid-cols-2 gap-3 border-t border-[var(--border-subtle)]/80 p-6 pt-4">
-                    <button onClick={onClose} className="flex-1 bg-[var(--surface-deep)]/80 py-3.5 rounded-2xl font-bold hover:bg-[var(--surface-deep)] transition-all text-[var(--text-primary)] active:scale-95">
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleJoin}
-                        disabled={isSubmitting || !agreed}
-                        className="flex-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-50 disabled:scale-100 transition-all active:scale-95 shadow-lg shadow-[var(--accent-vivid)]/20"
-                    >
-                        {isSubmitting ? "Processing..." : (currentUser ? "Agree & Join" : "Join as Guest")}
-                    </button>
-                </div>
-            </div>
-        </div>
+            <ModalFooter className="grid grid-cols-2 gap-3 border-t border-[var(--border-subtle)]/80 p-6 pt-4">
+                <button onClick={onClose} className="flex-1 bg-[var(--surface-deep)]/80 py-3.5 rounded-2xl font-bold hover:bg-[var(--surface-deep)] transition-all text-[var(--text-primary)] active:scale-95">
+                    Cancel
+                </button>
+                <button
+                    onClick={handleJoin}
+                    disabled={isSubmitting || !agreed}
+                    className="flex-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-50 disabled:scale-100 transition-all active:scale-95 shadow-lg shadow-[var(--accent-vivid)]/20"
+                >
+                    {isSubmitting ? "Processing..." : (currentUser ? "Agree & Join" : "Join as Guest")}
+                </button>
+            </ModalFooter>
+        </ModalShell>
     );
 }

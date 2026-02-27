@@ -1,7 +1,9 @@
 import { Landmark, Shuffle, UserCheck } from "lucide-react";
 
-import { cn } from "@/components/ui/Button";
 import { GlassSurface } from "@/components/ui/GlassSurface";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { cn } from "@/lib/utils";
 
 type DrawStrategy = "RANDOM" | "MANUAL";
 
@@ -75,7 +77,7 @@ export function PotRulesStep({ formData, onChange, disabled }: PotRulesStepProps
                         <label htmlFor="gracePeriod" className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                             Payment Grace Period (Days)
                         </label>
-                        <input
+                        <Input
                             id="gracePeriod"
                             type="number"
                             min={0}
@@ -83,7 +85,7 @@ export function PotRulesStep({ formData, onChange, disabled }: PotRulesStepProps
                             value={formData.gracePeriodDays}
                             onChange={(e) => onChange({ gracePeriodDays: Number(e.target.value) })}
                             disabled={disabled}
-                            className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 p-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] disabled:opacity-50"
+                            className="bg-[var(--surface-deep)]/50 font-mono"
                         />
                         <p className="mt-2 text-xs text-[var(--text-muted)]">
                             Number of days members have to pay after the due date before late fees apply (if any).
@@ -95,16 +97,16 @@ export function PotRulesStep({ formData, onChange, disabled }: PotRulesStepProps
                             Bank / UPI Details <span className="text-[var(--text-muted)] font-normal">(Optional)</span>
                         </label>
                         <div className="relative">
-                            <div className="absolute left-3 top-3 text-[var(--text-muted)]">
+                            <div className="pointer-events-none absolute left-3 top-3 z-10 text-[var(--text-muted)]">
                                 <Landmark size={18} />
                             </div>
-                            <textarea
+                            <Textarea
                                 id="bankDetails"
                                 rows={3}
                                 value={formData.bankDetails}
                                 onChange={(e) => onChange({ bankDetails: e.target.value })}
                                 placeholder="Enter UPI ID or Bank Account details for members to pay to."
-                                className="w-full resize-none rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] placeholder:text-[var(--text-muted)]"
+                                className="resize-none bg-[var(--surface-deep)]/50 pl-10 pr-3"
                             />
                         </div>
                     </div>

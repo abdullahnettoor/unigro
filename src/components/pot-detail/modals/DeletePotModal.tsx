@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation } from "convex/react";
 import { AlertTriangle, Archive, Trash2, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Input } from "@/components/ui/Input";
+import { ModalCloseButton, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
+
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 
@@ -54,27 +57,25 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
     const canConfirmDelete = confirmText.trim().toLowerCase() === potTitle.trim().toLowerCase();
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
-            <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6 space-y-5">
-
-                {/* Header */}
-                <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-xl ${isDraft || step === "confirm-delete" ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
-                            {isDraft || step === "confirm-delete" ? <Trash2 size={20} /> : <Archive size={20} />}
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-display font-bold text-[var(--text-primary)]">
-                                {isDraft ? "Delete pot" : step === "confirm-delete" ? "Confirm permanent delete" : "Remove pot"}
-                            </h3>
-                            <p className="text-xs text-[var(--text-muted)]">{potTitle}</p>
-                        </div>
+        <ModalShell zIndex={100} showHandle={false}>
+            <ModalHeader className="flex justify-between items-start">
+                <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-xl ${isDraft || step === "confirm-delete" ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
+                        {isDraft || step === "confirm-delete" ? <Trash2 size={20} /> : <Archive size={20} />}
                     </div>
-                    <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1">
-                        <X size={18} />
-                    </button>
+                    <div>
+                        <h3 className="text-lg font-display font-bold text-[var(--text-primary)]">
+                            {isDraft ? "Delete pot" : step === "confirm-delete" ? "Confirm permanent delete" : "Remove pot"}
+                        </h3>
+                        <p className="text-xs text-[var(--text-muted)]">{potTitle}</p>
+                    </div>
                 </div>
+                <ModalCloseButton onClick={onClose}>
+                    <X size={18} />
+                </ModalCloseButton>
+            </ModalHeader>
 
+            <div className="p-6 space-y-5">
                 {/* ── DRAFT: immediate type-to-confirm delete ── */}
                 {isDraft && (
                     <>
@@ -89,12 +90,12 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
                             <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
                                 Type <span className="text-[var(--text-primary)] font-black">"{potTitle}"</span> to confirm
                             </label>
-                            <input
+                            <Input
                                 type="text"
                                 value={confirmText}
                                 onChange={e => setConfirmText(e.target.value)}
                                 placeholder={potTitle}
-                                className="w-full bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-red-500 text-sm"
+                                className="bg-[var(--surface-elevated)] text-sm focus:border-red-500"
                             />
                         </div>
 
@@ -158,12 +159,12 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
                             <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
                                 Type <span className="text-[var(--text-primary)] font-black">"{potTitle}"</span> to confirm
                             </label>
-                            <input
+                            <Input
                                 type="text"
                                 value={confirmText}
                                 onChange={e => setConfirmText(e.target.value)}
                                 placeholder={potTitle}
-                                className="w-full bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-red-500 text-sm"
+                                className="bg-[var(--surface-elevated)] text-sm focus:border-red-500"
                             />
                         </div>
 
@@ -186,6 +187,6 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
                     </>
                 )}
             </div>
-        </div>
+        </ModalShell>
     );
 }

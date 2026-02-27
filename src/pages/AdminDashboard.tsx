@@ -4,6 +4,7 @@ import { useMutation,useQuery } from "convex/react";
 import { Check, CreditCard, Loader2,X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Textarea } from "@/components/ui/Textarea";
 import { DashboardSidebar } from "@/pages/Dashboard";
 
 import { api } from "../../convex/_generated/api";
@@ -112,11 +113,11 @@ export function AdminDashboard() {
                                     <div className="mt-6">
                                         {rejectingId === req._id ? (
                                             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                                                <textarea
+                                                <Textarea
                                                     value={rejectionNote}
                                                     onChange={(e) => setRejectionNote(e.target.value)}
                                                     placeholder="Reason for rejection..."
-                                                    className="w-full bg-[var(--surface-deep)]/60 border border-[var(--danger)]/30 rounded-lg p-3 text-sm focus:border-[var(--danger)] outline-none text-[var(--text-primary)] h-24 resize-none"
+                                                    className="bg-[var(--surface-deep)]/60 border border-[var(--danger)]/30 h-24 resize-none"
                                                 />
                                                 <div className="flex gap-2">
                                                     <button

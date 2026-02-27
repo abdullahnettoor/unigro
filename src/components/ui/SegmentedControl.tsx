@@ -1,4 +1,4 @@
-import { cn } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface SegmentedOption<T extends string> {
     value: T;

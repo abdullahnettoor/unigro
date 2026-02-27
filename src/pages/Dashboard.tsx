@@ -10,6 +10,7 @@ import { VerificationBanner } from "@/components/dashboard/VerificationBanner";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { PotCard } from "@/components/shared/PotCard";
 import { GlassSurface } from "@/components/ui/GlassSurface";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { formatCurrency } from "@/lib/utils";
 
 import { api } from "../../convex/_generated/api";
@@ -104,6 +105,7 @@ export function Dashboard() {
     const user = useQuery(api.users.current);
     const { user: clerkUser } = useUser();
     const [showVerificationModal, setShowVerificationModal] = useState(false);
+    const [potView, setPotView] = useState<"participating" | "organizing">("participating");
 
     const managedPots = useMemo(() => pots?.filter((p) => p.foremanId === user?._id) || [], [pots, user?._id]);
     const joinedPots = useMemo(() => pots?.filter((p) => p.foremanId !== user?._id) || [], [pots, user?._id]);
@@ -118,7 +120,8 @@ export function Dashboard() {
 
     const nextPaymentAmount = joinedPots[0]?.config.contribution || managedPots[0]?.config.contribution || 0;
     const nextPaymentCurrency = joinedPots[0]?.config.currency || managedPots[0]?.config.currency || "INR";
-    const recentPots = pots?.slice(0, 4) || [];
+    const filteredPots = potView === "organizing" ? managedPots : joinedPots;
+    const recentPots = filteredPots.slice(0, 4);
 
     const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
     const greeting = getGreeting();
@@ -226,15 +229,25 @@ export function Dashboard() {
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                             <h2 className="text-2xl font-semibold font-display">
-                                Recent pots
+                                Your pots
                             </h2>
                             <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">
-                                {pots?.length || 0}
+                                {filteredPots.length}
                             </span>
                         </div>
-                        <Link to="/pots" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--surface-deep)]/50 px-3 py-1.5 text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-elevated)] border border-[var(--border-subtle)]">
-                            View All Pots
-                        </Link>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <SegmentedControl
+                                value={potView}
+                                onChange={setPotView}
+                                options={[
+                                    { value: "participating", label: "Participating" },
+                                    { value: "organizing", label: "Organizing" },
+                                ]}
+                            />
+                            <Link to="/pots" className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--surface-deep)]/50 px-3 py-1.5 text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-elevated)] border border-[var(--border-subtle)]">
+                                View All Pots
+                            </Link>
+                        </div>
                     </div>
 
                     {!pots ? (
@@ -245,7 +258,9 @@ export function Dashboard() {
                         </div>
                     ) : recentPots.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/30 py-12 text-center text-[var(--text-muted)]">
-                            You have not joined or organized any pots yet.
+                            {potView === "organizing"
+                                ? "You are not organizing any pots yet."
+                                : "You have not joined any pots yet."}
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">

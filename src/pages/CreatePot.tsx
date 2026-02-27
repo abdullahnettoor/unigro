@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { format } from "date-fns";
 import { ArrowRight, ChevronLeft, Save } from "lucide-react";
 
-import { cn } from "@/components/ui/Button";
+import { cn, formatCurrency } from "@/lib/utils";
 import { PotFinancialsStep } from "@/pages/create-pot/PotFinancialsStep";
 import { PotRulesStep } from "@/pages/create-pot/PotRulesStep";
 import { PotSlotsStep } from "@/pages/create-pot/PotSlotsStep";
+import { GlassSurface } from "@/components/ui/GlassSurface";
 
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -77,6 +79,11 @@ export function CreatePot() {
     });
 
     const completionPercent = ((step + 1) / STEPS.length) * 100;
+    const organizerFee = Math.round((formData.totalValue * formData.commission) / 100);
+    const payout = Math.max(0, formData.totalValue - organizerFee);
+    const formattedStartDate = formData.startDate
+        ? format(new Date(formData.startDate), "PPP")
+        : "Not set";
 
     const validateStep = (stepIndex: number) => {
         if (stepIndex === 0) {
@@ -146,7 +153,12 @@ export function CreatePot() {
             navigate(`/pot/${potId}`, { replace: true });
         } catch (submitError) {
             console.error("Failed to save pot:", submitError);
-            setError("Failed to save pot. Please try again.");
+            const message = submitError instanceof Error ? submitError.message : "";
+            if (message.toLowerCase().includes("up to 5 pots")) {
+                setError("You have reached the 5 pot limit. Archive or delete a pot to create a new one.");
+            } else {
+                setError("Failed to save pot. Please try again.");
+            }
             setIsSubmitting(false);
         }
     };
@@ -192,7 +204,7 @@ export function CreatePot() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-2xl px-4 py-6">
+            <main className="mx-auto max-w-6xl px-4 py-6">
                 <AnimatePresence mode="wait">
                     {error && (
                         <motion.div
@@ -206,26 +218,103 @@ export function CreatePot() {
                     )}
                 </AnimatePresence>
 
-                <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-                    <AnimatePresence mode="wait" custom={step}>
-                        <motion.div
-                            key={step}
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            {step === 0 && <PotFinancialsStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
-                            {step === 1 && <PotSlotsStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
-                            {step === 2 && <PotRulesStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
-                        </motion.div>
-                    </AnimatePresence>
-                </form>
+                <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+                    <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
+                        <AnimatePresence mode="wait" custom={step}>
+                            <motion.div
+                                key={step}
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {step === 0 && <PotFinancialsStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
+                                {step === 1 && <PotSlotsStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
+                                {step === 2 && <PotRulesStep formData={formData} onChange={updateFormData} disabled={isLocked} />}
+                            </motion.div>
+                        </AnimatePresence>
+                    </form>
+
+                    <aside className="hidden lg:block">
+                        <div className="sticky top-28">
+                            <GlassSurface tier="glass-2" className="p-5 space-y-4">
+                                <div>
+                                    <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Summary</p>
+                                    <h3 className="text-lg font-display font-semibold text-[var(--text-primary)]">
+                                        {formData.title.trim() || "Untitled pot"}
+                                    </h3>
+                                    {formData.description && (
+                                        <p className="mt-1 text-xs text-[var(--text-muted)] line-clamp-2">
+                                            {formData.description}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Total pool</span>
+                                        <span className="font-semibold text-[var(--text-primary)]">
+                                            {formatCurrency(formData.totalValue, formData.currency)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Per cycle</span>
+                                        <span className="font-semibold text-[var(--text-primary)]">
+                                            {formatCurrency(formData.contribution, formData.currency)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Slots</span>
+                                        <span className="font-semibold text-[var(--text-primary)]">
+                                            {formData.duration}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Frequency</span>
+                                        <span className="font-semibold text-[var(--text-primary)] capitalize">
+                                            {formData.frequency}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Organizer fee</span>
+                                        <span className="font-semibold text-[var(--text-primary)]">
+                                            {formData.commission.toFixed(2)}%
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Fee value</span>
+                                        <span className="font-semibold text-[var(--text-primary)]">
+                                            {formatCurrency(organizerFee, formData.currency)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Winner payout</span>
+                                        <span className="font-semibold text-[var(--accent-vivid)]">
+                                            {formatCurrency(payout, formData.currency)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Start date</span>
+                                        <span className="font-semibold text-[var(--text-primary)]">
+                                            {formattedStartDate}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[var(--text-muted)]">Draw</span>
+                                        <span className="font-semibold text-[var(--text-primary)]">
+                                            {formData.drawStrategy === "RANDOM" ? "System draw" : "Manual pick"}
+                                        </span>
+                                    </div>
+                                </div>
+                            </GlassSurface>
+                        </div>
+                    </aside>
+                </div>
             </main>
 
             {/* Bottom Action Bar */}
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-subtle)] bg-[var(--surface-elevated)] p-4 pb-safe-offset-4 shadow-lg sm:pb-4">
-                <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
+                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
                     <div className="text-xs text-[var(--text-muted)] hidden sm:block">
                         {step === 0 && "Next: Slot Configuration"}
                         {step === 1 && "Next: Rules & Review"}

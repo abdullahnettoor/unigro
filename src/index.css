@@ -43,6 +43,8 @@
   --danger: #C8463A;
   --gold: #BF9B3F;
   --hero-gradient: radial-gradient(circle at top, #E8F2ED 0%, #F6F5F2 50%, #ECE8E1 100%);
+  --bg-glass-gradient: radial-gradient(circle at top, color-mix(in srgb, var(--accent-soft) 24%, transparent) 0%, color-mix(in srgb, var(--bg-app) 75%, transparent) 55%, color-mix(in srgb, var(--surface-card) 50%, transparent) 100%);
+  --surface-glass-sheen: linear-gradient(135deg, color-mix(in srgb, var(--surface-elevated) 72%, transparent) 0%, color-mix(in srgb, var(--accent-soft) 22%, transparent) 55%, color-mix(in srgb, var(--surface-elevated) 70%, transparent) 100%);
   color-scheme: light;
 }
 
@@ -64,6 +66,8 @@
   --danger: #E1675A;
   --gold: #D7B765;
   --hero-gradient: radial-gradient(circle at top, #1F3A2E 0%, #0F1F1A 48%, #0B1814 100%);
+  --bg-glass-gradient: radial-gradient(circle at top, color-mix(in srgb, var(--accent-soft) 28%, transparent) 0%, color-mix(in srgb, var(--bg-app) 78%, transparent) 55%, color-mix(in srgb, var(--surface-card) 52%, transparent) 100%);
+  --surface-glass-sheen: linear-gradient(135deg, color-mix(in srgb, var(--surface-elevated) 68%, transparent) 0%, color-mix(in srgb, var(--accent-soft) 24%, transparent) 55%, color-mix(in srgb, var(--surface-elevated) 66%, transparent) 100%);
   color-scheme: dark;
 }
 
@@ -143,7 +147,7 @@ input[type="submit"] {
 
 /* Moderate premium glass tiers */
 .glass-1 {
-  background: color-mix(in srgb, var(--surface-elevated) 80%, transparent);
+  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 80%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid color-mix(in srgb, var(--border-subtle) 82%, transparent);
@@ -151,7 +155,7 @@ input[type="submit"] {
 }
 
 .glass-2 {
-  background: color-mix(in srgb, var(--surface-elevated) 72%, transparent);
+  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 72%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid color-mix(in srgb, var(--border-subtle) 78%, transparent);
@@ -159,11 +163,16 @@ input[type="submit"] {
 }
 
 .glass-3 {
-  background: color-mix(in srgb, var(--surface-elevated) 64%, transparent);
+  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 64%, transparent);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
+}
+
+.glass-sheen {
+  background-image: var(--surface-glass-sheen);
+  background-blend-mode: soft-light;
 }
 
 .sticky-safe-bottom {
@@ -186,4 +195,15 @@ input[type="submit"] {
 /* Compact button/chip override — fully cancels the 44px min-height rule */
 .btn-chip {
   min-height: 0;
+}
+
+/* Hide native date input icon when we provide a custom prefix icon */
+.date-input-no-icon {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.date-input-no-icon::-webkit-calendar-picker-indicator {
+  display: none;
+  opacity: 0;
 }

@@ -45,9 +45,9 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
                             {pot.title}
                         </h3>
                         <div className="mb-2 flex items-center gap-1 text-xs text-[var(--text-muted)]">
-                            Organized by{" "}
+                            Organizer:{" "}
                             <span className="max-w-[150px] truncate font-medium text-[var(--text-muted)]">
-                                {isForeman ? "you" : (pot.foreman?.name || "Organizer")}
+                                {isForeman ? "You" : (pot.foreman?.name || "Organizer")}
                             </span>
                         </div>
                     </div>

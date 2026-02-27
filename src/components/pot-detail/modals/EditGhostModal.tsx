@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { isValidPhoneNumber } from "react-phone-number-input";
-import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { useMutation } from "convex/react";
 import { UserPen, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Input } from "@/components/ui/Input";
+import { PhoneInputField } from "@/components/ui/PhoneInputField";
+import { ModalFooter, ModalHeader, ModalShell, ModalCloseButton } from "@/components/ui/ModalShell";
+
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 
@@ -61,32 +64,27 @@ export function EditGhostModal({ ghostUser, onClose }: EditGhostModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end justify-center p-3 sm:items-center sm:p-4 z-50">
-            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-200">
-                <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
-                    <button
-                        onClick={onClose}
-                        aria-label="Close edit profile"
-                        className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                    >
-                        <X size={20} />
-                    </button>
-                    <h3 className="text-2xl font-display font-bold mb-1">Edit unverified member</h3>
-                    <p className="text-[var(--text-muted)] text-sm leading-snug">
-                        Update contact info for users who haven't claimed their account yet.
-                    </p>
-                </div>
+        <ModalShell zIndex={100}>
+            <ModalHeader>
+                <ModalCloseButton onClick={onClose}>
+                    <X size={20} />
+                </ModalCloseButton>
+                <h3 className="text-2xl font-display font-bold mb-1">Edit unverified member</h3>
+                <p className="text-[var(--text-muted)] text-sm leading-snug">
+                    Update contact info for users who haven't claimed their account yet.
+                </p>
+            </ModalHeader>
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
                     <div>
                         <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Name</label>
                         <div className="relative">
-                            <input
+                            <Input
                                 type="text"
                                 required
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]"
+                                className="bg-[var(--surface-deep)]/60"
                                 placeholder="e.g. Sarah Jones"
                             />
                         </div>
@@ -103,17 +101,16 @@ export function EditGhostModal({ ghostUser, onClose }: EditGhostModalProps) {
 
                     {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
 
-                    <div className="sticky bottom-0 bg-[var(--surface-elevated)] pt-2">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
-                        >
-                            {isSubmitting ? "Saving..." : <><UserPen size={18} /> Save changes</>}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                <ModalFooter>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
+                    >
+                        {isSubmitting ? "Saving..." : <><UserPen size={18} /> Save changes</>}
+                    </button>
+                </ModalFooter>
+            </form>
+        </ModalShell>
     );
 }

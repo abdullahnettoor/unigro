@@ -83,8 +83,8 @@ function ConfirmDialog({
   if (!open || !options) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 p-3 sm:items-center sm:p-4">
-      <div className="w-full rounded-t-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 sm:max-w-md sm:rounded-2xl">
+    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 p-3 sm:items-center sm:p-4">
+      <div className="glass-3 w-full rounded-t-2xl border border-[var(--border-subtle)] p-6 sm:max-w-md sm:rounded-2xl">
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">{options.title}</h3>
         {options.message && <p className="mt-2 text-sm text-[var(--text-muted)]">{options.message}</p>}
         <div className="mt-6 flex gap-2">
@@ -165,4 +165,3 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
     </FeedbackContext.Provider>
   );
 }
-

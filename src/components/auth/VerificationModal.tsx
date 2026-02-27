@@ -1,6 +1,16 @@
-import { useRef,useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { AlertCircle,ShieldCheck, Upload, X } from "lucide-react";
+import { AlertCircle, ShieldCheck, Upload, X } from "lucide-react";
+
+import { Input } from "@/components/ui/Input";
+import { ModalCloseButton, ModalFooter, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/Select";
 
 import { api } from "../../../convex/_generated/api";
 
@@ -72,58 +82,53 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-end justify-center p-3 sm:items-center sm:p-4 z-[100]">
-            <div className="glass-3 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-300">
-                <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-[var(--border-subtle)] sm:hidden" />
-                <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
-                    <button
-                        onClick={onClose}
-                        aria-label="Close verification modal"
-                        className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-                    >
-                        <X size={24} />
-                    </button>
+        <ModalShell zIndex={100}>
+            <ModalHeader>
+                <ModalCloseButton onClick={onClose}>
+                    <X size={24} />
+                </ModalCloseButton>
 
-                    <div className="text-center">
-                        <div className="w-16 h-16 bg-[var(--accent-vivid)]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--accent-vivid)]/20">
-                            <ShieldCheck size={32} className="text-[var(--accent-vivid)]" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Verify your identity</h2>
-                        <p className="text-[var(--text-muted)] text-sm">
-                            Upload your government ID for trust verification.
-                        </p>
-                        {user?.adminNotes && user.verificationStatus === "REJECTED" && (
-                            <div className="mt-4 bg-[var(--danger)]/10 border border-[var(--danger)]/20 p-3 rounded-lg text-sm text-[var(--danger)]">
-                                <strong>Reason for rejection:</strong> {user.adminNotes}
-                            </div>
-                        )}
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-[var(--accent-vivid)]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[var(--accent-vivid)]/20">
+                        <ShieldCheck size={32} className="text-[var(--accent-vivid)]" />
                     </div>
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Verify your identity</h2>
+                    <p className="text-[var(--text-muted)] text-sm">
+                        Upload your government ID for trust verification.
+                    </p>
+                    {user?.adminNotes && user.verificationStatus === "REJECTED" && (
+                        <div className="mt-4 bg-[var(--danger)]/10 border border-[var(--danger)]/20 p-3 rounded-lg text-sm text-[var(--danger)]">
+                            <strong>Reason for rejection:</strong> {user.adminNotes}
+                        </div>
+                    )}
                 </div>
+            </ModalHeader>
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
                     {/* ID Type Selection */}
                     <div>
                         <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Document Type</label>
-                        <select
-                            value={idType}
-                            onChange={(e) => setIdType(e.target.value)}
-                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-xl py-3 px-4 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]/50"
-                        >
-                            <option value="Aadhaar">Aadhaar Card</option>
-                            <option value="PAN">PAN Card</option>
-                            <option value="Passport">Passport</option>
-                            <option value="Driving License">Driving License</option>
-                        </select>
+                        <Select value={idType} onValueChange={setIdType}>
+                            <SelectTrigger className="bg-[var(--surface-deep)]/60">
+                                <SelectValue placeholder="Document type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Aadhaar">Aadhaar Card</SelectItem>
+                                <SelectItem value="PAN">PAN Card</SelectItem>
+                                <SelectItem value="Passport">Passport</SelectItem>
+                                <SelectItem value="Driving License">Driving License</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* ID Number Input */}
                     <div>
                         <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">ID Number</label>
-                        <input
+                        <Input
                             type="text"
                             value={idNumber}
                             onChange={(e) => setIdNumber(e.target.value)}
-                            className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-xl py-3 px-4 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-vivid)]/50"
+                            className="bg-[var(--surface-deep)]/60"
                             placeholder={idType === "Aadhaar" ? "xxxx-xxxx-xxxx" : "Enter ID Number"}
                         />
                     </div>
@@ -163,7 +168,7 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
                         </div>
                     )}
 
-                    <div className="glass-2 sticky bottom-0 pt-2">
+                    <ModalFooter>
                         <button
                             type="submit"
                             disabled={loading || !file}
@@ -171,9 +176,8 @@ export function VerificationModal({ onClose }: VerificationModalProps) {
                         >
                             {loading ? "Uploading..." : "Submit for verification"}
                         </button>
-                    </div>
+                    </ModalFooter>
                 </form>
-            </div>
-        </div>
+            </ModalShell>
     );
 }

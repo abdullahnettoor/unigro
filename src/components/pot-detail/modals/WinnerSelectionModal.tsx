@@ -1,3 +1,5 @@
+import { ModalBody, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
+
 interface WinnerSelectionModalProps {
     activeSlots: any[];
     selectedWinnerSlotNum: number | null;
@@ -14,10 +16,12 @@ export function WinnerSelectionModal({
     handleDraw
 }: WinnerSelectionModalProps) {
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-end justify-center p-3 sm:items-center sm:p-4">
-            <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-6">
-                <h3 className="text-xl font-display font-black mb-4">Select Winner Manually</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto mb-6 scrollbar-hide">
+        <ModalShell zIndex={100} showHandle={false}>
+            <ModalHeader>
+                <h3 className="text-xl font-display font-black">Select Winner Manually</h3>
+            </ModalHeader>
+            <ModalBody className="space-y-6">
+                <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-hide">
                     {activeSlots.filter(s => !s.drawOrder).map(s => (
                         <button
                             key={s._id}
@@ -33,7 +37,7 @@ export function WinnerSelectionModal({
                     <button onClick={() => setShowWinnerSelection(false)} className="flex-1 bg-[var(--surface-deep)] py-4 rounded-2xl font-bold text-sm">Cancel</button>
                     <button onClick={handleDraw} disabled={!selectedWinnerSlotNum} className="flex-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-4 rounded-2xl text-sm shadow-xl disabled:opacity-50">Confirm Winner</button>
                 </div>
-            </div>
-        </div>
+            </ModalBody>
+        </ModalShell>
     );
 }

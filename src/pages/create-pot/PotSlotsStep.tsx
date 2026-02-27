@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Percent, Users } from "lucide-react";
 
-import { cn } from "@/components/ui/Button";
 import { GlassSurface } from "@/components/ui/GlassSurface";
-import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
+import { Input } from "@/components/ui/Input";
+import { cn, formatCurrency, getCurrencySymbol } from "@/lib/utils";
 
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
 
@@ -109,17 +109,17 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                                 </label>
                             </div>
                             <div className="relative">
-                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+                                <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--text-muted)]">
                                     <Users size={18} />
                                 </div>
-                                <input
+                                <Input
                                     type="number"
                                     min={2}
                                     max={50}
                                     value={formData.duration}
                                     onChange={(e) => setDuration(Number(e.target.value))}
                                     disabled={disabled}
-                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] disabled:opacity-50"
+                                    className="bg-[var(--surface-deep)]/50 pl-10 pr-3 font-mono"
                                 />
                             </div>
                             <p className="mt-2 text-xs text-[var(--text-muted)]">
@@ -163,17 +163,17 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                             </div>
 
                             <div className="relative">
-                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] flex items-center justify-center w-5">
+                                <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 flex w-5 items-center justify-center text-[var(--text-muted)]">
                                     {commissionType === "PERCENTAGE" ? <Percent size={16} /> : <span className="text-sm font-bold">{currencySymbol}</span>}
                                 </div>
-                                <input
+                                <Input
                                     type="number"
                                     min={0}
                                     {...(commissionType === "PERCENTAGE" ? { max: 50, step: 0.1 } : { max: formData.totalValue })}
                                     value={commissionType === "PERCENTAGE" ? Number(formData.commission.toFixed(2)) : fixedCommission}
                                     onChange={(e) => handleCommissionChange(Number(e.target.value), commissionType)}
                                     disabled={disabled}
-                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/50 py-3 pl-10 pr-3 font-mono text-[var(--text-primary)] outline-none transition-all focus:border-[var(--accent-vivid)] focus:ring-1 focus:ring-[var(--accent-vivid)] disabled:opacity-50"
+                                    className="bg-[var(--surface-deep)]/50 pl-10 pr-3 font-mono"
                                 />
                             </div>
                             <p className="mt-2 text-xs text-[var(--text-muted)]">

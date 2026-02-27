@@ -7,6 +7,7 @@ import { Home, Settings, WalletCards } from "lucide-react";
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { UserSync } from "./components/auth/UserSync";
 import { PWAPrompt } from "./components/shared/PWAPrompt";
+import { Toaster } from "./components/ui/Sonner";
 
 const loadDashboard = () => import("./pages/Dashboard");
 const loadPots = () => import("./pages/Pots");
@@ -145,6 +146,7 @@ function BottomNav() {
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)] pb-24 sm:pb-0">
+      <Toaster />
       <Authenticated>
         <UserSync />
         <AuthenticatedPrefetch />

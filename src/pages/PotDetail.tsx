@@ -24,6 +24,7 @@ import { RulesTab } from "@/components/pot-detail/RulesTab";
 import { SlotsTab } from "@/components/pot-detail/SlotsTab";
 import { TabNav } from "@/components/pot-detail/TabNav";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { GlassSurface } from "@/components/ui/GlassSurface";
 import { getNextCycleDate, getPotDisplayProgress, getPotFinancials, getSlotStats, getVirtualOpenSlots } from "@/lib/pot";
 import { formatCurrency } from "@/lib/utils";
 
@@ -537,6 +538,29 @@ export function PotDetail() {
                         onSlotClick={handleSlotClick}
                     />
 
+                    {/* Desktop / Tablet Status Cards */}
+                    <div className="hidden md:grid md:grid-cols-3 gap-4">
+                        <GlassSurface tier="glass-2" className="p-4">
+                            <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Next payment</p>
+                            <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{nextDueDate}</p>
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">Member contribution due</p>
+                        </GlassSurface>
+                        <GlassSurface tier="glass-2" className="p-4">
+                            <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Next draw</p>
+                            <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{nextDrawDate}</p>
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">Payout schedule</p>
+                        </GlassSurface>
+                        <GlassSurface tier="glass-2" className="p-4">
+                            <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Winning pot</p>
+                            <p className="mt-2 text-lg font-semibold text-[var(--accent-secondary)]">
+                                {formatCurrency(winningAmount, pot.config.currency)}
+                            </p>
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">
+                                After {commissionPct.toFixed(2)}% fee
+                            </p>
+                        </GlassSurface>
+                    </div>
+
                     {/* MOBILE/TABLET EXPANDABLE STATS & CONTROLS */}
                     <MobileStats
                         pot={pot}
@@ -853,4 +877,3 @@ function SecureAccountBanner() {
         </div>
     );
 }
-

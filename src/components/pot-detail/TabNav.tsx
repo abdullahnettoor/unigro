@@ -19,7 +19,7 @@ export function TabNav({
 }: TabNavProps) {
     const tabButtonClass = (tab: Tab) =>
         `px-3 py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap rounded-full ${activeTab === tab
-            ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
+            ? "bg-[var(--surface-elevated)] text-[var(--text-primary)] shadow-sm"
             : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         }`;
 
@@ -40,7 +40,7 @@ export function TabNav({
                         onClick={() => setActiveTab('organize')}
                         className={tabButtonClass("organize")}
                     >
-                        Organize {pendingApprovalsCount > 0 && <span className="ml-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded-full text-[10px]">{pendingApprovalsCount}</span>}
+                        Approvals {pendingApprovalsCount > 0 && <span className="ml-1 bg-[var(--accent-vivid)] text-[var(--text-on-accent)] px-1.5 py-0.5 rounded-full text-[10px]">{pendingApprovalsCount}</span>}
                     </button>
                 )}
 

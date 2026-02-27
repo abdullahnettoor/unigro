@@ -1,10 +1,6 @@
-import * as React from "react"
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import * as React from "react";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
-}
+import { cn } from "@/lib/utils";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     glass?: boolean

@@ -1,10 +1,6 @@
-import * as React from "react"
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import * as React from "react";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
-}
+import { cn } from "@/lib/utils";
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
     variant?: "default" | "brand" | "success" | "warning" | "danger" | "outline"
@@ -12,7 +8,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Badge({ className, variant = "default", size = "sm", ...props }: BadgeProps) {
-    const baseStyles = "inline-flex items-center rounded-full font-bold font-mono uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+    const baseStyles = "inline-flex items-center rounded-full font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-vivid)] focus:ring-offset-2"
 
     const variants = {
         default: "bg-[var(--surface-deep)]/80 text-[var(--text-muted)] border border-transparent",

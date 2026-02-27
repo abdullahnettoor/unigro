@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence,motion } from "framer-motion";
 import { Eye, Sparkles, Trophy, X, Zap } from "lucide-react";
 
 interface Slot {

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import PhoneInput, { getCountryCallingCode } from "react-phone-number-input";
-import "react-phone-number-input/style.css";
-import { cn } from "./Button";
 
+import { cn } from "@/lib/utils";
+
+import "react-phone-number-input/style.css";
 interface PhoneInputFieldProps {
     value: string;
     onChange: (value: string) => void;

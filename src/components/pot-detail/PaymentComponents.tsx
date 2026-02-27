@@ -3,6 +3,8 @@ import { useMutation } from "convex/react";
 import { AlertCircle, Banknote, CheckCircle, Clock, Image as ImageIcon, Smartphone, Upload, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { ModalBody, ModalCloseButton, ModalFooter, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
 import { formatCurrency } from "@/lib/utils";
 
 import { api } from "../../../convex/_generated/api";
@@ -123,18 +125,25 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm shadow-2xl flex items-end justify-center p-3 sm:items-center sm:p-4 z-[100] animate-in fade-in duration-200">
-            <div className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[88vh] flex flex-col overflow-hidden relative shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
-                <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-[var(--border-subtle)] sm:hidden" />
-                <div className="p-6 pb-4 border-b border-[var(--border-subtle)]/80">
-                    <button onClick={onClose} aria-label="Close payment modal" className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
-                        <X size={20} />
-                    </button>
-                    <h3 className="text-xl font-bold mb-1">Make payment</h3>
-                    <p className="text-[var(--text-muted)] text-sm">Cycle {monthIndex + 1} • <span className="text-[var(--accent-vivid)] font-mono">{formatCurrency(amount, currency)}</span></p>
-                </div>
+        <ModalShell
+            zIndex={150}
+            overlayClassName="bg-black/60 backdrop-blur-sm shadow-2xl animate-in fade-in duration-200"
+            className="rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom-4 duration-300"
+        >
+            <ModalHeader>
+                <ModalCloseButton onClick={onClose}>
+                    <X size={20} />
+                </ModalCloseButton>
+                <h3 className="text-xl font-bold mb-1">Make payment</h3>
+                <p className="text-[var(--text-muted)] text-sm">
+                    Cycle {monthIndex + 1} •{" "}
+                    <span className="text-[var(--accent-vivid)] font-mono">
+                        {formatCurrency(amount, currency)}
+                    </span>
+                </p>
+            </ModalHeader>
 
-                <div className="flex-1 overflow-y-auto p-6">
+            <ModalBody>
                     {!paymentType ? (
                         <div className="grid grid-cols-2 gap-4">
                             <button
@@ -188,7 +197,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
 
                                     {error && <p className="text-[var(--danger)] text-sm text-center">{error}</p>}
 
-                                    <div className="sticky bottom-0 pt-4 pb-2 mt-4 flex items-center justify-center">
+                                    <ModalFooter className="pt-4 pb-2 mt-4 flex items-center justify-center">
                                         <button
                                             type="submit"
                                             disabled={isUploading || !file}
@@ -196,7 +205,7 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                         >
                                             {isUploading ? "Uploading..." : "Submit proof"}
                                         </button>
-                                    </div>
+                                    </ModalFooter>
                                 </form>
                             ) : (
 
@@ -205,24 +214,23 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                         isForeman ? (
                                             <div className="mb-6 text-left" >
                                                 <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Payment Date</label>
-                                                <input
-                                                    type="date"
+                                                <DatePicker
                                                     value={paymentDate}
-                                                    onChange={(e) => setPaymentDate(e.target.value)}
-                                                    className="w-full bg-[var(--surface-deep)]/60 border border-[var(--border-subtle)] rounded-lg p-3 text-[var(--text-primary)] focus:border-[var(--accent-vivid)] outline-none"
+                                                    onChange={setPaymentDate}
+                                                    className="bg-[var(--surface-deep)]/60"
                                                 />
                                                 <p className="text-xs text-[var(--text-muted)] mt-2">
                                                     Record the actual date this payment was received.
                                                 </p>
                                             </div>
                                         ) : (
-                                            <div className="bg-[var(--warning)]/15 p-5 rounded-xl mb-6 border border-[var(--warning)]/30 backdrop-blur-sm">
-                                                <p className="text-[var(--text-primary)] font-medium text-sm leading-relaxed">
-                                                    Please confirm that you have handed cash to the organizer. The organizer will need to approve this request.
-                                                </p>
-                                            </div>
+                                    <div className="bg-[var(--warning)]/15 p-5 rounded-xl mb-6 border border-[var(--warning)]/30 backdrop-blur-sm">
+                                        <p className="text-[var(--text-primary)] font-medium text-sm leading-relaxed">
+                                            Please confirm that you have handed cash to the organizer. The organizer will need to approve this request.
+                                        </p>
+                                    </div>
                                         )}
-                                    <div className="sticky bottom-0 pt-4 pb-2 mt-4 flex items-center justify-center">
+                                    <ModalFooter className="pt-4 pb-2 mt-4 flex items-center justify-center">
                                         <button
                                             onClick={handleCashSubmit}
                                             disabled={isUploading}
@@ -230,15 +238,14 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
                                         >
                                             {isUploading ? "Processing..." : (isForeman ? "Record received" : "Confirm cash payment")}
                                         </button>
-                                    </div>
+                                    </ModalFooter>
                                 </div>
                             )}
                         </>
                     )
                     }
-                </div>
-            </div >
-        </div >
+            </ModalBody>
+        </ModalShell>
     );
 }
 
