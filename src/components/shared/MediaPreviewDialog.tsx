@@ -3,6 +3,7 @@ import { Download, Minus, Plus, RotateCcw } from "lucide-react";
 
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
 
 interface MediaPreviewDialogProps {
   url: string | null;
@@ -36,10 +37,10 @@ export function MediaPreviewDialog({ url, onClose, alt = "Preview" }: MediaPrevi
     >
       <DialogContent className="max-w-4xl p-4">
         {url ? (
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap items-center justify-between gap-2 pr-12">
-                <div className="text-sm font-semibold text-[var(--text-primary)]">Document preview</div>
-                <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 pr-12">
+              <div className="text-sm font-semibold text-[var(--text-primary)]">Document preview</div>
+              <div className="flex items-center gap-2">
                 <Button type="button" variant="ghost" onClick={zoomOut} className="h-9 w-9 p-0">
                   <Minus size={16} />
                 </Button>
@@ -67,7 +68,7 @@ export function MediaPreviewDialog({ url, onClose, alt = "Preview" }: MediaPrevi
                 </Button>
               </div>
             </div>
-            <div className="max-h-[70vh] overflow-auto rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/20 p-3">
+            <Surface tier={1} rounded="xl" className="max-h-[70vh] overflow-auto border border-[var(--border-subtle)] p-3">
               <div
                 className={`origin-top-left ${clampedZoom > 1 ? "cursor-grab" : ""} ${isPanning ? "cursor-grabbing" : ""}`}
                 style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${clampedZoom})` }}
@@ -92,7 +93,7 @@ export function MediaPreviewDialog({ url, onClose, alt = "Preview" }: MediaPrevi
               >
                 <img src={url} alt={alt} className="max-w-full h-auto object-contain" />
               </div>
-            </div>
+            </Surface>
           </div>
         ) : null}
       </DialogContent>

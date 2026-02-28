@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Download, X } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { Button } from '@/components/ui/Button';
+import { Surface } from '@/components/ui/Surface';
 
 type BeforeInstallPromptEvent = Event & {
     prompt: () => Promise<void>;
@@ -76,7 +78,7 @@ export function PWAPrompt() {
 
     return (
         <div className="fixed inset-x-3 bottom-3 z-50 animate-in slide-in-from-bottom-5 sm:inset-x-auto sm:right-4 sm:bottom-4">
-            <div className="glass-3 flex items-start gap-3 rounded-2xl p-4 shadow-2xl sm:max-w-sm">
+            <Surface tier={3} rounded="2xl" className="flex items-start gap-3 p-4 shadow-2xl sm:max-w-sm">
                 <div className="rounded-lg bg-[var(--accent-vivid)]/10 p-2 text-[var(--accent-vivid)]">
                     <Download size={20} />
                 </div>
@@ -94,20 +96,24 @@ export function PWAPrompt() {
                             : offlineReady
                                 ? "You can now use this app without an internet connection."
                                 : isIOS
-                                    ? "On iOS, tap Share and choose “Add to Home Screen”."
+                                    ? 'On iOS, tap Share and choose "Add to Home Screen".'
                                     : "Install for faster access and offline support."}
                     </p>
 
                     {needRefresh && (
-                        <button
+                        <Button
+                            variant="primary"
+                            size="sm"
                             onClick={() => updateServiceWorker(true)}
-                            className="w-full rounded-lg bg-[var(--accent-vivid)] px-3 py-2 text-sm font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"
+                            className="w-full font-bold sm:w-auto mt-2"
                         >
                             Update now
-                        </button>
+                        </Button>
                     )}
                     {!needRefresh && !offlineReady && deferredPrompt && (
-                        <button
+                        <Button
+                            variant="primary"
+                            size="sm"
                             onClick={async () => {
                                 track("pwa_install_prompt_shown");
                                 await deferredPrompt.prompt();
@@ -115,16 +121,16 @@ export function PWAPrompt() {
                                 track("pwa_install_prompt_result", { outcome: result.outcome });
                                 setDeferredPrompt(null);
                             }}
-                            className="w-full rounded-lg bg-[var(--accent-vivid)] px-3 py-2 text-sm font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-xs sm:py-1.5"
+                            className="w-full font-bold sm:w-auto mt-2"
                         >
                             Install app
-                        </button>
+                        </Button>
                     )}
                 </div>
-                <button onClick={close} aria-label="Dismiss prompt" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                <Button variant="ghost" size="sm" onClick={close} aria-label="Dismiss prompt" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] h-auto p-1">
                     <X size={16} />
-                </button>
-            </div>
+                </Button>
+            </Surface>
         </div>
     );
 }

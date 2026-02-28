@@ -11,7 +11,7 @@ export function OrganizerDisplay({ foremanId, avatarOnly }: { foremanId: Id<"use
     const Avatar = foreman.pictureUrl ? (
         <img src={foreman.pictureUrl} alt={foreman.name} className="w-8 h-8 sm:w-6 sm:h-6 rounded-full border-2 sm:border border-[var(--border-subtle)]" />
     ) : (
-        <div className="w-8 h-8 sm:w-6 sm:h-6 rounded-full bg-[var(--surface-deep)] flex items-center justify-center text-[10px] font-bold text-[var(--text-muted)] border-2 sm:border border-[var(--border-subtle)]">
+        <div className="w-8 h-8 sm:w-6 sm:h-6 rounded-full bg-[var(--surface-surface)]/20 flex items-center justify-center text-[10px] font-bold text-[var(--text-muted)] border-2 sm:border border-[var(--border-subtle)]">
             {foreman.name?.charAt(0)}
         </div>
     );

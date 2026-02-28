@@ -4,6 +4,7 @@ import { useMutation } from "convex/react";
 import { UserPen, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { ModalFooter, ModalHeader, ModalShell, ModalCloseButton } from "@/components/ui/ModalShell";
@@ -76,39 +77,42 @@ export function EditGhostModal({ ghostUser, onClose }: EditGhostModalProps) {
             </ModalHeader>
 
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Name</label>
-                        <div className="relative">
-                            <Input
-                                type="text"
-                                required
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="bg-[var(--surface-deep)]/60"
-                                placeholder="e.g. Sarah Jones"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone Number</label>
-                        <PhoneInputField
-                            value={phone}
-                            onChange={setPhone}
-                            error={!!error && error.includes("phone")}
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Name</label>
+                    <div className="relative">
+                        <Input
+                            type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="bg-[var(--surface-deep)]/60"
+                            placeholder="e.g. Sarah Jones"
                         />
                     </div>
+                </div>
 
-                    {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone Number</label>
+                    <PhoneInputField
+                        value={phone}
+                        onChange={setPhone}
+                        error={!!error && error.includes("phone")}
+                    />
+                </div>
+
+                {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
 
                 <ModalFooter>
-                    <button
+                    <Button
                         type="submit"
+                        variant="primary"
+                        size="lg"
+                        fullWidth
                         disabled={isSubmitting}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
+                        className="gap-2"
                     >
                         {isSubmitting ? "Saving..." : <><UserPen size={18} /> Save changes</>}
-                    </button>
+                    </Button>
                 </ModalFooter>
             </form>
         </ModalShell>

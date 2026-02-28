@@ -52,17 +52,17 @@ export function Calendar({
           defaultClassNames.month_caption
         ),
         nav: cn(
-          "absolute inset-x-0 top-1 flex items-center justify-between",
+          "absolute inset-x-0 top-1 flex items-center justify-between z-10 pointer-events-none",
           defaultClassNames.nav
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant, size: "icon" }),
-          "h-7 w-7 rounded-full p-0 text-[var(--text-muted)] hover:text-[var(--text-primary)] aria-disabled:opacity-40",
+          "h-7 w-7 !min-h-0 !min-w-0 !w-7 !h-7 !p-0 pointer-events-auto bg-transparent rounded-full aspect-square flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] aria-disabled:opacity-40",
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant, size: "icon" }),
-          "h-7 w-7 rounded-full p-0 text-[var(--text-muted)] hover:text-[var(--text-primary)] aria-disabled:opacity-40",
+          "h-7 w-7 !min-h-0 !min-w-0 !w-7 !h-7 !p-0 pointer-events-auto bg-transparent rounded-full aspect-square flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] aria-disabled:opacity-40",
           defaultClassNames.button_next
         ),
         month_grid: cn("w-full border-collapse", defaultClassNames.month_grid),
@@ -94,7 +94,7 @@ export function Calendar({
           defaultClassNames.day
         ),
         day_button: cn(
-          "h-9 w-9 rounded-full text-sm font-normal text-[var(--text-primary)] hover:bg-[var(--surface-deep)]/60 aria-selected:bg-[var(--accent-vivid)] aria-selected:text-[var(--text-on-accent)]",
+          "h-9 w-9 !min-h-0 rounded-full text-sm font-normal text-[var(--text-primary)] hover:bg-[var(--surface-deep)]/60 aria-selected:bg-[var(--accent-vivid)] aria-selected:text-[var(--text-on-accent)]",
           defaultClassNames.day_button
         ),
         range_start: cn(
@@ -107,11 +107,11 @@ export function Calendar({
           defaultClassNames.range_end
         ),
         today: cn(
-          "border border-[var(--accent-vivid)]/40",
+          "border border-[var(--accent-vivid)]/40 rounded-full",
           defaultClassNames.today
         ),
         outside: cn(
-          "text-[var(--text-muted)]/60 aria-selected:text-[var(--text-muted)]/60",
+          "text-[var(--text-muted)] opacity-50 aria-selected:text-[var(--text-muted)] aria-selected:opacity-50",
           defaultClassNames.outside
         ),
         disabled: cn(
@@ -170,7 +170,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        "relative isolate z-10 text-[var(--text-primary)] data-[selected-single=true]:bg-[var(--accent-vivid)] data-[selected-single=true]:text-[var(--text-on-accent)] data-[range-middle=true]:bg-[var(--surface-deep)]/60 data-[range-start=true]:bg-[var(--accent-vivid)] data-[range-start=true]:text-[var(--text-on-accent)] data-[range-end=true]:bg-[var(--accent-vivid)] data-[range-end=true]:text-[var(--text-on-accent)]",
+        "relative isolate z-10 text-[var(--text-primary)] data-[selected-single=true]:bg-[var(--accent-vivid)] data-[selected-single=true]:text-[var(--text-on-accent)] data-[selected-single=true]:opacity-100 data-[range-middle=true]:bg-[var(--surface-deep)]/60 data-[range-start=true]:bg-[var(--accent-vivid)] data-[range-start=true]:text-[var(--text-on-accent)] data-[range-end=true]:bg-[var(--accent-vivid)] data-[range-end=true]:text-[var(--text-on-accent)]",
         className
       )}
       {...props}

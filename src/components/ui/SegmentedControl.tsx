@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 interface SegmentedOption<T extends string> {
     value: T;
-    label: string;
+    label: React.ReactNode;
     count?: number;
 }
 

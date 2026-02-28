@@ -4,6 +4,7 @@ import { useMutation } from "convex/react";
 
 import { MediaPreviewDialog } from "@/components/shared/MediaPreviewDialog";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/Dialog";
 import { Surface } from "@/components/ui/Surface";
@@ -133,10 +134,12 @@ export function OrganizeTab({
                                         <div>
                                             <p className="text-sm font-bold">Round {tx.monthIndex} Payment</p>
                                             <p className="text-xs text-[var(--text-muted)]">{tx.user?.name || 'Member'}</p>
-                                            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-deep)]/70 px-2 py-0.5 text-[10px] font-semibold text-[var(--text-muted)]">
-                                                {tx.proofUrl ? <Smartphone size={11} /> : <Banknote size={11} />}
-                                                {tx.proofUrl ? "Online" : "Cash"}
-                                            </span>
+                                            <div className="mt-1 flex items-center">
+                                                <Badge variant="default" size="sm" className="gap-1.5 flex items-center">
+                                                    {tx.proofUrl ? <Smartphone size={11} /> : <Banknote size={11} />}
+                                                    {tx.proofUrl ? "Online" : "Cash"}
+                                                </Badge>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-2 sm:justify-end">
@@ -171,9 +174,9 @@ export function OrganizeTab({
                         }
                     </p>
                     <Button
-                        variant="ghost"
+                        variant="danger"
                         onClick={onDeletePot}
-                        className="w-full border border-red-500/30 hover:border-red-500/60 text-red-400 hover:text-red-300 text-sm"
+                        className="w-full text-sm font-bold bg-transparent border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
                     >
                         <Trash2 size={14} />
                         {isDraft ? "Delete pot" : "Archive / Delete pot"}
@@ -229,15 +232,15 @@ export function OrganizeTab({
                                 </div>
                             ) : null}
 
-                            {!reviewTx.proofUrl ? (
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-[var(--text-muted)]">Payment date</label>
-                                    <DatePicker value={reviewDate} onChange={setReviewDate} />
-                                    <p className="text-xs text-[var(--text-muted)]">
-                                        Record the actual date this payment was received.
-                                    </p>
-                                </div>
-                            ) : null}
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-[var(--text-muted)] flex items-baseline gap-1.5 flex-wrap">
+                                    Payment date
+                                    <span className="font-normal text-[10px] opacity-70">
+                                        (Record the date this payment was {reviewTx.proofUrl ? "received/verified" : "received"})
+                                    </span>
+                                </label>
+                                <DatePicker value={reviewDate} onChange={setReviewDate} />
+                            </div>
 
                             <div className="space-y-2">
                                 <label className="text-xs font-semibold text-[var(--text-muted)]">Rejection note (optional)</label>
@@ -251,7 +254,7 @@ export function OrganizeTab({
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
                                 <Button
-                                    variant="ghost"
+                                    variant="danger"
                                     onClick={async () => {
                                         if (!reviewTx) return;
                                         setIsReviewing(true);
@@ -264,7 +267,7 @@ export function OrganizeTab({
                                         }
                                     }}
                                     disabled={isReviewing}
-                                    className="text-[var(--danger)] hover:bg-[var(--danger)]/10"
+                                    className="bg-transparent text-[var(--danger)] border border-[var(--danger)]/30 hover:bg-[var(--danger)]/10"
                                 >
                                     <X size={16} /> Reject
                                 </Button>
@@ -302,3 +305,4 @@ export function OrganizeTab({
         </div>
     );
 }
+

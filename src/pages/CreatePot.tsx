@@ -5,13 +5,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { format } from "date-fns";
 import { ArrowRight, ChevronLeft, Save } from "lucide-react";
 
-import { cn, formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { PotFinancialsStep } from "@/pages/create-pot/PotFinancialsStep";
 import { PotRulesStep } from "@/pages/create-pot/PotRulesStep";
 import { PotSlotsStep } from "@/pages/create-pot/PotSlotsStep";
 import { PageShell } from "@/components/layout/PageShell";
-import { GlassSurface } from "@/components/ui/GlassSurface";
-
+import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/Button";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 
@@ -175,13 +175,15 @@ export function CreatePot() {
             <header className="sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 px-4 pt-12 pb-4 backdrop-blur-md sm:pt-6">
                 <div className="mx-auto max-w-2xl">
                     <div className="mb-4 flex items-center justify-between">
-                        <button
+                        <Button
                             onClick={() => (step > 0 ? handleBack() : navigate(-1))}
-                            className="inline-flex items-center gap-1 rounded-full p-2 -ml-2 text-[var(--text-muted)] hover:bg-[var(--surface-deep)] hover:text-[var(--text-primary)] transition-colors"
+                            variant="ghost"
+                            size="sm"
+                            className="-ml-2 gap-1 text-[var(--text-muted)]"
                         >
                             <ChevronLeft size={20} />
-                            <span className="text-sm font-medium">{step === 0 ? "Cancel" : "Back"}</span>
-                        </button>
+                            <span className="font-medium">{step === 0 ? "Cancel" : "Back"}</span>
+                        </Button>
                         <div className="text-lg font-bold text-[var(--text-primary)]">
                             {editPotId ? "Edit Pot" : "Create Pot"}
                         </div>
@@ -238,7 +240,7 @@ export function CreatePot() {
 
                     <aside className="hidden lg:block">
                         <div className="sticky top-28">
-                            <GlassSurface tier="glass-2" className="p-5 space-y-4">
+                            <Surface tier={2} className="p-5 space-y-4">
                                 <div>
                                     <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Summary</p>
                                     <h3 className="text-lg font-display font-semibold text-[var(--text-primary)]">
@@ -307,7 +309,7 @@ export function CreatePot() {
                                         </span>
                                     </div>
                                 </div>
-                            </GlassSurface>
+                            </Surface>
                         </div>
                     </aside>
                 </div>
@@ -322,14 +324,12 @@ export function CreatePot() {
                         {step === 2 && "Final Step"}
                     </div>
 
-                    <button
+                    <Button
                         type="button"
+                        variant="primary"
                         onClick={step === STEPS.length - 1 ? () => handleSubmit() : handleNext}
                         disabled={isSubmitting}
-                        className={cn(
-                            "ml-auto inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full px-8 text-base font-bold text-[var(--text-on-accent)] shadow-lg transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 sm:w-auto",
-                            isSubmitting ? "bg-[var(--text-muted)]" : "bg-[var(--accent-vivid)] shadow-[var(--accent-vivid)]/20"
-                        )}
+                        className="ml-auto w-full min-h-12 px-8 font-bold shadow-lg sm:w-auto"
                     >
                         {isSubmitting ? (
                             "Saving..."
@@ -344,7 +344,7 @@ export function CreatePot() {
                                 <ArrowRight size={18} />
                             </>
                         )}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

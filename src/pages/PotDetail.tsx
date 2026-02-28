@@ -26,6 +26,7 @@ import { TabNav } from "@/components/pot-detail/TabNav";
 import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/Button";
 import { getNextCycleDate, getPotDisplayProgress, getPotFinancials, getSlotStats, getVirtualOpenSlots } from "@/lib/pot";
 import { formatCurrency } from "@/lib/utils";
 
@@ -416,7 +417,7 @@ export function PotDetail() {
                     helper: "Select a winner for the current cycle.",
                     onClick: handleDraw,
                     disabled: isDrawing,
-                    tone: "secondary",
+                    tone: "primary",
                 };
             }
             if (isActive && currentWinnerSlot) {
@@ -473,101 +474,232 @@ export function PotDetail() {
     return (
         <div className="min-h-dvh bg-[var(--bg-app)]">
             <PageShell maxWidth="xl" className="py-4 sm:py-6 lg:px-8">
-            {/* Mobile Sticky Topbar */}
-            <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">
-                <button onClick={() => navigate('/pots')} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
-                    <ChevronLeft size={20} />
-                </button>
-                <div className="flex-1 min-w-0 text-center flex flex-col items-center justify-center">
-                    <h2 className="truncate font-display text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-tight">{pot.title}</h2>
+                {/* Mobile Sticky Topbar */}
+                <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">
+                    <button onClick={() => navigate('/pots')} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
+                        <ChevronLeft size={20} />
+                    </button>
+                    <div className="flex-1 min-w-0 text-center flex flex-col items-center justify-center">
+                        <h2 className="truncate font-display text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-tight">{pot.title}</h2>
+                    </div>
+                    {isForeman && isDraft && filledCount === 0 ? (
+                        <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="rounded-full p-2 hover:bg-[var(--surface-deep)] text-[var(--text-muted)] flex-shrink-0">
+                            <Edit2 size={18} />
+                        </button>
+                    ) : (
+                        <div className="flex-shrink-0 p-1 cursor-pointer hover:scale-105 transition-transform" onClick={handleOrganizerClick}>
+                            <OrganizerDisplay foremanId={pot.foremanId} avatarOnly={true} />
+                        </div>
+                    )}
                 </div>
-                {isForeman && !isActive ? (
-                    <button onClick={() => window.location.href = `/create?edit=${pot._id}`} className="rounded-full p-2 hover:bg-[var(--surface-deep)] text-[var(--text-muted)] flex-shrink-0">
-                        <Edit2 size={18} />
-                    </button>
-                ) : (
-                    <div className="flex-shrink-0 p-1 cursor-pointer hover:scale-105 transition-transform" onClick={handleOrganizerClick}>
-                        <OrganizerDisplay foremanId={pot.foremanId} avatarOnly={true} />
-                    </div>
+
+                {/* Desktop Back Link */}
+                <button
+                    onClick={() => navigate('/pots')}
+                    className="mb-4 hidden lg:flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+                >
+                    <ChevronLeft size={16} /> Back to pots
+                </button>
+
+                {/* Full Pot Banner for Visitors */}
+                {!isMember && !isForeman && !hasOpenSlots && (
+                    <Surface tier={3} className="mb-6 border-l-4 border-l-[var(--warning)] p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                        <div className="bg-[var(--warning)]/20 p-2 rounded-full text-[var(--warning)]">
+                            <ShieldAlert size={20} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-[var(--text-primary)]">Pot is currently full</p>
+                            <p className="text-xs text-[var(--text-muted)]">All slots have been taken. Contact the organizer to request an opening.</p>
+                        </div>
+                        <button
+                            onClick={handleContactOrganizer}
+                            className="text-xs font-bold text-[var(--accent-vivid)] hover:underline whitespace-nowrap"
+                        >
+                            Contact
+                        </button>
+                    </Surface>
                 )}
-            </div>
 
-            {/* Desktop Back Link */}
-            <button
-                onClick={() => navigate('/pots')}
-                className="mb-4 hidden lg:flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
-            >
-                <ChevronLeft size={16} /> Back to pots
-            </button>
+                {/* MAIN 2-COLUMN GRID */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start pb-24 lg:pb-8">
 
-            {/* Full Pot Banner for Visitors */}
-            {!isMember && !isForeman && !hasOpenSlots && (
-                <Surface tier={3} className="mb-6 border-l-4 border-l-[var(--warning)] p-4 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
-                    <div className="bg-[var(--warning)]/20 p-2 rounded-full text-[var(--warning)]">
-                        <ShieldAlert size={20} />
+                    {/* LEFT COLUMN: Hero & Content */}
+                    <div className="space-y-6">
+                        {/* Hero Visualizer Section */}
+                        <PotHero
+                            pot={pot}
+                            allSlots={allSlots}
+                            transactions={transactions || []}
+                            isMember={isMember}
+                            isForeman={isForeman}
+                            isDraft={isDraft}
+                            isActive={isActive}
+                            hasOpenSlots={hasOpenSlots}
+                            progressInfo={progressInfo}
+                            filledCount={filledCount}
+                            displayProgress={displayProgress}
+                            onOrganizerClick={handleOrganizerClick}
+                            onSlotClick={handleSlotClick}
+                        />
+
+                        {/* Desktop / Tablet Status Cards */}
+                        <div className="hidden md:grid md:grid-cols-3 gap-4">
+                            <Surface tier={2} className="p-4">
+                                <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Next payment</p>
+                                <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{nextDueDate}</p>
+                                <p className="mt-1 text-xs text-[var(--text-muted)]">Member contribution due</p>
+                            </Surface>
+                            <Surface tier={2} className="p-4">
+                                <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Next draw</p>
+                                <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{nextDrawDate}</p>
+                                <p className="mt-1 text-xs text-[var(--text-muted)]">Payout schedule</p>
+                            </Surface>
+                            <Surface tier={2} className="p-4">
+                                <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Winning pot</p>
+                                <p className="mt-2 text-lg font-semibold text-[var(--accent-secondary)]">
+                                    {formatCurrency(winningAmount, pot.config.currency)}
+                                </p>
+                                <p className="mt-1 text-xs text-[var(--text-muted)]">
+                                    After {commissionPct.toFixed(2)}% fee
+                                </p>
+                            </Surface>
+                        </div>
+
+                        {/* MOBILE/TABLET EXPANDABLE STATS & CONTROLS */}
+                        <MobileStats
+                            pot={pot}
+                            showMobileStats={showMobileStats}
+                            setShowMobileStats={setShowMobileStats}
+                            winningAmount={winningAmount}
+                            commissionPct={commissionPct}
+                            commissionAmount={commissionAmount}
+                            nextDueDate={nextDueDate}
+                            nextDrawDate={nextDrawDate}
+                            handleShare={handleShare}
+                        />
+
+                        {/* Tab Navigation */}
+                        <div id="tabs-section" className="scroll-mt-24">
+                            <TabNav
+                                isMember={isMember}
+                                isForeman={isForeman}
+                                activeTab={activeTab}
+                                setActiveTab={setActiveTab}
+                                pendingApprovalsCount={pendingApprovalsCount}
+                                memberListLength={memberList.length}
+                            />
+                        </div>
+
+                        {/* TAB CONTENT AREAS */}
+                        <div className="min-h-[400px]">
+                            {/* TAB CONTENT: DASHBOARD */}
+                            {activeTab === 'dashboard' && (isMember || isForeman) && (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    {isMember && !isDraft && (
+                                        <MemberDashboard
+                                            pot={pot}
+                                            mySlots={mySlots}
+                                            transactions={transactions || []}
+                                            nextDueDate={nextDueDate}
+                                            currentUserId={currentUser?._id || ""}
+                                            onPay={(slotId, cycle, amount) => setGlobalPaymentState({ slotId, cycle, amount })}
+                                        />
+                                    )}
+
+                                    {currentWinnerSlot && (
+                                        <Surface tier={2} className="border-l-4 border-l-[var(--gold)] rounded-2xl p-5 flex items-center gap-4">
+                                            <div className="bg-[var(--gold)]/20 p-3 rounded-full text-[var(--gold)]">
+                                                <Gavel size={24} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Cycle {pot.currentMonth} Winner</p>
+                                                <p className="text-xl font-display font-black text-[var(--gold)]">#{currentWinnerSlot.slotNumber} • {currentWinnerSlot.user?.name}</p>
+                                            </div>
+                                        </Surface>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* TAB CONTENT: MEMBERS */}
+                            {activeTab === 'members' && (
+                                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <MembersList
+                                        members={memberList}
+                                        potId={pot._id}
+                                        currentMonth={pot.currentMonth}
+                                        isForeman={isForeman}
+                                        isActive={isActive}
+                                        currentUserId={currentUser?._id}
+                                        currency={pot.config.currency}
+                                    />
+                                </div>
+                            )}
+
+                            {/* TAB CONTENT: RULES & INFO */}
+                            {activeTab === 'rules' && (
+                                <RulesTab pot={pot} gracePeriod={gracePeriod} />
+                            )}
+
+                            {/* TAB CONTENT: SLOTS */}
+                            {activeTab === 'slots' && (
+                                <SlotsTab
+                                    pot={pot}
+                                    allSlots={allSlots}
+                                    currentUserId={currentUser?._id}
+                                    isForeman={isForeman}
+                                    isDraft={isDraft}
+                                    setShowAddMember={setShowAddMember}
+                                    setShowSplitModal={setShowSplitModal}
+                                    deleteSlot={deleteSlot}
+                                />
+                            )}
+
+                            {/* TAB CONTENT: HISTORY */}
+                            {activeTab === 'history' && (
+                                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <PotHistory
+                                        pot={pot}
+                                        allSlots={allSlots}
+                                        transactions={transactions || []}
+                                        mySlots={mySlots}
+                                        currentUserId={currentUser?._id}
+                                        onPay={(slotId, cycle, amount) => {
+                                            setGlobalPaymentState({
+                                                slotId,
+                                                cycle,
+                                                amount
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {/* TAB CONTENT: ORGANIZE (Foreman only) */}
+                            {activeTab === 'organize' && isForeman && (
+                                <OrganizeTab
+                                    pot={pot}
+                                    isDraft={isDraft}
+                                    isActive={isActive}
+                                    isForeman={isForeman}
+                                    currentWinnerSlot={currentWinnerSlot}
+                                    isDrawing={isDrawing}
+                                    transactions={transactions || []}
+                                    allSlots={allSlots}
+                                    commissionPct={commissionPct}
+                                    handleActivate={handleActivate}
+                                    handleDraw={handleDraw}
+                                    setShowWinnerSelection={setShowWinnerSelection}
+                                    setGlobalPaymentState={setGlobalPaymentState}
+                                    onDeletePot={() => setShowDeletePotModal(true)}
+                                />
+                            )}
+                        </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-[var(--text-primary)]">Pot is currently full</p>
-                        <p className="text-xs text-[var(--text-muted)]">All slots have been taken. Contact the organizer to request an opening.</p>
-                    </div>
-                    <button
-                        onClick={handleContactOrganizer}
-                        className="text-xs font-bold text-[var(--accent-vivid)] hover:underline whitespace-nowrap"
-                    >
-                        Contact
-                    </button>
-                </Surface>
-            )}
 
-            {/* MAIN 2-COLUMN GRID */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start pb-24 lg:pb-8">
-
-                {/* LEFT COLUMN: Hero & Content */}
-                <div className="space-y-6">
-                    {/* Hero Visualizer Section */}
-                    <PotHero
+                    {/* RIGHT COLUMN: SIDEBAR STATS & DESKTOP PRIMARY ACTION */}
+                    <DesktopSidebar
                         pot={pot}
-                        allSlots={allSlots}
-                        transactions={transactions || []}
-                        isMember={isMember}
-                        isForeman={isForeman}
-                        isActive={isActive}
-                        hasOpenSlots={hasOpenSlots}
-                        progressInfo={progressInfo}
-                        filledCount={filledCount}
-                        displayProgress={displayProgress}
-                        onOrganizerClick={handleOrganizerClick}
-                        onSlotClick={handleSlotClick}
-                    />
-
-                    {/* Desktop / Tablet Status Cards */}
-                    <div className="hidden md:grid md:grid-cols-3 gap-4">
-                        <Surface tier={2} className="p-4">
-                            <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Next payment</p>
-                            <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{nextDueDate}</p>
-                            <p className="mt-1 text-xs text-[var(--text-muted)]">Member contribution due</p>
-                        </Surface>
-                        <Surface tier={2} className="p-4">
-                            <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Next draw</p>
-                            <p className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{nextDrawDate}</p>
-                            <p className="mt-1 text-xs text-[var(--text-muted)]">Payout schedule</p>
-                        </Surface>
-                        <Surface tier={2} className="p-4">
-                            <p className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Winning pot</p>
-                            <p className="mt-2 text-lg font-semibold text-[var(--accent-secondary)]">
-                                {formatCurrency(winningAmount, pot.config.currency)}
-                            </p>
-                            <p className="mt-1 text-xs text-[var(--text-muted)]">
-                                After {commissionPct.toFixed(2)}% fee
-                            </p>
-                        </Surface>
-                    </div>
-
-                    {/* MOBILE/TABLET EXPANDABLE STATS & CONTROLS */}
-                    <MobileStats
-                        pot={pot}
-                        showMobileStats={showMobileStats}
-                        setShowMobileStats={setShowMobileStats}
+                        primaryAction={primaryAction}
                         winningAmount={winningAmount}
                         commissionPct={commissionPct}
                         commissionAmount={commissionAmount}
@@ -575,255 +707,126 @@ export function PotDetail() {
                         nextDrawDate={nextDrawDate}
                         handleShare={handleShare}
                     />
-
-                    {/* Tab Navigation */}
-                    <div id="tabs-section" className="scroll-mt-24">
-                        <TabNav
-                            isMember={isMember}
-                            isForeman={isForeman}
-                            activeTab={activeTab}
-                            setActiveTab={setActiveTab}
-                            pendingApprovalsCount={pendingApprovalsCount}
-                            memberListLength={memberList.length}
-                        />
-                    </div>
-
-                    {/* TAB CONTENT AREAS */}
-                    <div className="min-h-[400px]">
-                        {/* TAB CONTENT: DASHBOARD */}
-                        {activeTab === 'dashboard' && (isMember || isForeman) && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                {isMember && !isDraft && (
-                                    <MemberDashboard
-                                        pot={pot}
-                                        mySlots={mySlots}
-                                        transactions={transactions || []}
-                                        nextDueDate={nextDueDate}
-                                        currentUserId={currentUser?._id || ""}
-                                        onPay={(slotId, cycle, amount) => setGlobalPaymentState({ slotId, cycle, amount })}
-                                    />
-                                )}
-
-                                {currentWinnerSlot && (
-                                    <Surface tier={2} className="border-l-4 border-l-[var(--gold)] rounded-2xl p-5 flex items-center gap-4">
-                                        <div className="bg-[var(--gold)]/20 p-3 rounded-full text-[var(--gold)]">
-                                            <Gavel size={24} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Cycle {pot.currentMonth} Winner</p>
-                                            <p className="text-xl font-display font-black text-[var(--gold)]">#{currentWinnerSlot.slotNumber} • {currentWinnerSlot.user?.name}</p>
-                                        </div>
-                                    </Surface>
-                                )}
-                            </div>
-                        )}
-
-                        {/* TAB CONTENT: MEMBERS */}
-                        {activeTab === 'members' && (
-                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <MembersList
-                                    members={memberList}
-                                    potId={pot._id}
-                                    currentMonth={pot.currentMonth}
-                                    isForeman={isForeman}
-                                    isActive={isActive}
-                                    currentUserId={currentUser?._id}
-                                    currency={pot.config.currency}
-                                />
-                            </div>
-                        )}
-
-                        {/* TAB CONTENT: RULES & INFO */}
-                        {activeTab === 'rules' && (
-                            <RulesTab pot={pot} gracePeriod={gracePeriod} />
-                        )}
-
-                        {/* TAB CONTENT: SLOTS */}
-                        {activeTab === 'slots' && (
-                            <SlotsTab
-                                pot={pot}
-                                allSlots={allSlots}
-                                currentUserId={currentUser?._id}
-                                isForeman={isForeman}
-                                isDraft={isDraft}
-                                setShowAddMember={setShowAddMember}
-                                setShowSplitModal={setShowSplitModal}
-                                deleteSlot={deleteSlot}
-                            />
-                        )}
-
-                        {/* TAB CONTENT: HISTORY */}
-                        {activeTab === 'history' && (
-                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <PotHistory
-                                    pot={pot}
-                                    allSlots={allSlots}
-                                    transactions={transactions || []}
-                                    mySlots={mySlots}
-                                    onPay={(slotId, cycle, amount) => {
-                                        setGlobalPaymentState({
-                                            slotId,
-                                            cycle,
-                                            amount
-                                        });
-                                    }}
-                                />
-                            </div>
-                        )}
-
-                        {/* TAB CONTENT: ORGANIZE (Foreman only) */}
-                        {activeTab === 'organize' && isForeman && (
-                            <OrganizeTab
-                                pot={pot}
-                                isDraft={isDraft}
-                                isActive={isActive}
-                                isForeman={isForeman}
-                                currentWinnerSlot={currentWinnerSlot}
-                                isDrawing={isDrawing}
-                                transactions={transactions || []}
-                                allSlots={allSlots}
-                                commissionPct={commissionPct}
-                                handleActivate={handleActivate}
-                                handleDraw={handleDraw}
-                                setShowWinnerSelection={setShowWinnerSelection}
-                                setGlobalPaymentState={setGlobalPaymentState}
-                                onDeletePot={() => setShowDeletePotModal(true)}
-                            />
-                        )}
-                    </div>
                 </div>
 
-                {/* RIGHT COLUMN: SIDEBAR STATS & DESKTOP PRIMARY ACTION */}
-                <DesktopSidebar
-                    pot={pot}
-                    primaryAction={primaryAction}
-                    winningAmount={winningAmount}
-                    commissionPct={commissionPct}
-                    commissionAmount={commissionAmount}
-                    nextDueDate={nextDueDate}
-                    nextDrawDate={nextDrawDate}
-                    handleShare={handleShare}
-                />
-            </div>
-
-            {/* MOBILE & TABLET STICKY BOTTOM ACTION BAR */}
-            {currentUser && (
-                <MobileActionBar
-                    pot={pot}
-                    primaryAction={primaryAction}
-                    isAnyModalOpen={isAnyModalOpen}
-                />
-            )}
-
-            {/* Modals */}
-            {globalPaymentState && (
-                <PaymentModal
-                    potId={pot._id}
-                    slotId={globalPaymentState.slotId}
-                    monthIndex={globalPaymentState.cycle}
-                    amount={globalPaymentState.amount}
-                    currency={pot.config.currency}
-                    onClose={() => setGlobalPaymentState(null)}
-                    isForeman={globalPaymentState.isForemanAction}
-                    onForemanRecord={async (date) => {
-                        await recordCashPayment({
-                            potId: pot._id,
-                            slotId: globalPaymentState.slotId,
-                            monthIndex: globalPaymentState.cycle,
-                            userId: globalPaymentState.userId as Id<"users">,
-                            paidAt: date
-                        });
-                    }}
-                />
-            )}
-
-            {showJoinModal && (
-                <JoinPotModal
-                    potId={pot._id}
-                    totalValue={pot.config.totalValue}
-                    contribution={pot.config.contribution}
-                    totalSlots={pot.config.totalSlots}
-                    filledSlots={filledCount}
-                    currency={pot.config.currency}
-                    onClose={() => setShowJoinModal(false)}
-                    onViewRules={() => {
-                        setShowJoinModal(false);
-                        setActiveTab('rules');
-                    }}
-                />
-            )}
-
-            {showAddMember && (
-                <AddMemberModal
-                    potId={pot._id}
-                    openSlots={virtualOpenSlots as any}
-                    onClose={() => setShowAddMember(false)}
-                />
-            )}
-
-            {showSplitModal && (
-                <SplitSlotModal
-                    potId={pot._id}
-                    openSlots={splitEligibleSlots as any}
-                    onClose={() => setShowSplitModal(false)}
-                />
-            )}
-
-            {showNextRoundModal && (() => {
-                const currentMonthTxs = (transactions || []).filter(t => t.monthIndex === pot.currentMonth);
-                const paidSlotIds = new Set(currentMonthTxs.filter(t => t.status === "PAID").map(t => t.slotId));
-                const pendingSlotIds = new Set(currentMonthTxs.filter(t => t.status === "PENDING").map(t => t.slotId));
-                const eligibleForPayment = allSlots.filter(s => s.status === "FILLED");
-                const unpaidCount = eligibleForPayment.filter(s => !paidSlotIds.has(s._id) && !pendingSlotIds.has(s._id)).length;
-                const pendingCount = eligibleForPayment.filter(s => pendingSlotIds.has(s._id)).length;
-                return (
-                    <NextRoundModal
-                        potId={pot._id}
-                        currentMonth={pot.currentMonth}
-                        totalMonths={pot.config.duration}
-                        defaultNextDate={new Date().toISOString().split('T')[0]}
-                        isOccasional={pot.config.frequency === 'occasional'}
-                        unpaidCount={unpaidCount}
-                        pendingCount={pendingCount}
-                        onClose={() => setShowNextRoundModal(false)}
+                {/* MOBILE & TABLET STICKY BOTTOM ACTION BAR */}
+                {currentUser && (
+                    <MobileActionBar
+                        pot={pot}
+                        primaryAction={primaryAction}
+                        isAnyModalOpen={isAnyModalOpen}
                     />
-                );
-            })()}
+                )}
 
-            {showWinnerSelection && (
-                <WinnerSelectionModal
-                    activeSlots={activeSlots}
-                    selectedWinnerSlotNum={selectedWinnerSlotNum}
-                    setSelectedWinnerSlotNum={setSelectedWinnerSlotNum}
-                    setShowWinnerSelection={setShowWinnerSelection}
-                    handleDraw={handleManualDraw}
-                />
-            )}
+                {/* Modals */}
+                {globalPaymentState && (
+                    <PaymentModal
+                        potId={pot._id}
+                        slotId={globalPaymentState.slotId}
+                        monthIndex={globalPaymentState.cycle}
+                        amount={globalPaymentState.amount}
+                        currency={pot.config.currency}
+                        onClose={() => setGlobalPaymentState(null)}
+                        isForeman={globalPaymentState.isForemanAction}
+                        onForemanRecord={async (date) => {
+                            await recordCashPayment({
+                                potId: pot._id,
+                                slotId: globalPaymentState.slotId,
+                                monthIndex: globalPaymentState.cycle,
+                                userId: globalPaymentState.userId as Id<"users">,
+                                paidAt: date
+                            });
+                        }}
+                    />
+                )}
 
-            {showRunDrawAnimation && (
-                <RunDrawAnimationModal
-                    eligibleSlots={activeSlots.filter(s => !s.drawOrder)}
-                    onRunDraw={executeRandomDraw}
-                    onClose={() => setShowRunDrawAnimation(false)}
-                    currency={pot.config.currency || "USD"}
-                    winningAmount={winningAmount}
-                    currentMonth={pot.currentMonth}
-                />
-            )}
+                {showJoinModal && (
+                    <JoinPotModal
+                        potId={pot._id}
+                        totalValue={pot.config.totalValue}
+                        contribution={pot.config.contribution}
+                        totalSlots={pot.config.totalSlots}
+                        filledSlots={filledCount}
+                        currency={pot.config.currency}
+                        onClose={() => setShowJoinModal(false)}
+                        onViewRules={() => {
+                            setShowJoinModal(false);
+                            setActiveTab('rules');
+                        }}
+                    />
+                )}
 
-            {showDeletePotModal && (
-                <DeletePotModal
-                    potId={pot._id}
-                    potTitle={pot.title}
-                    potStatus={pot.status}
-                    onClose={() => setShowDeletePotModal(false)}
-                />
-            )}
+                {showAddMember && (
+                    <AddMemberModal
+                        potId={pot._id}
+                        openSlots={virtualOpenSlots as any}
+                        onClose={() => setShowAddMember(false)}
+                    />
+                )}
 
-            {/* Visitor/Guest CTA Banners */}
-            {!currentUser && !isAnyModalOpen && !showMobileStats && (
-                isGhostMember ? <SecureAccountBanner /> : <VisitorBanner />
-            )}
+                {showSplitModal && (
+                    <SplitSlotModal
+                        potId={pot._id}
+                        openSlots={splitEligibleSlots as any}
+                        onClose={() => setShowSplitModal(false)}
+                    />
+                )}
+
+                {showNextRoundModal && (() => {
+                    const currentMonthTxs = (transactions || []).filter(t => t.monthIndex === pot.currentMonth);
+                    const paidSlotIds = new Set(currentMonthTxs.filter(t => t.status === "PAID").map(t => t.slotId));
+                    const pendingSlotIds = new Set(currentMonthTxs.filter(t => t.status === "PENDING").map(t => t.slotId));
+                    const eligibleForPayment = allSlots.filter(s => s.status === "FILLED");
+                    const unpaidCount = eligibleForPayment.filter(s => !paidSlotIds.has(s._id) && !pendingSlotIds.has(s._id)).length;
+                    const pendingCount = eligibleForPayment.filter(s => pendingSlotIds.has(s._id)).length;
+                    return (
+                        <NextRoundModal
+                            potId={pot._id}
+                            currentMonth={pot.currentMonth}
+                            totalMonths={pot.config.duration}
+                            defaultNextDate={new Date().toISOString().split('T')[0]}
+                            isOccasional={pot.config.frequency === 'occasional'}
+                            unpaidCount={unpaidCount}
+                            pendingCount={pendingCount}
+                            onClose={() => setShowNextRoundModal(false)}
+                        />
+                    );
+                })()}
+
+                {showWinnerSelection && (
+                    <WinnerSelectionModal
+                        activeSlots={activeSlots}
+                        selectedWinnerSlotNum={selectedWinnerSlotNum}
+                        setSelectedWinnerSlotNum={setSelectedWinnerSlotNum}
+                        setShowWinnerSelection={setShowWinnerSelection}
+                        handleDraw={handleManualDraw}
+                    />
+                )}
+
+                {showRunDrawAnimation && (
+                    <RunDrawAnimationModal
+                        eligibleSlots={activeSlots.filter(s => !s.drawOrder)}
+                        onRunDraw={executeRandomDraw}
+                        onClose={() => setShowRunDrawAnimation(false)}
+                        currency={pot.config.currency || "USD"}
+                        winningAmount={winningAmount}
+                        currentMonth={pot.currentMonth}
+                    />
+                )}
+
+                {showDeletePotModal && (
+                    <DeletePotModal
+                        potId={pot._id}
+                        potTitle={pot.title}
+                        potStatus={pot.status}
+                        onClose={() => setShowDeletePotModal(false)}
+                    />
+                )}
+
+                {/* Visitor/Guest CTA Banners */}
+                {!currentUser && !isAnyModalOpen && !showMobileStats && (
+                    isGhostMember ? <SecureAccountBanner /> : <VisitorBanner />
+                )}
             </PageShell>
         </div>
     );
@@ -832,7 +835,7 @@ export function PotDetail() {
 function VisitorBanner() {
     return (
         <div className="fixed inset-x-4 bottom-6 z-50 animate-in slide-in-from-bottom-8 duration-500">
-            <div className="mx-auto max-w-md glass-3 border border-[var(--accent-vivid)]/30 rounded-3xl p-6 shadow-2xl overflow-hidden relative">
+            <Surface tier={3} rounded="3xl" className="mx-auto max-w-md border border-[var(--accent-vivid)]/30 p-6 shadow-2xl overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)]" />
                 <div className="flex flex-col gap-4 relative z-10">
                     <div>
@@ -842,15 +845,15 @@ function VisitorBanner() {
                         </p>
                     </div>
                     <SignInButton mode="modal">
-                        <button className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[var(--accent-vivid)]/20">
+                        <Button variant="primary" size="lg" fullWidth className="group shadow-lg shadow-[var(--accent-vivid)]/20 font-bold gap-2">
                             Get Started Now <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </button>
+                        </Button>
                     </SignInButton>
                 </div>
                 <div className="absolute -bottom-6 -right-6 opacity-10">
                     <Coins size={120} className="text-[var(--accent-vivid)]" />
                 </div>
-            </div>
+            </Surface>
         </div>
     );
 }
@@ -858,7 +861,7 @@ function VisitorBanner() {
 function SecureAccountBanner() {
     return (
         <div className="fixed inset-x-4 bottom-6 z-50 animate-in slide-in-from-bottom-8 duration-500">
-            <div className="mx-auto max-w-md glass-3 border border-[var(--accent-secondary)]/30 rounded-3xl p-6 shadow-2xl overflow-hidden relative">
+            <Surface tier={3} rounded="3xl" className="mx-auto max-w-md border border-[var(--accent-secondary)]/30 p-6 shadow-2xl overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-secondary)] to-[var(--accent-vivid)]" />
                 <div className="flex flex-col gap-4 relative z-10">
                     <div>
@@ -868,15 +871,15 @@ function SecureAccountBanner() {
                         </p>
                     </div>
                     <SignInButton mode="modal">
-                        <button className="w-full bg-[var(--accent-secondary)] text-[var(--text-primary)] font-bold py-3 rounded-2xl hover:opacity-90 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[var(--accent-secondary)]/20">
+                        <Button variant="accent" size="lg" fullWidth className="group shadow-lg shadow-[var(--accent-secondary)]/20 font-bold gap-2">
                             Create Account <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </button>
+                        </Button>
                     </SignInButton>
                 </div>
                 <div className="absolute -bottom-6 -right-6 opacity-10">
                     <ShieldAlert size={120} className="text-[var(--accent-secondary)]" />
                 </div>
-            </div>
+            </Surface>
         </div>
     );
 }

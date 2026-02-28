@@ -5,6 +5,9 @@ import { CheckCircle, ChevronDown, ChevronUp, Clock, ShieldAlert, Users, UserPen
 import { PaymentModal } from "@/components/pot-detail/PaymentComponents";
 import { formatCurrency } from "@/lib/utils";
 import { EditGhostModal } from "./modals/EditGhostModal";
+import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -68,9 +71,9 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
                 {members.map((m) => {
                     const isFullyPaid = m.totalDue === 0;
                     return (
-                        <div key={m.userId} className="bg-[var(--surface-elevated)] border border-[var(--border-subtle)] rounded-xl overflow-hidden">
+                        <Surface tier={1} rounded="xl" key={m.userId} className="overflow-hidden p-0 border border-[var(--border-subtle)]">
                             <div
-                                className="p-4 flex items-center justify-between cursor-pointer hover:bg-[var(--surface-deep)]/60 transition-colors"
+                                className="p-4 flex items-center justify-between cursor-pointer hover:bg-[var(--surface-deep)]/40 transition-colors"
                                 onClick={() => toggleExpand(m.userId)}
                             >
                                 <div className="flex items-center gap-3">
@@ -84,7 +87,10 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
                                     <div>
                                         <div className="font-bold flex items-center gap-2">
                                             {m.user.name}
-                                            {m.totalShare < 100 && <span className="text-[10px] bg-[var(--surface-deep)]/80 px-1.5 rounded-full text-[var(--text-muted)]">{m.totalShare}% Stake</span>}
+                                            {m.user.verificationStatus === "UNVERIFIED" && !m.user.clerkId && isForeman && (
+                                                <Badge variant="warning" size="sm">Ghost User</Badge>
+                                            )}
+                                            {m.totalShare < 100 && <Badge variant="default" size="sm">{m.totalShare}% Stake</Badge>}
                                         </div>
                                         <div className="text-xs text-[var(--text-muted)]">
                                             {m.slots.length} Slot{m.slots.length !== 1 ? 's' : ''} • {m.user.phone}
@@ -94,11 +100,6 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
 
                                 <div className="flex items-center gap-4">
                                     <div className="text-right">
-                                        {m.user.verificationStatus === "UNVERIFIED" && !m.user.clerkId && isForeman && (
-                                            <div className="text-[10px] text-[var(--accent-vivid)] font-bold mb-1 flex items-center justify-end gap-1">
-                                                Ghost User
-                                            </div>
-                                        )}
                                         <div className={`font-bold font-mono ${isFullyPaid ? "text-[var(--accent-vivid)]" : "text-[var(--accent-secondary)]"}`}>
                                             {isFullyPaid ? "PAID" : `Due: ${formatCurrency(m.totalDue, currency)}`}
                                         </div>
@@ -106,7 +107,16 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
                                             <div className="text-[10px] text-[var(--text-muted)]">{m.paidCount}/{m.slots.length} Paid</div>
                                         )}
                                     </div>
-                                    <div className="flex flex-col items-center gap-2">
+                                    <div className="flex items-center gap-2">
+                                        {m.user.verificationStatus === "UNVERIFIED" && !m.user.clerkId && isForeman && (
+                                            <Button
+                                                variant="ghost"
+                                                className="!h-8 !w-8 p-0 hover:bg-[var(--surface-deep)] rounded-full transition-colors"
+                                                onClick={(e) => { e.stopPropagation(); setEditingGhost({ _id: m.userId, name: m.user.name, phone: m.user.phone }); }}
+                                            >
+                                                <UserPen size={16} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors" />
+                                            </Button>
+                                        )}
                                         {expandedUser === m.userId ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                                     </div>
                                 </div>
@@ -114,25 +124,17 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
 
                             {/* Expanded Details */}
                             {expandedUser === m.userId && (
-                                <div className="bg-[var(--surface-deep)]/60 p-4 border-t border-[var(--border-subtle)] space-y-2 relative">
-                                    {m.user.verificationStatus === "UNVERIFIED" && !m.user.clerkId && isForeman && (
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setEditingGhost({ _id: m.userId, name: m.user.name, phone: m.user.phone }); }}
-                                            className="absolute top-4 right-4 bg-[var(--surface-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-[10px] px-2 py-1 rounded hover:bg-[var(--surface-card)] transition-colors flex items-center gap-1 shadow-sm"
-                                        >
-                                            <UserPen size={12} /> Edit Details
-                                        </button>
-                                    )}
+                                <div className="bg-[var(--surface-deep)]/40 p-4 border-t border-[var(--border-subtle)] space-y-2 relative">
                                     {/* Missed Payments Section */}
                                     {m.missedPayments?.length > 0 && (
-                                        <div className="mb-4  bg-[var(--danger)]/10 rounded-lg p-3 border border-[var(--danger)]/20">
+                                        <Surface tier={2} className="mb-4 rounded-lg p-3 border border-[var(--danger)]/30">
                                             <div className="text-xs font-bold text-[var(--danger)] mb-2 flex items-center gap-1">
                                                 <ShieldAlert size={12} /> Missed Payments
                                             </div>
                                             <div className="space-y-2">
                                                 {m.missedPayments.map((missed: any, idx: number) => (
-                                                    <div key={idx} className="flex justify-between items-center text-xs">
-                                                        <span className="text-[var(--text-muted)]">
+                                                    <div key={idx} className="flex justify-between items-center text-xs bg-[var(--danger)]/5 p-2 rounded-md">
+                                                        <span className="text-[var(--text-primary)] font-medium">
                                                             Cycle {missed.monthIndex + 1} • Slot #{missed.slotNumber}
                                                         </span>
                                                         <div className="flex items-center gap-3">
@@ -140,39 +142,43 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
 
                                                             {/* User Self-Pay Action */}
                                                             {missed.isMyPayment && missed.status === 'UNPAID' && (
-                                                                <button
+                                                                <Button
+                                                                    variant="danger"
+                                                                    size="sm"
+                                                                    className="!h-7 px-3 text-[10px]"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         setPaymentModalState({ slotId: missed.slotId, cycle: missed.monthIndex, amount: missed.amount });
                                                                     }}
-                                                                    className="bg-[var(--danger)] text-[var(--text-on-accent)] text-[10px] font-bold px-3 py-1 rounded hover:bg-[var(--danger)]/90 shadow-sm"
                                                                 >
                                                                     Pay Now
-                                                                </button>
+                                                                </Button>
                                                             )}
                                                             {missed.status === 'PENDING' && (
-                                                                <span className="text-[var(--warning)] text-[10px] bg-[var(--warning)]/10 px-2 py-0.5 rounded flex items-center gap-1">
+                                                                <Badge variant="warning" size="sm" className="gap-1 flex items-center">
                                                                     <Clock size={10} /> Pending
-                                                                </span>
+                                                                </Badge>
                                                             )}
 
                                                             {/* Foreman Action */}
                                                             {isForeman && isActive && missed.status !== 'PENDING' && (
-                                                                <button
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    size="sm"
+                                                                    className="!h-7 px-3 text-[10px] text-[var(--danger)] border-[var(--danger)]/30 hover:bg-[var(--danger)]/10"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         handleMarkPaid(missed.slotId, m.userId, missed.monthIndex, missed.amount);
                                                                     }}
-                                                                    className="bg-[var(--surface-elevated)] border border-[var(--danger)]/30 text-[var(--danger)] text-[10px] px-2 py-0.5 rounded hover:bg-[var(--danger)]/20"
                                                                 >
                                                                     Mark Paid
-                                                                </button>
+                                                                </Button>
                                                             )}
                                                         </div>
                                                     </div>
                                                 ))}
                                             </div>
-                                        </div>
+                                        </Surface>
                                     )}
 
                                     {/* Current Slots List */}
@@ -181,10 +187,10 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
                                             <div key={slot._id} className="flex justify-between items-center text-sm p-2 rounded hover:bg-[var(--surface-deep)]/60">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[var(--text-muted)] font-mono">Slot #{slot.slotNumber}</span>
-                                                    {slot.isSplit && <span className="text-[10px] bg-[var(--surface-deep)]/80 px-1.5 rounded text-[var(--text-muted)]">{slot.share}%</span>}
+                                                    {slot.isSplit && <Badge variant="default" size="sm">{slot.share}%</Badge>}
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className={`font-bold ${slot.isPaid ? 'text-[var(--accent-vivid)]' : 'text-[var(--text-muted)]'}`}>
+                                                    <span className={`font-bold ${slot.isPaid ? 'text-[var(--accent-vivid)]' : 'text-[var(--text-primary)]'}`}>
                                                         {slot.isPaid ? 'PAID' : formatCurrency(slot.due, currency)}
                                                     </span>
 
@@ -193,28 +199,32 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
                                                         <>
                                                             {/* Self Pay */}
                                                             {m.userId === currentUserId && (
-                                                                <button
+                                                                <Button
+                                                                    variant="primary"
+                                                                    size="sm"
+                                                                    className="!h-7 px-3 text-[10px]"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         setPaymentModalState({ slotId: slot._id, cycle: currentMonth, amount: slot.due });
                                                                     }}
-                                                                    className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] text-[10px] font-bold px-3 py-1 rounded hover:opacity-90 shadow-sm"
                                                                 >
                                                                     Pay Now
-                                                                </button>
+                                                                </Button>
                                                             )}
 
                                                             {/* Foreman Mark Paid */}
                                                             {isForeman && (
-                                                                <button
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    size="sm"
+                                                                    className="!h-7 px-3 text-[10px] text-[var(--accent-vivid)] border-[var(--accent-vivid)]/30 hover:bg-[var(--accent-vivid)]/10"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         handleMarkPaid(slot._id, m.userId, currentMonth, slot.due);
                                                                     }}
-                                                                    className="bg-[var(--surface-elevated)] border border-[var(--accent-vivid)]/30 text-[var(--accent-vivid)] text-[10px] font-bold px-2 py-1 rounded hover:bg-[var(--accent-vivid)]/10"
                                                                 >
                                                                     Mark Paid
-                                                                </button>
+                                                                </Button>
                                                             )}
                                                         </>
                                                     )}
@@ -225,7 +235,7 @@ export function MembersList({ members, potId, currentMonth, isForeman, isActive,
                                     })}
                                 </div>
                             )}
-                        </div>
+                        </Surface>
                     );
                 })}
             </div>

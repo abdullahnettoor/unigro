@@ -1,7 +1,9 @@
-import { useEffect,useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { useClerk,useUser } from "@clerk/clerk-react";
+import { cn } from "@/lib/utils";
+import { useClerk, useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
+import { Button } from "@/components/ui/Button";
 import {
     AlertCircle,
     Clock,
@@ -11,7 +13,8 @@ import {
     Settings,
     ShieldCheck,
     Sun,
-    User} from "lucide-react";
+    User
+} from "lucide-react";
 
 import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
 
@@ -117,7 +120,12 @@ export function UserMenu({ trigger, placement = "bottom-end", menuClassName }: U
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className={`${positionClasses} glass-3 w-72 rounded-2xl shadow-xl p-2 z-50 ${animationClasses} duration-200 ${menuClassName || ""}`}>
+                <div className={cn(
+                    positionClasses,
+                    "glass-3 w-[calc(100vw-2rem)] max-w-72 rounded-2xl shadow-xl p-2 z-50 duration-200",
+                    animationClasses,
+                    menuClassName
+                )}>
 
                     {/* User Header */}
                     <div className="px-4 py-3 border-b border-[var(--border-subtle)] mb-2">
@@ -143,13 +151,14 @@ export function UserMenu({ trigger, placement = "bottom-end", menuClassName }: U
                             </div>
                         </Link>
 
-                        <button
+                        <Button
                             onClick={() => { openUserProfile(); setIsOpen(false); }}
-                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[var(--text-primary)] rounded-xl hover:bg-[var(--surface-deep)] transition-colors group"
+                            variant="ghost"
+                            className="flex items-center justify-start gap-3 w-full px-4 text-sm text-[var(--text-primary)] rounded-xl hover:bg-[var(--surface-deep)] group"
                         >
                             <User size={18} className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" />
                             <span className="whitespace-nowrap">Manage account</span>
-                        </button>
+                        </Button>
                     </div>
 
                     {/* Theme Toggle */}
@@ -176,13 +185,14 @@ export function UserMenu({ trigger, placement = "bottom-end", menuClassName }: U
                     </div>
 
                     <div className="mt-2 pt-2 border-t border-[var(--border-subtle)]">
-                        <button
+                        <Button
                             onClick={() => signOut()}
-                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[var(--danger)] rounded-xl hover:bg-[var(--danger)]/10 transition-colors"
+                            variant="danger"
+                            className="flex items-center justify-start gap-3 w-full px-4 text-sm rounded-xl"
                         >
                             <LogOut size={18} />
                             <span>Sign out</span>
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

@@ -42,9 +42,9 @@ export function PotCard({ pot, currentUserId }: PotCardProps) {
                 </div>
 
                 <div className="mb-2 flex items-start gap-3">
-                    <div className="glass-1 mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base">
+                    <Surface tier={1} rounded="xl" className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center text-base">
                         {pot.status === "ACTIVE" ? "◉" : "◎"}
-                    </div>
+                    </Surface>
                     <div className="min-w-0">
                         <h3 className="mb-1 truncate text-lg font-semibold font-display text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent-vivid)] sm:text-xl">
                             {pot.title}

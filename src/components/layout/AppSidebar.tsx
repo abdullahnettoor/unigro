@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, Settings as SettingsIcon, ShieldAlert, WalletCards } from "lucide-react";
 
-import { UserMenu } from "@/components/layout/UserMenu";
 import { Surface } from "@/components/ui/Surface";
 
 interface AppSidebarProps {
@@ -15,10 +14,9 @@ export function AppSidebar({ firstName, imageUrl, showAdmin = false }: AppSideba
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
   const navItemClass = (active: boolean) =>
-    `flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${
-      active
-        ? "bg-[var(--accent-vivid)]/12 font-semibold text-[var(--accent-vivid)]"
-        : "text-[var(--text-muted)] hover:bg-[var(--surface-card)]/60"
+    `flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${active
+      ? "bg-[var(--accent-vivid)]/12 font-semibold text-[var(--accent-vivid)]"
+      : "text-[var(--text-muted)] hover:bg-[var(--surface-card)]/60"
     }`;
 
   return (
@@ -59,27 +57,21 @@ export function AppSidebar({ firstName, imageUrl, showAdmin = false }: AppSideba
         </div>
 
         <div className="mt-auto border-t border-[var(--border-subtle)]/70 pt-3">
-          <UserMenu
-            placement="top-center"
-            menuClassName="w-full"
-            trigger={
-              <div className="flex w-full items-center gap-3 rounded-lg px-1 py-1 text-left">
-                <div className="h-9 w-9 overflow-hidden rounded-full border border-[var(--border-subtle)]">
-                  {imageUrl ? (
-                    <img src={imageUrl} alt="Profile" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="grid h-full w-full place-items-center bg-[var(--surface-deep)] text-xs font-semibold text-[var(--text-muted)]">
-                      {firstName.charAt(0)}
-                    </div>
-                  )}
+          <Link to="/settings" className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-[var(--surface-card)]/60 transition-colors">
+            <div className="h-9 w-9 overflow-hidden rounded-full border border-[var(--border-subtle)] shrink-0">
+              {imageUrl ? (
+                <img src={imageUrl} alt="Profile" className="h-full w-full object-cover" />
+              ) : (
+                <div className="grid h-full w-full place-items-center bg-[var(--surface-deep)] text-xs font-semibold text-[var(--text-muted)]">
+                  {firstName?.charAt(0) || "U"}
                 </div>
-                <div className="min-w-0 text-left">
-                  <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{firstName}</p>
-                  <p className="text-xs text-[var(--text-muted)]">Profile menu</p>
-                </div>
-              </div>
-            }
-          />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{firstName || "User"}</p>
+              <p className="text-xs text-[var(--text-muted)]">Profile settings</p>
+            </div>
+          </Link>
         </div>
       </Surface>
     </aside>

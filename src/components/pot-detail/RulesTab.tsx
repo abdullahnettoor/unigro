@@ -1,5 +1,6 @@
 import { Calendar, Coins, Info, Layers } from "lucide-react";
 import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
+import { Surface } from "@/components/ui/Surface";
 import { formatCurrency } from "@/lib/utils";
 
 import type { Doc } from "../../../convex/_generated/dataModel";
@@ -12,7 +13,7 @@ interface RulesTabProps {
 export function RulesTab({ pot, gracePeriod }: RulesTabProps) {
     return (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
-            <div className="glass-1 rounded-2xl p-6">
+            <Surface tier={1} className="rounded-2xl p-6">
                 <div className="mb-6 -mt-2">
                     <OrganizerDisplay foremanId={pot.foremanId} />
                 </div>
@@ -22,71 +23,63 @@ export function RulesTab({ pot, gracePeriod }: RulesTabProps) {
                 <p className="text-[var(--text-muted)] text-sm whitespace-pre-wrap leading-relaxed">
                     {pot.description || "No specific description provided by the organizer."}
                 </p>
-            </div>
+            </Surface>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="glass-1 p-5 rounded-2xl space-y-4">
-                    <h4 className="font-bold text-[var(--text-primary)] text-[10px] uppercase tracking-widest flex items-center gap-2 mb-2"><Layers size={14} className="text-[var(--accent-vivid)]" /> Configuration</h4>
+                <Surface tier={1} className="p-5 rounded-2xl space-y-4">
+                    <h4 className="font-bold text-[var(--text-primary)] text-[10px] uppercase tracking-widest flex items-center gap-2 mb-2">
+                        <Layers size={14} className="text-[var(--accent-vivid)]" /> Configuration
+                    </h4>
                     <div className="space-y-2 text-sm font-medium">
-                        <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                        <Surface tier={2} className="flex justify-between items-center p-2.5 rounded-lg border-none shadow-none">
+                            <span className="text-[var(--text-muted)]">Target Slots</span>
+                            <span className="font-bold text-[var(--text-primary)]">{pot.config.totalSlots}</span>
+                        </Surface>
+                        <Surface tier={2} className="flex justify-between items-center p-2.5 rounded-lg border-none shadow-none">
+                            <span className="text-[var(--text-muted)]">EMI</span>
+                            <span className="font-bold text-[var(--accent-vivid)]">{formatCurrency(pot.config.contribution, pot.config.currency)}</span>
+                        </Surface>
+                        <Surface tier={2} className="flex justify-between items-center p-2.5 rounded-lg border-none shadow-none">
                             <span className="text-[var(--text-muted)]">Frequency</span>
                             <span className="capitalize">{pot.config.frequency}</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                        </Surface>
+                        <Surface tier={2} className="flex justify-between items-center p-2.5 rounded-lg border-none shadow-none">
                             <span className="text-[var(--text-muted)]">Duration</span>
                             <span>{pot.config.duration} Rounds</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                        </Surface>
+                        <Surface tier={2} className="flex justify-between items-center p-2.5 rounded-lg border-none shadow-none">
                             <span className="text-[var(--text-muted)]">Commission</span>
                             <span>{pot.config.commission}%</span>
-                        </div>
+                        </Surface>
                     </div>
-                </div>
+                </Surface>
 
-                <div className="glass-1 p-5 rounded-2xl space-y-4">
-                    <h4 className="font-bold text-[var(--text-primary)] text-[10px] uppercase tracking-widest flex items-center gap-2 mb-2"><Calendar size={14} className="text-[var(--accent-secondary)]" /> Timeline</h4>
+                <Surface tier={1} className="p-5 rounded-2xl space-y-4">
+                    <h4 className="font-bold text-[var(--text-primary)] text-[10px] uppercase tracking-widest flex items-center gap-2 mb-2">
+                        <Calendar size={14} className="text-[var(--accent-secondary)]" /> Timeline
+                    </h4>
                     <div className="space-y-2 text-sm font-medium">
-                        <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
-                            <span className="text-[var(--text-muted)]">Grace Period</span>
-                            <span>{gracePeriod} Days</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-[var(--surface-deep)]/40 p-2.5 rounded-lg border border-[var(--border-subtle)]/20">
+                        <Surface tier={2} className="flex justify-between items-center p-2.5 rounded-lg border-none shadow-none">
                             <span className="text-[var(--text-muted)]">Start Date</span>
                             <span>{pot.startDate ? new Date(pot.startDate).toLocaleDateString() : 'N/A'}</span>
-                        </div>
+                        </Surface>
+                        <Surface tier={2} className="flex justify-between items-center p-2.5 rounded-lg border-none shadow-none">
+                            <span className="text-[var(--text-muted)]">Grace Period</span>
+                            <span>{gracePeriod} Days</span>
+                        </Surface>
                     </div>
-                </div>
-            </div>
-
-            <div className="glass-1 rounded-2xl p-6">
-                <h4 className="text-xs uppercase font-black tracking-widest text-[var(--text-muted)] mb-4">Pot Configuration</h4>
-                <dl className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Target Slots</dt>
-                        <dd className="font-bold">{pot.config.totalSlots}</dd>
-                    </div>
-                    <div>
-                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Duration</dt>
-                        <dd className="font-bold">{pot.config.duration} Months</dd>
-                    </div>
-                    <div>
-                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">EMI</dt>
-                        <dd className="font-bold">{formatCurrency(pot.config.contribution, pot.config.currency)}</dd>
-                    </div>
-                    <div>
-                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Commission</dt>
-                        <dd className="font-bold">{pot.config.commission}%</dd>
-                    </div>
-                </dl>
+                </Surface>
             </div>
 
             {pot.bankDetails && (
-                <div className="glass-1 p-6 rounded-2xl space-y-4">
-                    <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2"><Coins size={14} className="text-[var(--accent-vivid)]" /> Payment Details</h4>
-                    <div className="p-4 bg-[var(--surface-deep)]/60 rounded-xl font-mono text-sm whitespace-pre-wrap border border-[var(--border-subtle)]/30">
+                <Surface tier={1} className="p-6 rounded-2xl space-y-4">
+                    <h4 className="font-bold text-[var(--text-primary)] text-sm uppercase tracking-wider flex items-center gap-2">
+                        <Coins size={14} className="text-[var(--accent-vivid)]" /> Payment Details
+                    </h4>
+                    <Surface tier={2} className="p-4 rounded-xl font-mono text-sm whitespace-pre-wrap border-none shadow-none">
                         {pot.bankDetails}
-                    </div>
-                </div>
+                    </Surface>
+                </Surface>
             )}
         </div>
     );

@@ -1,4 +1,5 @@
 import { ShieldAlert, ShieldCheck } from "lucide-react";
+import { Surface } from "@/components/ui/Surface";
 
 export type VerificationStatus = "UNVERIFIED" | "PENDING" | "REJECTED";
 
@@ -39,17 +40,18 @@ export function VerificationBanner({ status, onClick }: VerificationBannerProps)
     const Icon = c.icon;
 
     return (
-        <div
+        <Surface
+            tier={2}
             onClick={c.interactive ? onClick : undefined}
             className={`mb-6 flex items-center gap-4 rounded-2xl border p-4 sm:mb-8 ${toneClass} ${hoverClass} ${c.interactive ? "cursor-pointer transition-colors" : ""}`}
         >
-            <div className="shrink-0 rounded-full bg-black/5 p-2">
+            <div className="shrink-0 rounded-full bg-[var(--surface-surface)]/20 p-2">
                 <Icon size={22} />
             </div>
             <div>
                 <h3 className="mb-1 font-semibold">{c.title}</h3>
                 <p className="text-sm text-[var(--text-muted)]">{c.message}</p>
             </div>
-        </div>
+        </Surface>
     );
 }

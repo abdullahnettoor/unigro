@@ -124,72 +124,72 @@ export function Pots() {
                 </div>
             </div>
 
-                {/* ── Title + Quick Filter ── */}
-                <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-semibold font-display">Your pots</h2>
-                        <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">
-                            {filteredPots.length}
-                        </span>
-                    </div>
-                    <div className="ml-auto">
-                        <SegmentedControl
-                            value={roleFilter}
-                            onChange={(val) => setRoleFilter(val as RoleFilter)}
-                            density="compact"
-                            options={[
-                                { value: "all", label: "All" },
-                                { value: "joined", label: "Joined" },
-                                { value: "organizing", label: "Mine" },
-                            ]}
-                        />
-                    </div>
+            {/* ── Title + Quick Filter ── */}
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-semibold font-display">Your pots</h2>
+                    <span className="rounded-full bg-[var(--surface-deep)]/80 px-2 py-0.5 text-sm text-[var(--text-muted)]">
+                        {filteredPots.length}
+                    </span>
                 </div>
+                <div className="ml-auto">
+                    <SegmentedControl
+                        value={roleFilter}
+                        onChange={(val) => setRoleFilter(val as RoleFilter)}
+                        density="compact"
+                        options={[
+                            { value: "all", label: "All" },
+                            { value: "joined", label: "Joined" },
+                            { value: "organizing", label: "Mine" },
+                        ]}
+                    />
+                </div>
+            </div>
 
-                {/* ── Status filter chips + sticky sort ── */}
-                <div className="mb-4 flex items-center h-[30px]">
-                    {/* Scrollable Chips */}
-                    <div className="flex flex-1 items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-                        {STATUS_CHIPS.map(({ value, label }) => (
-                            <button
-                                key={value}
-                                type="button"
-                                onClick={() => toggleStatus(value)}
-                                className={cn(
-                                    "btn-chip flex h-[26px] items-center shrink-0 rounded-full border px-3 text-[11px] font-semibold leading-none transition-all duration-150",
-                                    selectedStatuses.has(value)
-                                        ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
-                                        : "border-[var(--border-subtle)] bg-[var(--surface-deep)]/30 text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/40 hover:text-[var(--text-primary)]"
-                                )}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Sticky Sort — right-aligned */}
-                    <div className="flex items-center gap-1 shrink-0 bg-[var(--bg-app)] pl-2 h-full ml-1">
-                        <div className="h-3 w-px bg-[var(--border-subtle)] mr-1" />
-                        <Select value={sortFilter} onValueChange={(val) => setSortFilter(val as SortFilter)}>
-                            <SelectTrigger density="compact" className="h-[26px] rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-2 text-[11px] leading-none">
-                                <SelectValue placeholder="Sort" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="most_recent">Recent</SelectItem>
-                                <SelectItem value="pool_value">Pool</SelectItem>
-                                <SelectItem value="progress">Progress</SelectItem>
-                            </SelectContent>
-                        </Select>
+            {/* ── Status filter chips + sticky sort ── */}
+            <div className="mb-4 flex items-center h-[30px]">
+                {/* Scrollable Chips */}
+                <div className="flex flex-1 items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                    {STATUS_CHIPS.map(({ value, label }) => (
                         <button
+                            key={value}
                             type="button"
-                            onClick={() => setSortDirection(prev => prev === "desc" ? "asc" : "desc")}
-                            className="btn-chip flex aspect-square h-[26px] items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/50 transition-colors"
-                            title={sortDirection === "desc" ? "Descending" : "Ascending"}
+                            onClick={() => toggleStatus(value)}
+                            className={cn(
+                                "btn-chip flex h-[26px] items-center shrink-0 rounded-full border px-3 text-[11px] font-semibold leading-none transition-all duration-150",
+                                selectedStatuses.has(value)
+                                    ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
+                                    : "border-[var(--border-subtle)] bg-[var(--surface-deep)]/30 text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/40 hover:text-[var(--text-primary)]"
+                            )}
                         >
-                            {sortDirection === "desc" ? <ArrowDownAZ size={13} /> : <ArrowUpAZ size={13} />}
+                            {label}
                         </button>
-                    </div>
+                    ))}
                 </div>
+
+                {/* Sticky Sort — right-aligned */}
+                <div className="flex items-center gap-1 shrink-0 bg-[var(--bg-app)] pl-2 h-full ml-1">
+                    <div className="h-3 w-px bg-[var(--border-subtle)] mr-1" />
+                    <Select value={sortFilter} onValueChange={(val) => setSortFilter(val as SortFilter)}>
+                        <SelectTrigger density="compact" className="h-[26px] rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] px-2 text-[11px] leading-none">
+                            <SelectValue placeholder="Sort" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="most_recent">Recent</SelectItem>
+                            <SelectItem value="pool_value">Pool</SelectItem>
+                            <SelectItem value="progress">Progress</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <button
+                        type="button"
+                        onClick={() => setSortDirection(prev => prev === "desc" ? "asc" : "desc")}
+                        className="btn-chip flex aspect-square h-[26px] items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-elevated)] text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/50 transition-colors"
+                        title={sortDirection === "desc" ? "Descending" : "Ascending"}
+                    >
+                        {sortDirection === "desc" ? <ArrowDownAZ size={13} /> : <ArrowUpAZ size={13} />}
+                    </button>
+                </div>
+            </div>
 
             {/* ── Pot grid ── */}
             <section>

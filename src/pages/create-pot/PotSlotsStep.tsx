@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Percent, Users } from "lucide-react";
 
-import { GlassSurface } from "@/components/ui/GlassSurface";
+import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { cn, formatCurrency, getCurrencySymbol } from "@/lib/utils";
+import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
 
@@ -69,7 +70,7 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
 
     return (
         <section className="space-y-6">
-            <GlassSurface tier="glass-2" className="p-5 sm:p-6 space-y-5">
+            <Surface tier={2} className="p-5 sm:p-6 space-y-5">
                 <div>
                     <h2 className="text-xl font-display font-bold text-[var(--text-primary)] mb-1">Schedule & Slots</h2>
                     <p className="text-sm text-[var(--text-muted)]">Configure how often members contribute.</p>
@@ -82,21 +83,16 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                         </label>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {frequencies.map((freq) => (
-                                <button
+                                <Button
                                     key={freq.value}
                                     type="button"
                                     onClick={() => onChange({ frequency: freq.value })}
                                     disabled={disabled}
-                                    className={cn(
-                                        "rounded-xl border px-3 py-3 text-sm font-semibold transition-all duration-200",
-                                        formData.frequency === freq.value
-                                            ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] shadow-sm"
-                                            : "border-[var(--border-subtle)] bg-[var(--surface-elevated)]/50 text-[var(--text-muted)] hover:border-[var(--accent-vivid)]/40 hover:text-[var(--text-primary)]",
-                                        disabled && "opacity-50 cursor-not-allowed"
-                                    )}
+                                    variant={formData.frequency === freq.value ? "primary" : "secondary"}
+                                    className="w-full"
                                 >
                                     {freq.label}
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </div>
@@ -119,7 +115,7 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                                     value={formData.duration}
                                     onChange={(e) => setDuration(Number(e.target.value))}
                                     disabled={disabled}
-                                    className="bg-[var(--surface-deep)]/50 pl-10 pr-3 font-mono"
+                                    className="bg-[var(--surface-deep)]/50 !pl-10 pr-3 font-mono"
                                 />
                             </div>
                             <p className="mt-2 text-xs text-[var(--text-muted)]">
@@ -136,12 +132,10 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                                     <button
                                         type="button"
                                         onClick={() => setCommissionType("PERCENTAGE")}
-                                        className={cn(
-                                            "btn-chip px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all",
-                                            commissionType === "PERCENTAGE"
-                                                ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
-                                                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                                        )}
+                                        className={`btn-chip px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all ${commissionType === "PERCENTAGE"
+                                            ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
+                                            : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                                            }`}
                                     >
                                         %
                                     </button>
@@ -149,13 +143,10 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                                         type="button"
                                         onClick={() => setCommissionType("FIXED")}
                                         disabled={disabled}
-                                        className={cn(
-                                            "btn-chip px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all",
-                                            commissionType === "FIXED"
-                                                ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
-                                                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
-                                            disabled && "opacity-50 cursor-not-allowed"
-                                        )}
+                                        className={`btn-chip px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all ${commissionType === "FIXED"
+                                            ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
+                                            : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                                            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                                     >
                                         {currencySymbol}
                                     </button>
@@ -173,7 +164,7 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                                     value={commissionType === "PERCENTAGE" ? Number(formData.commission.toFixed(2)) : fixedCommission}
                                     onChange={(e) => handleCommissionChange(Number(e.target.value), commissionType)}
                                     disabled={disabled}
-                                    className="bg-[var(--surface-deep)]/50 pl-10 pr-3 font-mono"
+                                    className="bg-[var(--surface-deep)]/50 !pl-10 pr-3 font-mono"
                                 />
                             </div>
                             <p className="mt-2 text-xs text-[var(--text-muted)]">
@@ -185,9 +176,9 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                         </div>
                     </div>
                 </div>
-            </GlassSurface>
+            </Surface>
 
-            <GlassSurface tier="glass-1" className="p-5 overflow-hidden relative">
+            <Surface tier={1} className="p-5 overflow-hidden relative">
                 <div className="grid gap-4 sm:grid-cols-3 text-center sm:text-left">
                     <div>
                         <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-1">Contribution</div>
@@ -205,7 +196,7 @@ export function PotSlotsStep({ formData, onChange, disabled }: PotSlotsStepProps
                         <div className="text-[10px] text-[var(--text-muted)]">take home amount</div>
                     </div>
                 </div>
-            </GlassSurface>
+            </Surface>
         </section>
     );
 }

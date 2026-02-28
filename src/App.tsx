@@ -9,6 +9,7 @@ import { UserSync } from "./components/auth/UserSync";
 import { AppShell } from "./components/layout/AppShell";
 import { PWAPrompt } from "./components/shared/PWAPrompt";
 import { Toaster } from "./components/ui/Sonner";
+import { Button } from "./components/ui/Button";
 
 const loadDashboard = () => import("./pages/Dashboard");
 const loadPots = () => import("./pages/Pots");
@@ -75,9 +76,9 @@ function Landing() {
         </div>
         <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
           <SignInButton mode="modal">
-            <button className="w-full rounded-full bg-[var(--accent-vivid)] px-6 py-2.5 font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto">
+            <Button variant="primary" size="md" className="w-full rounded-full sm:w-auto">
               Sign In
-            </button>
+            </Button>
           </SignInButton>
         </div>
       </header>
@@ -90,9 +91,9 @@ function Landing() {
         </p>
         <div className="mx-auto flex max-w-xs justify-center gap-4 sm:max-w-none">
           <SignInButton mode="modal">
-            <button className="w-full rounded-full bg-[var(--accent-vivid)] px-8 py-3 text-base font-bold text-[var(--text-on-accent)] transition-opacity hover:opacity-90 sm:w-auto sm:text-lg">
+            <Button variant="primary" size="lg" className="w-full rounded-full sm:w-auto">
               Get Started
-            </button>
+            </Button>
           </SignInButton>
         </div>
       </section>
@@ -104,7 +105,7 @@ function BottomNav() {
   const location = useLocation();
   const isActive = (path: string) => (path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
   const itemClass = (active: boolean) =>
-    `flex min-h-11 flex-col items-center justify-center rounded-xl px-2 py-2 text-center transition-colors ${active
+    `flex flex-col items-center justify-center rounded-full px-3 py-2 min-w-[76px] text-center transition-colors ${active
       ? "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]"
       : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
     }`;
@@ -113,34 +114,40 @@ function BottomNav() {
   if (location.pathname === "/create" || location.pathname.startsWith("/pot/")) return null;
 
   return (
-    <nav className="fixed left-1/2 bottom-5 z-40 -translate-x-1/2 px-2 py-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/90 shadow-[0_12px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden w-fit min-w-[280px]">
-      <div className="flex items-center justify-around gap-1">
-        <Link
-          to="/"
-          className={itemClass(isActive("/"))}
-          aria-current={isActive("/") ? "page" : undefined}
-        >
-          <Home size={19} className={isActive("/") ? "scale-110" : ""} />
-          <span className={labelClass}>Home</span>
-        </Link>
-        <Link
-          to="/pots"
-          className={itemClass(isActive("/pots"))}
-          aria-current={isActive("/pots") ? "page" : undefined}
-        >
-          <WalletCards size={19} className={isActive("/pots") ? "scale-110" : ""} />
-          <span className={labelClass}>My Pots</span>
-        </Link>
-        <Link
-          to="/settings"
-          className={itemClass(isActive("/settings"))}
-          aria-current={isActive("/settings") ? "page" : undefined}
-        >
-          <Settings size={19} className={isActive("/settings") ? "scale-110" : ""} />
-          <span className={labelClass}>Profile</span>
-        </Link>
-      </div>
-    </nav>
+    <>
+      {/* Gradient Bottom Blur over scrolling content */}
+      <div className="fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30 md:hidden backdrop-blur-md [mask-image:linear-gradient(to_top,black_20%,transparent_100%)] bg-[var(--surface-elevated)]/20" />
+
+      {/* Floating Pill Navbar */}
+      <nav className="fixed left-1/2 bottom-5 z-40 -translate-x-1/2 px-2 py-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/90 shadow-[0_12px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden w-fit min-w-[280px]">
+        <div className="flex items-center justify-around gap-1">
+          <Link
+            to="/"
+            className={itemClass(isActive("/"))}
+            aria-current={isActive("/") ? "page" : undefined}
+          >
+            <Home size={19} className={isActive("/") ? "scale-110" : ""} />
+            <span className={labelClass}>Home</span>
+          </Link>
+          <Link
+            to="/pots"
+            className={itemClass(isActive("/pots"))}
+            aria-current={isActive("/pots") ? "page" : undefined}
+          >
+            <WalletCards size={19} className={isActive("/pots") ? "scale-110" : ""} />
+            <span className={labelClass}>My Pots</span>
+          </Link>
+          <Link
+            to="/settings"
+            className={itemClass(isActive("/settings"))}
+            aria-current={isActive("/settings") ? "page" : undefined}
+          >
+            <Settings size={19} className={isActive("/settings") ? "scale-110" : ""} />
+            <span className={labelClass}>Profile</span>
+          </Link>
+        </div>
+      </nav>
+    </>
   );
 }
 

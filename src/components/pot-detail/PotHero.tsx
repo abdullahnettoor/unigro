@@ -1,6 +1,8 @@
 import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
 import { PotVisualizer } from "@/components/pot-detail/PotVisualizer";
 import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/Button";
+import { Edit2 } from "lucide-react";
 
 import type { Doc } from "../../../convex/_generated/dataModel";
 
@@ -12,6 +14,7 @@ interface PotHeroProps {
     hasOpenSlots: boolean;
     isMember: boolean;
     isForeman: boolean;
+    isDraft: boolean;
     progressInfo: { count: number; total: number } | null;
     filledCount: number;
     displayProgress: number;
@@ -27,6 +30,7 @@ export function PotHero({
     hasOpenSlots,
     isMember,
     isForeman,
+    isDraft,
     progressInfo,
     filledCount,
     displayProgress,
@@ -35,8 +39,20 @@ export function PotHero({
 }: PotHeroProps) {
     return (
         <Surface tier={3} className="grain rounded-3xl p-6 sm:p-8 relative overflow-hidden">
-            <div className="absolute top-4 right-4 z-20 hidden lg:block cursor-pointer hover:scale-105 transition-transform" onClick={onOrganizerClick}>
-                <OrganizerDisplay foremanId={pot.foremanId} avatarOnly={true} />
+            <div className="absolute top-4 right-4 z-20 hidden lg:flex items-center gap-3">
+                {isForeman && isDraft && filledCount === 0 && (
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        className="gap-2 shadow-sm bg-[var(--surface-elevated)]/80 backdrop-blur-md"
+                        onClick={() => window.location.href = `/create?edit=${pot._id}`}
+                    >
+                        <Edit2 size={16} /> Edit Pot
+                    </Button>
+                )}
+                <div className="cursor-pointer hover:scale-105 transition-transform" onClick={onOrganizerClick}>
+                    <OrganizerDisplay foremanId={pot.foremanId} avatarOnly={true} />
+                </div>
             </div>
 
             {/* Desktop Title & Status */}

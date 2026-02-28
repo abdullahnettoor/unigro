@@ -2,6 +2,9 @@ import { Clock, Coins, ShieldAlert } from "lucide-react";
 
 import { formatCurrency } from "@/lib/utils";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
+import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 
 interface MemberDashboardProps {
     pot: Doc<"pots">;
@@ -39,7 +42,7 @@ export function MemberDashboard({ pot, mySlots, transactions, nextDueDate, curre
     }
 
     return (
-        <section className="mb-8 p-6 bg-[var(--surface-elevated)] border border-[var(--accent-vivid)]/20 rounded-2xl shadow-lg relative overflow-hidden">
+        <Surface tier={1} className="mb-8 p-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
                 <Coins size={100} className="text-[var(--accent-vivid)]" />
             </div>
@@ -50,27 +53,28 @@ export function MemberDashboard({ pot, mySlots, transactions, nextDueDate, curre
 
             {/* Overdue Payments Alert */}
             {overduePayments.length > 0 && (
-                <div className="mb-6 relative z-10  bg-[var(--danger)]/10 border border-[var(--danger)]/20 rounded-xl p-4 animate-pulse">
+                <Surface tier={2} className="mb-6 relative z-10 border border-[var(--danger)]/50 p-4 animate-pulse">
                     <h4 className="text-[var(--danger)] font-bold flex items-center gap-2 mb-3">
                         <ShieldAlert size={20} /> Action Required: Overdue Payments
                     </h4>
                     <div className="space-y-3">
                         {overduePayments.map((item) => (
-                            <div key={`${item.slot._id}-${item.cycle}`} className="flex justify-between items-center  bg-[var(--danger)]/5 p-3 rounded-lg border border-[var(--danger)]/10">
+                            <div key={`${item.slot._id}-${item.cycle}`} className="flex justify-between items-center bg-[var(--danger)]/5 p-3 rounded-lg border border-[var(--danger)]/10">
                                 <div>
                                     <div className="text-sm font-bold text-[var(--text-primary)]">Cycle {item.cycle} • Slot #{item.slot.slotNumber}</div>
                                     <div className="text-xs text-[var(--danger)]">Missed Payment of {formatCurrency(item.amount, pot.config.currency)}</div>
                                 </div>
-                                <button
+                                <Button
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => onPay(item.slot._id, item.cycle, item.amount)}
-                                    className="bg-[var(--danger)] hover:bg-[var(--danger)]/90 text-[var(--text-primary)] text-xs font-bold px-4 py-2 rounded-lg transition-colors"
                                 >
                                     Pay Now
-                                </button>
+                                </Button>
                             </div>
                         ))}
                     </div>
-                </div>
+                </Surface>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
@@ -89,36 +93,42 @@ export function MemberDashboard({ pot, mySlots, transactions, nextDueDate, curre
                         sharePct = myShare ? myShare.sharePercentage : 0;
                     }
                     const dueAmount = (pot.config.contribution * sharePct) / 100;
+                    
+                    let badgeVariant: "success" | "danger" | "warning" = "danger";
+                    if (status === "PAID") badgeVariant = "success";
+                    else if (status === "PENDING") badgeVariant = "warning";
 
                     return (
-                        <div key={slot._id} className="bg-[var(--surface-deep)]/60 p-4 rounded-xl border border-[var(--border-subtle)]">
+                        <Surface tier={2} key={slot._id} className="p-4 rounded-xl border border-[var(--border-subtle)]">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <div className="text-xs text-[var(--text-muted)] uppercase font-bold tracking-wider mb-1">
+                                    <div className="text-xs text-[var(--text-muted)] uppercase font-bold tracking-wider mb-1 flex items-center gap-2">
                                         Slot #{slot.slotNumber}
-                                        {sharePct < 100 && <span className="ml-2 text-[var(--accent-vivid)] text-[10px] bg-[var(--accent-vivid)]/10 px-1.5 py-0.5 rounded-full">{sharePct}% Share</span>}
+                                        {sharePct < 100 && <Badge variant="brand" size="sm">{sharePct}% Share</Badge>}
                                     </div>
                                     <div className="text-2xl font-bold font-mono text-[var(--text-primary)]">
                                         {status === 'PAID' ? 'Paid' : formatCurrency(dueAmount, pot.config.currency)}
                                     </div>
-                                    {status !== 'PAID' && <div className="text-xs text-[var(--accent-secondary)]">Due by {nextDueDate}</div>}
+                                    {status !== 'PAID' && <div className="text-xs text-[var(--accent-secondary)] mt-1">Due by {nextDueDate}</div>}
                                 </div>
-                                <div className={`px-3 py-1 rounded-full text-xs font-bold ${status === 'PAID' ? 'bg-[var(--accent-vivid)]/20 text-[var(--accent-vivid)]' : ' bg-[var(--danger)]/20 text-[var(--danger)]'}`}>
+                                <Badge variant={badgeVariant} size="md">
                                     {status}
-                                </div>
+                                </Badge>
                             </div>
 
                             {status === 'UNPAID' && (
-                                <button
+                                <Button
+                                    variant="primary"
+                                    fullWidth
+                                    className="mb-4"
                                     onClick={() => onPay(slot._id, pot.currentMonth, dueAmount)}
-                                    className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-2 rounded-lg hover:opacity-90 mb-4 text-sm"
                                 >
                                     Pay Now
-                                </button>
+                                </Button>
                             )}
 
                             {status === 'PENDING' && (
-                                <div className="text-center text-xs text-[var(--warning)] bg-[var(--warning)]/10 py-2 rounded-lg mb-4">
+                                <div className="text-center text-xs text-[var(--warning)] bg-[var(--warning)]/10 py-2 rounded-lg mb-4 font-semibold border border-[var(--warning)]/20">
                                     Payment Pending Approval
                                 </div>
                             )}
@@ -135,10 +145,10 @@ export function MemberDashboard({ pot, mySlots, transactions, nextDueDate, curre
                                     )}
                                 </div>
                             </div>
-                        </div>
+                        </Surface>
                     );
                 })}
             </div>
-        </section>
+        </Surface>
     );
 }

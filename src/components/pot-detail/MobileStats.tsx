@@ -1,4 +1,6 @@
 import { Calendar, ChevronDown, Clock, PieChart, Share2 } from "lucide-react";
+import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/Button";
 
 import { formatCurrency } from "@/lib/utils";
 
@@ -29,7 +31,7 @@ export function MobileStats({
 }: MobileStatsProps) {
     return (
         <div className="lg:hidden">
-            <div className={`glass-3 rounded-3xl overflow-hidden transition-all duration-500 ${showMobileStats ? 'pb-6' : ''}`}>
+            <Surface tier={2} className={`glass-3 rounded-3xl overflow-hidden transition-all duration-500 ${showMobileStats ? 'pb-6' : ''}`}>
                 <button
                     onClick={() => setShowMobileStats(!showMobileStats)}
                     className="w-full p-4 flex items-center justify-between text-sm font-bold transition-all hover:bg-[var(--surface-elevated)] border-none bg-transparent"
@@ -92,16 +94,17 @@ export function MobileStats({
                                 </div>
                             </div>
 
-                            <button
+                            <Button
+                                variant="ghost"
                                 onClick={handleShare}
-                                className="w-full flex items-center justify-center gap-2 py-3 rounded-full hover:bg-[var(--surface-deep)] text-xs font-bold transition-colors text-[var(--text-muted)]"
+                                className="w-full gap-2 text-[var(--text-muted)]"
                             >
                                 <Share2 size={14} /> Share details
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </Surface>
         </div>
     );
 }

@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { Phone, Save, User } from "lucide-react";
 
 import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import { ModalHeader, ModalShell } from "@/components/ui/ModalShell";
 
 import { api } from "../../../convex/_generated/api";
@@ -53,50 +54,51 @@ export function ProfileModal() {
             </ModalHeader>
 
             <form onSubmit={handleSubmit} className="space-y-6 p-6 sm:p-8">
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Full Name</label>
-                        <div className="relative">
-                            <User className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
-                            <Input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="bg-[var(--surface-deep)]/60 pl-12 pr-4"
-                                placeholder="John Doe"
-                            />
-                        </div>
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Full Name</label>
+                    <div className="relative">
+                        <User className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
+                        <Input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="bg-[var(--surface-deep)]/60 pl-12 pr-4"
+                            placeholder="John Doe"
+                        />
                     </div>
+                </div>
 
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Phone Number</label>
-                        <div className="relative">
-                            <Phone className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
-                            <Input
-                                type="tel"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="bg-[var(--surface-deep)]/60 pl-12 pr-4"
-                                placeholder="+91 9876543210"
-                            />
-                        </div>
-                        <p className="text-[10px] text-[var(--text-muted)] mt-2 ml-1">
-                            Used to claim “Ghost” accounts created by organizers.
-                        </p>
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Phone Number</label>
+                    <div className="relative">
+                        <Phone className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
+                        <Input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="bg-[var(--surface-deep)]/60 pl-12 pr-4"
+                            placeholder="+91 9876543210"
+                        />
                     </div>
+                    <p className="text-[10px] text-[var(--text-muted)] mt-2 ml-1">
+                        Used to claim “Ghost” accounts created by organizers.
+                    </p>
+                </div>
 
-                    {error && <p className="text-[var(--danger)] text-sm text-center bg-[var(--danger)]/10 p-2 rounded-lg">{error}</p>}
+                {error && <p className="text-[var(--danger)] text-sm text-center bg-[var(--danger)]/10 p-2 rounded-lg">{error}</p>}
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-4 rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                        {loading ? "Saving..." : (
-                            <>
-                                <Save size={18} /> Save & Continue
-                            </>
-                        )}
-                    </button>
+                <Button
+                    type="submit"
+                    disabled={loading}
+                    variant="primary"
+                    className="w-full min-h-[56px] text-base font-bold shadow-lg"
+                >
+                    {loading ? "Saving..." : (
+                        <>
+                            <Save size={18} /> Save & Continue
+                        </>
+                    )}
+                </Button>
             </form>
         </ModalShell>
     );

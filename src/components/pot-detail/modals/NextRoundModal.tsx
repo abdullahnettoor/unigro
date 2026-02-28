@@ -3,6 +3,8 @@ import { useMutation } from "convex/react";
 import { AlertTriangle, ArrowRight, CheckCircle2, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ModalCloseButton, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
 
@@ -66,85 +68,89 @@ export function NextRoundModal({
             </ModalHeader>
 
             <div className="p-6 space-y-5">
-                    <p className="text-[var(--text-muted)] text-sm">
-                        Winner for cycle {currentMonth} has been selected.
-                        {isLastRound
-                            ? " This was the final round. Completing this pot will archive it."
-                            : " Ready to start collecting for the next cycle?"
+                <p className="text-[var(--text-muted)] text-sm">
+                    Winner for cycle {currentMonth} has been selected.
+                    {isLastRound
+                        ? " This was the final round. Completing this pot will archive it."
+                        : " Ready to start collecting for the next cycle?"
+                    }
+                </p>
+
+                {/* ── Payment Warning ── */}
+                {hasPaymentWarning && (
+                    <Surface tier={1} className={`rounded-xl p-4 border flex gap-3 transition-colors ${warningAcknowledged
+                        ? "bg-[var(--accent-vivid)]/10 border-[var(--accent-vivid)]/30"
+                        : "bg-[var(--warning)]/10 border-[var(--warning)]/30"
+                        }`}>
+                        {warningAcknowledged
+                            ? <CheckCircle2 size={16} className="text-[var(--accent-vivid)] shrink-0 mt-0.5" />
+                            : <AlertTriangle size={16} className="text-[var(--warning)] shrink-0 mt-0.5" />
                         }
-                    </p>
-
-                    {/* ── Payment Warning ── */}
-                    {hasPaymentWarning && (
-                        <div className={`rounded-xl p-4 border flex gap-3 transition-colors ${warningAcknowledged
-                            ? "bg-[var(--accent-vivid)]/10 border-[var(--accent-vivid)]/30"
-                            : "bg-[var(--warning)]/10 border-[var(--warning)]/30"
-                            }`}>
-                            {warningAcknowledged
-                                ? <CheckCircle2 size={16} className="text-[var(--accent-vivid)] shrink-0 mt-0.5" />
-                                : <AlertTriangle size={16} className="text-[var(--warning)] shrink-0 mt-0.5" />
-                            }
-                            <div className="flex-1 min-w-0">
-                                {warningAcknowledged ? (
-                                    <p className="text-sm text-[var(--accent-vivid)] font-medium">Acknowledged — you can proceed.</p>
-                                ) : (
-                                    <>
-                                        <p className="text-sm text-[var(--warning)] font-bold mb-1">Payments not complete</p>
-                                        <ul className="text-xs text-[var(--text-muted)] space-y-0.5 mb-3">
-                                            {unpaidCount > 0 && (
-                                                <li>• {unpaidCount} slot{unpaidCount > 1 ? "s" : ""} with no payment submitted</li>
-                                            )}
-                                            {pendingCount > 0 && (
-                                                <li>• {pendingCount} slot{pendingCount > 1 ? "s" : ""} pending approval</li>
-                                            )}
-                                        </ul>
-                                        <button
-                                            onClick={() => setWarningAcknowledged(true)}
-                                            className="text-xs font-bold text-[var(--warning)] underline underline-offset-2 hover:text-[var(--text-primary)]"
-                                        >
-                                            Proceed anyway
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ── Next Draw Date (non-last rounds) ── */}
-                    {!isLastRound && (
-                        <div>
-                            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
-                                Next Draw Date {isOccasional && "(Required)"}
-                            </label>
-                            <DatePicker
-                                value={nextDate}
-                                onChange={setNextDate}
-                                disabled={false}
-                                className="bg-[var(--surface-elevated)]"
-                            />
-                            {isOccasional && (
-                                <p className="text-xs text-[var(--accent-vivid)] mt-1">Set the date for the next occasional draw.</p>
+                        <div className="flex-1 min-w-0">
+                            {warningAcknowledged ? (
+                                <p className="text-sm text-[var(--accent-vivid)] font-medium">Acknowledged — you can proceed.</p>
+                            ) : (
+                                <>
+                                    <p className="text-sm text-[var(--warning)] font-bold mb-1">Payments not complete</p>
+                                    <ul className="text-xs text-[var(--text-muted)] space-y-0.5 mb-3">
+                                        {unpaidCount > 0 && (
+                                            <li>• {unpaidCount} slot{unpaidCount > 1 ? "s" : ""} with no payment submitted</li>
+                                        )}
+                                        {pendingCount > 0 && (
+                                            <li>• {pendingCount} slot{pendingCount > 1 ? "s" : ""} pending approval</li>
+                                        )}
+                                    </ul>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setWarningAcknowledged(true)}
+                                        className="h-auto p-0 text-[var(--warning)] hover:text-[var(--warning)] hover:bg-transparent underline underline-offset-2"
+                                    >
+                                        Proceed anyway
+                                    </Button>
+                                </>
                             )}
                         </div>
-                    )}
+                    </Surface>
+                )}
 
-                    {/* ── Advance Button ── */}
-                    <button
-                        onClick={handleAdvance}
-                        disabled={loading || needsAcknowledgement}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed flex justify-center items-center gap-2"
-                    >
-                        {loading ? "Processing..." : (
-                            isLastRound
-                                ? "Finish pot"
-                                : <>{`Begin cycle ${currentMonth + 1}`} <ArrowRight size={18} /></>
+                {/* ── Next Draw Date (non-last rounds) ── */}
+                {!isLastRound && (
+                    <div>
+                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+                            Next Draw Date {isOccasional && "(Required)"}
+                        </label>
+                        <DatePicker
+                            value={nextDate}
+                            onChange={setNextDate}
+                            disabled={false}
+                            className="bg-[var(--surface-elevated)]"
+                        />
+                        {isOccasional && (
+                            <p className="text-xs text-[var(--accent-vivid)] mt-1">Set the date for the next occasional draw.</p>
                         )}
-                    </button>
-                    {needsAcknowledgement && (
-                        <p className="text-center text-xs text-[var(--text-muted)]">
-                            Acknowledge the payment warning above to proceed.
-                        </p>
+                    </div>
+                )}
+
+                {/* ── Advance Button ── */}
+                <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={handleAdvance}
+                    disabled={loading || needsAcknowledgement}
+                    className="w-full font-bold shadow-lg shadow-[var(--accent-vivid)]/20 py-3.5"
+                >
+                    {loading ? "Processing..." : (
+                        isLastRound
+                            ? "Finish pot"
+                            : <span className="flex items-center gap-2">{`Begin cycle ${currentMonth + 1}`} <ArrowRight size={18} /></span>
                     )}
+                </Button>
+                {needsAcknowledgement && (
+                    <p className="text-center text-xs text-[var(--text-muted)]">
+                        Acknowledge the payment warning above to proceed.
+                    </p>
+                )}
             </div>
         </ModalShell>
     );

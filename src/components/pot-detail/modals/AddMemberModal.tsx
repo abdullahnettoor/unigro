@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { Layers, UserPlus, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { ModalCloseButton, ModalFooter, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
@@ -78,80 +79,89 @@ export function AddMemberModal({ potId, openSlots, onClose }: AddMemberModalProp
                     <X size={20} />
                 </ModalCloseButton>
                 <h3 className="text-2xl font-display font-bold mb-1">Assign slot</h3>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center line-clamp-1">
                     <p className="text-[var(--text-muted)] text-sm">Assign a participant to a specific slot.</p>
+                </div>
+            </ModalHeader>
+
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Slot Number</label>
+                    <div className="relative">
+                        <Layers className="pointer-events-none absolute left-3 top-3.5 z-10 text-[var(--text-muted)]" size={16} />
+                        <Select
+                            value={selectedSlotNum === "" ? "" : String(selectedSlotNum)}
+                            onValueChange={(value) => setSelectedSlotNum(Number(value))}
+                        >
+                            <SelectTrigger className="bg-[var(--surface-deep)]/60 !pl-11">
+                                <SelectValue placeholder="Select slot" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {openSlots.map((s) => (
+                                    <SelectItem key={s._id} value={String(s.slotNumber)}>
+                                        Slot #{s.slotNumber}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                    <h4 className="text-sm font-bold">Assignee Details</h4>
                     {currentUser && (
-                        <button
+                        <Button
+                            variant="link"
+                            size="sm"
                             type="button"
                             onClick={() => {
                                 setName(currentUser.name || "");
                                 setPhone(currentUser.phone || "");
                             }}
-                            className="text-xs text-[var(--accent-vivid)] hover:underline font-bold"
+                            className="text-xs h-auto p-0"
                         >
                             Assign to me
-                        </button>
+                        </Button>
                     )}
                 </div>
-            </ModalHeader>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Slot Number</label>
-                        <div className="relative">
-                            <Layers className="pointer-events-none absolute left-3 top-3.5 z-10 text-[var(--text-muted)]" size={16} />
-                            <Select
-                                value={selectedSlotNum === "" ? "" : String(selectedSlotNum)}
-                                onValueChange={(value) => setSelectedSlotNum(Number(value))}
-                            >
-                                <SelectTrigger className="bg-[var(--surface-deep)]/60 pl-10">
-                                    <SelectValue placeholder="Select slot" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {openSlots.map((s) => (
-                                        <SelectItem key={s._id} value={String(s.slotNumber)}>
-                                            Slot #{s.slotNumber}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Name</label>
-                        <div className="relative">
-                            <Input
-                                type="text"
-                                required
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="bg-[var(--surface-deep)]/60"
-                                placeholder="e.g. Sarah Jones"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone Number</label>
-                        <PhoneInputField
-                            value={phone}
-                            onChange={setPhone}
-                            error={!!error && error.includes("phone")}
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Name</label>
+                    <div className="relative">
+                        <Input
+                            type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="bg-[var(--surface-deep)]/60"
+                            placeholder="e.g. Sarah Jones"
                         />
-                        <p className="text-xs text-[var(--text-muted)] mt-1">Required for account syncing. Preferably WhatsApp.</p>
                     </div>
+                </div>
 
-                    {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone Number</label>
+                    <PhoneInputField
+                        value={phone}
+                        onChange={setPhone}
+                        error={!!error && error.includes("phone")}
+                    />
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Required for account syncing. Preferably WhatsApp.</p>
+                </div>
+
+                {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
 
                 <ModalFooter>
-                    <button
+                    <Button
                         type="submit"
+                        variant="primary"
+                        size="lg"
+                        fullWidth
                         disabled={isSubmitting}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
+                        className="gap-2"
                     >
                         {isSubmitting ? "Assigning..." : <><UserPlus size={18} /> Assign slot</>}
-                    </button>
+                    </Button>
                 </ModalFooter>
             </form>
         </ModalShell>

@@ -4,6 +4,7 @@ import { useMutation } from "convex/react";
 import { AlertTriangle, Archive, Trash2, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ModalCloseButton, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
 
@@ -79,9 +80,9 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
                 {/* ── DRAFT: immediate type-to-confirm delete ── */}
                 {isDraft && (
                     <>
-                        <div className="bg-red-500/10 border border-red-500/25 rounded-xl p-4 flex gap-3">
-                            <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-300 leading-relaxed">
+                        <div className="bg-[var(--danger)]/10 border border-[var(--danger)]/25 rounded-2xl p-4 flex gap-3">
+                            <AlertTriangle size={16} className="text-[var(--danger)] shrink-0 mt-0.5" />
+                            <p className="text-sm text-[var(--danger)]/90 leading-relaxed">
                                 This will <strong>permanently delete</strong> this pot and all its slots. This action cannot be undone.
                             </p>
                         </div>
@@ -95,18 +96,21 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
                                 value={confirmText}
                                 onChange={e => setConfirmText(e.target.value)}
                                 placeholder={potTitle}
-                                className="bg-[var(--surface-elevated)] text-sm focus:border-red-500"
+                                className="bg-[var(--surface-elevated)] text-sm focus:border-[var(--danger)]"
                             />
                         </div>
 
-                        <button
+                        <Button
+                            variant="danger"
                             onClick={handleDelete}
                             disabled={!canConfirmDelete || loading}
-                            className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                            fullWidth
+                            size="lg"
+                            className="gap-2"
                         >
                             <Trash2 size={16} />
                             {loading ? "Deleting…" : "Delete forever"}
-                        </button>
+                        </Button>
                     </>
                 )}
 
@@ -118,14 +122,17 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
                         </p>
 
                         {/* Archive — recommended */}
-                        <button
+                        <Button
+                            variant="primary"
                             onClick={handleArchive}
                             disabled={loading || potStatus === "ARCHIVED"}
-                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-black py-3 rounded-xl hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2"
+                            fullWidth
+                            size="lg"
+                            className="gap-2"
                         >
                             <Archive size={16} />
                             {loading ? "Archiving…" : potStatus === "ARCHIVED" ? "Already archived" : "Archive pot"}
-                        </button>
+                        </Button>
 
                         {/* Divider */}
                         <div className="flex items-center gap-3">
@@ -135,22 +142,23 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
                         </div>
 
                         {/* Force delete — destructive secondary */}
-                        <button
+                        <Button
+                            variant="danger"
                             onClick={() => setStep("confirm-delete")}
-                            className="w-full border border-red-500/30 hover:border-red-500/60 text-red-400 hover:text-red-300 font-bold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+                            className="bg-transparent border border-[var(--danger)]/30 text-[var(--danger)] hover:bg-[var(--danger)]/10 hover:border-[var(--danger)]/60 text-sm gap-2 w-full"
                         >
                             <Trash2 size={14} />
                             Permanently delete instead
-                        </button>
+                        </Button>
                     </>
                 )}
 
                 {/* ── NON-DRAFT, STEP 2: type-to-confirm ── */}
                 {!isDraft && step === "confirm-delete" && (
                     <>
-                        <div className="bg-red-500/10 border border-red-500/25 rounded-xl p-4 flex gap-3">
-                            <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-300 leading-relaxed">
+                        <div className="bg-[var(--danger)]/10 border border-[var(--danger)]/25 rounded-2xl p-4 flex gap-3">
+                            <AlertTriangle size={16} className="text-[var(--danger)] shrink-0 mt-0.5" />
+                            <p className="text-sm text-[var(--danger)]/90 leading-relaxed">
                                 This will <strong>permanently delete</strong> the pot, all {potStatus === "ACTIVE" ? "ongoing " : ""}slots, transactions, and history. This cannot be undone.
                             </p>
                         </div>
@@ -164,25 +172,29 @@ export function DeletePotModal({ potId, potTitle, potStatus, onClose }: DeletePo
                                 value={confirmText}
                                 onChange={e => setConfirmText(e.target.value)}
                                 placeholder={potTitle}
-                                className="bg-[var(--surface-elevated)] text-sm focus:border-red-500"
+                                className="bg-[var(--surface-elevated)] text-sm focus:border-[var(--danger)]"
                             />
                         </div>
 
                         <div className="flex gap-3">
-                            <button
+                            <Button
+                                variant="secondary"
                                 onClick={() => { setStep("initial"); setConfirmText(""); }}
-                                className="flex-1 border border-[var(--border-subtle)] text-[var(--text-muted)] font-bold py-3 rounded-xl hover:text-[var(--text-primary)] text-sm transition-colors"
+                                size="lg"
+                                className="flex-1"
                             >
                                 Back
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="danger"
                                 onClick={handleDelete}
                                 disabled={!canConfirmDelete || loading}
-                                className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
+                                size="lg"
+                                className="flex-1 gap-2"
                             >
                                 <Trash2 size={14} />
                                 {loading ? "Deleting…" : "Delete forever"}
-                            </button>
+                            </Button>
                         </div>
                     </>
                 )}

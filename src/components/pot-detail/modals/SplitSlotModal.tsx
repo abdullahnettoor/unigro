@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { Layers, PieChart, UserPlus, X } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { ModalFooter, ModalHeader, ModalShell, ModalCloseButton } from "@/components/ui/ModalShell";
@@ -107,95 +108,103 @@ export function SplitSlotModal({ potId, openSlots, onClose }: SplitSlotModalProp
             </ModalHeader>
 
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
-                    {/* Slot Selection */}
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Slot Number</label>
-                        <div className="relative">
-                            <Layers className="pointer-events-none absolute left-3 top-3.5 z-10 text-[var(--text-muted)]" size={16} />
-                            <Select
-                                value={selectedSlotNum === "" ? "" : String(selectedSlotNum)}
-                                onValueChange={(value) => setSelectedSlotNum(Number(value))}
-                            >
-                                <SelectTrigger className="bg-[var(--surface-deep)]/60 pl-10">
-                                    <SelectValue placeholder="Select slot" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {openSlots.map((s) => (
-                                        <SelectItem key={s._id} value={String(s.slotNumber)}>
-                                            Slot #{s.slotNumber} {s.remainingPercentage !== undefined && s.remainingPercentage < 100 ? "(Partial)" : ""}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                {/* Slot Selection */}
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Slot Number</label>
+                    <div className="relative">
+                        <Layers className="pointer-events-none absolute left-3 top-3.5 z-10 text-[var(--text-muted)]" size={16} />
+                        <Select
+                            value={selectedSlotNum === "" ? "" : String(selectedSlotNum)}
+                            onValueChange={(value) => setSelectedSlotNum(Number(value))}
+                        >
+                            <SelectTrigger className="bg-[var(--surface-deep)]/60 !pl-11">
+                                <SelectValue placeholder="Select slot" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {openSlots.map((s) => (
+                                    <SelectItem key={s._id} value={String(s.slotNumber)}>
+                                        Slot #{s.slotNumber} {s.remainingPercentage !== undefined && s.remainingPercentage < 100 ? "(Partial)" : ""}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
+                </div>
 
-                    {/* Share Percentage */}
-                    <div>
-                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Share Percentage (%)</label>
-                        <div className="relative">
-                            <Input
-                                type="number"
-                                required
-                                min="1"
-                                max={maxShare}
-                                value={percentage}
-                                onChange={(e) => setPercentage(Number(e.target.value))}
-                                className={`bg-[var(--surface-deep)]/60 ${percentage > maxShare ? "border-[var(--danger)] focus:border-[var(--danger)]" : "border-[var(--border-subtle)]"}`}
-                            />
-                        </div>
-                        <p className="text-xs text-[var(--text-muted)] mt-1">
-                            Available: {maxShare}% {maxShare < 100 && "(Partially Filled)"}
-                        </p>
+                {/* Share Percentage */}
+                <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Share Percentage (%)</label>
+                    <div className="relative">
+                        <Input
+                            type="number"
+                            required
+                            min="1"
+                            max={maxShare}
+                            value={percentage}
+                            onChange={(e) => setPercentage(Number(e.target.value))}
+                            className={`bg-[var(--surface-deep)]/60 ${percentage > maxShare ? "border-[var(--danger)] focus:border-[var(--danger)]" : "border-[var(--border-subtle)]"}`}
+                        />
                     </div>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">
+                        Available: {maxShare}% {maxShare < 100 && "(Partially Filled)"}
+                    </p>
+                </div>
 
-                    {/* User Details */}
-                    <div className="grid grid-cols-1 gap-4">
-                        <div>
-                            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Name</label>
-                            <Input
-                                type="text"
-                                required
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="bg-[var(--surface-deep)]/60"
-                                placeholder="e.g. Sarah Jones"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone</label>
-                            <PhoneInputField
-                                value={phone}
-                                onChange={setPhone}
-                                error={!!error && error.includes("phone")}
-                            />
-                        </div>
-                    </div>
-
+                <div className="flex items-center justify-between pt-2">
+                    <h4 className="text-sm font-bold">Assignee Details</h4>
                     {currentUser && (
-                        <button
+                        <Button
+                            variant="link"
+                            size="sm"
                             type="button"
                             onClick={() => {
                                 setName(currentUser.name || "");
                                 setPhone(currentUser.phone || "");
                                 setEmail(currentUser.email || "");
                             }}
-                            className="text-xs text-[var(--accent-vivid)] hover:underline font-bold w-full text-right"
+                            className="text-xs h-auto p-0"
                         >
-                            Assign to Myself
-                        </button>
+                            Assign to me
+                        </Button>
                     )}
+                </div>
 
-                    {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
+                {/* User Details */}
+                <div className="grid grid-cols-1 gap-4">
+                    <div>
+                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Name</label>
+                        <Input
+                            type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="bg-[var(--surface-deep)]/60"
+                            placeholder="e.g. Sarah Jones"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Phone</label>
+                        <PhoneInputField
+                            value={phone}
+                            onChange={setPhone}
+                            error={!!error && error.includes("phone")}
+                        />
+                    </div>
+                </div>
+
+                {error && <p className="text-[var(--danger)] text-sm">{error}</p>}
 
                 <ModalFooter>
-                    <button
+                    <Button
                         type="submit"
+                        variant="primary"
+                        size="lg"
+                        fullWidth
                         disabled={isSubmitting}
-                        className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex justify-center items-center gap-2"
+                        className="gap-2"
                     >
                         {isSubmitting ? "Assigning..." : <><UserPlus size={18} /> Assign share</>}
-                    </button>
+                    </Button>
                 </ModalFooter>
             </form>
         </ModalShell>

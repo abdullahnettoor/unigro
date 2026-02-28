@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
 
 type ToastVariant = "success" | "error" | "info";
 
@@ -55,13 +57,15 @@ function Toasts({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: stri
               <div className="text-sm font-semibold">{t.title}</div>
               {t.message && <div className="mt-1 text-xs text-[var(--text-primary)]/80">{t.message}</div>}
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => onDismiss(t.id)}
-              className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              className="text-xs h-auto py-1 px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               aria-label="Dismiss"
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       ))}
@@ -84,27 +88,26 @@ function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 p-3 sm:items-center sm:p-4">
-      <div className="glass-3 w-full rounded-t-2xl border border-[var(--border-subtle)] p-6 sm:max-w-md sm:rounded-2xl">
+      <Surface tier={3} rounded="2xl" className="w-full border border-[var(--border-subtle)] p-6 sm:max-w-md">
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">{options.title}</h3>
         {options.message && <p className="mt-2 text-sm text-[var(--text-muted)]">{options.message}</p>}
         <div className="mt-6 flex gap-2">
-          <button
+          <Button
+            variant="secondary"
             onClick={onCancel}
-            className="flex-1 rounded-xl bg-[var(--surface-deep)] py-2.5 text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-deep)]"
+            className="flex-1 py-2.5 text-sm font-semibold hover:border-transparent"
           >
             {options.cancelText || "Cancel"}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={options.danger ? "danger" : "primary"}
             onClick={onConfirm}
-            className={`flex-1 rounded-xl py-2.5 text-sm font-semibold ${options.danger
-              ? "bg-[var(--danger)] text-[var(--text-on-accent)] hover:bg-[var(--danger)]/90"
-              : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90"
-              }`}
+            className="flex-1 py-2.5 text-sm font-semibold"
           >
             {options.confirmText || "Confirm"}
-          </button>
+          </Button>
         </div>
-      </div>
+      </Surface>
     </div>
   );
 }

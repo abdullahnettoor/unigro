@@ -1,6 +1,6 @@
 import { Landmark, Shuffle, UserCheck } from "lucide-react";
 
-import { GlassSurface } from "@/components/ui/GlassSurface";
+import { Surface } from "@/components/ui/Surface";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ interface PotRulesStepProps {
 export function PotRulesStep({ formData, onChange, disabled }: PotRulesStepProps) {
     return (
         <section className="space-y-6">
-            <GlassSurface tier="glass-2" className="p-5 sm:p-6 space-y-5">
+            <Surface tier={2} className="p-5 sm:p-6 space-y-5">
                 <div>
                     <h2 className="text-xl font-display font-bold text-[var(--text-primary)] mb-1">Pot Rules</h2>
                     <p className="text-sm text-[var(--text-muted)]">Define how winners are picked and payments are handled.</p>
@@ -106,12 +106,12 @@ export function PotRulesStep({ formData, onChange, disabled }: PotRulesStepProps
                                 value={formData.bankDetails}
                                 onChange={(e) => onChange({ bankDetails: e.target.value })}
                                 placeholder="Enter UPI ID or Bank Account details for members to pay to."
-                                className="resize-none bg-[var(--surface-deep)]/50 pl-10 pr-3"
+                                className="resize-none bg-[var(--surface-deep)]/50 !pl-10 pr-3"
                             />
                         </div>
                     </div>
                 </div>
-            </GlassSurface>
+            </Surface>
         </section>
     );
 }

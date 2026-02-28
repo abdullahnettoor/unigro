@@ -44,7 +44,7 @@ export function DesktopSidebar({
                             disabled={primaryAction.disabled}
                             size="lg"
                             className="w-full relative z-10"
-                            variant={primaryAction.tone === "secondary" ? "accent" : "primary"}
+                            variant={primaryAction.tone || "primary"}
                         >
                             {primaryAction.label.toUpperCase()}
                         </Button>
@@ -98,12 +98,13 @@ export function DesktopSidebar({
                 </div>
 
                 {/* Share Action */}
-                <button
+                <Button
+                    variant="ghost"
                     onClick={handleShare}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-full hover:bg-[var(--surface-deep)] text-xs font-bold transition-colors text-[var(--text-muted)]"
+                    className="w-full gap-2 text-[var(--text-muted)]"
                 >
                     <Share2 size={14} /> Share details
-                </button>
+                </Button>
             </Surface>
         </aside>
     );

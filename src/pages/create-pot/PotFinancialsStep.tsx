@@ -5,7 +5,7 @@ import cc from "currency-codes";
 import { Info } from "lucide-react";
 
 import { DatePicker } from "@/components/ui/DatePicker";
-import { GlassSurface } from "@/components/ui/GlassSurface";
+import { Surface } from "@/components/ui/Surface";
 import { Input } from "@/components/ui/Input";
 import {
     Select,
@@ -50,7 +50,7 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
 
     return (
         <section className="space-y-6">
-            <GlassSurface tier="glass-2" className="p-5 sm:p-6 space-y-5">
+            <Surface tier={2} className="p-5 sm:p-6 space-y-5">
                 <div>
                     <h2 className="text-xl font-display font-bold text-[var(--text-primary)] mb-1">Pot Details</h2>
                     <p className="text-sm text-[var(--text-muted)]">Give your pot a name and purpose.</p>
@@ -87,9 +87,9 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
                         />
                     </div>
                 </div>
-            </GlassSurface>
+            </Surface>
 
-            <GlassSurface tier="glass-2" className="p-5 sm:p-6 space-y-5">
+            <Surface tier={2} className="p-5 sm:p-6 space-y-5">
                 <div>
                     <h2 className="text-xl font-display font-bold text-[var(--text-primary)] mb-1">Financial Goal</h2>
                     <p className="text-sm text-[var(--text-muted)]">Set the target amount and start date.</p>
@@ -108,7 +108,7 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
                                     disabled={disabled}
                                 >
                                     <SelectTrigger
-                                        className="h-full rounded-none border-0 !bg-transparent !shadow-none !ring-0 px-3 text-sm font-semibold"
+                                        className="h-full rounded-none !border-transparent !bg-transparent !shadow-none !ring-0 px-3 text-sm font-semibold"
                                         style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", inherit' }}
                                     >
                                         <SelectValue placeholder="Currency" />
@@ -158,7 +158,7 @@ export function PotFinancialsStep({ formData, onChange, disabled }: PotFinancial
                         </p>
                     </div>
                 </div>
-            </GlassSurface>
+            </Surface>
         </section>
     );
 }

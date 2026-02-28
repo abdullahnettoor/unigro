@@ -38,7 +38,7 @@ export function DatePicker({
               readOnly
               placeholder={placeholder}
               disabled={disabled}
-              className={`bg-[var(--surface-deep)]/50 pl-11 pr-3 ${className ?? ""}`}
+              className={`bg-[var(--surface-deep)]/50 !pl-11 pr-3 ${className ?? ""}`}
             />
           </div>
         </button>

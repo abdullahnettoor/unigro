@@ -4,6 +4,7 @@ import { AlertCircle, Banknote, CheckCircle, Clock, Image as ImageIcon, Smartpho
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { Button } from "@/components/ui/Button";
 import { ModalBody, ModalCloseButton, ModalFooter, ModalHeader, ModalShell } from "@/components/ui/ModalShell";
 import { formatCurrency } from "@/lib/utils";
 
@@ -144,106 +145,110 @@ export function PaymentModal({ potId, slotId, monthIndex, amount, onClose, isFor
             </ModalHeader>
 
             <ModalBody>
-                    {!paymentType ? (
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={() => setPaymentType("online")}
-                                className="bg-[var(--surface-deep)] hover:bg-[var(--accent-vivid)]/10 border border-[var(--border-subtle)] hover:border-[var(--accent-vivid)] p-6 rounded-xl flex flex-col items-center gap-3 transition-all group"
-                            >
-                                <Smartphone className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" size={32} />
-                                <span className="font-bold text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">Online</span>
-                            </button>
-                            <button
-                                onClick={() => setPaymentType("cash")}
-                                className="bg-[var(--surface-deep)] hover:bg-[var(--warning)]/10 border border-[var(--border-subtle)] hover:border-[var(--warning)] p-6 rounded-xl flex flex-col items-center gap-3 transition-all group"
-                            >
-                                <Banknote className="text-[var(--text-muted)] group-hover:text-[var(--warning)]" size={32} />
-                                <span className="font-bold text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">Cash</span>
-                            </button>
-                        </div>
-                    ) : (
-                        <>
-                            <button onClick={() => setPaymentType(null)} className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] mb-4 flex items-center gap-1">
-                                ← Back
-                            </button>
+                {!paymentType ? (
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={() => setPaymentType("online")}
+                            className="bg-[var(--surface-deep)] hover:bg-[var(--accent-vivid)]/10 border border-[var(--border-subtle)] hover:border-[var(--accent-vivid)] p-6 rounded-xl flex flex-col items-center gap-3 transition-all group"
+                        >
+                            <Smartphone className="text-[var(--text-muted)] group-hover:text-[var(--accent-vivid)]" size={32} />
+                            <span className="font-bold text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">Online</span>
+                        </button>
+                        <button
+                            onClick={() => setPaymentType("cash")}
+                            className="bg-[var(--surface-deep)] hover:bg-[var(--warning)]/10 border border-[var(--border-subtle)] hover:border-[var(--warning)] p-6 rounded-xl flex flex-col items-center gap-3 transition-all group"
+                        >
+                            <Banknote className="text-[var(--text-muted)] group-hover:text-[var(--warning)]" size={32} />
+                            <span className="font-bold text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">Cash</span>
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <Button variant="ghost" size="sm" onClick={() => setPaymentType(null)} className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] mb-4 pl-0">
+                            ← Back
+                        </Button>
 
-                            {paymentType === "online" ? (
-                                <form onSubmit={handleOnlineSubmit} className="space-y-4">
-                                    <div
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors ${file ? "border-[var(--accent-vivid)]/50 bg-[var(--accent-vivid)]/5" : "border-[var(--border-subtle)] hover:border-[var(--border-subtle)] hover:bg-[var(--surface-deep)]/60"
-                                            }`}
-                                    >
-                                        {file ? (
-                                            <>
-                                                <ImageIcon className="text-[var(--accent-vivid)] mb-2" size={32} />
-                                                <span className="text-sm font-mono text-[var(--text-primary)] truncate max-w-full">{file.name}</span>
-                                                <span className="text-xs text-[var(--text-muted)] mt-1">Click to change</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Upload className="text-[var(--text-muted)] mb-2" size={32} />
-                                                <span className="text-sm text-[var(--text-muted)]">Tap to upload screenshot</span>
-                                            </>
-                                        )}
-                                        <input
-                                            type="file"
-                                            ref={fileInputRef}
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={handleFileChange}
-                                        />
-                                    </div>
-
-                                    {error && <p className="text-[var(--danger)] text-sm text-center">{error}</p>}
-
-                                    <ModalFooter className="pt-4 pb-2 mt-4 flex items-center justify-center">
-                                        <button
-                                            type="submit"
-                                            disabled={isUploading || !file}
-                                            className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--accent-vivid)]/10"
-                                        >
-                                            {isUploading ? "Uploading..." : "Submit proof"}
-                                        </button>
-                                    </ModalFooter>
-                                </form>
-                            ) : (
-
-                                <div className="text-center">
-                                    {
-                                        isForeman ? (
-                                            <div className="mb-6 text-left" >
-                                                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Payment Date</label>
-                                                <DatePicker
-                                                    value={paymentDate}
-                                                    onChange={setPaymentDate}
-                                                    className="bg-[var(--surface-deep)]/60"
-                                                />
-                                                <p className="text-xs text-[var(--text-muted)] mt-2">
-                                                    Record the actual date this payment was received.
-                                                </p>
-                                            </div>
-                                        ) : (
-                                    <div className="bg-[var(--warning)]/15 p-5 rounded-xl mb-6 border border-[var(--warning)]/30 backdrop-blur-sm">
-                                        <p className="text-[var(--text-primary)] font-medium text-sm leading-relaxed">
-                                            Please confirm that you have handed cash to the organizer. The organizer will need to approve this request.
-                                        </p>
-                                    </div>
-                                        )}
-                                    <ModalFooter className="pt-4 pb-2 mt-4 flex items-center justify-center">
-                                        <button
-                                            onClick={handleCashSubmit}
-                                            disabled={isUploading}
-                                            className={`w-full font-bold py-3 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg ${isForeman ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[var(--accent-vivid)]/10" : "bg-[var(--warning)] text-[var(--text-on-accent)] shadow-[var(--warning)]/10"}`}
-                                        >
-                                            {isUploading ? "Processing..." : (isForeman ? "Record received" : "Confirm cash payment")}
-                                        </button>
-                                    </ModalFooter>
+                        {paymentType === "online" ? (
+                            <form onSubmit={handleOnlineSubmit} className="space-y-4">
+                                <div
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors ${file ? "border-[var(--accent-vivid)]/50 bg-[var(--accent-vivid)]/5" : "border-[var(--border-subtle)] hover:border-[var(--border-subtle)] hover:bg-[var(--surface-deep)]/60"
+                                        }`}
+                                >
+                                    {file ? (
+                                        <>
+                                            <ImageIcon className="text-[var(--accent-vivid)] mb-2" size={32} />
+                                            <span className="text-sm font-mono text-[var(--text-primary)] truncate max-w-full">{file.name}</span>
+                                            <span className="text-xs text-[var(--text-muted)] mt-1">Click to change</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="text-[var(--text-muted)] mb-2" size={32} />
+                                            <span className="text-sm text-[var(--text-muted)]">Tap to upload screenshot</span>
+                                        </>
+                                    )}
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
                                 </div>
-                            )}
-                        </>
-                    )
-                    }
+
+                                {error && <p className="text-[var(--danger)] text-sm text-center">{error}</p>}
+
+                                <ModalFooter className="pt-4 pb-2 mt-4 flex items-center justify-center">
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        size="lg"
+                                        fullWidth
+                                        disabled={isUploading || !file}
+                                    >
+                                        {isUploading ? "Uploading..." : "Submit proof"}
+                                    </Button>
+                                </ModalFooter>
+                            </form>
+                        ) : (
+
+                            <div className="text-center">
+                                {
+                                    isForeman ? (
+                                        <div className="mb-6 text-left" >
+                                            <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Payment Date</label>
+                                            <DatePicker
+                                                value={paymentDate}
+                                                onChange={setPaymentDate}
+                                                className="bg-[var(--surface-deep)]/60"
+                                            />
+                                            <p className="text-xs text-[var(--text-muted)] mt-2">
+                                                Record the actual date this payment was received.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-[var(--warning)]/15 p-5 rounded-xl mb-6 border border-[var(--warning)]/30 backdrop-blur-sm">
+                                            <p className="text-[var(--text-primary)] font-medium text-sm leading-relaxed">
+                                                Please confirm that you have handed cash to the organizer. The organizer will need to approve this request.
+                                            </p>
+                                        </div>
+                                    )}
+                                <ModalFooter className="pt-4 pb-2 mt-4 flex items-center justify-center">
+                                    <Button
+                                        variant={isForeman ? "primary" : "danger"}
+                                        size="lg"
+                                        fullWidth
+                                        onClick={handleCashSubmit}
+                                        disabled={isUploading}
+                                    >
+                                        {isUploading ? "Processing..." : (isForeman ? "Record received" : "Confirm cash payment")}
+                                    </Button>
+                                </ModalFooter>
+                            </div>
+                        )}
+                    </>
+                )
+                }
             </ModalBody>
         </ModalShell>
     );
@@ -279,12 +284,13 @@ export function PaymentStatusCard({ status, amount, monthIndex, onPay, currency 
                     <Icon size={16} /> {config.label}
                 </div>
                 {status === "UNPAID" && (
-                    <button
+                    <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={onPay}
-                        className="bg-[var(--surface-elevated)] text-[var(--text-primary)] text-xs font-bold px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--surface-deep)]/80 transition-colors"
                     >
                         Mark as Paid
-                    </button>
+                    </Button>
                 )}
             </div>
         </div>

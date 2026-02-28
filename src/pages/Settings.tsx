@@ -334,27 +334,27 @@ export function Settings() {
                     <div className="mb-6">
                         <p className="text-xs uppercase font-semibold text-[var(--text-muted)] mb-2">Mode</p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {[
-                            { id: "system", label: "System Default" },
-                            { id: "dark", label: "Dark Mode" },
-                            { id: "light", label: "Light Mode" },
-                        ].map((opt) => (
-                            <button
-                                key={opt.id}
-                                onClick={() => {
-                                    const next = opt.id as ThemePreference;
-                                    setThemePref(next);
-                                    setThemePreference(next);
-                                }}
-                                aria-pressed={themePref === opt.id}
-                                className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${themePref === opt.id
-                                    ? "border-[var(--accent-vivid)]/40 bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)]"
-                                    : "border-[var(--border-subtle)] bg-[var(--surface-deep)]/40 text-[var(--text-primary)] hover:bg-[var(--surface-deep)]"
-                                    }`}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
+                            {[
+                                { id: "system", label: "System Default" },
+                                { id: "dark", label: "Dark Mode" },
+                                { id: "light", label: "Light Mode" },
+                            ].map((opt) => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => {
+                                        const next = opt.id as ThemePreference;
+                                        setThemePref(next);
+                                        setThemePreference(next);
+                                    }}
+                                    aria-pressed={themePref === opt.id}
+                                    className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${themePref === opt.id
+                                        ? "border-[var(--accent-vivid)]/40 bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)]"
+                                        : "border-[var(--border-subtle)] bg-[var(--surface-deep)]/40 text-[var(--text-primary)] hover:bg-[var(--surface-deep)]"
+                                        }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
                     <div>
