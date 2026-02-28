@@ -1,8 +1,16 @@
-import { Clock, ShieldCheck, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Banknote, Check, Clock, ShieldCheck, Smartphone, Trash2, X } from "lucide-react";
+import { useMutation } from "convex/react";
 
+import { MediaPreviewDialog } from "@/components/shared/MediaPreviewDialog";
+import { Button } from "@/components/ui/Button";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/Dialog";
+import { Surface } from "@/components/ui/Surface";
 import { formatCurrency } from "@/lib/utils";
 
 import type { Doc } from "../../../convex/_generated/dataModel";
+import { api } from "../../../convex/_generated/api";
 
 interface OrganizeTabProps {
     pot: Doc<"pots">;
@@ -38,11 +46,24 @@ export function OrganizeTab({
     onDeletePot,
 }: OrganizeTabProps) {
     const pendingTransactions = transactions?.filter(t => t.status === "PENDING") || [];
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [reviewTxId, setReviewTxId] = useState<string | null>(null);
+    const [rejectNote, setRejectNote] = useState("");
+    const [isReviewing, setIsReviewing] = useState(false);
+    const [reviewDate, setReviewDate] = useState(new Date().toISOString().split("T")[0]);
+    const approvePayment = useMutation(api.transactions.approvePayment);
+    const rejectPayment = useMutation(api.transactions.rejectPayment);
+    const recordCashPayment = useMutation(api.transactions.recordCashPayment);
+
+    const reviewTx = useMemo(
+        () => pendingTransactions.find((tx) => tx._id === reviewTxId) || null,
+        [pendingTransactions, reviewTxId]
+    );
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {/* Quick Management Card */}
-            <section className="glass-3 rounded-3xl p-6 border border-[var(--accent-vivid)]/20 shadow-xl relative overflow-hidden">
+            <Surface tier={3} className="rounded-3xl p-6 border border-[var(--accent-vivid)]/20 shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-2 opacity-5">
                     <ShieldCheck size={100} />
                 </div>
@@ -51,63 +72,60 @@ export function OrganizeTab({
                         <ShieldCheck className="text-[var(--accent-vivid)]" size={24} /> Organizer Controls
                     </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                        <div className="glass-1 p-4 rounded-2xl">
-                            <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Pot Status</p>
-                            <p className="text-lg font-black text-[var(--accent-vivid)] uppercase">{pot.status}</p>
-                        </div>
-                        <div className="glass-1 p-4 rounded-2xl">
-                            <p className="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Round Pool</p>
-                            <p className="text-lg font-black">{formatCurrency(pot.config.totalValue, pot.config.currency)}</p>
-                        </div>
+                    <div className="mb-6 flex flex-wrap gap-2 text-xs font-semibold text-[var(--text-muted)]">
+                        <span className="rounded-full bg-[var(--surface-deep)]/70 px-3 py-1">
+                            Status: <span className="text-[var(--accent-vivid)]">{pot.status}</span>
+                        </span>
+                        <span className="rounded-full bg-[var(--surface-deep)]/70 px-3 py-1">
+                            Round pool: <span className="text-[var(--text-primary)]">{formatCurrency(pot.config.totalValue, pot.config.currency)}</span>
+                        </span>
                     </div>
 
                     <div className="space-y-3">
                         {isDraft && (
-                            <button
-                                onClick={handleActivate}
-                                className="w-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] py-4 rounded-2xl font-black shadow-[0_10px_30px_rgba(var(--accent-vivid-rgb),0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
-                            >
+                            <Button onClick={handleActivate} size="lg" className="w-full">
                                 ACTIVATE POT
-                            </button>
+                            </Button>
                         )}
 
                         {isActive && !currentWinnerSlot && (
                             <div className="flex gap-3">
-                                <button
+                                <Button
                                     onClick={() => setShowWinnerSelection(true)}
-                                    className="flex-1 bg-[var(--surface-elevated)] border border-[var(--border-subtle)] py-3 rounded-2xl text-xs font-bold hover:bg-[var(--surface-deep)] transition-colors"
+                                    variant="secondary"
+                                    fullWidth
                                 >
                                     Manual Winner
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={handleDraw}
                                     disabled={isDrawing}
-                                    className="flex-1 bg-[var(--accent-secondary)] text-[var(--text-primary)] py-3 rounded-2xl text-xs font-black shadow-[0_10px_30px_rgba(var(--accent-secondary-rgb),0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                                    variant="accent"
+                                    fullWidth
                                 >
                                     RUN DRAW
-                                </button>
+                                </Button>
                             </div>
                         )}
                     </div>
                 </div>
-            </section>
+            </Surface>
 
             {/* Pending Approvals Section */}
-            <section className="glass-2 rounded-3xl p-6">
+            <Surface tier={2} className="rounded-3xl p-6">
                 <h3 className="text-lg font-display font-bold flex items-center gap-2 mb-6 text-[var(--warning)]">
                     <Clock size={20} /> Pending Approvals
                 </h3>
                 {pendingTransactions.length === 0 ? (
-                    <div className="text-center py-12 text-[var(--text-muted)] glass-1 rounded-2xl border border-dashed border-[var(--border-subtle)]">
+                    <Surface tier={1} className="text-center py-12 text-[var(--text-muted)] rounded-2xl border border-dashed border-[var(--border-subtle)]">
                         No pending approvals for now.
-                    </div>
+                    </Surface>
                 ) : (
                     <div className="space-y-4">
                         {pendingTransactions.map(tx => {
                             const slot = allSlots.find(s => s._id === tx.slotId);
                             return (
-                                <div key={tx._id} className="glass-1 p-4 rounded-xl flex items-center justify-between gap-4">
+                                <Surface key={tx._id} tier={1} className="p-4 rounded-xl flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                                     <div className="flex items-center gap-3">
                                         <div className="h-10 w-10 bg-[var(--surface-deep)] rounded-full flex items-center justify-center font-bold">
                                             {slot?.slotNumber || tx.monthIndex}
@@ -115,50 +133,34 @@ export function OrganizeTab({
                                         <div>
                                             <p className="text-sm font-bold">Round {tx.monthIndex} Payment</p>
                                             <p className="text-xs text-[var(--text-muted)]">{tx.user?.name || 'Member'}</p>
+                                            <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-deep)]/70 px-2 py-0.5 text-[10px] font-semibold text-[var(--text-muted)]">
+                                                {tx.proofUrl ? <Smartphone size={11} /> : <Banknote size={11} />}
+                                                {tx.proofUrl ? "Online" : "Cash"}
+                                            </span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        {tx.proofUrl && <a href={tx.proofUrl} target="_blank" rel="noreferrer" className="text-xs text-[var(--accent-vivid)] hover:underline mr-2">View Proof</a>}
-                                        <button
-                                            onClick={() => setGlobalPaymentState({ slotId: tx.slotId, cycle: tx.monthIndex, amount: pot.config.contribution, isForemanAction: true, userId: tx.userId })}
-                                            className="bg-[var(--accent-vivid)] text-[var(--text-on-accent)] text-xs font-bold px-4 py-2 rounded-full hover:opacity-90"
+                                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                                        <Button
+                                            onClick={() => {
+                                                setReviewTxId(tx._id);
+                                                setRejectNote("");
+                                                setReviewDate(new Date().toISOString().split("T")[0]);
+                                            }}
+                                            className="text-xs w-full sm:w-auto"
                                         >
                                             Review
-                                        </button>
+                                        </Button>
                                     </div>
-                                </div>
+                                </Surface>
                             );
                         })}
                     </div>
                 )}
-            </section>
-
-            {/* Round Details / Rules Summary */}
-            <div className="glass-1 rounded-3xl p-6">
-                <h4 className="text-xs uppercase font-black tracking-widest text-[var(--text-muted)] mb-4">Pot Configuration</h4>
-                <dl className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Target Slots</dt>
-                        <dd className="font-bold">{pot.config.totalSlots}</dd>
-                    </div>
-                    <div>
-                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Duration</dt>
-                        <dd className="font-bold">{pot.config.duration} Months</dd>
-                    </div>
-                    <div>
-                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">EMI</dt>
-                        <dd className="font-bold">{formatCurrency(pot.config.contribution, pot.config.currency)}</dd>
-                    </div>
-                    <div>
-                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Commission</dt>
-                        <dd className="font-bold">{commissionPct.toFixed(2)}%</dd>
-                    </div>
-                </dl>
-            </div>
+            </Surface>
 
             {/* Danger Zone — foreman only */}
             {isForeman && (
-                <div className="glass-1 rounded-3xl p-6 border border-red-500/20">
+                <Surface tier={1} className="rounded-3xl p-6 border border-red-500/20">
                     <h4 className="text-xs uppercase font-black tracking-widest text-red-400 mb-3 flex items-center gap-2">
                         <Trash2 size={14} /> Danger Zone
                     </h4>
@@ -168,15 +170,135 @@ export function OrganizeTab({
                             : "Archive or permanently delete this pot. Archived pots preserve history."
                         }
                     </p>
-                    <button
+                    <Button
+                        variant="ghost"
                         onClick={onDeletePot}
-                        className="w-full border border-red-500/30 hover:border-red-500/60 text-red-400 hover:text-red-300 font-bold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+                        className="w-full border border-red-500/30 hover:border-red-500/60 text-red-400 hover:text-red-300 text-sm"
                     >
                         <Trash2 size={14} />
                         {isDraft ? "Delete pot" : "Archive / Delete pot"}
-                    </button>
-                </div>
+                    </Button>
+                </Surface>
             )}
+
+            <MediaPreviewDialog
+                url={previewUrl}
+                onClose={() => setPreviewUrl(null)}
+                alt="Payment proof"
+            />
+
+            <Dialog
+                open={!!reviewTx}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setReviewTxId(null);
+                        setRejectNote("");
+                    }
+                }}
+            >
+                <DialogContent
+                    className="max-w-lg p-6"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                >
+                    {reviewTx ? (
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Payment review</p>
+                                <DialogTitle className="text-lg font-semibold text-[var(--text-primary)]">
+                                    Round {reviewTx.monthIndex} • {reviewTx.user?.name || "Member"}
+                                </DialogTitle>
+                                <p className="text-sm text-[var(--text-muted)]">
+                                    {formatCurrency(pot.config.contribution, pot.config.currency)} •{" "}
+                                    {reviewTx.proofUrl ? "Online transfer" : "Cash"}
+                                </p>
+                            </div>
+
+                            {reviewTx.proofUrl ? (
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setPreviewUrl(reviewTx.proofUrl)}
+                                    className="w-full"
+                                >
+                                    View proof
+                                </Button>
+                            ) : null}
+
+                            {!reviewTx.proofUrl ? (
+                                <div className="rounded-xl border border-dashed border-[var(--border-subtle)] p-3 text-xs text-[var(--text-muted)]">
+                                    Cash payment reported by member.
+                                </div>
+                            ) : null}
+
+                            {!reviewTx.proofUrl ? (
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-[var(--text-muted)]">Payment date</label>
+                                    <DatePicker value={reviewDate} onChange={setReviewDate} />
+                                    <p className="text-xs text-[var(--text-muted)]">
+                                        Record the actual date this payment was received.
+                                    </p>
+                                </div>
+                            ) : null}
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-[var(--text-muted)]">Rejection note (optional)</label>
+                                <input
+                                    value={rejectNote}
+                                    onChange={(e) => setRejectNote(e.target.value)}
+                                    placeholder="Reason for rejection..."
+                                    className="w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-deep)]/40 p-3 text-sm text-[var(--text-primary)]"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                                <Button
+                                    variant="ghost"
+                                    onClick={async () => {
+                                        if (!reviewTx) return;
+                                        setIsReviewing(true);
+                                        try {
+                                            await rejectPayment({ transactionId: reviewTx._id, notes: rejectNote.trim() || undefined });
+                                            setReviewTxId(null);
+                                            setRejectNote("");
+                                        } finally {
+                                            setIsReviewing(false);
+                                        }
+                                    }}
+                                    disabled={isReviewing}
+                                    className="text-[var(--danger)] hover:bg-[var(--danger)]/10"
+                                >
+                                    <X size={16} /> Reject
+                                </Button>
+                                <Button
+                                    onClick={async () => {
+                                        if (!reviewTx) return;
+                                        setIsReviewing(true);
+                                        try {
+                                            if (reviewTx.proofUrl) {
+                                                await approvePayment({ transactionId: reviewTx._id });
+                                            } else {
+                                                await recordCashPayment({
+                                                    potId: pot._id,
+                                                    slotId: reviewTx.slotId,
+                                                    monthIndex: reviewTx.monthIndex,
+                                                    userId: reviewTx.userId,
+                                                    paidAt: new Date(reviewDate).getTime(),
+                                                });
+                                            }
+                                            setReviewTxId(null);
+                                        } finally {
+                                            setIsReviewing(false);
+                                        }
+                                    }}
+                                    disabled={isReviewing}
+                                    className="gap-2"
+                                >
+                                    <Check size={16} /> {reviewTx.type === "online" ? "Approve" : "Record received"}
+                                </Button>
+                            </div>
+                        </div>
+                    ) : null}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

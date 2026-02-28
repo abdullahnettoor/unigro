@@ -31,14 +31,14 @@ export function DatePicker({
           className="w-full text-left"
         >
           <div className="relative">
-            <CalendarIcon className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
+            <CalendarIcon className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
             <Input
               type="text"
               value={selectedDate ? format(selectedDate, "PPP") : ""}
               readOnly
               placeholder={placeholder}
               disabled={disabled}
-              className={`bg-[var(--surface-deep)]/50 pl-10 pr-3 ${className ?? ""}`}
+              className={`bg-[var(--surface-deep)]/50 pl-11 pr-3 ${className ?? ""}`}
             />
           </div>
         </button>

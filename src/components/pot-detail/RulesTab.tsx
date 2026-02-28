@@ -1,5 +1,6 @@
 import { Calendar, Coins, Info, Layers } from "lucide-react";
 import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
+import { formatCurrency } from "@/lib/utils";
 
 import type { Doc } from "../../../convex/_generated/dataModel";
 
@@ -55,6 +56,28 @@ export function RulesTab({ pot, gracePeriod }: RulesTabProps) {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div className="glass-1 rounded-2xl p-6">
+                <h4 className="text-xs uppercase font-black tracking-widest text-[var(--text-muted)] mb-4">Pot Configuration</h4>
+                <dl className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Target Slots</dt>
+                        <dd className="font-bold">{pot.config.totalSlots}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Duration</dt>
+                        <dd className="font-bold">{pot.config.duration} Months</dd>
+                    </div>
+                    <div>
+                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">EMI</dt>
+                        <dd className="font-bold">{formatCurrency(pot.config.contribution, pot.config.currency)}</dd>
+                    </div>
+                    <div>
+                        <dt className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Commission</dt>
+                        <dd className="font-bold">{pot.config.commission}%</dd>
+                    </div>
+                </dl>
             </div>
 
             {pot.bankDetails && (

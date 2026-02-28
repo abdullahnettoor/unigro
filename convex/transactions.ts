@@ -188,6 +188,36 @@ export const approvePayment = mutation({
     },
 });
 
+// 3b. Reject Payment (Foreman)
+export const rejectPayment = mutation({
+    args: {
+        transactionId: v.id("transactions"),
+        notes: v.optional(v.string())
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const tx = await ctx.db.get(args.transactionId);
+        if (!tx) throw new Error("Transaction not found");
+
+        const pot = await ctx.db.get(tx.potId);
+        if (!pot) throw new Error("Pot not found");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        if (!user || user._id !== pot.foremanId) throw new Error("Only Foreman can reject");
+
+        await ctx.db.patch(args.transactionId, {
+            status: "UNPAID",
+            remarks: args.notes ? `Rejected: ${args.notes}` : "Rejected by Foreman",
+        });
+    },
+});
+
 // 4. Record Payout (Foreman -> Winner)
 export const recordPayout = mutation({
     args: {
