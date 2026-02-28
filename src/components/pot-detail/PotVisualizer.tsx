@@ -207,7 +207,12 @@ export function PotVisualizer({ pot, slots, currentMonthIndex, winnerId, transac
                         {/* Tooltip */}
                         <div className="pointer-events-none absolute bottom-full left-1/2 mb-3 -translate-x-1/2 scale-90 rounded-lg bg-[var(--surface-elevated)] p-2 text-xs shadow-xl ring-1 ring-[var(--border-subtle)] opacity-0 transition-all group-hover:opacity-100 group-hover:scale-100 min-w-[120px] backdrop-blur-md">
                             <div className="font-bold text-[var(--text-primary)]">
-                                {isOpen ? `Slot #${slot.slotNumber}: Available` : `Slot #${slot.slotNumber}: ${slot.user?.name}`}
+                                {isOpen
+                                    ? `#${slot.slotNumber}: Available`
+                                    : slot.isSplit && slot.splitOwners && slot.splitOwners.length > 0
+                                        ? `#${slot.slotNumber}: ${slot.splitOwners.map((o: any) => `${o.userName} ${o.sharePercentage}%`).join(" • ")}`
+                                        : `#${slot.slotNumber}: ${slot.user?.name}`
+                                }
                             </div>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className={`h-1.5 w-1.5 rounded-full ${isPaid ? 'bg-[var(--accent-vivid)]' : isPending ? 'bg-[var(--warning)]' : 'bg-gray-500'}`} />
