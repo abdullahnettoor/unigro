@@ -49,12 +49,21 @@ Use cases:
 - Slot views should emphasize collective occupancy and ownership distribution.
 - Status badges should be restrained, compact, and semantically consistent.
 
-Anti-patterns:
+Anti-patterns (The "AI Slop" Rule):
 
-- Neon fintech aesthetics
-- Heavy, high-gloss, neon glassmorphism that reduces readability
-- Saturated multi-color gradients as primary background language
-- Decorative motion that competes with financial data
+- Generic "fintech slop" aesthetics (e.g., typical purple gradients on white, empty vectors)
+- Overused font families (Inter, Roboto, system fonts) without intentionality
+- Heavy, high-gloss neon glassmorphism that reduces readability
+- Unintentional, timid, perfectly-safe color palettes with no attitude
+- Predictable layout structures without point-of-view
+
+### 3.1 Creative Execution
+
+We commit to a **distinctive, production-grade** aesthetic. Every UI endeavor must pick a tone and execute it aggressively—whether it's brutally minimal, organically styled, or luxuriously refined. The goal is to be unforgettable.
+
+Implementation requirements:
+- **Spatial Composition:** Don't default to center-aligned flex-boxes. Embrace unexpected layouts, controlled overlaps, asymmetrical balances, or highly rigorous mathematical density.
+- **Layers & Depth:** Do not default to flat `#FFF` boxes on `#F9F9F9`. Utilize CSS properties (masks, layers, subtle noise, gradients, blurring) to create actual atmosphere matching the intention.
 
 Moderate premium glass is approved for surfaces, navigation, and sheets when readability and contrast pass accessibility thresholds.
 
@@ -169,41 +178,48 @@ Guidelines:
 - Any horizontal tab/segment bar must support `overflow-x-auto` and hide scrollbars visually.
 - Responsive elements should dynamically hide/show (e.g., hiding mobile sticky bars on desktop and showing desktop sidebars).
 
-### 6.4 Safe Area Rules
+### 6.4 Safe Area Rules & PWA Support
 
 - Bottom navigation and mobile sheets must account for safe-area insets.
 - Do not place destructive or primary CTA content below reachable safe padding.
+- Always use the `safe-bottom` utility class and `100dvh` (not `100vh`) on primary wrappers to ensure stable PWA viewport rendering across standard browsers and installed apps.
 
 ## 7. Component Contracts
 
 This section defines behavior and hierarchy, not only styling.
 
-### 7.1 Top App Bar
+### 7.1 Layout Shells (AppShell & PageShell)
+
+- **`AppShell`**: Used as the root layout wrapper for PWA feel. It manages the global sticky header, bottom navigation bar, and primary safe-area spacing. Supports `floating` vs `sticky` header modes.
+- **`PageShell`**: Standardizes the layout rhythm per page. Use this to handle standard `title`, `subtitle`, `actions`, and fluid width constraints (`maxWidth` variations like `md|lg|xl`). Eliminates ad-hoc `max-w-* px-*` scattered styling.
+
+### 7.2 Top App Bar
 
 - Mobile: centered brand/title, no clutter.
 - Desktop: left brand and right account controls.
-- Surface: elevated with subtle border and backdrop.
+- Surface: elevated with subtle border and backdrop. Managed inside `AppShell`.
 
-### 7.10 Glass Surface Contract
+### 7.10 Surface Component Contract
 
-Use three standardized glass tiers only:
+Use three standardized surface tiers explicitly via the `<Surface>` component:
 
-- `glass-1`:
-- Use for chips, segmented controls, and compact badges.
-- Low blur, high readability.
+- `tier={1}` (Legacy glass-1):
+  - Use for chips, segmented controls, and compact badges.
+  - Low blur, high readability, tight borders.
 
-- `glass-2`:
-- Use for default cards, quick activity rail cards, and list rows.
-- Medium blur and balanced depth.
+- `tier={2}` (Legacy glass-2):
+  - Use for default cards, quick activity rails, and standard lists.
+  - Medium blur, balanced depth and inset shadows.
 
-- `glass-3`:
-- Use for overlays, sticky nav bars, sticky action bars, and sheet headers.
-- Strongest allowed blur with clear separators.
+- `tier={3}` (Legacy glass-3):
+  - Use for major overlays, sticky nav bars, sticky action bars, and sheet headers.
+  - Strongest allowed blur, distinct floating separation.
 
 Rules:
 
-- Do not define ad-hoc blur + opacity recipes in page files.
-- Glass surfaces must use semantic tokens and pass contrast checks in light and dark themes.
+- Do not define ad-hoc blur + opacity recipes in raw classes.
+- Always use the `<Surface>` wrapper instead of raw `glass-*` classes.
+- Child content must pass contrast checks against the chosen tier depth in all themes.
 
 ### 7.2 Bottom Navigation (3 Items)
 
@@ -257,7 +273,7 @@ Each state needs:
 - Sticky action row for primary and secondary actions.
 - Clear close affordance and dismiss behavior.
 
-### 7.8 Buttons
+### 7.9 Buttons
 
 Variants:
 
@@ -265,6 +281,10 @@ Variants:
 - `secondary`
 - `ghost`
 - `destructive`
+
+Properties:
+- Standard buttons should maintain a minimum height of `44px` for accessibility.
+- Add `density="compact"` prop when using chips/segmented controls in tight spaces, allowing height to drop below the 44px standard without breaking the semantic component tree.
 
 Contracts:
 
@@ -280,8 +300,8 @@ Contracts:
 
 ### 7.11 Sticky Bars (Mobile & Tablet)
 
-- **Top Sticky Navigation**: Use on detail pages to provide quick back access and contextual status (e.g., Pot Title & Status) to avoid consuming scrolling space. Must be hidden on large screens in favor of standard text-based back links. Uses `glass-3` with high z-index.
-- **Bottom Action Bar**: Used on mobile/tablet to anchor the primary CTA (e.g., Join, Pay, Invite) so users don't have to scroll to take action. Disappears on desktop where the sticky sidebar serves this purpose.
+- **Top Sticky Navigation**: Use on detail pages to provide quick back access and contextual status (e.g., Pot Title & Status) to avoid consuming scrolling space. Must be hidden on large screens in favor of standard text-based back links. Wrap in `<Surface tier={3}>` with a high z-index.
+- **Bottom Action Bar**: Used on mobile/tablet to anchor the primary CTA (e.g., Join, Pay, Invite) so users don't have to scroll to take action. Wrap in `<Surface tier={3}>`. Disappears on desktop where the sticky sidebar serves this purpose.
 
 ### 7.12 Expandable Mobile Cards
 
@@ -297,7 +317,7 @@ Contracts:
 ### 7.14 Information Banners
 
 - Used for contextual warnings or instructions (e.g., "Pot is full", "Overdue Payment").
-- Use `glass-3` with a left border accent (e.g., `border-l-[var(--warning)]`) and matching background tint.
+- Wrap in `<Surface tier={3}>` with a left border accent (e.g., `border-l-[var(--warning)]`) and matching background tint.
 - Layout: Icon on the left, Title & Description in the center, and an optional textual action button (e.g., "Contact") on the far right.
 
 ## 8. Content and Terminology Contract
@@ -357,9 +377,11 @@ Motion should communicate state change and confidence, not delight for its own s
 ### 9.3 Approved Patterns
 
 - Page transitions: subtle fade + minimal lift
+- High-impact moments: prioritize one well-orchestrated page load with staggered reveals (animation-delay) over scattered micro-interactions.
 - Tab transitions: opacity + slight translate
 - Modal/sheet transitions: vertical slide + fade
 - Toast transitions: short slide + fade
+- CSS-only priority: Use CSS transitions/animations for all standard effects. Use framer-motion only for complex orchestrated mounts and dragging.
 
 ### 9.4 Reduced Motion
 
