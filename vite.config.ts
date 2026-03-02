@@ -23,7 +23,12 @@ export default defineConfig({
           return 'vendor'
         }
       }
-    }
+    },
+  },
+  server: {
+    allowedHosts: [
+      'growpot-dev.abdullahnettoor.com',
+    ],
   },
   plugins: [
     react(),

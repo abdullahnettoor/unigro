@@ -120,7 +120,7 @@ function BottomNav() {
 
       {/* Floating Pill Navbar */}
       <nav className="fixed left-1/2 bottom-5 z-40 -translate-x-1/2 px-2 py-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/90 shadow-[0_12px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden w-fit min-w-[280px]">
-        <div className="flex items-center justify-around gap-1">
+        <div className="flex items-center justify-between gap-1">
           <Link
             to="/"
             className={itemClass(isActive("/"))}
