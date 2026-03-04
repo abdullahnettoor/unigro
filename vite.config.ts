@@ -13,17 +13,6 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 700,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return
-          if (id.includes('lucide-react')) return 'icons'
-          if (id.includes('@clerk') || id.includes('convex')) return 'backend-auth-vendor'
-          if (id.includes('react') || id.includes('scheduler')) return 'react-vendor'
-          return 'vendor'
-        }
-      }
-    },
   },
   server: {
     allowedHosts: [

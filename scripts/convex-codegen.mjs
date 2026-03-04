@@ -28,14 +28,14 @@ function loadEnvLocal() {
   }
 }
 
-if (!process.env.CONVEX_DEPLOYMENT) {
+if (!process.env.CONVEX_DEPLOYMENT && !process.env.CONVEX_DEPLOY_KEY) {
   loadEnvLocal();
 }
 
-if (!process.env.CONVEX_DEPLOYMENT) {
+if (!process.env.CONVEX_DEPLOYMENT && !process.env.CONVEX_DEPLOY_KEY) {
   console.error(
-    "[convex-codegen] Missing CONVEX_DEPLOYMENT. Set it in Cloudflare Pages environment variables " +
-      "or add it to .env.local for local builds."
+    "[convex-codegen] Missing Convex credentials. Set CONVEX_DEPLOYMENT or CONVEX_DEPLOY_KEY in Cloudflare Pages " +
+      "environment variables, or add CONVEX_DEPLOYMENT to .env.local for local builds."
   );
   process.exit(1);
 }
