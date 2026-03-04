@@ -54,7 +54,7 @@ export function Dashboard() {
             maxWidth="xl"
             sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />}
             title={`${greeting}, ${firstName}`}
-            subtitle="Your GrowPot is thriving"
+            subtitle="Your UniGro is thriving"
             titleClassName="text-3xl sm:text-4xl"
             subtitleClassName="text-sm text-[var(--accent-vivid)]"
             headerClassName="relative"

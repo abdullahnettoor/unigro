@@ -37,8 +37,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'GrowPot',
-        short_name: 'GrowPot',
+        name: 'UniGro',
+        short_name: 'UniGro',
         description: 'Communal Savings & Rotating Credit Association (ROSCA) App',
         theme_color: '#F6F5F2',
         background_color: '#F6F5F2',

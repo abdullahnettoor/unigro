@@ -71,10 +71,10 @@ export function JoinPotModal({ potId, contribution, totalValue, totalSlots, fill
                 });
 
                 // Persist the membership in this browser session
-                const existingGuests = JSON.parse(localStorage.getItem("growpot_ghost_memberships") || "[]");
+                const existingGuests = JSON.parse(localStorage.getItem("unigro_ghost_memberships") || "[]");
                 if (!existingGuests.includes(result.userId)) {
                     existingGuests.push(result.userId);
-                    localStorage.setItem("growpot_ghost_memberships", JSON.stringify(existingGuests));
+                    localStorage.setItem("unigro_ghost_memberships", JSON.stringify(existingGuests));
                 }
 
                 feedback.toast.success("Joined as Guest!", "Your slots are reserved. Sign up to secure your account.");

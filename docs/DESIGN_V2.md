@@ -1,14 +1,14 @@
-# GrowPot Design System v2
+# UniGro Design System v2
 
 Status: Canonical  
 Last updated: 2026-02-18  
-Supersedes: `/Users/abdullahnettoor/Projects/GrowPot/docs/DESIGN.md` (kept as legacy reference)
+Supersedes: `/Users/abdullahnettoor/Projects/UniGro/docs/DESIGN.md` (kept as legacy reference)
 
-This document is the source of truth for visual, interaction, and content design in GrowPot. All new UI work should follow this spec.
+This document is the source of truth for visual, interaction, and content design in UniGro. All new UI work should follow this spec.
 
 ## 1. Design Intent
 
-GrowPot is a community-finance product for ROSCA/chit workflows, not a generic consumer app. The experience must communicate:
+UniGro is a community-finance product for ROSCA/chit workflows, not a generic consumer app. The experience must communicate:
 
 - Trust and accountability
 - Financial clarity and auditability

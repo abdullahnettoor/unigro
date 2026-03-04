@@ -26,7 +26,7 @@ export function AppSidebar({ firstName, imageUrl, showAdmin = false }: AppSideba
           <div className="grid h-6 w-6 place-items-center rounded-md bg-[var(--accent-vivid)] text-[var(--text-on-accent)] text-xs font-bold">
             G
           </div>
-          <span className="text-base font-display font-bold text-[var(--text-primary)]">GrowPot</span>
+          <span className="text-base font-display font-bold text-[var(--text-primary)]">UniGro</span>
         </Link>
         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Workspace</p>
         <div className="space-y-2">

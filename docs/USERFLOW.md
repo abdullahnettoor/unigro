@@ -1,10 +1,10 @@
-# GrowPot User Flow (v2)
+# UniGro User Flow (v2)
 
 Status: Canonical  
 Last updated: 2026-02-18  
-Depends on: `/Users/abdullahnettoor/Projects/GrowPot/docs/DESIGN_V2.md`, `/Users/abdullahnettoor/Projects/GrowPot/docs/PRD_v3.0.md`
+Depends on: `/Users/abdullahnettoor/Projects/UniGro/docs/DESIGN_V2.md`, `/Users/abdullahnettoor/Projects/UniGro/docs/PRD_v3.0.md`
 
-This document defines the product user flow and content structure for GrowPot using the Design v2 principles: trusted, calm, premium, mobile-first.
+This document defines the product user flow and content structure for UniGro using the Design v2 principles: trusted, calm, premium, mobile-first.
 
 ## 1. Intent and Scope
 
@@ -232,7 +232,7 @@ P0:
 
 P1:
 
-- Add first-session guidance panel on dashboard (how GrowPot works in 3 steps).
+- Add first-session guidance panel on dashboard (how UniGro works in 3 steps).
 - Add standardized empty-state illustrations/messages for trust and clarity.
 - Expand audit views in history with clearer payout and approval markers.
 
@@ -258,7 +258,7 @@ P2:
 
 When implementing UI from this flow:
 
-1. Use `/Users/abdullahnettoor/Projects/GrowPot/docs/DESIGN_V2.md` as style and component contract.
+1. Use `/Users/abdullahnettoor/Projects/UniGro/docs/DESIGN_V2.md` as style and component contract.
 2. Use this file for journey order, screen purpose, and content hierarchy.
 3. If conflicts exist between old docs and this file, this file wins for flow decisions and `DESIGN_V2.md` wins for visual/interaction decisions.
 

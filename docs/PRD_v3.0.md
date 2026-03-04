@@ -1,4 +1,4 @@
-# **GrowPot Product Requirements Document (PRD) v3.0**
+# **UniGro Product Requirements Document (PRD) v3.0**
 
 **Version:** 3.0
 **Status:** Living Document (Updated Feb 17, 2026)
@@ -6,7 +6,7 @@
 
 ## **1. Executive Summary**
 
-**GrowPot** is a digital platform for managing community chit funds (ROSCAs). Unlike traditional tools that focus on "User Management," GrowPot uses a **Slot-First Architecture**. This allows flexible financial modeling where a pot consists of fixed *Slots* (financial positions), which can be held by single users, multiple users (split ownership), or even unsold (ghost slots).
+**UniGro** is a digital platform for managing community chit funds (ROSCAs). Unlike traditional tools that focus on "User Management," UniGro uses a **Slot-First Architecture**. This allows flexible financial modeling where a pot consists of fixed *Slots* (financial positions), which can be held by single users, multiple users (split ownership), or even unsold (ghost slots).
 
 The platform prioritizes **transparency, financial integrity, and trust**, bridging the gap between informal social savings and professional fund management.
 

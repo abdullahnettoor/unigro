@@ -330,7 +330,7 @@ export function Settings() {
                 {/* Appearance Section */}
                 <Surface tier={2} className="rounded-2xl p-6">
                     <h3 className="text-lg font-bold mb-2">Appearance</h3>
-                    <p className="text-sm text-[var(--text-muted)] mb-4">Choose how GrowPot looks on this device.</p>
+                    <p className="text-sm text-[var(--text-muted)] mb-4">Choose how UniGro looks on this device.</p>
                     <div className="mb-6">
                         <p className="text-xs uppercase font-semibold text-[var(--text-muted)] mb-2">Mode</p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

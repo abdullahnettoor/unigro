@@ -88,11 +88,11 @@ export function PWAPrompt() {
                             ? "New content available"
                             : offlineReady
                                 ? "App ready to work offline"
-                                : "Install GrowPot"}
+                                : "Install UniGro"}
                     </h3>
                     <p className="text-[var(--text-muted)] text-xs mb-3">
                         {needRefresh
-                            ? "A new version of GrowPot is available. Update now to get the latest features."
+                            ? "A new version of UniGro is available. Update now to get the latest features."
                             : offlineReady
                                 ? "You can now use this app without an internet connection."
                                 : isIOS

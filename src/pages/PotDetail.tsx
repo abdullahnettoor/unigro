@@ -93,7 +93,7 @@ export function PotDetail() {
     // Ghost Membership Recognition
     const [isGhostMember, setIsGhostMember] = useState(false);
     useEffect(() => {
-        const guestIds = JSON.parse(localStorage.getItem("growpot_ghost_memberships") || "[]");
+        const guestIds = JSON.parse(localStorage.getItem("unigro_ghost_memberships") || "[]");
         if (guestIds.length > 0 && !currentUser) {
             const joinedAsGhost = allSlots.some(s => s.userId && guestIds.includes(s.userId));
             setIsGhostMember(joinedAsGhost);
@@ -177,7 +177,7 @@ export function PotDetail() {
         if (!foremanDetails) return;
         const body = `Hi ${foremanDetails.name}, I'm interested in joining your pot "${pot.title}", but it appears to be full. Please let me know if a slot becomes available.`;
         const encodedBody = encodeURIComponent(body);
-        const subject = encodeURIComponent(`Inquiry about GrowPot: ${pot.title}`);
+        const subject = encodeURIComponent(`Inquiry about UniGro: ${pot.title}`);
 
         if (foremanDetails.phone) {
             window.open(`https://wa.me/${foremanDetails.phone.replace(/\D/g, '')}?text=${encodedBody}`, '_blank');
@@ -225,7 +225,7 @@ export function PotDetail() {
 
     const handleShare = async () => {
         const shareData = {
-            title: `Join my GrowPot: ${pot.title}`,
+            title: `Join my UniGro: ${pot.title}`,
             text: `Pool Value: ${formatCurrency(pot.config.totalValue, pot.config.currency)}. Join now!`,
             url: window.location.href
         };
