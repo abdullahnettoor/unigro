@@ -1,8 +1,9 @@
+import { Edit2 } from "lucide-react";
+
 import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
 import { PotVisualizer } from "@/components/pot-detail/PotVisualizer";
-import { Surface } from "@/components/ui/Surface";
 import { Button } from "@/components/ui/Button";
-import { Edit2 } from "lucide-react";
+import { Surface } from "@/components/ui/Surface";
 
 import type { Doc } from "../../../convex/_generated/dataModel";
 

@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
-import { Button } from "@/components/ui/Button";
 import {
     AlertCircle,
     Clock,
@@ -16,7 +14,9 @@ import {
     User
 } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
 import { getThemePreference, setThemePreference, type ThemePreference } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 import { api } from "../../../convex/_generated/api";
 

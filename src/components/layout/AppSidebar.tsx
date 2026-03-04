@@ -23,9 +23,7 @@ export function AppSidebar({ firstName, imageUrl, showAdmin = false }: AppSideba
     <aside className="hidden md:block">
       <Surface tier={2} className="sticky safe-top-offset flex h-[calc(100dvh-1.5rem)] flex-col p-3 lg:p-4">
         <Link to="/" className="mb-4 flex items-center gap-2 rounded-xl px-2 py-1.5">
-          <div className="grid h-6 w-6 place-items-center rounded-md bg-[var(--accent-vivid)] text-[var(--text-on-accent)] text-xs font-bold">
-            G
-          </div>
+          <img src="/monogram.svg" alt="UniGro" className="h-6 w-6 text-[var(--accent-vivid)]" />
           <span className="text-base font-display font-bold text-[var(--text-primary)]">UniGro</span>
         </Link>
         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Workspace</p>

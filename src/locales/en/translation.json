@@ -1,0 +1,11 @@
+{
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Manage your identity, preferences, and account details.",
+        "appearance": "Appearance",
+        "appearanceDesc": "Choose how UniGro looks on this device.",
+        "language": "Language",
+        "languageDesc": "Choose your preferred language for the app.",
+        "signOut": "Sign Out"
+    }
+}

@@ -1,21 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { SignInButton } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeft, ChevronRight, Coins, Edit2, Gavel, ShieldAlert } from "lucide-react";
-import { SignInButton } from "@clerk/clerk-react";
 
+import { PageShell } from "@/components/layout/PageShell";
 import { DesktopSidebar } from "@/components/pot-detail/DesktopSidebar";
 import { MemberDashboard } from "@/components/pot-detail/MemberDashboard";
 import { MembersList } from "@/components/pot-detail/MembersList";
 import { MobileActionBar } from "@/components/pot-detail/MobileActionBar";
 import { MobileStats } from "@/components/pot-detail/MobileStats";
 import { AddMemberModal } from "@/components/pot-detail/modals/AddMemberModal";
+import { DeletePotModal } from "@/components/pot-detail/modals/DeletePotModal";
 import { JoinPotModal } from "@/components/pot-detail/modals/JoinPotModal";
 import { NextRoundModal } from "@/components/pot-detail/modals/NextRoundModal"; // New
-import { SplitSlotModal } from "@/components/pot-detail/modals/SplitSlotModal"; // New
 import { RunDrawAnimationModal } from "@/components/pot-detail/modals/RunDrawAnimationModal";
+import { SplitSlotModal } from "@/components/pot-detail/modals/SplitSlotModal"; // New
 import { WinnerSelectionModal } from "@/components/pot-detail/modals/WinnerSelectionModal";
-import { DeletePotModal } from "@/components/pot-detail/modals/DeletePotModal";
 import { OrganizeTab } from "@/components/pot-detail/OrganizeTab";
 import { PaymentModal } from "@/components/pot-detail/PaymentComponents";
 import { PotHero } from "@/components/pot-detail/PotHero";
@@ -23,10 +24,9 @@ import { PotHistory } from "@/components/pot-detail/PotHistory"; // New
 import { RulesTab } from "@/components/pot-detail/RulesTab";
 import { SlotsTab } from "@/components/pot-detail/SlotsTab";
 import { TabNav } from "@/components/pot-detail/TabNav";
-import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
-import { Surface } from "@/components/ui/Surface";
 import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
 import { getNextCycleDate, getPotDisplayProgress, getPotFinancials, getSlotStats, getVirtualOpenSlots } from "@/lib/pot";
 import { formatCurrency } from "@/lib/utils";
 

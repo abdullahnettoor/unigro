@@ -1,10 +1,11 @@
 // import type { Doc, Id } from "../../../convex/_generated/dataModel";
-import { AlertCircle, CheckCircle, Clock, Lock, Trophy, Users, User } from "lucide-react";
-
 import { useState } from "react";
+import { AlertCircle, CheckCircle, Clock, Lock, Trophy, User,Users } from "lucide-react";
+
+import { Badge } from "@/components/ui/Badge";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Surface } from "@/components/ui/Surface";
-import { Badge } from "@/components/ui/Badge";
+
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
 
 interface PotHistoryProps {
@@ -234,7 +235,7 @@ function getMyPaymentStatus(cycle: number, mySlots: Doc<"slots">[], transactions
     return mySlots.map(slot => {
         let status: "UNPAID" | "PENDING" | "PAID" = "UNPAID";
         let paidAt: number | undefined = undefined;
-        let isSplit = slot.isSplit;
+        const isSplit = slot.isSplit;
         let sharePct = 100;
 
         if (isSplit && (slot as any).splitOwners && currentUserId) {
@@ -273,7 +274,7 @@ function getMyPaymentStatusDetailed(
         let status: "UNPAID" | "PENDING" | "PAID" = "UNPAID";
         let paidAt: number | undefined = undefined;
         let sharePct = 100;
-        let isSplit = slot.isSplit;
+        const isSplit = slot.isSplit;
 
         if (isSplit && (slot as any).splitOwners && currentUserId) {
             const myShare = (slot as any).splitOwners.find((o: any) => o.userId === currentUserId);

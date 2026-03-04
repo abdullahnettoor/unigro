@@ -8,6 +8,8 @@ import { ConvexClientProvider } from "@/providers/ConvexClientProvider"
 
 import "@/index.css"
 
+import "./i18n"
+
 initTheme()
 
 createRoot(document.getElementById('root')!).render(

@@ -1,5 +1,5 @@
-import { type Tab } from "@/pages/PotDetail";
 import { Surface } from "@/components/ui/Surface";
+import { type Tab } from "@/pages/PotDetail";
 
 interface TabNavProps {
     activeTab: Tab;

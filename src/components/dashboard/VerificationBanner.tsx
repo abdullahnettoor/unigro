@@ -1,4 +1,5 @@
 import { ShieldAlert, ShieldCheck } from "lucide-react";
+
 import { Surface } from "@/components/ui/Surface";
 
 export type VerificationStatus = "UNVERIFIED" | "PENDING" | "REJECTED";

@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { UserPen, Trash2, ChevronDown, ChevronUp, UserPlus, PieChart, Users, User } from "lucide-react";
-import { EditGhostModal } from "./modals/EditGhostModal";
+import { ChevronDown, ChevronUp, PieChart, Trash2, User,UserPen, UserPlus, Users } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
-import { Surface } from "@/components/ui/Surface";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { Surface } from "@/components/ui/Surface";
 
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
+
+import { EditGhostModal } from "./modals/EditGhostModal";
 
 interface SlotsTabProps {
     pot: Doc<"pots">;

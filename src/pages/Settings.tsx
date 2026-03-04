@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
-import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
 import { AlertCircle, Clock, FileText, Loader2, LogOut, Mail, Save, ShieldCheck, Smartphone, Upload, X } from "lucide-react";
 
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { getThemePreference, getThemeVariant, setThemePreference, setThemeVariant, type ThemePreference, type ThemeVariant } from "@/lib/theme";
-import { AppSidebar } from "@/components/layout/AppSidebar";
-import { PageShell } from "@/components/layout/PageShell";
 import { Surface } from "@/components/ui/Surface";
+import { getThemePreference, getThemeVariant, setThemePreference, setThemeVariant, type ThemePreference, type ThemeVariant } from "@/lib/theme";
 
 import { api } from "../../convex/_generated/api";
 
@@ -26,6 +28,7 @@ export function Settings() {
     const { signOut } = useClerk();
     const { user: clerkUser } = useUser();
     const feedback = useFeedback();
+    const { t } = useTranslation();
 
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -143,8 +146,8 @@ export function Settings() {
         <PageShell
             maxWidth="xl"
             sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />}
-            title="Settings"
-            subtitle="Manage your identity, preferences, and account details."
+            title={t('settings.title')}
+            subtitle={t('settings.subtitle')}
         >
             <div className="w-full max-w-5xl space-y-8 animate-in fade-in duration-500">
 
@@ -329,8 +332,8 @@ export function Settings() {
 
                 {/* Appearance Section */}
                 <Surface tier={2} className="rounded-2xl p-6">
-                    <h3 className="text-lg font-bold mb-2">Appearance</h3>
-                    <p className="text-sm text-[var(--text-muted)] mb-4">Choose how UniGro looks on this device.</p>
+                    <h3 className="text-lg font-bold mb-2">{t('settings.appearance')}</h3>
+                    <p className="text-sm text-[var(--text-muted)] mb-4">{t('settings.appearanceDesc')}</p>
                     <div className="mb-6">
                         <p className="text-xs uppercase font-semibold text-[var(--text-muted)] mb-2">Mode</p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -425,13 +428,22 @@ export function Settings() {
                     </div>
                 </Surface>
 
+                {/* Language Section */}
+                <Surface tier={2} className="rounded-2xl p-6">
+                    <h3 className="text-lg font-bold mb-2">{t('settings.language')}</h3>
+                    <p className="text-sm text-[var(--text-muted)] mb-4">{t('settings.languageDesc')}</p>
+                    <div className="max-w-sm">
+                        <LanguageSwitcher />
+                    </div>
+                </Surface>
+
                 <div className="pt-6 flex justify-center pb-12">
                     <Button
                         variant="ghost"
                         onClick={() => signOut()}
                         className="text-[var(--danger)] hover:bg-[var(--danger)]/10 px-6"
                     >
-                        <LogOut size={18} /> Sign Out
+                        <LogOut size={18} /> {t('settings.signOut')}
                     </Button>
                 </div>
             </div>

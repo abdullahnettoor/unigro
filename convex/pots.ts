@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+
 import type { Id } from "./_generated/dataModel";
+import { mutation, query } from "./_generated/server";
 
 export const create = mutation({
     args: {
@@ -350,7 +351,7 @@ export const assignSlot = mutation({
         }
 
         // Find Slot (might not exist in On-Demand)
-        let slot = await ctx.db
+        const slot = await ctx.db
             .query("slots")
             .withIndex("by_pot_slotNumber", q => q.eq("potId", args.potId).eq("slotNumber", args.slotNumber))
             .unique();

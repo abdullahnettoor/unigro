@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Percent, Users } from "lucide-react";
 
-import { Surface } from "@/components/ui/Surface";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Surface } from "@/components/ui/Surface";
 import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";

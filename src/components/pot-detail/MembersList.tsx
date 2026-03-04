@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
-import { CheckCircle, ChevronDown, ChevronUp, Clock, ShieldAlert, Users, UserPen } from "lucide-react";
+import { CheckCircle, ChevronDown, ChevronUp, Clock, ShieldAlert, UserPen,Users } from "lucide-react";
 
 import { PaymentModal } from "@/components/pot-detail/PaymentComponents";
-import { formatCurrency } from "@/lib/utils";
-import { EditGhostModal } from "./modals/EditGhostModal";
-import { Surface } from "@/components/ui/Surface";
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
+import { formatCurrency } from "@/lib/utils";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+
+import { EditGhostModal } from "./modals/EditGhostModal";
 
 interface MembersListProps {
     members: any[];

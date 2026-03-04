@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=Fraunces:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Google+Sans:wght@400;500;600;700&family=Fraunces:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Sora", sans-serif;
+  --font-display: "Google Sans", sans-serif;
   --font-body: "Manrope", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --font-weight-regular: 400;
@@ -19,7 +19,7 @@
 }
 
 :root {
-  --font-display: "Sora", sans-serif;
+  --font-display: "Google Sans", sans-serif;
   --font-body: "Manrope", sans-serif;
   --font-weight-regular: 400;
   --font-weight-medium: 500;

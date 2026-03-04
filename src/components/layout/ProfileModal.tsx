@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Phone, Save, User } from "lucide-react";
 
-import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { ModalHeader, ModalShell } from "@/components/ui/ModalShell";
 
 import { api } from "../../../convex/_generated/api";

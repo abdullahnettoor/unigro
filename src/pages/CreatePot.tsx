@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
-import { AnimatePresence, motion } from "framer-motion";
 import { format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ChevronLeft, Save } from "lucide-react";
 
+import { PageShell } from "@/components/layout/PageShell";
+import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
 import { formatCurrency } from "@/lib/utils";
 import { PotFinancialsStep } from "@/pages/create-pot/PotFinancialsStep";
 import { PotRulesStep } from "@/pages/create-pot/PotRulesStep";
 import { PotSlotsStep } from "@/pages/create-pot/PotSlotsStep";
-import { PageShell } from "@/components/layout/PageShell";
-import { Surface } from "@/components/ui/Surface";
-import { Button } from "@/components/ui/Button";
+
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 

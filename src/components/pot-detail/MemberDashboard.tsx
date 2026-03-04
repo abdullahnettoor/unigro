@@ -1,10 +1,11 @@
 import { Clock, Coins, ShieldAlert } from "lucide-react";
 
-import { formatCurrency } from "@/lib/utils";
-import type { Doc, Id } from "../../../convex/_generated/dataModel";
-import { Surface } from "@/components/ui/Surface";
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Surface } from "@/components/ui/Surface";
+import { formatCurrency } from "@/lib/utils";
+
+import type { Doc, Id } from "../../../convex/_generated/dataModel";
 
 interface MemberDashboardProps {
     pot: Doc<"pots">;

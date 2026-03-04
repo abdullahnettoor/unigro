@@ -8,8 +8,8 @@ import { AdminRoute } from "./components/auth/AdminRoute";
 import { UserSync } from "./components/auth/UserSync";
 import { AppShell } from "./components/layout/AppShell";
 import { PWAPrompt } from "./components/shared/PWAPrompt";
-import { Toaster } from "./components/ui/Sonner";
 import { Button } from "./components/ui/Button";
+import { Toaster } from "./components/ui/Sonner";
 
 const loadDashboard = () => import("./pages/Dashboard");
 const loadPots = () => import("./pages/Pots");
@@ -70,9 +70,12 @@ function Landing() {
   return (
     <main className="min-h-dvh bg-[var(--hero-gradient)] px-4 py-6 text-[var(--text-primary)] sm:px-6 sm:py-8">
       <header className="mb-8 flex flex-col items-start gap-4 sm:mb-12 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-display font-bold sm:text-4xl">UniGro</h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)] sm:text-base">Community savings made transparent.</p>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <img src="/app_icon.svg" alt="UniGro Logo" className="h-12 w-12 sm:h-16 sm:w-16 drop-shadow-sm" />
+          <div>
+            <h1 className="text-3xl font-display font-bold sm:text-4xl">UniGro</h1>
+            <p className="mt-1 text-sm text-[var(--text-muted)] sm:text-base">Community savings made transparent.</p>
+          </div>
         </div>
         <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
           <SignInButton mode="modal">

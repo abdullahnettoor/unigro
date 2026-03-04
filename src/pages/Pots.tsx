@@ -4,6 +4,8 @@ import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { ArrowDownAZ, ArrowUpAZ, Plus, Search } from "lucide-react";
 
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { PageShell } from "@/components/layout/PageShell";
 import { PotCard } from "@/components/shared/PotCard";
 import { Input } from "@/components/ui/Input";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -16,8 +18,6 @@ import {
 } from "@/components/ui/Select";
 import { getProgressScore } from "@/lib/pot";
 import { cn } from "@/lib/utils";
-import { AppSidebar } from "@/components/layout/AppSidebar";
-import { PageShell } from "@/components/layout/PageShell";
 
 import { api } from "../../convex/_generated/api";
 

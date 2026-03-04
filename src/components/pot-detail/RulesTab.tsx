@@ -1,4 +1,5 @@
 import { Calendar, Coins, Info, Layers } from "lucide-react";
+
 import { OrganizerDisplay } from "@/components/pot-detail/OrganizerDisplay";
 import { Surface } from "@/components/ui/Surface";
 import { formatCurrency } from "@/lib/utils";
