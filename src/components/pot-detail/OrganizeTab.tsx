@@ -39,11 +39,9 @@ export function OrganizeTab({
     isDrawing,
     transactions,
     allSlots,
-    commissionPct,
     handleActivate,
     handleDraw,
     setShowWinnerSelection,
-    setGlobalPaymentState,
     onDeletePot,
 }: OrganizeTabProps) {
     const pendingTransactions = transactions?.filter(t => t.status === "PENDING") || [];
