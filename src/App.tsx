@@ -2,14 +2,17 @@ import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { SignInButton } from "@clerk/clerk-react";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
+import { useUser } from "@clerk/clerk-react";
 import { Home, Settings, WalletCards } from "lucide-react";
 
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { UserSync } from "./components/auth/UserSync";
 import { AppShell } from "./components/layout/AppShell";
+import { AppSidebar } from "./components/layout/AppSidebar";
 import { PWAPrompt } from "./components/shared/PWAPrompt";
 import { Button } from "./components/ui/Button";
 import { Toaster } from "./components/ui/Sonner";
+import { LogoLoader } from "./components/ui/LogoLoader";
 
 const loadDashboard = () => import("./pages/Dashboard");
 const loadPots = () => import("./pages/Pots");
@@ -30,7 +33,7 @@ const ProfileModal = lazy(() => loadProfileModal().then((m) => ({ default: m.Pro
 function RouteLoading() {
   return (
     <div className="min-h-[40vh] grid place-items-center py-8">
-      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[var(--accent-vivid)]"></div>
+      <LogoLoader size="lg" />
     </div>
   );
 }
@@ -155,6 +158,13 @@ function BottomNav() {
 }
 
 function MainLayout({ children }: { children: React.ReactNode }) {
+  const { user: clerkUser } = useUser();
+  const location = useLocation();
+  const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "User";
+
+  // Persistent sidebar logic: Hide on PotDetail pages to avoid overcrowding
+  const hideSidebar = location.pathname.startsWith('/pot/') || location.pathname.startsWith('/create');
+
   return (
     <AppShell
       className="pb-24 sm:pb-0"
@@ -172,7 +182,19 @@ function MainLayout({ children }: { children: React.ReactNode }) {
           <ProfileModal />
         </Suspense>
       </Authenticated>
-      {children}
+
+      <div className={hideSidebar ? "w-full" : "mx-auto ml-3 w-full max-w-7xl md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-5 lg:gap-6"}>
+        {!hideSidebar && (
+          <Authenticated>
+            <AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />
+          </Authenticated>
+        )}
+        <div className="min-w-0">
+          <Suspense fallback={<RouteLoading />}>
+            {children}
+          </Suspense>
+        </div>
+      </div>
     </AppShell>
   );
 }
@@ -199,101 +221,99 @@ function App() {
       <PWAPrompt />
       <ThemeVariantSync />
       <AuthLoading>
-        <div className="min-h-dvh grid place-items-center bg-[var(--bg-app)]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-vivid)]"></div>
+        <div className="min-h-dvh flex items-center justify-center bg-[var(--bg-app)]">
+          <LogoLoader size="xl" />
         </div>
       </AuthLoading>
 
       <div className="bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)]">
-        <Suspense fallback={<RouteLoading />}>
-          <Routes>
-            {/* The root route handles Landing vs Dashboard */}
-            <Route
-              path="/"
-              element={
-                <>
-                  <Unauthenticated>
-                    <Landing />
-                  </Unauthenticated>
-                  <Authenticated>
-                    <MainLayout>
-                      <Dashboard />
-                    </MainLayout>
-                  </Authenticated>
-                </>
-              }
-            />
+        <Routes>
+          {/* The root route handles Landing vs Dashboard */}
+          <Route
+            path="/"
+            element={
+              <>
+                <Unauthenticated>
+                  <Landing />
+                </Unauthenticated>
+                <Authenticated>
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
+                </Authenticated>
+              </>
+            }
+          />
 
-            {/* Publicly accessible route */}
-            <Route
-              path="/pot/:potId"
-              element={
+          {/* Publicly accessible route */}
+          <Route
+            path="/pot/:potId"
+            element={
+              <MainLayout>
+                <PotDetail />
+              </MainLayout>
+            }
+          />
+
+          {/* Protected routes */}
+          <Route
+            path="/pots"
+            element={
+              <Authenticated>
                 <MainLayout>
-                  <PotDetail />
+                  <Pots />
                 </MainLayout>
-              }
-            />
+              </Authenticated>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <Authenticated>
+                <MainLayout>
+                  <SettingsPage />
+                </MainLayout>
+              </Authenticated>
+            }
+          />
+          <Route
+            path="/create"
+            element={
+              <Authenticated>
+                <MainLayout>
+                  <CreatePot />
+                </MainLayout>
+              </Authenticated>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <Authenticated>
+                <AdminRoute>
+                  <MainLayout>
+                    <AdminDashboard />
+                  </MainLayout>
+                </AdminRoute>
+              </Authenticated>
+            }
+          />
 
-            {/* Protected routes */}
-            <Route
-              path="/pots"
-              element={
+          {/* Default redirect for unauthenticated or unknown routes */}
+          <Route
+            path="*"
+            element={
+              <>
+                <Unauthenticated>
+                  <Navigate to="/" replace />
+                </Unauthenticated>
                 <Authenticated>
-                  <MainLayout>
-                    <Pots />
-                  </MainLayout>
+                  <Navigate to="/" replace />
                 </Authenticated>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <Authenticated>
-                  <MainLayout>
-                    <SettingsPage />
-                  </MainLayout>
-                </Authenticated>
-              }
-            />
-            <Route
-              path="/create"
-              element={
-                <Authenticated>
-                  <MainLayout>
-                    <CreatePot />
-                  </MainLayout>
-                </Authenticated>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <Authenticated>
-                  <AdminRoute>
-                    <MainLayout>
-                      <AdminDashboard />
-                    </MainLayout>
-                  </AdminRoute>
-                </Authenticated>
-              }
-            />
-
-            {/* Default redirect for unauthenticated or unknown routes */}
-            <Route
-              path="*"
-              element={
-                <>
-                  <Unauthenticated>
-                    <Navigate to="/" replace />
-                  </Unauthenticated>
-                  <Authenticated>
-                    <Navigate to="/" replace />
-                  </Authenticated>
-                </>
-              }
-            />
-          </Routes>
-        </Suspense>
+              </>
+            }
+          />
+        </Routes>
       </div>
     </BrowserRouter>
   );

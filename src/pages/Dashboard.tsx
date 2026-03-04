@@ -7,7 +7,6 @@ import { CalendarClock, CheckCircle2, ChevronRight, Plus, WalletCards } from "lu
 import { VerificationModal } from "@/components/auth/VerificationModal";
 import { QuickActivityCard } from "@/components/dashboard/QuickActivityCard";
 import { VerificationBanner } from "@/components/dashboard/VerificationBanner";
-import { AppSidebar } from "@/components/layout/AppSidebar";
 import { PageShell } from "@/components/layout/PageShell";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { PotCard } from "@/components/shared/PotCard";
@@ -33,6 +32,8 @@ export function Dashboard() {
     const managedPots = useMemo(() => pots?.filter((p) => p.foremanId === user?._id) || [], [pots, user?._id]);
     const joinedPots = useMemo(() => pots?.filter((p) => p.foremanId !== user?._id) || [], [pots, user?._id]);
 
+    const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
+
     const pendingApprovals = useMemo(() => {
         if (!managedPots.length) return 0;
         return managedPots.reduce((acc, pot) => {
@@ -46,14 +47,13 @@ export function Dashboard() {
     const filteredPots = potView === "organizing" ? managedPots : joinedPots;
     const recentPots = filteredPots.slice(0, 4);
 
-    const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
     const greeting = getGreeting();
+    const displayName = user?.name?.split(" ")[0] || "there";
 
     return (
         <PageShell
             maxWidth="xl"
-            sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />}
-            title={`${greeting}, ${firstName}`}
+            title={`${greeting}, ${displayName}`}
             subtitle="Your UniGro is thriving"
             titleClassName="text-3xl sm:text-4xl"
             subtitleClassName="text-sm text-[var(--accent-vivid)]"

@@ -457,3 +457,21 @@ input[type="submit"] {
   display: none;
   opacity: 0;
 }
+
+/* Custom Logo Loader Animations */
+/* A: Simple Pulse */
+@keyframes logo-pulse {
+
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-logo-pulse {
+  animation: logo-pulse 1.5s ease-in-out infinite;
+}

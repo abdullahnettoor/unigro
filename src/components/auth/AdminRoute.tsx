@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useQuery } from "convex/react";
-import { Loader2 } from "lucide-react";
+import { LogoLoader } from "@/components/ui/LogoLoader";
 
 import { api } from "../../../convex/_generated/api";
 
@@ -10,7 +10,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     if (isAdmin === undefined) {
         return (
             <div className="flex justify-center items-center h-screen bg-[var(--bg-app)]">
-                <Loader2 className="animate-spin text-[var(--accent-vivid)]" />
+                <LogoLoader size="lg" />
             </div>
         );
     }

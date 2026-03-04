@@ -26,6 +26,7 @@ import { SlotsTab } from "@/components/pot-detail/SlotsTab";
 import { TabNav } from "@/components/pot-detail/TabNav";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { Button } from "@/components/ui/Button";
+import { LogoLoader } from "@/components/ui/LogoLoader";
 import { Surface } from "@/components/ui/Surface";
 import { getNextCycleDate, getPotDisplayProgress, getPotFinancials, getSlotStats, getVirtualOpenSlots } from "@/lib/pot";
 import { formatCurrency } from "@/lib/utils";
@@ -141,7 +142,30 @@ export function PotDetail() {
         });
     }, [currentUser, isMember, isForeman]);
 
-    if (!pot || transactions === undefined) return <div className="p-8 text-center animate-pulse">Loading pot details...</div>;
+    if (pot === undefined || transactions === undefined) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-[var(--bg-app)]">
+                <LogoLoader size="lg" />
+            </div>
+        );
+    }
+
+    if (pot === null) {
+        return (
+            <PageShell title="Pot Not Found">
+                <div className="max-w-2xl mx-auto py-12 px-6 text-center space-y-6">
+                    <ShieldAlert size={48} className="mx-auto text-[var(--danger)]/80" />
+                    <h2 className="text-xl font-bold">This pot doesn't exist</h2>
+                    <p className="text-[var(--text-muted)] text-sm">
+                        It may have been deleted by the organizer or the link is invalid.
+                    </p>
+                    <Button onClick={() => navigate("/")} variant="primary">
+                        Return to Dashboard
+                    </Button>
+                </div>
+            </PageShell>
+        );
+    }
 
 
     const { commissionPct, commissionAmount, winningAmount } = getPotFinancials(pot as any);

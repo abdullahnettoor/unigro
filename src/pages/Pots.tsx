@@ -1,10 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { ArrowDownAZ, ArrowUpAZ, Plus, Search } from "lucide-react";
 
-import { AppSidebar } from "@/components/layout/AppSidebar";
 import { PageShell } from "@/components/layout/PageShell";
 import { PotCard } from "@/components/shared/PotCard";
 import { Input } from "@/components/ui/Input";
@@ -38,7 +36,6 @@ const DEFAULT_STATUSES = new Set<Status>();
 export function Pots() {
     const pots = useQuery(api.pots.list);
     const currentUser = useQuery(api.users.current);
-    const { user: clerkUser } = useUser();
 
     const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
     // Multi-select status: default = all except archived
@@ -47,7 +44,6 @@ export function Pots() {
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
     const [search, setSearch] = useState("");
 
-    const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
     const currentUserId = currentUser?._id;
 
     const toggleStatus = (s: Status) => {
@@ -92,7 +88,6 @@ export function Pots() {
     return (
         <PageShell
             maxWidth="xl"
-            sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />}
             title="Pots"
             subtitle="View and filter the pots you organize or joined."
             headerClassName="relative"

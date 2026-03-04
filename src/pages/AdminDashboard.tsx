@@ -1,20 +1,18 @@
 import { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
 import { Check, CreditCard, Loader2, X } from "lucide-react";
 
-import { AppSidebar } from "@/components/layout/AppSidebar";
 import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { MediaPreviewDialog } from "@/components/shared/MediaPreviewDialog";
 import { Button } from "@/components/ui/Button";
 import { Surface } from "@/components/ui/Surface";
 import { Textarea } from "@/components/ui/Textarea";
+import { LogoLoader } from "@/components/ui/LogoLoader";
 
 import { api } from "../../convex/_generated/api";
 
 export function AdminDashboard() {
-    const { user } = useUser();
     const pendingRequests = useQuery(api.verification.getPending);
     const reviewVerification = useMutation(api.verification.review);
     const feedback = useFeedback();
@@ -49,19 +47,15 @@ export function AdminDashboard() {
         }
     };
 
-    const clerkUser = user;
-    const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
-
     if (pendingRequests === undefined) {
         return (
             <PageShell
                 maxWidth="xl"
-                sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin />}
                 title="Admin dashboard"
                 subtitle="Review identity verification requests."
             >
                 <div className="max-w-5xl w-full py-8 flex justify-center">
-                    <Loader2 className="animate-spin text-[var(--accent-vivid)]" />
+                    <LogoLoader size="lg" />
                 </div>
             </PageShell>
         );
@@ -70,7 +64,6 @@ export function AdminDashboard() {
     return (
         <PageShell
             maxWidth="xl"
-            sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin />}
             title="Admin dashboard"
             subtitle="Review identity verification requests."
         >

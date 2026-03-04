@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
-import { AlertCircle, Clock, FileText, Loader2, LogOut, Mail, Save, ShieldCheck, Smartphone, Upload, X } from "lucide-react";
+import { AlertCircle, Clock, FileText, LogOut, Mail, Save, ShieldCheck, Smartphone, Upload, X } from "lucide-react";
 
-import { AppSidebar } from "@/components/layout/AppSidebar";
 import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { LogoLoader } from "@/components/ui/LogoLoader";
 import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Surface } from "@/components/ui/Surface";
@@ -26,7 +26,6 @@ export function Settings() {
     const requestVerification = useMutation(api.verification.submit);
     const updateProfile = useMutation(api.users.updateProfile);
     const { signOut } = useClerk();
-    const { user: clerkUser } = useUser();
     const feedback = useFeedback();
     const { t } = useTranslation();
 
@@ -52,7 +51,7 @@ export function Settings() {
         }
     }, [user, isEditingProfile]);
 
-    if (!user) return <div className="min-h-dvh grid place-items-center"><Loader2 className="animate-spin text-[var(--accent-vivid)]" /></div>;
+    if (!user) return <div className="min-h-dvh grid place-items-center"><LogoLoader size="lg" /></div>;
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
@@ -140,12 +139,10 @@ export function Settings() {
     const status = (user.verificationStatus as keyof typeof statusConfig) || "UNVERIFIED";
     const config = statusConfig[status];
     const Icon = config.icon;
-    const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "there";
 
     return (
         <PageShell
             maxWidth="xl"
-            sidebar={<AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />}
             title={t('settings.title')}
             subtitle={t('settings.subtitle')}
         >
