@@ -171,9 +171,9 @@ export function CreatePot() {
     };
 
     return (
-        <div className="min-h-dvh bg-[var(--bg-app)] pb-24 relative">
+        <div className="min-h-dvh pb-24 relative">
             {/* Header / Progress */}
-            <header className="sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[var(--surface-elevated)]/95 px-4 pt-12 pb-4 backdrop-blur-md sm:pt-6">
+            <header className="sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-[rgba(var(--surface-elevated-rgb),0.95)] px-4 pt-12 pb-4 backdrop-blur-md sm:pt-6">
                 <div className="mx-auto max-w-2xl">
                     <div className="mb-4 flex items-center justify-between">
                         <Button

@@ -108,13 +108,13 @@ export function Pots() {
             {/* ── Search ── */}
             <div className="mb-4">
                 <div className="relative min-w-0 flex-1">
-                    <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                    <Search size={15} className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-[var(--text-muted)]" />
                     <Input
                         type="text"
                         placeholder="Search pots..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-9"
+                        style={{ paddingLeft: "2.25rem" }}
                     />
                 </div>
             </div>

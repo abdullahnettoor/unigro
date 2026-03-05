@@ -45,7 +45,7 @@ export function PotHero({
                     <Button
                         variant="secondary"
                         size="sm"
-                        className="gap-2 shadow-sm bg-[var(--surface-elevated)]/80 backdrop-blur-md"
+                        className="gap-2 shadow-sm bg-[rgba(var(--surface-elevated-rgb),0.8)] backdrop-blur-md"
                         onClick={() => window.location.href = `/create?edit=${pot._id}`}
                     >
                         <Edit2 size={16} /> Edit Pot

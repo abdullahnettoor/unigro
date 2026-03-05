@@ -106,7 +106,9 @@
 /* Theme Variants (Light) */
 [data-theme-variant="ocean"] {
   --bg-app: #F1F4F7;
+  --bg-app-rgb: 241, 244, 247;
   --surface-elevated: #FFFFFF;
+  --surface-elevated-rgb: 255, 255, 255;
   --surface-card: #E7EEF4;
   --surface-deep: #DCE6EE;
   --accent-vivid: #1F6AA5;
@@ -138,7 +140,9 @@
 
 [data-theme-variant="clay"] {
   --bg-app: #F7F1EA;
+  --bg-app-rgb: 247, 241, 234;
   --surface-elevated: #FFF8F1;
+  --surface-elevated-rgb: 255, 248, 241;
   --surface-card: #F0E4D7;
   --surface-deep: #E6D7C7;
   --accent-vivid: #7A4E2F;
@@ -170,7 +174,9 @@
 
 [data-theme-variant="dusk"] {
   --bg-app: #F4EEF6;
+  --bg-app-rgb: 244, 238, 246;
   --surface-elevated: #FFFFFF;
+  --surface-elevated-rgb: 255, 255, 255;
   --surface-card: #EDE1F1;
   --surface-deep: #E2D4EA;
   --accent-vivid: #6A4DA3;
@@ -203,7 +209,9 @@
 /* Theme Variants (Dark) */
 [data-theme="dark"][data-theme-variant="ocean"] {
   --bg-app: #0E1B25;
+  --bg-app-rgb: 14, 27, 37;
   --surface-elevated: #142433;
+  --surface-elevated-rgb: 20, 36, 51;
   --surface-card: #1A2B3B;
   --surface-deep: #0C1721;
   --accent-vivid: #5FB3FF;
@@ -223,7 +231,9 @@
 
 [data-theme="dark"][data-theme-variant="clay"] {
   --bg-app: #1A1411;
+  --bg-app-rgb: 26, 20, 17;
   --surface-elevated: #221A16;
+  --surface-elevated-rgb: 34, 26, 22;
   --surface-card: #2A201B;
   --surface-deep: #16100D;
   --accent-vivid: #D39A6B;
@@ -243,7 +253,9 @@
 
 [data-theme="dark"][data-theme-variant="dusk"] {
   --bg-app: #16121D;
+  --bg-app-rgb: 22, 18, 29;
   --surface-elevated: #201A2A;
+  --surface-elevated-rgb: 32, 26, 42;
   --surface-card: #2A2235;
   --surface-deep: #120F18;
   --accent-vivid: #A88CFF;
@@ -347,30 +359,28 @@ input[type="submit"] {
   transition: background-color var(--motion-normal) ease, color var(--motion-normal) ease, border-color var(--motion-normal) ease, box-shadow var(--motion-normal) ease, fill var(--motion-normal) ease, stroke var(--motion-normal) ease;
 }
 
-/* Moderate premium glass tiers */
+/* Glass surface tiers — mirrors the proven sticky topbar technique */
 .glass-1 {
-  background: rgba(var(--surface-elevated-rgb), 0.45);
-  backdrop-filter: saturate(140%) blur(12px);
-  -webkit-backdrop-filter: saturate(140%) blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(var(--surface-elevated-rgb), 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--surface-elevated-rgb), 0.15);
   box-shadow: var(--shadow-1);
 }
 
 .glass-2 {
-  background: rgba(var(--surface-elevated-rgb), 0.35);
-  backdrop-filter: saturate(160%) blur(22px);
-  -webkit-backdrop-filter: saturate(160%) blur(22px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-top-color: rgba(255, 255, 255, 0.25);
+  background: rgba(var(--surface-elevated-rgb), 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(var(--surface-elevated-rgb), 0.2);
   box-shadow: var(--shadow-2);
 }
 
 .glass-3 {
-  background: rgba(var(--surface-elevated-rgb), var(--glass-bg-opacity, 0.8));
-  backdrop-filter: saturate(190%) blur(40px);
-  -webkit-backdrop-filter: saturate(190%) blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-top-color: rgba(255, 255, 255, 0.45);
+  background: rgba(var(--surface-elevated-rgb), 0.80);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(var(--surface-elevated-rgb), 0.25);
   box-shadow: var(--shadow-3);
 }
 

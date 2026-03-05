@@ -25,7 +25,7 @@ export function TabNav({
         }`;
 
     return (
-        <div className="sticky top-0 sm:top-4 z-40 -mx-4 sm:mx-0 px-4 sm:px-0 bg-[var(--bg-app)]/60 backdrop-blur-sm py-2">
+        <div className="sticky top-0 sm:top-4 z-40 -mx-4 sm:mx-0 px-4 sm:px-0 bg-[rgba(var(--bg-app-rgb),0.6)] backdrop-blur-sm py-2">
             <Surface tier={1} className="flex gap-1 overflow-x-auto rounded-full p-1 scrollbar-hide">
                 {(isMember || isForeman) && (
                     <button
@@ -66,12 +66,12 @@ export function TabNav({
                     </button>
                 )}
 
-                    <button
-                        onClick={() => setActiveTab('rules')}
-                        className={tabButtonClass("rules")}
-                    >
-                        Rules & Info
-                    </button>
+                <button
+                    onClick={() => setActiveTab('rules')}
+                    className={tabButtonClass("rules")}
+                >
+                    Rules & Info
+                </button>
 
                 {(isMember || isForeman) && (
                     <>

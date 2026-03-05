@@ -92,37 +92,41 @@ export function Dashboard() {
                 <div className="mb-3 flex items-center justify-between">
                     <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">Quick activity</h2>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-4 pt-1 -mx-4 px-4 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3 no-scrollbar">
-                    <QuickActivityCard
-                        title="Next payment"
-                        value={formatCurrency(nextPaymentAmount, nextPaymentCurrency)}
-                        hint={nextPaymentAmount > 0 ? "Your next due contribution" : "Join a pot to see upcoming dues"}
-                        icon={CalendarClock}
-                        accent
-                    />
-                    <QuickActivityCard
-                        title="Pending approvals"
-                        value={`${pendingApprovals}`}
-                        hint="Approvals waiting in your organized pots"
-                        icon={CheckCircle2}
-                    />
-                    <QuickActivityCard
-                        title="Your active pots"
-                        value={`${(joinedPots.length + managedPots.length).toString()}`}
-                        hint={`${managedPots.length} organized · ${joinedPots.length} joined`}
-                        icon={WalletCards}
-                    />
-                    <Link
-                        to="/create"
-                        className="group min-w-[240px] rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/20 p-5 text-left transition-colors hover:border-[var(--accent-vivid)]/40 hover:bg-[var(--accent-vivid)]/8"
-                    >
-                        <div className="mb-3 flex items-center justify-between">
-                            <span className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Create pot</span>
-                            <Plus size={16} className="text-[var(--accent-vivid)]" />
-                        </div>
-                        <div className="text-xl font-semibold text-[var(--text-primary)]">Start a new pot</div>
-                        <p className="mt-1 text-xs text-[var(--text-muted)]">Set up members, payouts, and schedule.</p>
-                    </Link>
+                <div className="relative">
+                    <div className="flex gap-3 overflow-x-auto pb-4 pt-1 -mx-4 px-4 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3 no-scrollbar">
+                        <QuickActivityCard
+                            title="Next payment"
+                            value={formatCurrency(nextPaymentAmount, nextPaymentCurrency)}
+                            hint={nextPaymentAmount > 0 ? "Your next due contribution" : "Join a pot to see upcoming dues"}
+                            icon={CalendarClock}
+                            accent
+                        />
+                        <QuickActivityCard
+                            title="Pending approvals"
+                            value={`${pendingApprovals}`}
+                            hint="Approvals waiting in your organized pots"
+                            icon={CheckCircle2}
+                        />
+                        <QuickActivityCard
+                            title="Your active pots"
+                            value={`${(joinedPots.length + managedPots.length).toString()}`}
+                            hint={`${managedPots.length} organized · ${joinedPots.length} joined`}
+                            icon={WalletCards}
+                        />
+                        <Link
+                            to="/create"
+                            className="group min-w-[240px] rounded-2xl border border-dashed border-[var(--border-subtle)] bg-[var(--surface-elevated)]/20 p-5 text-left transition-colors hover:border-[var(--accent-vivid)]/40 hover:bg-[var(--accent-vivid)]/8"
+                        >
+                            <div className="mb-3 flex items-center justify-between">
+                                <span className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Create pot</span>
+                                <Plus size={16} className="text-[var(--accent-vivid)]" />
+                            </div>
+                            <div className="text-xl font-semibold text-[var(--text-primary)]">Start a new pot</div>
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">Set up members, payouts, and schedule.</p>
+                        </Link>
+                    </div>
+                    {/* Right-edge fade hint (mobile only) */}
+                    <div className="pointer-events-none absolute right-0 top-0 bottom-4 w-16 bg-gradient-to-l from-[var(--bg-app)] to-transparent md:hidden" />
                 </div>
             </section>
 
