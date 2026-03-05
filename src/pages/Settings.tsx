@@ -217,9 +217,9 @@ export function Settings() {
     const config = statusConfig[status];
     const StatusIcon = config.icon;
 
-    // ── PWA display logic ──
+    // ── PWA display logic ── always show, content adapts to context
     const canInstall = !isStandalone && (Boolean(deferredPrompt) || isIOS);
-    const showPwaRow = canInstall || isStandalone; // always show something app-related
+    const showPwaRow = true; // always show an app row — content adapts
 
     // ── Member since ──
     const memberSince = user._creationTime
@@ -516,13 +516,20 @@ export function Settings() {
                                             ) : undefined
                                         }
                                     />
-                                ) : (
-                                    // Already installed and up to date
+                                ) : isStandalone ? (
+                                    // Installed, up to date
                                     <SettingRow
                                         icon={RefreshCw}
                                         label="Check for updates"
                                         description="UniGro is up to date"
                                         onClick={() => updateServiceWorker(false)}
+                                    />
+                                ) : (
+                                    // Browser hasn't shown install prompt yet (e.g. desktop or prompt not ready)
+                                    <SettingRow
+                                        icon={Download}
+                                        label="Add to Home Screen"
+                                        description='Open browser menu → "Add to Home Screen" or "Install app"'
                                     />
                                 )}
                             </>

@@ -64,6 +64,13 @@
   --text-3: color-mix(in srgb, var(--text-primary) 70%, transparent);
   --safe-bottom: max(0.75rem, env(safe-area-inset-bottom));
   --glass-bg-opacity: 0.8;
+  /* Pre-computed glass backgrounds — surface-elevated #FFFFFF at each opacity tier */
+  --glass-bg-1: rgba(255, 255, 255, 0.55);
+  /* #FFFFFF @ 55% */
+  --glass-bg-2: rgba(255, 255, 255, 0.68);
+  /* #FFFFFF @ 68% */
+  --glass-bg-3: rgba(255, 255, 255, 0.82);
+  /* #FFFFFF @ 82% */
   color-scheme: light;
 }
 
@@ -100,6 +107,13 @@
   --text-2: var(--text-muted);
   --text-3: color-mix(in srgb, var(--text-primary) 70%, transparent);
   --glass-bg-opacity: 0.75;
+  /* Pre-computed glass backgrounds — surface-elevated #152620 at each opacity tier */
+  --glass-bg-1: rgba(21, 38, 32, 0.55);
+  /* #152620 @ 55% */
+  --glass-bg-2: rgba(21, 38, 32, 0.72);
+  /* #152620 @ 72% */
+  --glass-bg-3: rgba(21, 38, 32, 0.86);
+  /* #152620 @ 86% */
   color-scheme: dark;
 }
 
@@ -136,6 +150,13 @@
   --text-1: var(--text-primary);
   --text-2: var(--text-muted);
   --text-3: color-mix(in srgb, var(--text-primary) 70%, transparent);
+  /* Pre-computed glass backgrounds — surface-elevated #FFFFFF at each opacity tier */
+  --glass-bg-1: rgba(255, 255, 255, 0.55);
+  /* #FFFFFF @ 55% */
+  --glass-bg-2: rgba(255, 255, 255, 0.68);
+  /* #FFFFFF @ 68% */
+  --glass-bg-3: rgba(255, 255, 255, 0.82);
+  /* #FFFFFF @ 82% */
 }
 
 [data-theme-variant="clay"] {
@@ -170,6 +191,13 @@
   --text-1: var(--text-primary);
   --text-2: var(--text-muted);
   --text-3: color-mix(in srgb, var(--text-primary) 70%, transparent);
+  /* Pre-computed glass backgrounds — surface-elevated #FFF8F1 at each opacity tier */
+  --glass-bg-1: rgba(255, 248, 241, 0.55);
+  /* #FFF8F1 @ 55% */
+  --glass-bg-2: rgba(255, 248, 241, 0.68);
+  /* #FFF8F1 @ 68% */
+  --glass-bg-3: rgba(255, 248, 241, 0.82);
+  /* #FFF8F1 @ 82% */
 }
 
 [data-theme-variant="dusk"] {
@@ -204,6 +232,13 @@
   --text-1: var(--text-primary);
   --text-2: var(--text-muted);
   --text-3: color-mix(in srgb, var(--text-primary) 70%, transparent);
+  /* Pre-computed glass backgrounds — surface-elevated #FFFFFF at each opacity tier */
+  --glass-bg-1: rgba(255, 255, 255, 0.55);
+  /* #FFFFFF @ 55% */
+  --glass-bg-2: rgba(255, 255, 255, 0.68);
+  /* #FFFFFF @ 68% */
+  --glass-bg-3: rgba(255, 255, 255, 0.82);
+  /* #FFFFFF @ 82% */
 }
 
 /* Theme Variants (Dark) */
@@ -227,6 +262,13 @@
   --danger: #FF7A70;
   --gold: #F0C36B;
   --hero-gradient: radial-gradient(circle at top, #1A3143 0%, #0E1B25 55%, #0A141D 100%);
+  /* Pre-computed glass backgrounds — surface-elevated #142433 at each opacity tier */
+  --glass-bg-1: rgba(20, 36, 51, 0.55);
+  /* #142433 @ 55% */
+  --glass-bg-2: rgba(20, 36, 51, 0.72);
+  /* #142433 @ 72% */
+  --glass-bg-3: rgba(20, 36, 51, 0.86);
+  /* #142433 @ 86% */
 }
 
 [data-theme="dark"][data-theme-variant="clay"] {
@@ -249,6 +291,13 @@
   --danger: #E07A6A;
   --gold: #E0B05D;
   --hero-gradient: radial-gradient(circle at top, #33241D 0%, #1A1411 55%, #130E0C 100%);
+  /* Pre-computed glass backgrounds — surface-elevated #221A16 at each opacity tier */
+  --glass-bg-1: rgba(34, 26, 22, 0.55);
+  /* #221A16 @ 55% */
+  --glass-bg-2: rgba(34, 26, 22, 0.72);
+  /* #221A16 @ 72% */
+  --glass-bg-3: rgba(34, 26, 22, 0.86);
+  /* #221A16 @ 86% */
 }
 
 [data-theme="dark"][data-theme-variant="dusk"] {
@@ -271,6 +320,13 @@
   --danger: #FF7A9C;
   --gold: #E2B86C;
   --hero-gradient: radial-gradient(circle at top, #2A1F38 0%, #16121D 55%, #0F0B14 100%);
+  /* Pre-computed glass backgrounds — surface-elevated #201A2A at each opacity tier */
+  --glass-bg-1: rgba(32, 26, 42, 0.55);
+  /* #201A2A @ 55% */
+  --glass-bg-2: rgba(32, 26, 42, 0.72);
+  /* #201A2A @ 72% */
+  --glass-bg-3: rgba(32, 26, 42, 0.86);
+  /* #201A2A @ 86% */
 }
 
 body {
@@ -359,28 +415,25 @@ input[type="submit"] {
   transition: background-color var(--motion-normal) ease, color var(--motion-normal) ease, border-color var(--motion-normal) ease, box-shadow var(--motion-normal) ease, fill var(--motion-normal) ease, stroke var(--motion-normal) ease;
 }
 
-/* Glass surface tiers — mirrors the proven sticky topbar technique */
+/* Glass surface tiers — use pre-computed rgba() vars per theme for mobile compatibility */
 .glass-1 {
-  background: rgba(var(--surface-elevated-rgb), 0.55);
+  background: var(--glass-bg-1);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(var(--surface-elevated-rgb), 0.15);
   box-shadow: var(--shadow-1);
 }
 
 .glass-2 {
-  background: rgba(var(--surface-elevated-rgb), 0.65);
+  background: var(--glass-bg-2);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(var(--surface-elevated-rgb), 0.2);
   box-shadow: var(--shadow-2);
 }
 
 .glass-3 {
-  background: rgba(var(--surface-elevated-rgb), 0.80);
+  background: var(--glass-bg-3);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(var(--surface-elevated-rgb), 0.25);
   box-shadow: var(--shadow-3);
 }
 
