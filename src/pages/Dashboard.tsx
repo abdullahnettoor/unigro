@@ -92,8 +92,8 @@ export function Dashboard() {
                 <div className="mb-3 flex items-center justify-between">
                     <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">Quick activity</h2>
                 </div>
-                <div className="relative">
-                    <div className="flex gap-3 overflow-x-auto pb-4 pt-1 -mx-4 px-4 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3 no-scrollbar">
+                <div className="relative -mx-4">
+                    <div className="flex gap-3 overflow-x-auto pb-4 pt-1 px-4 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3 no-scrollbar">
                         <QuickActivityCard
                             title="Next payment"
                             value={formatCurrency(nextPaymentAmount, nextPaymentCurrency)}
@@ -125,7 +125,9 @@ export function Dashboard() {
                             <p className="mt-1 text-xs text-[var(--text-muted)]">Set up members, payouts, and schedule.</p>
                         </Link>
                     </div>
-                    {/* Right-edge fade hint (mobile only) */}
+                    {/* Left-edge fade (mobile only) */}
+                    <div className="pointer-events-none absolute left-0 top-0 bottom-4 w-6 bg-gradient-to-r from-[var(--bg-app)] to-transparent md:hidden" />
+                    {/* Right-edge fade (mobile only) */}
                     <div className="pointer-events-none absolute right-0 top-0 bottom-4 w-16 bg-gradient-to-l from-[var(--bg-app)] to-transparent md:hidden" />
                 </div>
             </section>
