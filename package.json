@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npx convex codegen",
     "build": "tsc -b && vite build",
-    "deploy:pages": "npx wrangler pages deploy dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },
