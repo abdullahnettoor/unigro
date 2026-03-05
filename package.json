@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/convex-codegen.mjs",
     "build": "tsc -b && vite build",
     "deploy:pages": "npx wrangler pages deploy dist",
     "lint": "eslint .",
