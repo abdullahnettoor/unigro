@@ -307,9 +307,7 @@ input[type="submit"] {
 }
 
 @supports (padding: max(0px)) {
-  body {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+  /* Body padding handled by AppShell and specific layout components */
 }
 
 @media (prefers-reduced-motion: reduce) {

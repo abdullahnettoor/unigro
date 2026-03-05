@@ -30,6 +30,17 @@ const SettingsPage = lazy(() => loadSettings().then((m) => ({ default: m.Setting
 const AdminDashboard = lazy(() => loadAdminDashboard().then((m) => ({ default: m.AdminDashboard })));
 const ProfileModal = lazy(() => loadProfileModal().then((m) => ({ default: m.ProfileModal })));
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Authenticated>{children}</Authenticated>
+      <Unauthenticated>
+        <Navigate to="/" replace />
+      </Unauthenticated>
+    </>
+  );
+}
+
 function RouteLoading() {
   return (
     <div className="min-h-[40vh] grid place-items-center py-8">
@@ -167,7 +178,6 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <AppShell
-      className="pb-24 sm:pb-0"
       bottomNav={
         <Authenticated>
           <BottomNav />
@@ -183,7 +193,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         </Suspense>
       </Authenticated>
 
-      <div className={hideSidebar ? "w-full" : "mx-auto ml-3 w-full max-w-7xl md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-5 lg:gap-6"}>
+      <div className={hideSidebar ? "w-full" : "mx-auto w-full max-w-7xl px-4 md:px-6 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-5 lg:gap-6"}>
         {!hideSidebar && (
           <Authenticated>
             <AppSidebar firstName={firstName} imageUrl={clerkUser?.imageUrl} showAdmin={firstName === "Admin"} />
@@ -259,43 +269,43 @@ function App() {
           <Route
             path="/pots"
             element={
-              <Authenticated>
+              <ProtectedRoute>
                 <MainLayout>
                   <Pots />
                 </MainLayout>
-              </Authenticated>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/settings"
             element={
-              <Authenticated>
+              <ProtectedRoute>
                 <MainLayout>
                   <SettingsPage />
                 </MainLayout>
-              </Authenticated>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/create"
             element={
-              <Authenticated>
+              <ProtectedRoute>
                 <MainLayout>
                   <CreatePot />
                 </MainLayout>
-              </Authenticated>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin"
             element={
-              <Authenticated>
+              <ProtectedRoute>
                 <AdminRoute>
                   <MainLayout>
                     <AdminDashboard />
                   </MainLayout>
                 </AdminRoute>
-              </Authenticated>
+              </ProtectedRoute>
             }
           />
 

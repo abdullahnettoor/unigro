@@ -500,8 +500,8 @@ export function PotDetail() {
             <PageShell maxWidth="xl" className="py-4 sm:py-6 lg:px-8">
                 {/* Mobile Sticky Topbar */}
                 <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">
-                    <button onClick={() => navigate('/pots')} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
-                        <ChevronLeft size={20} />
+                    <button onClick={() => navigate(currentUser ? '/pots' : '/')} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
+                        <img src="/monogram.svg" alt="UniGro" className="h-6 w-6" />
                     </button>
                     <div className="flex-1 min-w-0 text-center flex flex-col items-center justify-center">
                         <h2 className="truncate font-display text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-tight">{pot.title}</h2>
@@ -518,12 +518,14 @@ export function PotDetail() {
                 </div>
 
                 {/* Desktop Back Link */}
-                <button
-                    onClick={() => navigate('/pots')}
-                    className="mb-4 hidden lg:flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
-                >
-                    <ChevronLeft size={16} /> Back to pots
-                </button>
+                {currentUser && (
+                    <button
+                        onClick={() => navigate('/pots')}
+                        className="mb-4 hidden lg:flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+                    >
+                        <ChevronLeft size={16} /> Back to pots
+                    </button>
+                )}
 
                 {/* Full Pot Banner for Visitors */}
                 {!isMember && !isForeman && !hasOpenSlots && (

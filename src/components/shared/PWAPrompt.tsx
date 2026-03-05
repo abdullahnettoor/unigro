@@ -24,7 +24,6 @@ const DISMISS_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
 
 export function PWAPrompt() {
     const {
-        offlineReady: [offlineReady, setOfflineReady],
         needRefresh: [needRefresh, setNeedRefresh],
         updateServiceWorker,
     } = useRegisterSW({
@@ -67,7 +66,6 @@ export function PWAPrompt() {
     const showInstallHint = !dismissed && !isStandalone && (Boolean(deferredPrompt) || isIOS);
 
     const close = () => {
-        setOfflineReady(false);
         setNeedRefresh(false);
         track("pwa_prompt_dismissed");
         setDeferredPrompt(null);
@@ -75,7 +73,7 @@ export function PWAPrompt() {
         window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
     };
 
-    if (!offlineReady && !needRefresh && !showInstallHint) return null;
+    if (!needRefresh && !showInstallHint) return null;
 
     return (
         <div className="fixed inset-x-3 bottom-3 z-50 animate-in slide-in-from-bottom-5 sm:inset-x-auto sm:right-4 sm:bottom-4">
@@ -85,20 +83,14 @@ export function PWAPrompt() {
                 </div>
                 <div className="flex-1">
                     <h3 className="font-bold text-[var(--text-primary)] text-sm mb-1">
-                        {needRefresh
-                            ? "New content available"
-                            : offlineReady
-                                ? "App ready to work offline"
-                                : "Install UniGro"}
+                        {needRefresh ? "New content available" : "Install UniGro"}
                     </h3>
                     <p className="text-[var(--text-muted)] text-xs mb-3">
                         {needRefresh
                             ? "A new version of UniGro is available. Update now to get the latest features."
-                            : offlineReady
-                                ? "You can now use this app without an internet connection."
-                                : isIOS
-                                    ? 'On iOS, tap Share and choose "Add to Home Screen".'
-                                    : "Install for faster access and offline support."}
+                            : isIOS
+                                ? 'On iOS, tap Share and choose "Add to Home Screen".'
+                                : "Install for faster access and better experience."}
                     </p>
 
                     {needRefresh && (
@@ -111,7 +103,7 @@ export function PWAPrompt() {
                             Update now
                         </Button>
                     )}
-                    {!needRefresh && !offlineReady && deferredPrompt && (
+                    {!needRefresh && deferredPrompt && (
                         <Button
                             variant="primary"
                             size="sm"
