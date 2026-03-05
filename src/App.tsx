@@ -13,6 +13,7 @@ import { PWAPrompt } from "./components/shared/PWAPrompt";
 import { Button } from "./components/ui/Button";
 import { Toaster } from "./components/ui/Sonner";
 import { LogoLoader } from "./components/ui/LogoLoader";
+import { Surface } from "./components/ui/Surface";
 
 const loadDashboard = () => import("./pages/Dashboard");
 const loadPots = () => import("./pages/Pots");
@@ -133,10 +134,14 @@ function BottomNav() {
   return (
     <>
       {/* Gradient Bottom Blur over scrolling content */}
-      <div className="fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30 md:hidden backdrop-blur-md [mask-image:linear-gradient(to_top,black_20%,transparent_100%)] bg-[var(--surface-elevated)]/20" />
+      <div className="fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30 md:hidden backdrop-blur-md [mask-image:linear-gradient(to_top,black_20%,transparent_100%)] bg-gradient-to-t from-[var(--bg-app)]/40 to-transparent" />
 
       {/* Floating Pill Navbar */}
-      <nav className="fixed left-1/2 bottom-5 z-40 -translate-x-1/2 px-2 py-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/90 shadow-[0_12px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden w-fit min-w-[280px]">
+      <Surface
+        tier={3}
+        rounded="full"
+        className="fixed left-1/2 bottom-5 z-40 -translate-x-1/2 px-2 py-1.5 border border-[var(--border-subtle)] shadow-[0_12px_40px_rgba(0,0,0,0.4)] md:hidden w-fit min-w-[280px]"
+      >
         <div className="flex items-center justify-between gap-1">
           <Link
             to="/"
@@ -160,10 +165,10 @@ function BottomNav() {
             aria-current={isActive("/settings") ? "page" : undefined}
           >
             <Settings size={19} className={isActive("/settings") ? "scale-110" : ""} />
-            <span className={labelClass}>Profile</span>
+            <span className={labelClass}>Settings</span>
           </Link>
         </div>
-      </nav>
+      </Surface>
     </>
   );
 }

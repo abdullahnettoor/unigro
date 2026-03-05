@@ -329,27 +329,30 @@ input[type="submit"] {
 
 /* Moderate premium glass tiers */
 .glass-1 {
-  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 80%, transparent);
+  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 65%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid color-mix(in srgb, var(--border-subtle) 82%, transparent);
   box-shadow: var(--shadow-1);
+  transform: translateZ(0);
 }
 
 .glass-2 {
-  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 72%, transparent);
+  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 55%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid color-mix(in srgb, var(--border-subtle) 78%, transparent);
   box-shadow: var(--shadow-2);
+  transform: translateZ(0);
 }
 
 .glass-3 {
-  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 64%, transparent);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 45%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
   box-shadow: var(--shadow-3);
+  transform: translateZ(0);
 }
 
 .glass-sheen {
