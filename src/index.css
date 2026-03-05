@@ -257,6 +257,9 @@
 
 body {
   background-color: var(--bg-app);
+  background-image: var(--hero-gradient);
+  background-attachment: fixed;
+  background-size: cover;
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 16px;
@@ -265,6 +268,17 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' /%3E%3C/svg%3E");
 }
 
 h1,
@@ -328,35 +342,36 @@ input[type="submit"] {
 }
 
 /* Moderate premium glass tiers */
+/* Moderate premium glass tiers - Optimized for depth and visibility */
 .glass-1 {
-  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 65%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 82%, transparent);
+  background: color-mix(in srgb, var(--surface-elevated) 45%, transparent);
+  backdrop-filter: saturate(140%) blur(12px);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 25%, transparent);
+  border-top-color: color-mix(in srgb, white 15%, transparent);
   box-shadow: var(--shadow-1);
-  transform: translateZ(0);
 }
 
 .glass-2 {
-  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 55%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 78%, transparent);
+  background: color-mix(in srgb, var(--surface-elevated) 40%, transparent);
+  backdrop-filter: saturate(160%) blur(22px);
+  -webkit-backdrop-filter: saturate(160%) blur(22px);
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 20%, transparent);
+  border-top-color: color-mix(in srgb, white 20%, transparent);
   box-shadow: var(--shadow-2);
-  transform: translateZ(0);
 }
 
 .glass-3 {
-  background: var(--surface-glass-sheen), color-mix(in srgb, var(--surface-elevated) 45%, transparent);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
+  background: color-mix(in srgb, var(--surface-elevated) 35%, transparent);
+  backdrop-filter: saturate(180%) blur(32px);
+  -webkit-backdrop-filter: saturate(180%) blur(32px);
+  border: 1px solid color-mix(in srgb, white 20%, transparent);
+  border-top-color: color-mix(in srgb, white 40%, transparent);
   box-shadow: var(--shadow-3);
-  transform: translateZ(0);
 }
 
 .glass-sheen {
-  background-image: var(--surface-glass-sheen);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
   background-blend-mode: soft-light;
 }
 

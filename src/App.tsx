@@ -241,7 +241,7 @@ function App() {
         </div>
       </AuthLoading>
 
-      <div className="bg-[var(--bg-app)] text-[var(--text-primary)] font-[family-name:var(--font-body)]">
+      <div className="text-[var(--text-primary)] font-[family-name:var(--font-body)]">
         <Routes>
           {/* The root route handles Landing vs Dashboard */}
           <Route

@@ -496,7 +496,7 @@ export function PotDetail() {
 
     // --- RENDER ---
     return (
-        <div className="min-h-dvh bg-[var(--bg-app)]">
+        <div className="min-h-dvh">
             <PageShell maxWidth="xl" className="py-4 sm:py-6 lg:px-8">
                 {/* Mobile Sticky Topbar */}
                 <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">

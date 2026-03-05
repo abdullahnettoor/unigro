@@ -28,7 +28,7 @@ export function AppShell({ children, bottomNav, className }: AppShellProps) {
   return (
     <div
       className={cn(
-        "min-h-dvh bg-[var(--bg-app)] text-[var(--text-primary)] font-body pb-[calc(var(--safe-bottom)+6.5rem)] sm:pb-0",
+        "min-h-dvh font-body pb-[calc(var(--safe-bottom)+6.5rem)] sm:pb-0",
         className
       )}
     >
