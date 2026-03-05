@@ -92,7 +92,7 @@ export function Dashboard() {
                 <div className="mb-3 flex items-center justify-between">
                     <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-muted)]">Quick activity</h2>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3">
+                <div className="flex gap-3 overflow-x-auto pb-4 pt-1 -mx-4 px-4 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3 no-scrollbar">
                     <QuickActivityCard
                         title="Next payment"
                         value={formatCurrency(nextPaymentAmount, nextPaymentCurrency)}

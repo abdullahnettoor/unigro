@@ -30,7 +30,7 @@ const SheetContent = React.forwardRef<
     <SheetPrimitive.Content
       ref={ref}
       className={cn(
-        "glass-3 fixed z-50 flex flex-col gap-4 p-6 text-[var(--text-primary)] shadow-2xl outline-none",
+        "glass-3 fixed z-50 flex flex-col gap-4 p-6 text-[var(--text-primary)] shadow-2xl outline-none bg-[var(--surface-elevated)]/80 backdrop-blur-md",
         side === "right" && "inset-y-0 right-0 w-[92vw] max-w-md rounded-l-2xl",
         side === "left" && "inset-y-0 left-0 w-[92vw] max-w-md rounded-r-2xl",
         side === "top" && "inset-x-0 top-0 max-h-[85vh] rounded-b-2xl",

@@ -29,7 +29,9 @@
   --motion-normal: 220ms;
   --motion-slow: 320ms;
   --bg-app: #F6F5F2;
+  --bg-app-rgb: 246, 245, 242;
   --surface-elevated: #FFFFFF;
+  --surface-elevated-rgb: 255, 255, 255;
   --surface-card: #F0F4F1;
   --surface-deep: #E7ECE9;
   --accent-vivid: #2B6E57;
@@ -61,12 +63,15 @@
   --text-2: var(--text-muted);
   --text-3: color-mix(in srgb, var(--text-primary) 70%, transparent);
   --safe-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  --glass-bg-opacity: 0.8;
   color-scheme: light;
 }
 
 [data-theme="dark"] {
   --bg-app: #0F1F1A;
+  --bg-app-rgb: 15, 31, 26;
   --surface-elevated: #152620;
+  --surface-elevated-rgb: 21, 38, 32;
   --surface-card: #1B2D27;
   --surface-deep: #12211D;
   --accent-vivid: #99DBA6;
@@ -94,6 +99,7 @@
   --text-1: var(--text-primary);
   --text-2: var(--text-muted);
   --text-3: color-mix(in srgb, var(--text-primary) 70%, transparent);
+  --glass-bg-opacity: 0.75;
   color-scheme: dark;
 }
 
@@ -342,31 +348,29 @@ input[type="submit"] {
 }
 
 /* Moderate premium glass tiers */
-/* Moderate premium glass tiers - Optimized for depth and visibility */
 .glass-1 {
-  background: color-mix(in srgb, var(--surface-elevated) 45%, transparent);
+  background: rgba(var(--surface-elevated-rgb), 0.45);
   backdrop-filter: saturate(140%) blur(12px);
   -webkit-backdrop-filter: saturate(140%) blur(12px);
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 25%, transparent);
-  border-top-color: color-mix(in srgb, white 15%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: var(--shadow-1);
 }
 
 .glass-2 {
-  background: color-mix(in srgb, var(--surface-elevated) 40%, transparent);
+  background: rgba(var(--surface-elevated-rgb), 0.35);
   backdrop-filter: saturate(160%) blur(22px);
   -webkit-backdrop-filter: saturate(160%) blur(22px);
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 20%, transparent);
-  border-top-color: color-mix(in srgb, white 20%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(255, 255, 255, 0.25);
   box-shadow: var(--shadow-2);
 }
 
 .glass-3 {
-  background: color-mix(in srgb, var(--surface-elevated) 35%, transparent);
-  backdrop-filter: saturate(180%) blur(32px);
-  -webkit-backdrop-filter: saturate(180%) blur(32px);
-  border: 1px solid color-mix(in srgb, white 20%, transparent);
-  border-top-color: color-mix(in srgb, white 40%, transparent);
+  background: rgba(var(--surface-elevated-rgb), var(--glass-bg-opacity, 0.8));
+  backdrop-filter: saturate(190%) blur(40px);
+  -webkit-backdrop-filter: saturate(190%) blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.45);
   box-shadow: var(--shadow-3);
 }
 

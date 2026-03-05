@@ -499,7 +499,7 @@ export function PotDetail() {
         <div className="min-h-dvh">
             <PageShell maxWidth="xl" className="py-4 sm:py-6 lg:px-8">
                 {/* Mobile Sticky Topbar */}
-                <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[var(--bg-app)]/80 px-4 py-3 backdrop-blur-md lg:hidden">
+                <div className="sticky top-0 z-[60] -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[rgba(var(--bg-app-rgb),0.8)] px-4 py-3 backdrop-blur-md lg:hidden">
                     <button onClick={() => navigate(currentUser ? '/pots' : '/')} className="rounded-full p-2 hover:bg-[var(--surface-deep)]">
                         <img src="/monogram.svg" alt="UniGro" className="h-6 w-6" />
                     </button>

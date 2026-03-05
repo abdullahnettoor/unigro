@@ -37,7 +37,7 @@ export function ModalShell({
     >
       <div
         className={cn(
-          "glass-3 border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-200",
+          "glass-3 border border-[var(--border-subtle)] rounded-t-2xl sm:rounded-2xl w-full max-h-[88vh] flex flex-col overflow-hidden relative animate-in fade-in zoom-in duration-200 bg-[var(--surface-elevated)]/80 backdrop-blur-md",
           sizeClass[size],
           className
         )}
