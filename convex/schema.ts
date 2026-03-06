@@ -4,9 +4,9 @@ import { v } from "convex/values";
 export default defineSchema({
     users: defineTable({
         name: v.string(),
-        phone: v.string(), // Primary Key for Ghost linking
+        phone: v.string(), // Primary Key for Guest linking
         email: v.optional(v.string()),
-        clerkId: v.optional(v.string()), // Null for Ghosts
+        clerkId: v.optional(v.string()), // Null for Guests
         pictureUrl: v.optional(v.string()),
         verificationStatus: v.union(
             v.literal("UNVERIFIED"),
@@ -22,19 +22,19 @@ export default defineSchema({
         .index("by_phone", ["phone"])
         .index("by_clerkId", ["clerkId"]),
 
-    pots: defineTable({
+    pools: defineTable({
         title: v.string(),
-        foremanId: v.id("users"),
+        organizerId: v.id("users"),
         description: v.optional(v.string()),
         bankDetails: v.optional(v.string()),
-        drawStrategy: v.optional(v.union(v.literal("RANDOM"), v.literal("MANUAL"))), // Restored
+        drawStrategy: v.optional(v.union(v.literal("RANDOM"), v.literal("MANUAL"))),
         startDate: v.optional(v.number()),
         nextDrawDate: v.optional(v.number()),
         config: v.object({
             totalValue: v.number(),
-            totalSlots: v.number(), // New: Explicit Slot Count
+            totalSeats: v.number(),
             contribution: v.number(),
-            currency: v.optional(v.string()), // New: Currency (default INR)
+            currency: v.optional(v.string()),
             frequency: v.union(
                 v.literal("monthly"),
                 v.literal("weekly"),
@@ -47,43 +47,42 @@ export default defineSchema({
             gracePeriodDays: v.optional(v.number()),
         }),
         status: v.union(v.literal("DRAFT"), v.literal("ACTIVE"), v.literal("COMPLETED"), v.literal("ARCHIVED")),
-        currentMonth: v.number(),
+        currentRound: v.number(),
     }),
 
-    slots: defineTable({
-        potId: v.id("pots"),
-        slotNumber: v.number(), // 1 to N
-        userId: v.optional(v.id("users")), // Null = Open Slot. Primary owner if not split.
+    seats: defineTable({
+        poolId: v.id("pools"),
+        seatNumber: v.number(), // 1 to N
+        userId: v.optional(v.id("users")), // Null = Open Seat. Primary owner if not co-seat.
         status: v.union(v.literal("OPEN"), v.literal("RESERVED"), v.literal("FILLED")),
-        isGhost: v.boolean(),
-        isSplit: v.optional(v.boolean()), // True if multiple owners
+        isGuest: v.boolean(),
+        isCoSeat: v.optional(v.boolean()), // True if multiple owners
         // Billing & Winnings
-        drawOrder: v.optional(v.number()), // Cycle specific winner
+        roundWon: v.optional(v.number()), // Round-specific winner
     })
-        .index("by_pot", ["potId"])
-        .index("by_user", ["userId"]) // For lising pots by user
-        .index("by_user_pot", ["userId", "potId"])
-        .index("by_pot_slotNumber", ["potId", "slotNumber"]),
+        .index("by_pool", ["poolId"])
+        .index("by_user", ["userId"])
+        .index("by_user_pool", ["userId", "poolId"])
+        .index("by_pool_seatNumber", ["poolId", "seatNumber"]),
 
-    // NEW: Split Ownership Table
-    split_ownership: defineTable({
-        slotId: v.id("slots"),
+    seat_shares: defineTable({
+        seatId: v.id("seats"),
         userId: v.id("users"),
         sharePercentage: v.number(), // e.g., 50 (for 50%)
         status: v.union(v.literal("ACTIVE"), v.literal("REMOVED")),
     })
-        .index("by_slot", ["slotId"])
+        .index("by_seat", ["seatId"])
         .index("by_user", ["userId"]),
 
     transactions: defineTable({
-        potId: v.id("pots"),
-        slotId: v.id("slots"),
-        userId: v.optional(v.id("users")), // NEW: Track who made the payment (crucial for split slots)
-        monthIndex: v.number(),
+        poolId: v.id("pools"),
+        seatId: v.id("seats"),
+        userId: v.optional(v.id("users")), // Track who made the payment (crucial for co-seats)
+        roundIndex: v.number(),
         status: v.union(v.literal("UNPAID"), v.literal("PENDING"), v.literal("PAID")),
         type: v.optional(v.union(v.literal("cash"), v.literal("online"), v.literal("payout"))),
-        paidAt: v.optional(v.number()), // NEW: Actual payment date
+        paidAt: v.optional(v.number()), // Actual payment date
         proofUrl: v.optional(v.string()),
         remarks: v.optional(v.string()),
-    }).index("by_pot_month", ["potId", "monthIndex"]),
+    }).index("by_pool_round", ["poolId", "roundIndex"]),
 });
