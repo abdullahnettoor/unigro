@@ -1,11 +1,89 @@
 {
-    "settings": {
-        "title": "Settings",
-        "subtitle": "Manage your identity, preferences, and account details.",
-        "appearance": "Appearance",
-        "appearanceDesc": "Choose how UniGro looks on this device.",
-        "language": "Language",
-        "languageDesc": "Choose your preferred language for the app.",
-        "signOut": "Sign Out"
+    "common": {
+        "loading": "Loading...",
+        "error": "Something went wrong.",
+        "retry": "Retry",
+        "cancel": "Cancel",
+        "save": "Save",
+        "confirm": "Confirm",
+        "delete": "Delete",
+        "edit": "Edit",
+        "back": "Back",
+        "next": "Next",
+        "done": "Done",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "domain": {
+        "pool": "Pool",
+        "pools": "Pools",
+        "seat": "Seat",
+        "seats": "Seats",
+        "round": "Round",
+        "rounds": "Rounds",
+        "draw": "Draw",
+        "organizer": "Organizer",
+        "member": "Member",
+        "members": "Members",
+        "guest": "Guest",
+        "coSeat": "Co-Seat",
+        "share": "Share"
+    },
+    "poolStatus": {
+        "DRAFT": "Draft",
+        "ACTIVE": "Active",
+        "COMPLETED": "Completed",
+        "ARCHIVED": "Archived"
+    },
+    "seatStatus": {
+        "OPEN": "Open",
+        "RESERVED": "Reserved",
+        "FILLED": "Filled"
+    },
+    "pool": {
+        "create": "Create Pool",
+        "join": "Join Pool",
+        "leave": "Leave Pool",
+        "activate": "Activate Pool",
+        "archive": "Archive Pool",
+        "delete": "Delete Pool",
+        "myPools": "My Pools",
+        "noPoolsYet": "No pools yet.",
+        "totalSeats": "Total Seats",
+        "contribution": "Contribution",
+        "totalValue": "Total Value",
+        "duration": "Duration",
+        "frequency": "Frequency",
+        "startDate": "Start Date",
+        "nextDraw": "Next Draw",
+        "currentRound": "Current Round",
+        "commission": "Commission",
+        "winningAmount": "Winning Amount"
+    },
+    "seat": {
+        "assign": "Assign Seat",
+        "remove": "Remove Seat",
+        "available": "Available Seats",
+        "yourSeat": "Your Seat",
+        "seatNumber": "Seat #{{number}}"
+    },
+    "draw": {
+        "run": "Run Draw",
+        "winner": "Winner",
+        "noWinnerYet": "No winner selected yet.",
+        "advanceRound": "Advance to Next Round"
+    },
+    "frequency": {
+        "monthly": "Monthly",
+        "weekly": "Weekly",
+        "biweekly": "Bi-Weekly",
+        "quarterly": "Quarterly",
+        "occasional": "Occasional"
+    },
+    "verification": {
+        "UNVERIFIED": "Unverified",
+        "PENDING": "Pending",
+        "VERIFIED": "Verified",
+        "REJECTED": "Rejected"
     }
 }
