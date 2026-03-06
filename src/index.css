@@ -64,6 +64,9 @@
   --text-3: color-mix(in srgb, var(--text-primary) 70%, transparent);
   --safe-bottom: max(0.75rem, env(safe-area-inset-bottom));
   --glass-bg-opacity: 0.8;
+  --glass-blur-1: 12px;
+  --glass-blur-2: 20px;
+  --glass-blur-3: 32px;
   /* Pre-computed glass backgrounds — surface-elevated #FFFFFF at each opacity tier */
   --glass-bg-1: rgba(255, 255, 255, 0.55);
   /* #FFFFFF @ 55% */
@@ -418,23 +421,31 @@ input[type="submit"] {
 /* Glass surface tiers — use pre-computed rgba() vars per theme for mobile compatibility */
 .glass-1 {
   background: var(--glass-bg-1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: saturate(140%) blur(var(--glass-blur-1));
+  -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-1));
   box-shadow: var(--shadow-1);
 }
 
 .glass-2 {
   background: var(--glass-bg-2);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: saturate(140%) blur(var(--glass-blur-2));
+  -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-2));
   box-shadow: var(--shadow-2);
 }
 
 .glass-3 {
   background: var(--glass-bg-3);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
+  backdrop-filter: saturate(140%) blur(var(--glass-blur-3));
+  -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-3));
   box-shadow: var(--shadow-3);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --glass-blur-1: 16px;
+    --glass-blur-2: 28px;
+    --glass-blur-3: 36px;
+  }
 }
 
 .glass-sheen {
