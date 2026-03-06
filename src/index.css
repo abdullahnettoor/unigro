@@ -67,6 +67,9 @@
   --glass-blur-1: 12px;
   --glass-blur-2: 20px;
   --glass-blur-3: 32px;
+  --glass-unified-bg: rgba(var(--bg-app-rgb), 0.8);
+  --glass-unified-blur: 12px;
+  --glass-unified-saturate: 100%;
   /* Pre-computed glass backgrounds — surface-elevated #FFFFFF at each opacity tier */
   --glass-bg-1: rgba(255, 255, 255, 0.55);
   /* #FFFFFF @ 55% */
@@ -420,25 +423,25 @@ input[type="submit"] {
 
 /* Glass surface tiers — use pre-computed rgba() vars per theme for mobile compatibility */
 .glass-1 {
-  background: var(--glass-bg-1);
-  backdrop-filter: saturate(140%) blur(var(--glass-blur-1));
-  -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-1));
+  background: var(--glass-unified-bg, var(--glass-bg-1));
+  backdrop-filter: saturate(var(--glass-unified-saturate, 140%)) blur(var(--glass-unified-blur, var(--glass-blur-1)));
+  -webkit-backdrop-filter: saturate(var(--glass-unified-saturate, 140%)) blur(var(--glass-unified-blur, var(--glass-blur-1)));
   box-shadow: var(--shadow-1);
   isolation: isolate;
 }
 
 .glass-2 {
-  background: var(--glass-bg-2);
-  backdrop-filter: saturate(140%) blur(var(--glass-blur-2));
-  -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-2));
+  background: var(--glass-unified-bg, var(--glass-bg-2));
+  backdrop-filter: saturate(var(--glass-unified-saturate, 140%)) blur(var(--glass-unified-blur, var(--glass-blur-2)));
+  -webkit-backdrop-filter: saturate(var(--glass-unified-saturate, 140%)) blur(var(--glass-unified-blur, var(--glass-blur-2)));
   box-shadow: var(--shadow-2);
   isolation: isolate;
 }
 
 .glass-3 {
-  background: var(--glass-bg-3);
-  backdrop-filter: saturate(140%) blur(var(--glass-blur-3));
-  -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-3));
+  background: var(--glass-unified-bg, var(--glass-bg-3));
+  backdrop-filter: saturate(var(--glass-unified-saturate, 140%)) blur(var(--glass-unified-blur, var(--glass-blur-3)));
+  -webkit-backdrop-filter: saturate(var(--glass-unified-saturate, 140%)) blur(var(--glass-unified-blur, var(--glass-blur-3)));
   box-shadow: var(--shadow-3);
   isolation: isolate;
 }
@@ -463,23 +466,6 @@ input[type="submit"] {
   }
 }
 
-@media (pointer: coarse) {
-  .glass-1 {
-    background: rgba(var(--bg-app-rgb), 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-  .glass-2 {
-    background: rgba(var(--bg-app-rgb), 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-  .glass-3 {
-    background: rgba(var(--bg-app-rgb), 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-}
 
 .glass-sheen {
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
