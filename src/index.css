@@ -446,6 +446,12 @@ input[type="submit"] {
   isolation: isolate;
 }
 
+.glass-sticky {
+  background: rgba(var(--bg-app-rgb), 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-1,
   .glass-2,
