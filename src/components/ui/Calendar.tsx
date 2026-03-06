@@ -39,7 +39,10 @@ export function Calendar({
           date.toLocaleString(locale?.code, { month: "short" }),
         ...formatters,
       }}
-      className={cn("p-2 text-[var(--text-primary)]", className)}
+      className={cn(
+        "p-2 text-[var(--text-primary)] bg-[rgba(var(--bg-app-rgb),0.8)] backdrop-blur-md rounded-2xl",
+        className
+      )}
       classNames={{
         root: cn("w-fit", defaultClassNames.root),
         months: cn(

@@ -140,7 +140,7 @@ function BottomNav() {
       <Surface
         tier={3}
         rounded="full"
-        className="fixed left-1/2 bottom-5 z-40 -translate-x-1/2 px-2 py-1.5 border border-[var(--border-subtle)] shadow-[0_12px_40px_rgba(0,0,0,0.4)] md:hidden w-fit min-w-[280px]"
+        className="fixed left-1/2 bottom-5 z-40 -translate-x-1/2 px-2 py-1.5 border border-[var(--border-subtle)] shadow-[0_12px_40px_rgba(0,0,0,0.4)] md:hidden w-fit min-w-[280px] bg-[rgba(var(--bg-app-rgb),0.8)] backdrop-blur-md"
       >
         <div className="flex items-center justify-between gap-1">
           <Link
