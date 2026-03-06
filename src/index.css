@@ -424,6 +424,7 @@ input[type="submit"] {
   backdrop-filter: saturate(140%) blur(var(--glass-blur-1));
   -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-1));
   box-shadow: var(--shadow-1);
+  isolation: isolate;
 }
 
 .glass-2 {
@@ -431,6 +432,7 @@ input[type="submit"] {
   backdrop-filter: saturate(140%) blur(var(--glass-blur-2));
   -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-2));
   box-shadow: var(--shadow-2);
+  isolation: isolate;
 }
 
 .glass-3 {
@@ -438,6 +440,7 @@ input[type="submit"] {
   backdrop-filter: saturate(140%) blur(var(--glass-blur-3));
   -webkit-backdrop-filter: saturate(140%) blur(var(--glass-blur-3));
   box-shadow: var(--shadow-3);
+  isolation: isolate;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -457,6 +460,24 @@ input[type="submit"] {
     --glass-blur-1: 16px;
     --glass-blur-2: 28px;
     --glass-blur-3: 36px;
+  }
+}
+
+@media (pointer: coarse) {
+  .glass-1 {
+    background: color-mix(in srgb, var(--glass-bg-1) 70%, transparent);
+    background-image: var(--surface-glass-sheen);
+    background-blend-mode: soft-light;
+  }
+  .glass-2 {
+    background: color-mix(in srgb, var(--glass-bg-2) 70%, transparent);
+    background-image: var(--surface-glass-sheen);
+    background-blend-mode: soft-light;
+  }
+  .glass-3 {
+    background: color-mix(in srgb, var(--glass-bg-3) 70%, transparent);
+    background-image: var(--surface-glass-sheen);
+    background-blend-mode: soft-light;
   }
 }
 
