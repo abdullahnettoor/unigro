@@ -465,19 +465,19 @@ input[type="submit"] {
 
 @media (pointer: coarse) {
   .glass-1 {
-    background: color-mix(in srgb, var(--glass-bg-1) 70%, transparent);
-    background-image: var(--surface-glass-sheen);
-    background-blend-mode: soft-light;
+    background: rgba(var(--bg-app-rgb), 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   .glass-2 {
-    background: color-mix(in srgb, var(--glass-bg-2) 70%, transparent);
-    background-image: var(--surface-glass-sheen);
-    background-blend-mode: soft-light;
+    background: rgba(var(--bg-app-rgb), 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
   .glass-3 {
-    background: color-mix(in srgb, var(--glass-bg-3) 70%, transparent);
-    background-image: var(--surface-glass-sheen);
-    background-blend-mode: soft-light;
+    background: rgba(var(--bg-app-rgb), 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }
 
