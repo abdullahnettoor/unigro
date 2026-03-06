@@ -440,6 +440,18 @@ input[type="submit"] {
   box-shadow: var(--shadow-3);
 }
 
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-1,
+  .glass-2,
+  .glass-3 {
+    background-image:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0)),
+      var(--surface-glass-sheen);
+    background-blend-mode: soft-light, normal;
+    border: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  }
+}
+
 @media (max-width: 640px) {
   :root {
     --glass-blur-1: 16px;
