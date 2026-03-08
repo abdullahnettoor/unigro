@@ -1,8 +1,7 @@
 import { Surface } from "@/components/ui/Surface";
 import { Button } from "@/components/ui/button";
 import * as Icons from "@/lib/icons";
-import { cn } from "@/lib/utils";
-import { SeatGrid } from "./SeatGrid";
+import { OrbitVisualizer } from "./visualizers/OrbitVisualizer";
 import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
 
 interface PoolHeroProps {
@@ -30,7 +29,6 @@ export function PoolHero({
   isOrganizer,
   hasOpenSeats,
   isMember,
-  progressLabel,
   progressValue,
   progressCount,
   progressTotal,
@@ -38,6 +36,7 @@ export function PoolHero({
   onSeatClick,
   onContact,
 }: PoolHeroProps) {
+
   if (isRestricted) {
     return (
       <Surface tier={3} className="grain rounded-3xl p-8 relative overflow-hidden flex flex-col items-center justify-center text-center">
@@ -82,46 +81,51 @@ export function PoolHero({
       {(isMember || isOrganizer || (pool.status === "ACTIVE" && hasOpenSeats)) && (
         <div className="mt-6 flex flex-col w-full">
           <div className="w-full min-w-0">
-            <SeatGrid pool={pool} seats={seats} transactions={transactions} onSeatClick={onSeatClick} />
+            <OrbitVisualizer pool={pool} seats={seats} transactions={transactions} onSeatClick={onSeatClick} />
           </div>
         </div>
       )}
 
-      <div className="mt-6 space-y-5 border-t border-[var(--border-subtle)] pt-5">
-        <div>
-          <div className="flex items-center justify-between text-xs uppercase tracking-wide text-[var(--text-muted)] font-semibold">
-            <span>{progressLabel}</span>
-            <span className="font-mono text-[var(--text-primary)]">
-              {progressCount} / {progressTotal}
-            </span>
-          </div>
-          <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/40">
-            <div
-              className="h-full bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)] transition-all"
-              style={{ width: `${Math.min(100, progressValue)}%` }}
-            />
-          </div>
-        </div>
+      {/* Premium Progress Card integrated directly into Hero */}
+      <div className="mt-6 border-t border-[var(--border-subtle)] pt-5">
+        <div className="bg-[var(--surface-1)] border border-[var(--border-subtle)]/40 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-vivid)]/[0.03] to-transparent pointer-events-none" />
 
-        {pool.status === "ACTIVE" && (
-          <div>
-            <div className="flex items-center justify-between text-xs uppercase tracking-wide text-[var(--text-muted)] font-semibold">
-              <span>Round progress</span>
-              <span className="font-mono text-[var(--text-primary)]">
-                {pool.currentRound} / {pool.config.duration}
+          <div className="relative z-10 flex items-end justify-between mb-3">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold font-mono tracking-tight text-[var(--accent-vivid)]">
+                {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(progressCount * (pool.config.contribution || 0))}
+              </span>
+              <span className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                {pool.status === 'ACTIVE' ? 'collected' : 'committed'}
               </span>
             </div>
-            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/40">
-              <div
-                className={cn(
-                  "h-full transition-all",
-                  "bg-gradient-to-r from-[var(--gold)] to-[var(--accent-vivid)]"
-                )}
-                style={{ width: `${Math.min(100, (pool.currentRound / Math.max(pool.config.duration, 1)) * 100)}%` }}
-              />
+            <div className="flex items-baseline gap-1.5 opacity-80">
+              <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                of
+              </span>
+              <span className="text-sm font-semibold font-mono tracking-tight text-[var(--text-primary)]">
+                {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(progressTotal * (pool.config.contribution || 0))}
+              </span>
             </div>
           </div>
-        )}
+
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/40 z-10">
+            <div
+              className="absolute left-0 top-0 h-full bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)] transition-all duration-1000 ease-out rounded-full"
+              style={{ width: `${Math.min(100, Math.max(0, progressValue))}%` }}
+            />
+          </div>
+
+          <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-[var(--text-secondary)] z-10 relative">
+            <span>
+              <span className="font-bold text-[var(--accent-vivid)]">{Math.round(progressValue)}%</span> {pool.status === 'ACTIVE' ? 'this round' : 'filled'}
+            </span>
+            <span>
+              {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Math.max(0, progressTotal - progressCount) * (pool.config.contribution || 0))} remaining
+            </span>
+          </div>
+        </div>
       </div>
     </Surface>
   );
