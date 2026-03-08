@@ -21,10 +21,10 @@ export function LanguageSwitcher() {
                 i18n.changeLanguage(lang);
             }}
         >
-            <SelectTrigger className="w-full bg-[var(--surface-card)]">
+            <SelectTrigger className="w-full h-10 rounded-full bg-[var(--surface-0)]/50 border-[var(--border-subtle)]/50 px-3 text-[11px] font-bold">
                 <div className="flex items-center gap-2">
-                    <Globe size={16} className="text-[var(--text-muted)]" />
-                    <SelectValue placeholder="Select Language" />
+                    <Globe size={14} className="text-[var(--text-muted)]" />
+                    <SelectValue placeholder="Language" />
                 </div>
             </SelectTrigger>
             <SelectContent>
