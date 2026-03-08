@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
 import { Download, Minus, Plus, RotateCcw } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
-import { Dialog, DialogContent } from "@/components/ui/Dialog";
-import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface MediaPreviewDialogProps {
   url: string | null;
@@ -68,7 +67,7 @@ export function MediaPreviewDialog({ url, onClose, alt = "Preview" }: MediaPrevi
                 </Button>
               </div>
             </div>
-            <Surface tier={1} rounded="xl" className="max-h-[70vh] overflow-auto border border-[var(--border-subtle)] p-3">
+            <div className="max-h-[70vh] overflow-auto rounded-xl border border-white/10 bg-[var(--surface-deep)]/60 p-3">
               <div
                 className={`origin-top-left ${clampedZoom > 1 ? "cursor-grab" : ""} ${isPanning ? "cursor-grabbing" : ""}`}
                 style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${clampedZoom})` }}
@@ -93,7 +92,7 @@ export function MediaPreviewDialog({ url, onClose, alt = "Preview" }: MediaPrevi
               >
                 <img src={url} alt={alt} className="max-w-full h-auto object-contain" />
               </div>
-            </Surface>
+            </div>
           </div>
         ) : null}
       </DialogContent>

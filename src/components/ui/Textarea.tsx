@@ -1,26 +1,22 @@
-import * as React from "react";
+import * as React from "react"
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
-export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  density?: "comfortable" | "compact";
-}
+const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.ComponentProps<"textarea">
+>(({ className, ...props }, ref) => {
+  return (
+    <textarea
+      className={cn(
+        "flex min-h-[80px] w-full rounded-[14px] border border-[var(--border-subtle)]/80 bg-[var(--surface-0)]/70 px-4 py-3 text-sm text-[var(--text-primary)] shadow-[0_8px_20px_rgba(0,0,0,0.08)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-4 focus:ring-[var(--accent-vivid)]/10 focus:border-[var(--accent-vivid)]/30 transition-all disabled:cursor-not-allowed disabled:opacity-50 resize-none",
+        className
+      )}
+      ref={ref}
+      {...props}
+    />
+  )
+})
+Textarea.displayName = "Textarea"
 
-const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, density = "comfortable", ...props }, ref) => {
-    return (
-      <textarea
-        ref={ref}
-        className={cn(
-          "glass-1 control-base control-textarea flex w-full text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-vivid)] disabled:cursor-not-allowed disabled:opacity-60",
-          density === "compact" ? "control-compact" : "",
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
-Textarea.displayName = "Textarea";
-
-export { Textarea };
+export { Textarea }

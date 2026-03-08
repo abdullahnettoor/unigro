@@ -1,30 +1,36 @@
-import * as React from "react";
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-    variant?: "default" | "brand" | "success" | "warning" | "danger" | "outline"
-    size?: "sm" | "md"
+const badgeVariants = cva(
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        outline: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  )
 }
 
-export function Badge({ className, variant = "default", size = "sm", ...props }: BadgeProps) {
-    const baseStyles = "inline-flex items-center rounded-full font-semibold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent-vivid)] focus:ring-offset-2"
-
-    const variants = {
-        default: "bg-[var(--surface-deep)]/80 text-[var(--text-muted)] border border-transparent",
-        brand: "bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)] border border-[var(--accent-vivid)]/20",
-        success: "bg-[var(--success)]/15 text-[var(--success)] border border-[var(--success)]/20",
-        warning: "bg-[var(--warning)]/15 text-[var(--warning)] border border-[var(--warning)]/20",
-        danger: "bg-[var(--danger)]/15 text-[var(--danger)] border border-[var(--danger)]/20",
-        outline: "text-[var(--text-primary)] border border-[var(--border-subtle)]"
-    }
-
-    const sizes = {
-        sm: "px-2 py-0.5 text-[10px]",
-        md: "px-3 py-1 text-xs"
-    }
-
-    return (
-        <div className={cn(baseStyles, variants[variant], sizes[size], className)} {...props} />
-    )
-}
+export { Badge, badgeVariants }

@@ -43,8 +43,8 @@ export function PhoneInputField({
 
     return (
         <div className={cn(
-            "w-full bg-[var(--surface-deep)]/60 border rounded-xl overflow-hidden transition-all focus-within:ring-2 focus-within:ring-[var(--accent-vivid)]",
-            error ? "border-[var(--danger)]" : "border-[var(--border-subtle)]",
+            "w-full bg-[var(--surface-0)]/70 border rounded-full overflow-hidden transition-all focus-within:ring-4 focus-within:ring-[var(--accent-vivid)]/10 focus-within:border-[var(--accent-vivid)]/30",
+            error ? "border-[var(--danger)]" : "border-[var(--border-subtle)]/80",
             className
         )}>
             <PhoneInput

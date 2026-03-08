@@ -1,0 +1,128 @@
+import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/button";
+import * as Icons from "@/lib/icons";
+import { cn } from "@/lib/utils";
+import { SeatGrid } from "./SeatGrid";
+import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
+
+interface PoolHeroProps {
+  pool: PoolDetail;
+  seats: PoolSeat[];
+  transactions: PoolTransaction[];
+  isOrganizer: boolean;
+  isDraft: boolean;
+  hasOpenSeats: boolean;
+  isMember: boolean;
+  filledCount: number;
+  progressLabel: string;
+  progressValue: number;
+  progressCount: number;
+  progressTotal: number;
+  isRestricted?: boolean;
+  onSeatClick: (seat: PoolSeat, isOpen: boolean) => void;
+  onContact?: () => void;
+}
+
+export function PoolHero({
+  pool,
+  seats,
+  transactions,
+  isOrganizer,
+  hasOpenSeats,
+  isMember,
+  progressLabel,
+  progressValue,
+  progressCount,
+  progressTotal,
+  isRestricted,
+  onSeatClick,
+  onContact,
+}: PoolHeroProps) {
+  if (isRestricted) {
+    return (
+      <Surface tier={3} className="grain rounded-3xl p-8 relative overflow-hidden flex flex-col items-center justify-center text-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-vivid)]/[0.04] to-transparent pointer-events-none" />
+        <div className="relative z-10 space-y-6 max-w-sm">
+          <div className="mx-auto h-16 w-16 rounded-[24px] bg-[var(--surface-2)] flex items-center justify-center text-[var(--accent-vivid)] border border-[var(--border-subtle)]/40 shadow-inner">
+            <Icons.LockIcon size={28} strokeWidth={2} />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-display font-black text-[var(--text-primary)] leading-tight">{pool.title}</h1>
+            <div className="inline-flex items-center rounded-full bg-[var(--accent-vivid)]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--accent-vivid)]">
+              {pool.status} Pool
+            </div>
+          </div>
+          <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+            This pool is currently active. For member privacy, deep details and contributions are restricted to participants.
+          </p>
+          {onContact && (
+            <Button onClick={onContact} className="h-12 px-10 rounded-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-bold gap-3 shadow-lg shadow-[var(--accent-vivid)]/20 hover:scale-[1.02] active:scale-95 transition-all">
+              <Icons.PhoneIcon size={18} />
+              Contact Organizer
+            </Button>
+          )}
+        </div>
+      </Surface>
+    );
+  }
+
+  return (
+    <Surface tier={3} className="grain rounded-3xl p-4 sm:p-7 relative overflow-hidden">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <span className="inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-2)]/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">
+            {pool.status}
+          </span>
+          <h1 className="mt-3 text-xl sm:text-2xl font-display font-bold text-[var(--text-primary)] break-words leading-tight">
+            {pool.title}
+          </h1>
+        </div>
+      </div>
+
+      {(isMember || isOrganizer || (pool.status === "ACTIVE" && hasOpenSeats)) && (
+        <div className="mt-6 flex flex-col w-full">
+          <div className="w-full min-w-0">
+            <SeatGrid pool={pool} seats={seats} transactions={transactions} onSeatClick={onSeatClick} />
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 space-y-5 border-t border-[var(--border-subtle)] pt-5">
+        <div>
+          <div className="flex items-center justify-between text-xs uppercase tracking-wide text-[var(--text-muted)] font-semibold">
+            <span>{progressLabel}</span>
+            <span className="font-mono text-[var(--text-primary)]">
+              {progressCount} / {progressTotal}
+            </span>
+          </div>
+          <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/40">
+            <div
+              className="h-full bg-gradient-to-r from-[var(--accent-vivid)] to-[var(--accent-secondary)] transition-all"
+              style={{ width: `${Math.min(100, progressValue)}%` }}
+            />
+          </div>
+        </div>
+
+        {pool.status === "ACTIVE" && (
+          <div>
+            <div className="flex items-center justify-between text-xs uppercase tracking-wide text-[var(--text-muted)] font-semibold">
+              <span>Round progress</span>
+              <span className="font-mono text-[var(--text-primary)]">
+                {pool.currentRound} / {pool.config.duration}
+              </span>
+            </div>
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/40">
+              <div
+                className={cn(
+                  "h-full transition-all",
+                  "bg-gradient-to-r from-[var(--gold)] to-[var(--accent-vivid)]"
+                )}
+                style={{ width: `${Math.min(100, (pool.currentRound / Math.max(pool.config.duration, 1)) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </Surface>
+  );
+}

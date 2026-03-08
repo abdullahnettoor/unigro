@@ -5,8 +5,15 @@ import { mutation, query } from "./_generated/server";
 export const create = mutation({
     args: {
         title: v.string(),
-        description: v.optional(v.string()),
-        bankDetails: v.optional(v.string()),
+        terms: v.optional(v.string()),
+        paymentDetails: v.optional(v.object({
+            upiId: v.optional(v.string()),
+            accountName: v.optional(v.string()),
+            bankName: v.optional(v.string()),
+            accountNumber: v.optional(v.string()),
+            ifsc: v.optional(v.string()),
+            note: v.optional(v.string()),
+        })),
         drawStrategy: v.optional(v.union(v.literal("RANDOM"), v.literal("MANUAL"))),
         totalValue: v.number(),
         totalSeats: v.number(),
@@ -47,8 +54,8 @@ export const create = mutation({
         const poolId = await ctx.db.insert("pools", {
             title: args.title,
             organizerId: user._id,
-            description: args.description,
-            bankDetails: args.bankDetails,
+            terms: args.terms,
+            paymentDetails: args.paymentDetails,
             drawStrategy: args.drawStrategy,
             startDate: args.startDate,
             config: {
@@ -208,8 +215,15 @@ export const updatePool = mutation({
     args: {
         poolId: v.id("pools"),
         title: v.optional(v.string()),
-        description: v.optional(v.string()),
-        bankDetails: v.optional(v.string()),
+        terms: v.optional(v.string()),
+        paymentDetails: v.optional(v.object({
+            upiId: v.optional(v.string()),
+            accountName: v.optional(v.string()),
+            bankName: v.optional(v.string()),
+            accountNumber: v.optional(v.string()),
+            ifsc: v.optional(v.string()),
+            note: v.optional(v.string()),
+        })),
         startDate: v.optional(v.number()),
         totalValue: v.optional(v.number()),
         totalSeats: v.optional(v.number()),
@@ -271,8 +285,8 @@ export const updatePool = mutation({
 
             await ctx.db.patch(args.poolId, {
                 title: args.title ?? pool.title,
-                description: args.description ?? pool.description,
-                bankDetails: args.bankDetails ?? pool.bankDetails,
+                terms: args.terms ?? pool.terms,
+                paymentDetails: args.paymentDetails ?? pool.paymentDetails,
                 drawStrategy: args.drawStrategy ?? pool.drawStrategy,
                 startDate: args.startDate ?? pool.startDate,
                 config: { ...pool.config, ...configUpdates },
@@ -280,8 +294,8 @@ export const updatePool = mutation({
         } else {
             await ctx.db.patch(args.poolId, {
                 title: args.title ?? pool.title,
-                description: args.description ?? pool.description,
-                bankDetails: args.bankDetails ?? pool.bankDetails,
+                terms: args.terms ?? pool.terms,
+                paymentDetails: args.paymentDetails ?? pool.paymentDetails,
                 drawStrategy: args.drawStrategy ?? pool.drawStrategy,
             });
         }
@@ -305,6 +319,26 @@ export const archivePool = mutation({
             throw new Error("Only the Organizer can archive this pool");
 
         await ctx.db.patch(args.poolId, { status: "ARCHIVED" });
+    },
+});
+
+export const unarchivePool = mutation({
+    args: { poolId: v.id("pools") },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const pool = await ctx.db.get(args.poolId);
+        if (!pool) throw new Error("Pool not found");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+        if (!user || user._id !== pool.organizerId)
+            throw new Error("Only the Organizer can unarchive this pool");
+
+        await ctx.db.patch(args.poolId, { status: "ACTIVE" });
     },
 });
 

@@ -61,7 +61,7 @@ export const submitPayment = mutation({
 
         const data = {
             status: "PENDING" as const,
-            type: "online" as const,
+            type: args.type || ("online" as const),
             paidAt: Date.now(),
             proofUrl,
             remarks: args.remarks,
