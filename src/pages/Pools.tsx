@@ -1,8 +1,8 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { ArrowDownAZ, ArrowUpAZ, Plus, Search } from "lucide-react";
-import { motion, useScroll, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 
 import { api } from "@convex/api";
 import { LoadingIcon, DraftIcon } from "@/lib/icons";
@@ -16,8 +16,8 @@ type SortFilter = "most_recent" | "pool_value" | "progress";
 type SortDirection = "desc" | "asc";
 
 const STATUS_CHIPS: { value: Status; label: string }[] = [
-    { value: "draft", label: "Draft" },
     { value: "active", label: "Active" },
+    { value: "draft", label: "Draft" },
     { value: "completed", label: "Completed" },
     { value: "archived", label: "Archived" },
 ];
@@ -25,8 +25,8 @@ const STATUS_CHIPS: { value: Status; label: string }[] = [
 const DEFAULT_STATUSES = new Set<Status>(["active"]);
 
 const getProgressScore = (pool: any) => {
-    if (pool.status === 'DRAFT') return 0;
-    if (pool.status === 'COMPLETED') return 100;
+    if (pool.status === "DRAFT") return 0;
+    if (pool.status === "COMPLETED") return 100;
     const currentRound = pool.currentRound || 0;
     const duration = pool.config?.duration || 1;
     return (currentRound / duration) * 100;
@@ -85,66 +85,85 @@ export function Pools() {
             });
     }, [currentUserId, pools, roleFilter, search, sortDirection, sortFilter, selectedStatuses]);
 
-    const containerRef = useRef<HTMLDivElement>(null);
+    // ── SCROLL DETECTION ─────────────────────────────────────────────────
+    //
+    // BUG FIXED: The original code used useMemo to register a scrollY.on()
+    // listener. useMemo is NOT an effect — React can re-run it at any time,
+    // silently creating duplicate listeners that each call setScrolled on
+    // every pixel. The unsubscribe return value was also discarded, so
+    // listeners accumulated and leaked. Result: cascading re-renders → stutter.
+    //
+    // useMotionValueEvent is Framer's correct API for this pattern. It runs
+    // outside React's render cycle entirely — zero re-renders per pixel.
+    // We also guard setState so React only re-renders on the exact two moments
+    // the boolean flips (crossing 60px down, and back up). Not on every pixel.
+    //
+    // containerRef was also removed: it was created and attached to the page
+    // div but never passed to useScroll(), making it dead code. useScroll()
+    // with no arguments correctly tracks the window.
+    //
     const { scrollY } = useScroll();
-
-    // Transform values for sticky animation
     const [scrolled, setScrolled] = useState(false);
 
-    // Sync React state with scrolly
-    useMemo(() => {
-        return scrollY.on("change", (latest) => {
-            setScrolled(latest > 60);
-        });
-    }, [scrollY]);
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        const next = latest > 60;
+        setScrolled((prev) => (prev === next ? prev : next));
+    });
 
     const activeFilterSummary = useMemo(() => {
         const roles = { all: "All", organizing: "My Pools", joined: "Joined" };
-        const statusList = Array.from(selectedStatuses).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(", ");
+        const statusList = Array.from(selectedStatuses)
+            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(", ");
         return `${roles[roleFilter]} • ${statusList || "No status"}`;
     }, [roleFilter, selectedStatuses]);
 
     return (
-        <div ref={containerRef} className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 pb-32">
-            {/* Minimal Sticky Header Container */}
-            <div className="sticky top-0 z-50 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 pointer-events-none">
-                <motion.div
+        <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 pb-32">
+
+            {/* ── STICKY HEADER ───────────────────────────────────────────── */}
+            <div className="sticky top-0 z-50 -mx-4 lg:-mx-8 pointer-events-none px-4 lg:px-8">
+                <div
                     className={cn(
-                        "pointer-events-auto transition-all duration-300 py-4",
-                        scrolled ? "glass-3 border-b border-[var(--border-subtle)]/30 shadow-lg -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" : "bg-transparent"
+                        "pointer-events-auto py-4",
+                        "transition-[background-color,border-color,box-shadow] duration-200 ease-out",
+                        scrolled
+                            ? "glass-3 border-b border-[var(--border-subtle)]/30 shadow-lg -mx-4 lg:-mx-8 px-4 lg:px-8"
+                            : "bg-transparent border-b border-transparent shadow-none"
                     )}
                 >
                     <div className="flex flex-col gap-4">
+
                         {/* Title Row */}
                         <div className="flex items-center justify-between gap-4">
-                            <div className="flex flex-col">
+                            <div className="flex flex-col min-w-0">
                                 <div className="flex items-center gap-3">
-                                    <motion.h1
-                                        layout
-                                        className={cn(
-                                            "font-display font-bold text-[var(--text-primary)] transition-all duration-300",
-                                            scrolled ? "text-xl" : "text-2xl"
-                                        )}
-                                    >
+
+
+                                    <h1 className={cn(
+                                        "font-display font-bold text-[var(--text-primary)]",
+                                        "transition-[font-size] duration-200 ease-out",
+                                        scrolled ? "text-xl" : "text-2xl"
+                                    )}>
                                         Your pools
-                                    </motion.h1>
+                                    </h1>
+
                                     {pools && (
-                                        <motion.span
-                                            layout
-                                            className="rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/50 px-2 py-0.5 text-[10px] font-semibold text-[var(--text-muted)] tracking-wider"
-                                        >
+                                        <span className="rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/50 px-2 py-0.5 text-[10px] font-semibold text-[var(--text-muted)] tracking-wider shrink-0">
                                             {pools.length}
-                                        </motion.span>
+                                        </span>
                                     )}
                                 </div>
 
-                                {/* Second Line on scroll */}
-                                <AnimatePresence>
+                                {/* Filter summary — animates in when scrolled.*/}
+                                <AnimatePresence initial={false}>
                                     {scrolled && (
                                         <motion.div
+                                            key="filter-summary"
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: "auto" }}
                                             exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.2, ease: "easeOut" }}
                                             className="mt-1 flex items-center gap-2 overflow-hidden"
                                         >
                                             <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-widest opacity-70">
@@ -155,73 +174,68 @@ export function Pools() {
                                 </AnimatePresence>
                             </div>
 
-                            {/* Morphing Create Button */}
+                            {/* ── MORPHING CREATE BUTTON ────────────────────────── */}
                             <div className="flex-shrink-0">
                                 <Link to="/create">
                                     <motion.div
-                                        layout
                                         initial={false}
                                         animate={scrolled ? "sticky" : "normal"}
                                         variants={{
                                             normal: {
-                                                width: "auto",
-                                                height: "36px",
-                                                paddingLeft: "16px",
-                                                paddingRight: "16px",
-                                                borderRadius: "9999px",
+                                                width: 118,
+                                                height: 36,
+                                                paddingLeft: 16,
+                                                paddingRight: 14,
+                                                borderRadius: 9999,
                                                 backgroundColor: "var(--surface-deep)",
                                                 color: "var(--accent-vivid)",
+                                                boxShadow: "0 1px 2px rgba(0,0,0,0.06), inset 0 0 0 1px color-mix(in srgb, var(--accent-vivid) 30%, transparent)",
                                             },
                                             sticky: {
-                                                width: "32px",
-                                                height: "32px",
-                                                paddingLeft: "0px",
-                                                paddingRight: "0px",
-                                                borderRadius: "9999px",
+                                                width: 32,
+                                                height: 32,
+                                                paddingLeft: 0,
+                                                paddingRight: 0,
+                                                borderRadius: 9999,
                                                 backgroundColor: "var(--accent-vivid)",
                                                 color: "var(--text-on-accent)",
-                                            }
+                                                boxShadow: "0 4px 14px color-mix(in srgb, var(--accent-vivid) 35%, transparent)",
+                                            },
                                         }}
-                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                        className={cn(
-                                            "flex items-center justify-center border shadow-sm pointer-events-auto",
-                                            scrolled
-                                                ? "border-transparent shadow-lg shadow-[var(--accent-vivid)]/20"
-                                                : "border-[var(--accent-vivid)]/30"
-                                        )}
+                                        transition={{ type: "spring", stiffness: 380, damping: 32, mass: 0.8 }}
+                                        className="flex items-center justify-center overflow-hidden pointer-events-auto"
                                     >
-                                        <motion.div layout className="flex items-center justify-center gap-1.5 overflow-hidden">
-                                            <Plus
-                                                size={scrolled ? 18 : 14}
-                                                strokeWidth={scrolled ? 3 : 2.5}
-                                                className="shrink-0"
-                                            />
-                                            <AnimatePresence mode="popLayout">
-                                                {!scrolled && (
-                                                    <motion.span
-                                                        key="text"
-                                                        initial={{ opacity: 0, width: 0, x: -10 }}
-                                                        animate={{ opacity: 1, width: "auto", x: 0 }}
-                                                        exit={{ opacity: 0, width: 0, x: -10 }}
-                                                        className="text-xs font-semibold whitespace-nowrap overflow-hidden"
-                                                    >
-                                                        Create pool
-                                                    </motion.span>
-                                                )}
-                                            </AnimatePresence>
-                                        </motion.div>
+                                        <Plus size={15} strokeWidth={2.5} className="shrink-0" />
+
+                                        <AnimatePresence initial={false} mode="popLayout">
+                                            {!scrolled && (
+                                                <motion.span
+                                                    key="label"
+                                                    initial={{ opacity: 0, width: 0 }}
+                                                    animate={{ opacity: 1, width: "auto" }}
+                                                    exit={{ opacity: 0, width: 0 }}
+                                                    transition={{ duration: 0.15, ease: "easeOut" }}
+                                                    className="ml-1.5 text-xs font-semibold whitespace-nowrap overflow-hidden"
+                                                >
+                                                    Create pool
+                                                </motion.span>
+                                            )}
+                                        </AnimatePresence>
                                     </motion.div>
                                 </Link>
                             </div>
                         </div>
 
-                        {/* Persistent Search Bar (Sticky) */}
+                        {/* Search bar — narrows to max-w-md when scrolled.
+                         * CSS transition is correct here: max-width is a layout
+                         * property, not ideal for Framer. transition-[max-width]
+                         * keeps it specific and won't interfere with other props. */}
                         <div className={cn(
-                            "relative transition-all duration-300",
-                            scrolled ? "max-w-md mx-auto w-full" : "w-full"
+                            "relative transition-[max-width] duration-200 ease-out",
+                            scrolled ? "max-w-md mx-auto w-full" : "max-w-full w-full"
                         )}>
                             <div className="glass-2 flex items-center rounded-2xl border border-[var(--border-subtle)]/60 p-0.5">
-                                <Search size={16} className="ml-3 text-[var(--text-muted)]" />
+                                <Search size={16} className="ml-3 shrink-0 text-[var(--text-muted)]" />
                                 <input
                                     type="text"
                                     placeholder="Search pools..."
@@ -231,14 +245,35 @@ export function Pools() {
                                 />
                             </div>
                         </div>
+
                     </div>
-                </motion.div>
+                </div>
             </div>
 
-            {/* Filter Toolbar (Non-sticky) */}
-            <div className="mb-6 flex flex-col gap-3">
-                <div className="glass-2 flex items-center justify-between gap-2 rounded-[20px] p-1.5 border border-[var(--border-subtle)]/60">
-                    <div className="flex items-center justify-between w-full sm:justify-end gap-1 sm:gap-2 px-0.5 sm:px-0">
+            {/* Filter & Control Section */}
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                {/* Status Chips (Left/Top) */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+                    {STATUS_CHIPS.map(({ value, label }) => (
+                        <button
+                            key={value}
+                            type="button"
+                            onClick={() => toggleStatus(value)}
+                            className={cn(
+                                "btn-chip flex h-[30px] items-center shrink-0 rounded-full border px-4 text-[11px] font-semibold leading-none transition-all duration-150",
+                                selectedStatuses.has(value)
+                                    ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[0_2px_10px_rgba(var(--accent-vivid-rgb),0.2)]"
+                                    : "border-[var(--border-subtle)]/40 bg-[var(--surface-2)]/50 text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
+                            )}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Role & Sort Controls (Right/Bottom) */}
+                <div className="glass-2 flex items-center gap-2 rounded-[20px] p-1.5 border border-[var(--border-subtle)]/60 shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-2">
                         {/* Role Filter */}
                         <div className="flex bg-[var(--surface-0)]/50 p-0.5 sm:p-1 rounded-[14px] sm:rounded-2xl shrink-0">
                             {[
@@ -262,7 +297,7 @@ export function Pools() {
                         </div>
 
                         {/* Divider */}
-                        <div className="w-px h-4 sm:h-5 bg-[var(--border-subtle)]/60 mx-0.5 sm:mx-1 shrink-0" />
+                        <div className="w-px h-4 sm:h-5 bg-[var(--border-subtle)]/60 mx-1 shrink-0" />
 
                         {/* Sorting */}
                         <div className="flex items-center shrink min-w-0">
@@ -286,25 +321,6 @@ export function Pools() {
                             </button>
                         </div>
                     </div>
-                </div>
-
-                {/* Status Chips */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 px-1">
-                    {STATUS_CHIPS.map(({ value, label }) => (
-                        <button
-                            key={value}
-                            type="button"
-                            onClick={() => toggleStatus(value)}
-                            className={cn(
-                                "btn-chip flex h-[28px] items-center shrink-0 rounded-full border px-4 text-[11px] font-semibold leading-none transition-all duration-150",
-                                selectedStatuses.has(value)
-                                    ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
-                                    : "border-[var(--border-subtle)]/40 bg-[var(--surface-2)]/50 text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-                            )}
-                        >
-                            {label}
-                        </button>
-                    ))}
                 </div>
             </div>
 
