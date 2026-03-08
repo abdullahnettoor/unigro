@@ -15,7 +15,7 @@ import { LogoLoader } from "./components/ui/LogoLoader";
 
 // Lazy page imports
 const loadDashboard = () => import("./pages/Dashboard");
-const loadPools = () => import("./pages/Pots");           // file still called Pots.tsx
+const loadPools = () => import("./pages/Pools");           // file still called Pots.tsx
 const loadCreatePool = () => import("./pages/CreatePool");
 const loadPoolDetail = () => import("./pages/PoolDetail");
 const loadSettings = () => import("./pages/Settings");
@@ -23,7 +23,7 @@ const loadAdminDashboard = () => import("./pages/AdminDashboard");
 const loadDesign = () => import("./pages/Design");
 
 const Dashboard = lazy(() => loadDashboard().then((m) => ({ default: m.Dashboard })));
-const Pools = lazy(() => loadPools().then((m) => ({ default: m.Pots })));
+const Pools = lazy(() => loadPools().then((m) => ({ default: m.Pools })));
 const CreatePool = lazy(() => loadCreatePool().then((m) => ({ default: m.CreatePool })));
 const PoolDetail = lazy(() => loadPoolDetail().then((m) => ({ default: m.PoolDetail })));
 const SettingsPage = lazy(() => loadSettings().then((m) => ({ default: m.Settings })));
