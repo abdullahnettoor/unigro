@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { ArrowDownAZ, ArrowUpAZ, Plus, Search } from "lucide-react";
+import { motion, useScroll, AnimatePresence } from "framer-motion";
 
 import { api } from "@convex/api";
 import { LoadingIcon, DraftIcon } from "@/lib/icons";
@@ -84,49 +85,160 @@ export function Pools() {
             });
     }, [currentUserId, pools, roleFilter, search, sortDirection, sortFilter, selectedStatuses]);
 
+    const containerRef = useRef<HTMLDivElement>(null);
+    const { scrollY } = useScroll();
+
+    // Transform values for sticky animation
+    const [scrolled, setScrolled] = useState(false);
+
+    // Sync React state with scrolly
+    useMemo(() => {
+        return scrollY.on("change", (latest) => {
+            setScrolled(latest > 60);
+        });
+    }, [scrollY]);
+
+    const activeFilterSummary = useMemo(() => {
+        const roles = { all: "All", organizing: "My Pools", joined: "Joined" };
+        const statusList = Array.from(selectedStatuses).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(", ");
+        return `${roles[roleFilter]} • ${statusList || "No status"}`;
+    }, [roleFilter, selectedStatuses]);
+
     return (
-        <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 pb-32">
-            {/* Minimal Header */}
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-display font-bold text-[var(--text-primary)] flex items-center gap-3">
-                        Your pools
-                        {pools && (
-                            <span className="rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/50 px-2 py-0.5 text-[10px] font-semibold text-[var(--text-muted)] tracking-wider">
-                                {pools.length}
-                            </span>
-                        )}
-                    </h1>
-                </div>
-                <Link
-                    to="/create"
-                    className="inline-flex h-9 items-center justify-center rounded-full bg-[var(--surface-deep)] border border-[var(--accent-vivid)]/30 px-4 text-xs font-semibold text-[var(--accent-vivid)] shadow-sm transition-all hover:-translate-y-0.5 hover:border-[var(--accent-vivid)] gap-1.5"
+        <div ref={containerRef} className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 pb-32">
+            {/* Minimal Sticky Header Container */}
+            <div className="sticky top-0 z-50 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 pointer-events-none">
+                <motion.div
+                    className={cn(
+                        "pointer-events-auto transition-all duration-300 py-4",
+                        scrolled ? "glass-3 border-b border-[var(--border-subtle)]/30 shadow-lg -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" : "bg-transparent"
+                    )}
                 >
-                    <Plus size={14} strokeWidth={2.5} />
-                    Create pool
-                </Link>
+                    <div className="flex flex-col gap-4">
+                        {/* Title Row */}
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex flex-col">
+                                <div className="flex items-center gap-3">
+                                    <motion.h1
+                                        layout
+                                        className={cn(
+                                            "font-display font-bold text-[var(--text-primary)] transition-all duration-300",
+                                            scrolled ? "text-xl" : "text-2xl"
+                                        )}
+                                    >
+                                        Your pools
+                                    </motion.h1>
+                                    {pools && (
+                                        <motion.span
+                                            layout
+                                            className="rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/50 px-2 py-0.5 text-[10px] font-semibold text-[var(--text-muted)] tracking-wider"
+                                        >
+                                            {pools.length}
+                                        </motion.span>
+                                    )}
+                                </div>
+
+                                {/* Second Line on scroll */}
+                                <AnimatePresence>
+                                    {scrolled && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="mt-1 flex items-center gap-2 overflow-hidden"
+                                        >
+                                            <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-widest opacity-70">
+                                                {activeFilterSummary}
+                                            </span>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Morphing Create Button */}
+                            <div className="flex-shrink-0">
+                                <Link to="/create">
+                                    <motion.div
+                                        layout
+                                        initial={false}
+                                        animate={scrolled ? "sticky" : "normal"}
+                                        variants={{
+                                            normal: {
+                                                width: "auto",
+                                                height: "36px",
+                                                paddingLeft: "16px",
+                                                paddingRight: "16px",
+                                                borderRadius: "9999px",
+                                                backgroundColor: "var(--surface-deep)",
+                                                color: "var(--accent-vivid)",
+                                            },
+                                            sticky: {
+                                                width: "32px",
+                                                height: "32px",
+                                                paddingLeft: "0px",
+                                                paddingRight: "0px",
+                                                borderRadius: "9999px",
+                                                backgroundColor: "var(--accent-vivid)",
+                                                color: "var(--text-on-accent)",
+                                            }
+                                        }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                        className={cn(
+                                            "flex items-center justify-center border shadow-sm pointer-events-auto",
+                                            scrolled
+                                                ? "border-transparent shadow-lg shadow-[var(--accent-vivid)]/20"
+                                                : "border-[var(--accent-vivid)]/30"
+                                        )}
+                                    >
+                                        <motion.div layout className="flex items-center justify-center gap-1.5 overflow-hidden">
+                                            <Plus
+                                                size={scrolled ? 18 : 14}
+                                                strokeWidth={scrolled ? 3 : 2.5}
+                                                className="shrink-0"
+                                            />
+                                            <AnimatePresence mode="popLayout">
+                                                {!scrolled && (
+                                                    <motion.span
+                                                        key="text"
+                                                        initial={{ opacity: 0, width: 0, x: -10 }}
+                                                        animate={{ opacity: 1, width: "auto", x: 0 }}
+                                                        exit={{ opacity: 0, width: 0, x: -10 }}
+                                                        className="text-xs font-semibold whitespace-nowrap overflow-hidden"
+                                                    >
+                                                        Create pool
+                                                    </motion.span>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.div>
+                                    </motion.div>
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* Persistent Search Bar (Sticky) */}
+                        <div className={cn(
+                            "relative transition-all duration-300",
+                            scrolled ? "max-w-md mx-auto w-full" : "w-full"
+                        )}>
+                            <div className="glass-2 flex items-center rounded-2xl border border-[var(--border-subtle)]/60 p-0.5">
+                                <Search size={16} className="ml-3 text-[var(--text-muted)]" />
+                                <input
+                                    type="text"
+                                    placeholder="Search pools..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="w-full bg-transparent border-none py-2 px-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-0"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
 
-            {/* Unified Toolbar */}
+            {/* Filter Toolbar (Non-sticky) */}
             <div className="mb-6 flex flex-col gap-3">
-                {/* Search, Sort, & Role Filter */}
-                <div className="glass-2 flex flex-col sm:flex-row items-stretch sm:items-center rounded-[20px] p-1.5 border border-[var(--border-subtle)]/60">
-                    <div className="relative flex-1 flex items-center min-w-0">
-                        <Search size={15} className="absolute left-3 text-[var(--text-muted)]" />
-                        <input
-                            type="text"
-                            placeholder="Search pools..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-transparent border-none py-2 pl-9 pr-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-0"
-                        />
-                    </div>
-
-                    {/* Divider on desktop */}
-                    <div className="hidden sm:block w-px h-6 bg-[var(--border-subtle)] mx-2" />
-
-                    {/* Secondary Row on mobile */}
-                    <div className="flex items-center justify-between sm:justify-end gap-1 sm:gap-2 border-t border-[var(--border-subtle)]/50 sm:border-t-0 pt-1.5 sm:pt-0 pb-0.5 sm:pb-0 px-0.5 sm:px-0">
+                <div className="glass-2 flex items-center justify-between gap-2 rounded-[20px] p-1.5 border border-[var(--border-subtle)]/60">
+                    <div className="flex items-center justify-between w-full sm:justify-end gap-1 sm:gap-2 px-0.5 sm:px-0">
                         {/* Role Filter */}
                         <div className="flex bg-[var(--surface-0)]/50 p-0.5 sm:p-1 rounded-[14px] sm:rounded-2xl shrink-0">
                             {[
@@ -149,10 +261,10 @@ export function Pools() {
                             ))}
                         </div>
 
-                        {/* Divider between role and sort on mobile inside flex*/}
+                        {/* Divider */}
                         <div className="w-px h-4 sm:h-5 bg-[var(--border-subtle)]/60 mx-0.5 sm:mx-1 shrink-0" />
 
-                        {/* Sorting integrated into toolbar */}
+                        {/* Sorting */}
                         <div className="flex items-center shrink min-w-0">
                             <Select value={sortFilter} onValueChange={(val) => setSortFilter(val as SortFilter)}>
                                 <SelectTrigger className="h-[26px] sm:h-[28px] w-auto max-w-[85px] sm:max-w-[120px] border-none bg-transparent px-1 sm:px-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] shadow-none focus:ring-0 truncate [&>svg]:hidden sm:[&>svg]:block">
