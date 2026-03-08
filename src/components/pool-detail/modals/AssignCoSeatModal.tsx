@@ -84,7 +84,7 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-3 border border-[var(--border-subtle)] max-w-sm rounded-[32px] p-0 focus:outline-none shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <DialogHeader className="p-7 pb-2 shrink-0">
+        <DialogHeader className="p-7 pb-2 shrink-0 pr-12">
           <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--accent-vivid)]">Allocation Split</p>
           <DialogTitle className="font-display text-xl font-bold text-[var(--text-primary)] leading-tight">Assign co-seat owner</DialogTitle>
           <DialogDescription className="text-sm text-[var(--text-muted)] leading-relaxed">
@@ -92,7 +92,7 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-7 pb-7 space-y-5 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto min-h-0 px-7 pb-7 space-y-5 scrollbar-hide overscroll-contain">
           <div className="mt-4 space-y-5">
             <div className="grid grid-cols-5 gap-3">
               <div className="col-span-3 space-y-1.5">
@@ -145,7 +145,7 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
           </div>
         </div>
 
-        <DialogFooter className="p-7 pt-0 flex flex-col items-stretch gap-3 shrink-0">
+        <DialogFooter className="p-7 pt-0 flex flex-col items-stretch gap-3 shrink-0 sm:space-x-0">
           <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 w-full rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-[0_12px_28px_rgba(var(--accent-glow),0.25)] hover:bg-[var(--accent-vivid)]/90 transition-all">
             {isSubmitting ? <Icons.LoadingIcon className="h-4 w-4 animate-spin mr-2" /> : <Icons.LayersIcon size={16} className="mr-2" />}
             Assign share

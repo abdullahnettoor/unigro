@@ -105,7 +105,7 @@ export function JoinPoolModal({
       <DialogContent className="glass-3 border border-[var(--border-subtle)] p-0 gap-0 overflow-hidden max-w-sm sm:max-w-md flex flex-col max-h-[90vh]">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-vivid)]/[0.03] to-transparent pointer-events-none" />
 
-        <DialogHeader className="p-6 pb-2 relative shrink-0">
+        <DialogHeader className="p-6 pb-2 relative shrink-0 pr-12">
           <div className="flex items-center gap-3 mb-1">
             <div className="h-10 w-10 rounded-2xl bg-[var(--accent-vivid)]/10 flex items-center justify-center text-[var(--accent-vivid)]">
               <Icons.JoinIcon size={20} />
@@ -117,7 +117,7 @@ export function JoinPoolModal({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-2 space-y-6 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto min-h-0 px-6 py-2 space-y-6 scrollbar-hide overscroll-contain">
           {!isAuthenticated && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
               <Surface tier={1} className="rounded-2xl border border-[var(--border-subtle)]/60 p-4 bg-[var(--surface-1)]/40">
@@ -241,7 +241,7 @@ export function JoinPoolModal({
           </Surface>
         </div>
 
-        <DialogFooter className="p-6 pt-0 sm:flex-col gap-3 shrink-0">
+        <DialogFooter className="p-6 pt-0 sm:flex-col gap-3 shrink-0 sm:space-x-0">
           <Button
             onClick={handleJoin}
             disabled={isSubmitting || availableSeats === 0}

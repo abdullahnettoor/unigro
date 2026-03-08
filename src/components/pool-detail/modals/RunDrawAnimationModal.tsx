@@ -170,7 +170,7 @@ export function RunDrawAnimationModal({
   const cols = count <= 4 ? count : count <= 9 ? 3 : count <= 16 ? 4 : count <= 25 ? 5 : 6;
 
   return (
-    <div className="fixed inset-0 z-[300] flex flex-col items-center justify-between bg-[var(--surface-0)]/98 backdrop-blur-2xl py-8 px-4 sm:px-8 overflow-y-auto scrollbar-hide">
+    <div className="fixed inset-0 z-[300] flex flex-col items-center justify-between bg-[var(--surface-0)]/98 backdrop-blur-2xl py-8 px-4 sm:px-8 overflow-y-auto min-h-0 scrollbar-hide overscroll-contain">
       {phase === "winner" && <ConfettiBlizzard />}
 
       <AnimatePresence>

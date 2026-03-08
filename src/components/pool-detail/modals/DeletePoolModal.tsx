@@ -12,7 +12,7 @@ export function DeletePoolModal({ open, onOpenChange, onConfirm }: DeletePoolMod
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-3 border border-[var(--danger)]/30 rounded-[32px] max-w-[400px] p-0 overflow-hidden outline-none">
-        <DialogHeader className="p-6 pb-2">
+        <DialogHeader className="p-6 pb-2 pr-12">
           <div className="flex flex-col gap-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--danger)]">Danger Zone</p>
             <DialogTitle className="font-display text-xl font-bold">Delete Pool</DialogTitle>

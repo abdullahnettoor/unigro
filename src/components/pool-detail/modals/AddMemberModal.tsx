@@ -73,7 +73,7 @@ export function AddMemberModal({ open, onOpenChange, poolId, fullSeats }: AddMem
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-3 border border-[var(--border-subtle)] max-w-sm rounded-[32px] p-0 overflow-hidden focus:outline-none shadow-2xl flex flex-col max-h-[90vh]">
-        <DialogHeader className="p-7 pb-2 shrink-0 text-center sm:text-left">
+        <DialogHeader className="p-7 pb-2 shrink-0 text-center sm:text-left pr-12">
           <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--accent-vivid)]">Member Entry</p>
           <DialogTitle className="font-display text-xl font-bold text-[var(--text-primary)]">Add new member</DialogTitle>
           <DialogDescription className="text-sm text-[var(--text-muted)] leading-relaxed">
@@ -81,7 +81,7 @@ export function AddMemberModal({ open, onOpenChange, poolId, fullSeats }: AddMem
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-7 pb-7 space-y-5 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto min-h-0 px-7 pb-7 space-y-5 scrollbar-hide overscroll-contain">
           <div className="mt-4 space-y-5">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)] ml-1">Seat Number</label>
@@ -119,7 +119,7 @@ export function AddMemberModal({ open, onOpenChange, poolId, fullSeats }: AddMem
             </div>
           </div>
         </div>
-        <DialogFooter className="p-7 pt-0 flex flex-col items-stretch gap-3 shrink-0">
+        <DialogFooter className="p-7 pt-0 flex flex-col items-stretch gap-3 shrink-0 sm:space-x-0">
           <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 w-full rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-[0_12px_28px_rgba(var(--accent-glow),0.25)] hover:bg-[var(--accent-vivid)]/90 transition-all">
             {isSubmitting ? <Icons.LoadingIcon className="h-4 w-4 animate-spin mr-2" /> : <Icons.InviteIcon size={16} className="mr-2" />}
             Assign seat

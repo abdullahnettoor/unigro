@@ -132,7 +132,7 @@ export function PaymentModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-3 border border-[var(--border-subtle)] rounded-[32px] max-w-[400px] p-0 overflow-hidden outline-none flex flex-col max-h-[90vh]">
-        <DialogHeader className="p-6 pb-2 shrink-0">
+        <DialogHeader className="p-6 pb-2 shrink-0 pr-12">
           <div className="flex flex-col gap-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--accent-vivid)]">Financial</p>
             <DialogTitle className="font-display text-xl font-bold">
@@ -141,7 +141,7 @@ export function PaymentModal({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto min-h-0 px-6 pb-6 space-y-6 scrollbar-hide overscroll-contain">
           {/* Summary Card - Persistent context */}
           <Surface tier={2} className="grain p-4 rounded-2xl border border-[var(--border-subtle)]/50 flex items-center justify-between">
             <div className="flex items-center gap-3">
