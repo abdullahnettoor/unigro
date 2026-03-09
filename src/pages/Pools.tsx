@@ -301,7 +301,7 @@ export function Pools() {
 
                         {/* Sorting */}
                         <div className="flex items-center shrink min-w-0">
-                            <Select value={sortFilter} onValueChange={(val) => setSortFilter(val as SortFilter)}>
+                            <Select value={sortFilter} onValueChange={(val: string) => setSortFilter(val as SortFilter)}>
                                 <SelectTrigger className="h-[26px] sm:h-[28px] w-auto max-w-[85px] sm:max-w-[120px] border-none bg-transparent px-1 sm:px-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] shadow-none focus:ring-0 truncate [&>svg]:hidden sm:[&>svg]:block">
                                     <SelectValue placeholder="Sort by" />
                                 </SelectTrigger>

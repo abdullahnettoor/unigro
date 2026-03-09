@@ -224,7 +224,7 @@ export function AdminDashboard() {
                                                         <div className="relative">
                                                             <Textarea
                                                                 value={rejectionNote}
-                                                                onChange={(e) => setRejectionNote(e.target.value)}
+                                                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRejectionNote(e.target.value)}
                                                                 placeholder="Please provide a clear reason for rejecting this verification..."
                                                                 className="glass-1 border-[var(--danger)]/30 min-h-[100px] rounded-[20px] p-4 text-xs font-medium resize-none focus:ring-[var(--danger)]/10"
                                                             />

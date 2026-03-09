@@ -298,7 +298,7 @@ export function Settings() {
                                                 <Input
                                                     className="bg-[var(--surface-2)]/40 border-[var(--border-subtle)]/60 rounded-full h-11 px-5"
                                                     value={editName}
-                                                    onChange={(e) => setEditName(e.target.value)}
+                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
@@ -432,7 +432,7 @@ export function Settings() {
                                         <Input
                                             className="bg-[var(--surface-2)]/30 border-[var(--border-subtle)]/50 rounded-full h-11 px-5"
                                             value={idNumber}
-                                            onChange={(e) => {
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                                 let val = e.target.value;
                                                 if (idType === "Aadhaar") val = val.replace(/\D/g, "").slice(0, 12);
                                                 else if (idType === "PAN") val = val.toUpperCase().slice(0, 10);
@@ -524,7 +524,7 @@ export function Settings() {
                             <p className="text-[11px] text-[var(--text-muted)] font-medium">Coordinate the interface with your vibe.</p>
                         </div>
                         <div className="w-full sm:w-48">
-                            <Select value={themeVariant} onValueChange={(val) => { const next = val as ThemeVariant; setThemeVariantState(next); setThemeVariant(next); }}>
+                            <Select value={themeVariant} onValueChange={(val: string) => { const next = val as ThemeVariant; setThemeVariantState(next); setThemeVariant(next); }}>
                                 <SelectTrigger className="bg-[var(--surface-0)]/50 border-[var(--border-subtle)]/50 h-10 rounded-full px-3 text-[11px] font-bold shadow-sm shadow-black/5">
                                     <SelectValue />
                                 </SelectTrigger>

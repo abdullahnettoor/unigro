@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function LanguageSwitcher() {
     const { i18n } = useTranslation();
@@ -17,7 +17,7 @@ export function LanguageSwitcher() {
     return (
         <Select
             value={currentLang}
-            onValueChange={(lang) => {
+            onValueChange={(lang: string) => {
                 i18n.changeLanguage(lang);
             }}
         >

@@ -27,7 +27,7 @@ export function MediaPreviewDialog({ url, onClose, alt = "Preview" }: MediaPrevi
   return (
     <Dialog
       open={!!url}
-      onOpenChange={(open) => {
+      onOpenChange={(open: boolean) => {
         if (!open) {
           resetZoom();
           onClose();

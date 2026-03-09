@@ -48,7 +48,7 @@ export function DatePicker({
           mode="single"
           selected={selectedDate}
           captionLayout="dropdown"
-          onSelect={(date) => {
+          onSelect={(date: Date | undefined) => {
             if (!date) return;
             onChange(format(date, "yyyy-MM-dd"));
           }}
