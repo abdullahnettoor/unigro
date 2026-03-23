@@ -11,6 +11,7 @@ import { api } from "@convex/api";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { Id } from "@convex/dataModel";
 import type { PoolPaymentDetails } from "../types";
+import { SelectionControl } from "@/components/ui/selection-control";
 
 interface PaymentModalProps {
   open: boolean;
@@ -47,6 +48,7 @@ export function PaymentModal({
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split("T")[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [cashConfirmed, setCashConfirmed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,13 +111,6 @@ export function PaymentModal({
       }
       return;
     }
-
-    const ok = await feedback.confirm({
-      title: "Confirm cash payment?",
-      message: "The organizer will need to verify and approve this request.",
-      confirmText: "Request Approval",
-    });
-    if (!ok) return;
 
     setIsSubmitting(true);
     try {
@@ -191,7 +186,12 @@ export function PaymentModal({
           ) : (
             <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
               <button
-                onClick={() => { setPaymentType(null); setFile(null); setFilePreview(null); }}
+                onClick={() => {
+                  setPaymentType(null);
+                  setFile(null);
+                  setFilePreview(null);
+                  setCashConfirmed(false);
+                }}
                 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 disabled={isSubmitting}
               >
@@ -306,11 +306,11 @@ export function PaymentModal({
 
                   <Button
                     className={cn(
-                      "w-full h-12 rounded-full font-bold text-white shadow-lg disabled:opacity-50",
+                      "w-full h-12 rounded-full font-bold text-[var(--text-on-accent)] shadow-lg disabled:opacity-100",
                       isOrganizer ? "bg-[var(--accent-vivid)] shadow-[var(--accent-vivid)]/20" : "bg-[var(--warning)] shadow-[var(--warning)]/20"
                     )}
-                    onClick={handleCashSubmit}
-                    disabled={isSubmitting}
+                    onClick={() => void handleCashSubmit()}
+                    disabled={isSubmitting || (!isOrganizer && !cashConfirmed)}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">
@@ -320,6 +320,26 @@ export function PaymentModal({
                       isOrganizer ? "Confirm Cash Received" : "Confirm Cash Paid"
                     )}
                   </Button>
+
+                  {!isOrganizer && (
+                    <button
+                      type="button"
+                      onClick={() => setCashConfirmed((prev) => !prev)}
+                      className="w-full rounded-2xl border border-[var(--border-subtle)]/60 bg-[var(--surface-2)]/35 px-4 py-3 text-left transition-colors hover:bg-[var(--surface-2)]/55"
+                    >
+                      <span className="flex items-start gap-3">
+                        <SelectionControl checked={cashConfirmed} variant="checkbox" size="sm" className="mt-0.5" />
+                        <span>
+                          <span className="block text-sm font-semibold text-[var(--text-primary)]">
+                            I confirm I handed cash to the organizer
+                          </span>
+                          <span className="mt-1 block text-xs text-[var(--text-muted)]">
+                            This will send an approval request to the organizer.
+                          </span>
+                        </span>
+                      </span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>

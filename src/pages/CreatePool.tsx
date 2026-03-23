@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { api } from "@convex/api";
 import type { Id } from "@convex/dataModel";
 import { PoolFinancialsStep } from "@/components/create-pool/PoolFinancialsStep";
-import { PoolSlotsStep } from "@/components/create-pool/PoolSlotsStep";
+import { PoolSeatsStep } from "@/components/create-pool/PoolSeatsStep";
 import { PoolRulesStep } from "@/components/create-pool/PoolRulesStep";
 import { StepHeader } from "@/components/create-pool/StepHeader";
 import { StepFooterBar } from "@/components/create-pool/StepFooterBar";
@@ -268,7 +268,7 @@ export function CreatePool() {
                   />
                 )}
                 {step === 2 && (
-                  <PoolSlotsStep
+                  <PoolSeatsStep
                     formData={formData}
                     onChange={updateFormData}
                     disabled={isLocked}

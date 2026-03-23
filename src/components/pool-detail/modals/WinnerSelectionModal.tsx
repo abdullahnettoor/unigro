@@ -5,18 +5,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Surface } from "@/components/ui/Surface";
+import { cn } from "@/lib/utils";
 
 interface WinnerSelectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   eligibleSeats: number[];
+  drawStrategy?: "RANDOM" | "MANUAL";
   onStartAnimation: () => void;
   onSetManualWinner: (seatNumber: number) => Promise<void>;
 }
 
-export function WinnerSelectionModal({ open, onOpenChange, eligibleSeats, onStartAnimation, onSetManualWinner }: WinnerSelectionModalProps) {
+export function WinnerSelectionModal({
+  open,
+  onOpenChange,
+  eligibleSeats,
+  drawStrategy,
+  onStartAnimation,
+  onSetManualWinner
+}: WinnerSelectionModalProps) {
   const [selectedSeat, setSelectedSeat] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isRandomPrimary = (drawStrategy ?? "RANDOM") === "RANDOM";
 
   const handleManualSet = async () => {
     if (!selectedSeat) return;
@@ -70,17 +80,28 @@ export function WinnerSelectionModal({ open, onOpenChange, eligibleSeats, onStar
 
             <div className="grid grid-cols-2 gap-3 pt-2">
               <Button
-                variant="ghost"
+                variant={isRandomPrimary ? "default" : "outline"}
                 onClick={onStartAnimation}
                 disabled={isSubmitting}
-                className="h-12 rounded-full font-bold text-[var(--text-muted)] hover:bg-[var(--surface-3)]/40 hover:text-[var(--text-primary)] transition-all"
+                className={cn(
+                  "h-12 rounded-full font-bold transition-all",
+                  isRandomPrimary
+                    ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)]"
+                    : "text-[var(--text-primary)]"
+                )}
               >
                 Random draw
               </Button>
               <Button
                 onClick={handleManualSet}
                 disabled={isSubmitting || !selectedSeat}
-                className="h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-lg shadow-[var(--accent-vivid)]/20"
+                variant={isRandomPrimary ? "outline" : "default"}
+                className={cn(
+                  "h-12 rounded-full font-bold",
+                  isRandomPrimary
+                    ? "text-[var(--text-primary)]"
+                    : "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-lg shadow-[var(--accent-vivid)]/20"
+                )}
               >
                 {isSubmitting ? <Icons.LoadingIcon className="animate-spin" size={16} /> : "Set Winner"}
               </Button>

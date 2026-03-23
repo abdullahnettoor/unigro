@@ -196,6 +196,8 @@ export function PoolDetail() {
       };
     });
 
+  const hasWinnerForCurrentRound = seats.some((seat) => seat.roundWon === pool.currentRound);
+
   const handleActivate = async () => {
     if (availableSeats > 0) {
       feedback.toast.info("Cannot activate yet", `${availableSeats} seats are still open.`);
@@ -228,6 +230,10 @@ export function PoolDetail() {
   };
 
   const handleAdvanceRound = async (nextDraw: number) => {
+    if (!hasWinnerForCurrentRound) {
+      feedback.toast.info("Winner required", "Pick a winner for this round before advancing.");
+      return;
+    }
     try {
       await advanceRound({ poolId: pool._id, nextDrawDate: nextDraw });
       feedback.toast.success("Round advanced", "Next round has started.");
@@ -451,12 +457,19 @@ export function PoolDetail() {
                 onReject={handleReject}
                 onOpenCashPayment={() => setShowRecordCash(true)}
                 onOpenWinnerSelection={() => setShowWinnerSelection(true)}
-                onOpenNextRound={() => setShowNextRound(true)}
+                onOpenNextRound={() => {
+                  if (!hasWinnerForCurrentRound) {
+                    feedback.toast.info("Winner required", "Pick a winner for this round before advancing.");
+                    return;
+                  }
+                  setShowNextRound(true);
+                }}
                 onOpenPayout={() => setShowRecordPayout(true)}
                 onActivatePool={handleActivate}
                 onArchivePool={() => setShowArchiveModal(true)}
                 onUnarchivePool={handleUnarchivePool}
                 onDeletePool={() => setShowDeletePool(true)}
+                canAdvanceRound={hasWinnerForCurrentRound}
               />
             )}
           </>
@@ -514,6 +527,7 @@ export function PoolDetail() {
           open={showWinnerSelection}
           onOpenChange={setShowWinnerSelection}
           eligibleSeats={eligibleDrawSeats.map(s => s.seatNumber)}
+          drawStrategy={pool.drawStrategy}
           onStartAnimation={() => {
             setShowWinnerSelection(false);
             setShowDrawAnimation(true);
@@ -528,6 +542,8 @@ export function PoolDetail() {
           open={showNextRound}
           onOpenChange={setShowNextRound}
           onAdvance={handleAdvanceRound}
+          canAdvance={hasWinnerForCurrentRound}
+          advanceHint="Pick a winner for the current round before advancing."
         />
 
         {showDrawAnimation && (

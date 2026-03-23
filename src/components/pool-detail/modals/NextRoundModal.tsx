@@ -10,9 +10,17 @@ interface NextRoundModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdvance: (nextDrawDate: number) => Promise<void>;
+  canAdvance?: boolean;
+  advanceHint?: string;
 }
 
-export function NextRoundModal({ open, onOpenChange, onAdvance }: NextRoundModalProps) {
+export function NextRoundModal({
+  open,
+  onOpenChange,
+  onAdvance,
+  canAdvance = true,
+  advanceHint,
+}: NextRoundModalProps) {
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,8 +68,8 @@ export function NextRoundModal({ open, onOpenChange, onAdvance }: NextRoundModal
 
             <Button
               onClick={handleAdvance}
-              disabled={isSubmitting}
-              className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-lg shadow-[var(--accent-vivid)]/20"
+              disabled={isSubmitting || !canAdvance}
+              className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)] shadow-lg shadow-[var(--accent-vivid)]/20 disabled:opacity-100 disabled:bg-[var(--surface-2)] disabled:text-[var(--text-muted)] disabled:shadow-none"
             >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
@@ -71,6 +79,12 @@ export function NextRoundModal({ open, onOpenChange, onAdvance }: NextRoundModal
                 "Confirm & Advance"
               )}
             </Button>
+
+            {!canAdvance && (
+              <p className="text-xs text-[var(--warning)] font-medium">
+                {advanceHint || "Select a winner for the current round before advancing."}
+              </p>
+            )}
           </div>
 
           <p className="text-[10px] text-[var(--text-muted)] text-center px-4 leading-relaxed font-medium">

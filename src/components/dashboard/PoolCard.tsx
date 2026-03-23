@@ -8,6 +8,7 @@ export type PoolItem = {
   title: string;
   status: string;
   currentRound: number;
+  filledSeats?: number;
   config: {
     totalSeats: number;
     contribution: number;
@@ -18,24 +19,6 @@ export type PoolItem = {
   };
   organizer?: { name: string } | null;
 };
-
-const MAX_DOTS = 16;
-
-function getDotIndices(total: number, maxDots = MAX_DOTS) {
-  const safeTotal = Math.max(0, total);
-  if (safeTotal <= maxDots) {
-    return Array.from({ length: safeTotal }, (_, i) => i);
-  }
-  const step = Math.ceil(safeTotal / maxDots);
-  const indices: number[] = [];
-  for (let i = 0; i < safeTotal; i += step) {
-    indices.push(i);
-  }
-  if (indices[indices.length - 1] !== safeTotal - 1) {
-    indices.push(safeTotal - 1);
-  }
-  return indices;
-}
 
 export function PoolCard({ pool }: { pool: PoolItem }) {
   const poolValue = pool.config.totalValue ?? pool.config.contribution * pool.config.totalSeats;
@@ -49,7 +32,9 @@ export function PoolCard({ pool }: { pool: PoolItem }) {
 
   const showRounds = pool.status === "ACTIVE" || pool.status === "COMPLETED";
   const totalDots = showRounds ? pool.config.duration : pool.config.totalSeats;
-  const dotIndices = getDotIndices(totalDots);
+  const dotIndices = Array.from({ length: Math.max(0, totalDots) }, (_, i) => i);
+  const filledSeats = Math.max(0, Math.min(pool.config.totalSeats, pool.filledSeats ?? 0));
+  const normalizedRound = Math.max(1, Math.min(pool.currentRound || 1, pool.config.duration || 1));
 
   return (
     <Link
@@ -100,17 +85,17 @@ export function PoolCard({ pool }: { pool: PoolItem }) {
           <div className="relative">
             <span className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-[var(--surface-2)]/80" />
             <div className="relative flex items-center justify-between gap-0.5 overflow-hidden">
-              {dotIndices.map((index, idx) => {
-                const nextIndex = dotIndices[idx + 1] ?? totalDots;
-                const done = index < pool.currentRound;
-                const current = done && nextIndex >= pool.currentRound;
+              {dotIndices.map((index) => {
+                const roundNumber = index + 1;
+                const done = roundNumber < normalizedRound;
+                const current = roundNumber === normalizedRound;
                 return (
                   <div key={index} className="flex items-center">
                     <div
                       className={cn(
                         "h-2 w-2 rounded-full transition-all",
-                        done && !current && "bg-[var(--accent-vivid)]/70",
-                        current && "bg-[var(--accent-vivid)] shadow-[0_0_10px_rgba(157,132,255,0.55)]",
+                        done && "bg-[var(--accent-vivid)]/70",
+                        current && "h-2.5 w-2.5 border border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/95",
                         !done && "bg-[var(--surface-2)]"
                       )}
                     />
@@ -125,7 +110,7 @@ export function PoolCard({ pool }: { pool: PoolItem }) {
       {pool.status === "DRAFT" && (
         <div className="relative">
           <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)]">
-            Seats target {pool.config.totalSeats}
+            Seats filled {filledSeats}/{pool.config.totalSeats}
           </p>
           <div className="relative">
             <span className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-[var(--surface-2)]/80" />
@@ -135,7 +120,7 @@ export function PoolCard({ pool }: { pool: PoolItem }) {
                   <div
                     className={cn(
                       "h-2 w-2 rounded-full",
-                      index === 0 ? "bg-[var(--warning)]/70" : "bg-[var(--surface-2)]"
+                      index < filledSeats ? "bg-[var(--warning)]/75" : "bg-[var(--surface-2)]"
                     )}
                   />
                 </div>

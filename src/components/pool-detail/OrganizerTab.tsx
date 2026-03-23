@@ -23,6 +23,7 @@ interface OrganizerTabProps {
   onArchivePool: () => void;
   onUnarchivePool: () => void;
   onDeletePool: () => void;
+  canAdvanceRound?: boolean;
 }
 
 export function OrganizerTab({
@@ -38,6 +39,7 @@ export function OrganizerTab({
   onArchivePool,
   onUnarchivePool,
   onDeletePool,
+  canAdvanceRound = true,
 }: OrganizerTabProps) {
   const [reviewTxId, setReviewTxId] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -226,10 +228,15 @@ export function OrganizerTab({
                 <Button size="sm" variant="secondary" onClick={onOpenWinnerSelection} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
                   <Icons.DrawIcon size={14} /> Run draw
                 </Button>
-                <Button size="sm" variant="secondary" onClick={onOpenNextRound} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
+                <Button size="sm" variant="secondary" onClick={onOpenNextRound} disabled={isArchived || !canAdvanceRound} className="rounded-xl h-10 font-bold text-xs gap-2">
                   <Icons.RoundIcon size={14} /> Next
                 </Button>
               </div>
+              {!canAdvanceRound && (
+                <p className="mt-2 text-[10px] text-[var(--warning)] font-medium">
+                  Pick a winner for this round before advancing.
+                </p>
+              )}
             </Surface>
 
             <Surface tier={2} className="rounded-[32px] p-6 border border-[var(--border-subtle)] flex flex-col">

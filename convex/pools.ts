@@ -117,7 +117,16 @@ export const list = query({
                 const pool = await ctx.db.get(id);
                 if (!pool) return null;
                 const organizer = await ctx.db.get(pool.organizerId);
-                return { ...pool, organizer: organizer ? { name: organizer.name } : null };
+                const seats = await ctx.db
+                    .query("seats")
+                    .withIndex("by_pool", (q) => q.eq("poolId", id))
+                    .collect();
+                const filledSeats = seats.filter((seat) => seat.status !== "OPEN").length;
+                return {
+                    ...pool,
+                    filledSeats,
+                    organizer: organizer ? { name: organizer.name } : null
+                };
             })
         );
         return pools.filter((p) => p !== null);

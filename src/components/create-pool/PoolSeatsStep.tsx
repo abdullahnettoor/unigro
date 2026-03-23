@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Percent } from "lucide-react";
 import CurrencyInput from "react-currency-input-field";
 // @ts-ignore
@@ -20,7 +20,7 @@ import { SeatCountIcon } from "@/lib/icons";
 
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
 
-interface PoolSlotsStepProps {
+interface PoolSeatsStepProps {
   formData: {
     frequency: Frequency;
     duration: number;
@@ -30,13 +30,14 @@ interface PoolSlotsStepProps {
     currency: string;
     organizerFirst: boolean;
   };
-  onChange: (data: Partial<PoolSlotsStepProps["formData"]>) => void;
+  onChange: (data: Partial<PoolSeatsStepProps["formData"]>) => void;
   disabled?: boolean;
   showOrganizerFirst?: boolean;
 }
 
-export function PoolSlotsStep({ formData, onChange, disabled, showOrganizerFirst = true }: PoolSlotsStepProps) {
+export function PoolSeatsStep({ formData, onChange, disabled, showOrganizerFirst = true }: PoolSeatsStepProps) {
   const [commissionType, setCommissionType] = useState<"PERCENTAGE" | "FIXED">("PERCENTAGE");
+  const [durationInput, setDurationInput] = useState(() => String(formData.duration));
   const [fixedCommission, setFixedCommission] = useState(() => {
     return Math.round((formData.totalValue * formData.commission) / 100);
   });
@@ -67,8 +68,14 @@ export function PoolSlotsStep({ formData, onChange, disabled, showOrganizerFirst
       return a.code.localeCompare(b.code);
     });
 
-  const setDuration = (val: number) => {
-    const nextDuration = Number.isFinite(val) ? Math.min(60, Math.max(2, val)) : 2;
+  useEffect(() => {
+    setDurationInput(String(formData.duration));
+  }, [formData.duration]);
+
+  const commitDuration = (raw: string) => {
+    const parsed = Number(raw);
+    const nextDuration = Number.isFinite(parsed) ? Math.min(60, Math.max(2, Math.trunc(parsed))) : 2;
+    setDurationInput(String(nextDuration));
     onChange({ duration: nextDuration });
   };
 
@@ -181,10 +188,19 @@ export function PoolSlotsStep({ formData, onChange, disabled, showOrganizerFirst
                 </div>
                 <Input
                   type="number"
-                  min={2}
+                  min={1}
                   max={50}
-                  value={formData.duration}
-                  onChange={(e) => setDuration(Number(e.target.value))}
+                  value={durationInput}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setDurationInput(raw);
+                    if (raw === "") return;
+                    const parsed = Number(raw);
+                    if (Number.isFinite(parsed)) {
+                      onChange({ duration: Math.min(60, Math.max(1, Math.trunc(parsed))) });
+                    }
+                  }}
+                  onBlur={(e) => commitDuration(e.target.value)}
                   disabled={disabled}
                   className="bg-[var(--surface-deep)]/50 !pl-10 pr-3 font-mono"
                 />
@@ -205,11 +221,10 @@ export function PoolSlotsStep({ formData, onChange, disabled, showOrganizerFirst
                   <button
                     type="button"
                     onClick={() => setCommissionType("PERCENTAGE")}
-                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all ${
-                      commissionType === "PERCENTAGE"
+                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all ${commissionType === "PERCENTAGE"
                         ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
                         : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                    }`}
+                      }`}
                   >
                     %
                   </button>
@@ -217,11 +232,10 @@ export function PoolSlotsStep({ formData, onChange, disabled, showOrganizerFirst
                     type="button"
                     onClick={() => setCommissionType("FIXED")}
                     disabled={disabled}
-                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all ${
-                      commissionType === "FIXED"
+                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all ${commissionType === "FIXED"
                         ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-sm"
                         : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                    } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {currencySymbol}
                   </button>
@@ -282,11 +296,10 @@ export function PoolSlotsStep({ formData, onChange, disabled, showOrganizerFirst
         <button
           type="button"
           onClick={() => onChange({ organizerFirst: !formData.organizerFirst })}
-          className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 transition-all ${
-            formData.organizerFirst
+          className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 transition-all ${formData.organizerFirst
               ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)]/8"
               : "border-[var(--border-subtle)] bg-[var(--surface-2)]/40"
-          }`}
+            }`}
         >
           <div className="text-left">
             <p className={`text-sm font-semibold ${formData.organizerFirst ? "text-[var(--accent-vivid)]" : "text-[var(--text-primary)]"}`}>

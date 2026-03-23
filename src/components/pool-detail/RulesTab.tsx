@@ -14,6 +14,51 @@ interface RulesTabProps {
 export function RulesTab({ pool, nextDrawDate, isMember, onJoin }: RulesTabProps) {
   return (
     <section className="space-y-8">
+      {/* ── 1. Organizer Profile ── */}
+      <div className="space-y-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-muted)] px-1">Trust & Transparency</p>
+        <Surface tier={3} className="grain rounded-[28px] border border-[var(--border-subtle)] p-6 bg-gradient-to-br from-[var(--surface-3)] to-[var(--surface-2)]">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="relative shrink-0">
+                <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-[var(--accent-vivid)] text-white font-display text-xl font-bold shadow-xl shadow-[var(--accent-vivid)]/20 border-2 border-white/10 relative">
+                  <span className="relative z-10">{pool.organizer?.name?.[0] || "O"}</span>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent rounded-[22px]" />
+                </div>
+                {pool.organizer?.verificationStatus === "VERIFIED" && (
+                  <div className="absolute -right-1 -bottom-1 z-20 rounded-full bg-[var(--success)] p-1 text-white ring-2 ring-[var(--surface-3)] shadow-md">
+                    <Icons.CheckIcon size={10} strokeWidth={4} />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h4 className="text-lg font-bold text-[var(--text-primary)] leading-tight truncate">
+                  {pool.organizer?.name}
+                </h4>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-vivid)]">Verified Organizer</p>
+                </div>
+
+                <div className="mt-2.5 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                  <span className="font-mono bg-[var(--surface-3)]/60 px-2 py-0.5 rounded-full border border-[var(--border-subtle)]/30">
+                    {pool.organizer?.phone || "N/A"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {pool.organizer?.phone && (
+              <Button asChild size="icon" variant="outline" className="rounded-2xl h-11 w-11 shrink-0 bg-white/5 border-[var(--border-subtle)]/40 text-[var(--accent-vivid)] hover:bg-[var(--accent-vivid)] hover:text-white transition-all duration-300 group">
+                <a href={`tel:${pool.organizer.phone}`} title="Call Organizer">
+                  <Icons.PhoneIcon size={18} className="group-hover:scale-110 transition-transform" />
+                </a>
+              </Button>
+            )}
+          </div>
+        </Surface>
+      </div>
+
       {/* ── 1. Pool Rules ── */}
       <div className="space-y-4">
         <header className="px-1 flex items-center justify-between gap-4">
@@ -140,52 +185,6 @@ export function RulesTab({ pool, nextDrawDate, isMember, onJoin }: RulesTabProps
         </div>
       )}
 
-      {/* ── 4. Organizer Profile ── */}
-      <div className="space-y-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-muted)] px-1">Trust & Transparency</p>
-        <Surface tier={3} className="grain rounded-[28px] border border-[var(--border-subtle)] p-6 bg-gradient-to-br from-[var(--surface-3)] to-[var(--surface-2)]">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              <div className="relative shrink-0">
-                {/* Outer wrapper for shadow */}
-                <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-[var(--accent-vivid)] text-white font-display text-xl font-bold shadow-xl shadow-[var(--accent-vivid)]/20 border-2 border-white/10 relative">
-                  <span className="relative z-10">{pool.organizer?.name?.[0] || 'O'}</span>
-                  {/* Inner gradient with matched radius to avoid overflow issues */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent rounded-[22px]" />
-                </div>
-                {pool.organizer?.verificationStatus === "VERIFIED" && (
-                  <div className="absolute -right-1 -bottom-1 z-20 rounded-full bg-[var(--success)] p-1 text-white ring-2 ring-[var(--surface-3)] shadow-md">
-                    <Icons.CheckIcon size={10} strokeWidth={4} />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <h4 className="text-lg font-bold text-[var(--text-primary)] leading-tight truncate">
-                  {pool.organizer?.name}
-                </h4>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-vivid)]">Verified Organizer</p>
-                </div>
-
-                <div className="mt-2.5 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                  <span className="font-mono bg-[var(--surface-3)]/60 px-2 py-0.5 rounded-full border border-[var(--border-subtle)]/30">
-                    {pool.organizer?.phone || 'N/A'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {pool.organizer?.phone && (
-              <Button asChild size="icon" variant="outline" className="rounded-2xl h-11 w-11 shrink-0 bg-white/5 border-[var(--border-subtle)]/40 text-[var(--accent-vivid)] hover:bg-[var(--accent-vivid)] hover:text-white transition-all duration-300 group">
-                <a href={`tel:${pool.organizer.phone}`} title="Call Organizer">
-                  <Icons.PhoneIcon size={18} className="group-hover:scale-110 transition-transform" />
-                </a>
-              </Button>
-            )}
-          </div>
-        </Surface>
-      </div>
     </section>
   );
 }
