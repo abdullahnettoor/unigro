@@ -5,7 +5,6 @@ import { ArrowDownAZ, ArrowUpAZ, Plus, RotateCcw, Search } from "lucide-react";
 
 import { api } from "@convex/api";
 import {
-  ActivePoolIcon,
   DraftIcon,
   LoadingIcon,
 } from "@/lib/icons";

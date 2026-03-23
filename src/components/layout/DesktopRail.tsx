@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { NavAdminIcon, NavHomeIcon, NavPoolsIcon, NavSettingsIcon } from "@/lib/icons";
 
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DesktopRailProps {
     showAdmin?: boolean;
@@ -27,7 +25,6 @@ const navItems: NavItem[] = [
 
 export function DesktopRail({ showAdmin = false, userImageUrl, userName }: DesktopRailProps) {
     const location = useLocation();
-    const [expanded, setExpanded] = useState(false);
 
     const isActive = (to: string) =>
         to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
@@ -43,20 +40,15 @@ export function DesktopRail({ showAdmin = false, userImageUrl, userName }: Deskt
     const visibleItems = navItems.filter((item) => !item.adminOnly || showAdmin);
 
     return (
-        <TooltipProvider delayDuration={300}>
-            <aside
-                className={cn(
-                    "hidden lg:flex flex-col",
-                    "fixed left-0 top-0 h-full z-40",
-                    "border-r border-[var(--border-subtle)]/60",
-                    "glass-2",
-                    "bg-[var(--surface-1)]/40",
-                    "transition-all duration-300 ease-in-out",
-                    expanded ? "w-[220px]" : "w-[64px]"
-                )}
-                onMouseEnter={() => setExpanded(true)}
-                onMouseLeave={() => setExpanded(false)}
-            >
+        <aside
+            className={cn(
+                "hidden lg:flex flex-col",
+                "fixed left-0 top-0 h-full z-40 w-[220px]",
+                "border-r border-[var(--border-subtle)]/70",
+                "bg-[rgba(var(--bg-app-rgb),0.94)] supports-[backdrop-filter]:bg-[rgba(var(--bg-app-rgb),0.78)]",
+                "backdrop-blur-xl shadow-[18px_0_40px_rgba(0,0,0,0.22)]"
+            )}
+        >
                 {/* Logo */}
                 <Link
                     to="/"
@@ -71,8 +63,7 @@ export function DesktopRail({ showAdmin = false, userImageUrl, userName }: Deskt
                     <span
                         className={cn(
                             "font-display font-bold text-base text-[var(--text-primary)] whitespace-nowrap",
-                            "transition-all duration-200",
-                            expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none"
+                            "opacity-100 translate-x-0"
                         )}
                     >
                         UniGro
@@ -87,40 +78,26 @@ export function DesktopRail({ showAdmin = false, userImageUrl, userName }: Deskt
                     {visibleItems.map((item) => {
                         const active = isActive(item.to);
                         return (
-                            <Tooltip key={item.to}>
-                                <TooltipTrigger asChild>
-                                    <Link
-                                        to={item.to}
-                                        aria-current={active ? "page" : undefined}
-                                        className={cn(
-                                            "relative flex items-center gap-3 px-2.5 py-2.5 rounded-xl",
-                                            "transition-all duration-200 overflow-hidden",
-                                            active
-                                                ? "text-[var(--accent-vivid)]"
-                                                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                                        )}
-                                    >
-                                        {active && (
-                                            <span className="absolute inset-0 -z-10 rounded-xl bg-[var(--accent-vivid)]/15" />
-                                        )}
-                                        <span className="shrink-0">{item.icon}</span>
-                                        <span
-                                            className={cn(
-                                                "text-sm font-medium whitespace-nowrap",
-                                                "transition-all duration-200",
-                                                expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 w-0"
-                                            )}
-                                        >
-                                            {item.label}
-                                        </span>
-                                    </Link>
-                                </TooltipTrigger>
-                                {!expanded && (
-                                    <TooltipContent side="right">
-                                        <p>{item.label}</p>
-                                    </TooltipContent>
+                            <Link
+                                key={item.to}
+                                to={item.to}
+                                aria-current={active ? "page" : undefined}
+                                className={cn(
+                                    "relative flex items-center gap-3 px-2.5 py-2.5 rounded-xl",
+                                    "transition-all duration-200 overflow-hidden",
+                                    active
+                                        ? "text-[var(--accent-vivid)]"
+                                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                                 )}
-                            </Tooltip>
+                            >
+                                {active && (
+                                    <span className="absolute inset-0 -z-10 rounded-xl bg-[var(--accent-vivid)]/15" />
+                                )}
+                                <span className="shrink-0">{item.icon}</span>
+                                <span className="text-sm font-medium whitespace-nowrap opacity-100 translate-x-0">
+                                    {item.label}
+                                </span>
+                            </Link>
                         );
                     })}
                 </nav>
@@ -147,7 +124,7 @@ export function DesktopRail({ showAdmin = false, userImageUrl, userName }: Deskt
                         <div
                             className={cn(
                                 "min-w-0 transition-all duration-200",
-                                expanded ? "opacity-100" : "opacity-0 w-0"
+                                "opacity-100"
                             )}
                         >
                             <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
@@ -157,7 +134,6 @@ export function DesktopRail({ showAdmin = false, userImageUrl, userName }: Deskt
                         </div>
                     </Link>
                 </div>
-            </aside>
-        </TooltipProvider>
+        </aside>
     );
 }

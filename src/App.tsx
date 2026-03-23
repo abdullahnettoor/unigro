@@ -125,7 +125,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       </Authenticated>
 
       {/* Main content — offset for desktop rail */}
-      <div className="flex-1 min-w-0 lg:pl-16 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+      <div className="flex-1 min-w-0 lg:pl-[236px] pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
         <Suspense fallback={<RouteLoading />}>
           {children}
         </Suspense>
