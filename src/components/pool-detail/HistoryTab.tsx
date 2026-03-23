@@ -102,10 +102,10 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
             <button
               key={opt.id}
               onClick={() => setFilter(opt.id as any)}
-              className={cn(
+                className={cn(
                 "flex items-center justify-center sm:px-6 py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all duration-300",
                 filter === opt.id
-                  ? "bg-[var(--accent-vivid)] text-white shadow-md shadow-[var(--accent-vivid)]/20"
+                  ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-md shadow-[var(--accent-vivid)]/20"
                   : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
               )}
             >
@@ -149,7 +149,7 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
                   <div className="flex items-center gap-4">
                     <div className={cn(
                       "h-10 w-10 rounded-xl flex flex-col items-center justify-center font-display border transition-colors",
-                      isCurrent ? "bg-[var(--accent-vivid)] text-white border-transparent" :
+                      isCurrent ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] border-transparent" :
                         "bg-[var(--surface-3)] border-[var(--border-subtle)] text-[var(--text-primary)]"
                     )}>
                       <span className="text-[14px] font-black leading-none">#{card.roundIndex}</span>
@@ -242,7 +242,7 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
                                     {isActivePool && isUnpaid && !isFuture && (
                                       <Button
                                         size="sm"
-                                        className="h-8 px-3 rounded-full bg-[var(--accent-vivid)] text-[10px] font-bold text-white shadow-lg shadow-[var(--accent-vivid)]/20"
+                                        className="h-8 px-3 rounded-full bg-[var(--accent-vivid)] text-[10px] font-bold text-[var(--text-on-accent)] shadow-lg shadow-[var(--accent-vivid)]/20"
                                         onClick={() => onPay(item.seat._id as string, card.roundIndex, item.amount)}
                                       >
                                         Pay

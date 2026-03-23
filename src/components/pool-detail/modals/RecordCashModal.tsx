@@ -75,7 +75,7 @@ export function RecordCashModal({ open, onOpenChange, poolId, roundIndex, seatOp
                 <SelectTrigger className="h-12 rounded-full bg-[var(--surface-2)]/40 border-[var(--border-subtle)] focus:ring-[var(--accent-vivid)] px-5">
                   <SelectValue placeholder="Choose a seat..." />
                 </SelectTrigger>
-                <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)]">
+                <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)] bg-[var(--surface-2)] text-[var(--text-primary)]">
                   {seatOptions.map((seat) => (
                     <SelectItem key={seat.seatId} value={seat.seatId} className="rounded-xl mx-1 my-0.5 pl-11 pr-4">
                       Seat #{seat.seatNumber}
@@ -95,7 +95,7 @@ export function RecordCashModal({ open, onOpenChange, poolId, roundIndex, seatOp
           </div>
 
           <Button
-            className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-lg shadow-[var(--accent-vivid)]/20 disabled:opacity-50"
+            className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)] shadow-lg shadow-[var(--accent-vivid)]/20 disabled:opacity-50 disabled:text-[var(--text-on-accent)]/70"
             onClick={handleSubmit}
             disabled={isSubmitting || !selectedSeatId}
           >

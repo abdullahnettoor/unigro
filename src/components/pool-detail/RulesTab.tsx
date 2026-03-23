@@ -21,12 +21,12 @@ export function RulesTab({ pool, nextDrawDate, isMember, onJoin }: RulesTabProps
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
               <div className="relative shrink-0">
-                <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-[var(--accent-vivid)] text-white font-display text-xl font-bold shadow-xl shadow-[var(--accent-vivid)]/20 border-2 border-white/10 relative">
+                <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-[var(--accent-vivid)] text-[var(--text-on-accent)] font-display text-xl font-bold shadow-xl shadow-[var(--accent-vivid)]/20 border-2 border-white/10 relative">
                   <span className="relative z-10">{pool.organizer?.name?.[0] || "O"}</span>
                   <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent rounded-[22px]" />
                 </div>
                 {pool.organizer?.verificationStatus === "VERIFIED" && (
-                  <div className="absolute -right-1 -bottom-1 z-20 rounded-full bg-[var(--success)] p-1 text-white ring-2 ring-[var(--surface-3)] shadow-md">
+                  <div className="absolute -right-1 -bottom-1 z-20 rounded-full bg-[var(--success)] p-1 text-[var(--text-on-accent)] ring-2 ring-[var(--surface-3)] shadow-md">
                     <Icons.CheckIcon size={10} strokeWidth={4} />
                   </div>
                 )}
@@ -49,7 +49,7 @@ export function RulesTab({ pool, nextDrawDate, isMember, onJoin }: RulesTabProps
             </div>
 
             {pool.organizer?.phone && (
-              <Button asChild size="icon" variant="outline" className="rounded-2xl h-11 w-11 shrink-0 bg-white/5 border-[var(--border-subtle)]/40 text-[var(--accent-vivid)] hover:bg-[var(--accent-vivid)] hover:text-white transition-all duration-300 group">
+              <Button asChild size="icon" variant="outline" className="rounded-2xl h-11 w-11 shrink-0 bg-white/5 border-[var(--border-subtle)]/40 text-[var(--accent-vivid)] hover:bg-[var(--accent-vivid)] hover:text-[var(--text-on-accent)] transition-all duration-300 group">
                 <a href={`tel:${pool.organizer.phone}`} title="Call Organizer">
                   <Icons.PhoneIcon size={18} className="group-hover:scale-110 transition-transform" />
                 </a>
@@ -70,7 +70,7 @@ export function RulesTab({ pool, nextDrawDate, isMember, onJoin }: RulesTabProps
           {onJoin && (
             <Button
               onClick={onJoin}
-              className="rounded-full bg-[var(--accent-vivid)] hover:bg-[var(--accent-vivid)]/90 text-white font-bold px-6 h-11 gap-2 shadow-xl shadow-[var(--accent-vivid)]/25 transition-all active:scale-95"
+              className="rounded-full bg-[var(--accent-vivid)] hover:bg-[var(--accent-vivid)]/90 text-[var(--text-on-accent)] font-bold px-6 h-11 gap-2 shadow-xl shadow-[var(--accent-vivid)]/25 transition-all active:scale-95"
             >
               <Icons.ZapIcon size={18} fill="currentColor" />
               <span>Join Pool</span>

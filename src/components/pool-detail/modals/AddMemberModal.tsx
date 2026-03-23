@@ -89,7 +89,7 @@ export function AddMemberModal({ open, onOpenChange, poolId, fullSeats }: AddMem
                 <SelectTrigger className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm">
                   <SelectValue placeholder="Select an open seat" />
                 </SelectTrigger>
-                <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)]">
+                <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)] bg-[var(--surface-2)] text-[var(--text-primary)]">
                   {availableSeats.map((seat) => (
                     <SelectItem key={seat.seatNumber} value={seat.seatNumber.toString()} className="rounded-xl">
                       Seat #{seat.seatNumber}
@@ -104,7 +104,7 @@ export function AddMemberModal({ open, onOpenChange, poolId, fullSeats }: AddMem
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm"
+                className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                 placeholder="e.g. Arjun Kumar"
               />
             </div>
@@ -120,7 +120,7 @@ export function AddMemberModal({ open, onOpenChange, poolId, fullSeats }: AddMem
           </div>
         </div>
         <DialogFooter className="p-7 pt-0 flex flex-col items-stretch gap-3 shrink-0 sm:space-x-0">
-          <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 w-full rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-[0_12px_28px_rgba(var(--accent-glow),0.25)] hover:bg-[var(--accent-vivid)]/90 transition-all">
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 w-full rounded-full bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)] shadow-[0_12px_28px_rgba(var(--accent-glow),0.25)] hover:bg-[var(--accent-vivid)]/90 transition-all">
             {isSubmitting ? <Icons.LoadingIcon className="h-4 w-4 animate-spin mr-2" /> : <Icons.InviteIcon size={16} className="mr-2" />}
             Assign seat
           </Button>

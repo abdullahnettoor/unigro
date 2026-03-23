@@ -95,7 +95,7 @@ export function RecordPayoutModal({ open, onOpenChange, poolId, currentRound, se
                 <SelectTrigger className="h-12 rounded-full bg-[var(--surface-2)]/40 border-[var(--border-subtle)] focus:ring-[var(--accent-vivid)] px-5">
                   <SelectValue placeholder="Round" />
                 </SelectTrigger>
-                <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)]">
+                <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)] bg-[var(--surface-2)] text-[var(--text-primary)]">
                   {rounds.map((r) => (
                     <SelectItem key={r} value={r} className="rounded-xl mx-1 my-0.5 pl-11 pr-4">
                       Round {r}
@@ -119,7 +119,7 @@ export function RecordPayoutModal({ open, onOpenChange, poolId, currentRound, se
                     )}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)]">
+                <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)] bg-[var(--surface-2)] text-[var(--text-primary)]">
                   {seatOptions.map((seat) => (
                     <SelectItem key={seat.seatId} value={seat.seatId} className="rounded-xl mx-1 my-0.5 pl-11 pr-4 font-medium">
                       <div className="flex items-center gap-3">
@@ -162,7 +162,7 @@ export function RecordPayoutModal({ open, onOpenChange, poolId, currentRound, se
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !selectedSeatId}
-              className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-lg shadow-[var(--accent-vivid)]/20"
+              className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)] shadow-lg shadow-[var(--accent-vivid)]/20 disabled:text-[var(--text-on-accent)]/70"
             >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">

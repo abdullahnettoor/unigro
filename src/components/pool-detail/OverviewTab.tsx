@@ -158,28 +158,39 @@ export function OverviewTab({
       </Surface>
 
       {overdueItems.length > 0 && (
-        <div className="flex items-start gap-4 rounded-3xl border border-[var(--danger)]/30 bg-[var(--danger)]/7 p-5">
-          <div className="shrink-0 rounded-2xl bg-[var(--danger)]/15 p-3 text-[var(--danger)]">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-[var(--text-primary)]">Overdue Payments</h3>
-            <p className="mt-0.5 text-sm text-[var(--text-muted)]">Multiple rounds are pending attention.</p>
-            <div className="mt-4 space-y-3">
-              {overdueItems.map((item) => (
-                <div key={`${item.seat._id}-${item.roundIndex}`} className="flex items-center justify-between rounded-xl border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--text-primary)]">
-                      Round {item.roundIndex} • Seat #{item.seat.seatNumber}
-                    </p>
-                    <p className="text-xs text-[var(--danger)] font-bold">{formatCurrency(item.amount, pool.config.currency)}</p>
-                  </div>
-                  <Button size="sm" variant="destructive" onClick={() => onPay(item.seat._id as string, item.roundIndex, item.amount)} className="rounded-full h-8 px-4">
-                    Pay Now
-                  </Button>
-                </div>
-              ))}
+        <div className="rounded-3xl border border-[var(--danger)]/30 bg-[var(--danger)]/7 p-5">
+          <div className="mb-4 flex items-start gap-3">
+            <div className="shrink-0 rounded-2xl bg-[var(--danger)]/15 p-2.5 text-[var(--danger)]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
             </div>
+            <div className="min-w-0">
+              <h3 className="text-base font-bold text-[var(--text-primary)]">Overdue Payments</h3>
+              <p className="mt-0.5 text-sm text-[var(--text-muted)]">Multiple rounds are pending attention.</p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {overdueItems.map((item) => (
+              <div
+                key={`${item.seat._id}-${item.roundIndex}`}
+                className="flex items-center justify-between gap-3 rounded-xl border border-[var(--danger)]/20 bg-[var(--danger)]/10 px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">
+                    Round {item.roundIndex} • Seat #{item.seat.seatNumber}
+                  </p>
+                  <p className="text-xs text-[var(--danger)] font-bold">{formatCurrency(item.amount, pool.config.currency)}</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => onPay(item.seat._id as string, item.roundIndex, item.amount)}
+                  className="h-8 shrink-0 rounded-full px-4"
+                >
+                  Pay Now
+                </Button>
+              </div>
+            ))}
           </div>
         </div>
       )}

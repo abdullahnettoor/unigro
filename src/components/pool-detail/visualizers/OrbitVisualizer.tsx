@@ -94,7 +94,7 @@ function CentralOrb({
     return (
         <g>
             {/* Outer ambient glow */}
-            {!compact && <circle cx={cx} cy={cy} r={R + 25} fill="var(--accent-vivid)" opacity={0.1} />}
+            <circle cx={cx} cy={cy} r={R + (compact ? 18 : 25)} fill="var(--accent-vivid)" opacity={compact ? 0.06 : 0.1} />
 
             {/* Energy ring track */}
             <circle cx={cx} cy={cy} r={RING_R} fill="none" stroke="var(--border-subtle)" strokeWidth={2} opacity={0.3} strokeDasharray="4 6" />
@@ -187,40 +187,39 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
     const pos = pointOnCircle(cx, cy, orbitR, angle);
     const tok = getVisualTokens(payment, win);
     const R = compact ? (isHovered ? 14 : 11) : (isHovered ? 18 : 14);
-    const subR = R + 8;
+    const subR = R + (compact ? 6 : 8);
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         onSelect(seat);
     };
 
-    // Animation value for co-seat orbiting
     const [pulsePhase, setPulsePhase] = useState(0);
-
-    // Pulse ticker for co-seat rotation
     useEffect(() => {
-        if (compact) return;
-        let frame: number;
+        let frame = 0;
         let last = performance.now();
         const tick = (now: number) => {
             const dt = now - last;
             last = now;
-            setPulsePhase(p => p + dt * 0.06); // ~degrees per ms at 0.06
+            setPulsePhase((prev) => (prev + dt * (compact ? 0.04 : 0.065)) % 360);
             frame = requestAnimationFrame(tick);
         };
         frame = requestAnimationFrame(tick);
         return () => cancelAnimationFrame(frame);
     }, [compact]);
 
-    // Co-seat sub-particle angles (two small nodes orbiting the satellite)
-    const sub1 = {
-        x: pos.x + subR * Math.cos(toRad(pulsePhase * 1.2)),
-        y: pos.y + subR * Math.sin(toRad(pulsePhase * 1.2))
-    };
-    const sub2 = {
-        x: pos.x + subR * Math.cos(toRad(pulsePhase * 1.2 + 180)),
-        y: pos.y + subR * Math.sin(toRad(pulsePhase * 1.2 + 180))
-    };
+    const coSeatCount = seat.isCoSeat
+        ? Math.max(1, seat.coOwners?.length ?? 0)
+        : 0;
+    const renderedCoSeatDots = Math.min(coSeatCount, 6);
+    const coSeatDots = Array.from({ length: renderedCoSeatDots }, (_, i) => {
+        const a = pulsePhase + (360 / renderedCoSeatDots) * i;
+        return {
+            x: pos.x + subR * Math.cos(toRad(a - 90)),
+            y: pos.y + subR * Math.sin(toRad(a - 90)),
+            warm: i % 2 === 1,
+        };
+    });
 
     return (
         <motion.g
@@ -232,14 +231,6 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
-            {/* Co-seat Sub-particles (orbiting around the main seat node) */}
-            {seat.isCoSeat && !compact && (
-                <g>
-                    <circle cx={sub1.x} cy={sub1.y} r={3} fill="var(--text-muted)" opacity={0.6} />
-                    <circle cx={sub2.x} cy={sub2.y} r={3} fill="var(--warning)" opacity={0.8} />
-                </g>
-            )}
-
             {/* Outer halo: pending pulse / selected glow */}
             {(tok.isPulse || isHovered) && (
                 <motion.circle
@@ -293,6 +284,22 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
                     animate={{ r: R }}
                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 />
+            )}
+
+            {/* Co-seat Sub-particles (orbiting around the main seat node) */}
+            {seat.isCoSeat && renderedCoSeatDots > 0 && (
+                <g>
+                    {coSeatDots.map((dot, idx) => (
+                        <circle
+                            key={`${seat._id}-co-dot-${idx}`}
+                            cx={dot.x}
+                            cy={dot.y}
+                            r={compact ? 1.8 : 2.8}
+                            fill={dot.warm ? "var(--warning)" : "var(--text-muted)"}
+                            opacity={dot.warm ? (compact ? 0.78 : 0.88) : (compact ? 0.58 : 0.7)}
+                        />
+                    ))}
+                </g>
             )}
 
             {/* Seat number */}
@@ -459,13 +466,15 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
                     <circle cx={CX} cy={CY} r={190} fill="var(--surface-1)" opacity={0.3} />
 
                     {/* Orbit track */}
-                    <circle
+                    <motion.circle
                         cx={CX} cy={CY} r={ORBIT_R}
                         fill="none"
                         stroke="var(--border-subtle)"
                         strokeWidth={1.5}
                         strokeDasharray="4 6"
                         opacity={0.5}
+                        animate={{ strokeDashoffset: [0, -40] }}
+                        transition={{ duration: isCompact ? 8 : 5.5, repeat: Infinity, ease: "linear" }}
                     />
 
                     {/* Central orb */}

@@ -70,7 +70,7 @@ export function EditGuestModal({ open, onOpenChange, guestId, initialName, initi
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm"
+                  className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                   placeholder="e.g. Khalid Ben"
                 />
               </div>
@@ -86,7 +86,7 @@ export function EditGuestModal({ open, onOpenChange, guestId, initialName, initi
             </div>
 
             <DialogFooter className="mt-12 flex flex-col items-stretch gap-3 pb-2 sm:space-x-0">
-              <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 w-full rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-[0_12px_28px_rgba(var(--accent-glow),0.25)] hover:bg-[var(--accent-vivid)]/90 transition-all">
+              <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 w-full rounded-full bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)] shadow-[0_12px_28px_rgba(var(--accent-glow),0.25)] hover:bg-[var(--accent-vivid)]/90 transition-all">
                 {isSubmitting ? <Icons.LoadingIcon className="h-4 w-4 animate-spin mr-2" /> : <Icons.EditIcon size={16} className="mr-2" />}
                 Save changes
               </Button>

@@ -89,7 +89,7 @@ export function SeatsTab({
                 className={cn(
                   "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 whitespace-nowrap",
                   view === opt.id
-                    ? "bg-[var(--accent-vivid)] text-white shadow-md shadow-[var(--accent-vivid)]/20"
+                    ? "bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-md shadow-[var(--accent-vivid)]/20"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
                 )}
               >
@@ -191,7 +191,7 @@ export function SeatsTab({
                         ) : (
                           <div className="flex flex-wrap gap-1.5">
                             {isMySlot && (
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[var(--accent-vivid)] text-[9px] font-black uppercase text-white">My Seat</span>
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[var(--accent-vivid)] text-[9px] font-black uppercase text-[var(--text-on-accent)]">My Seat</span>
                             )}
                             {seat.isGuest && (
                               <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[var(--surface-3)] text-[9px] font-bold text-[var(--text-muted)] border border-[var(--border-subtle)]">Guest</span>
@@ -252,8 +252,7 @@ export function SeatsTab({
                   <div className="px-5 pb-5 mt-1">
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="w-full rounded-2xl bg-[var(--accent-vivid)]/5 text-[var(--accent-vivid)] hover:bg-[var(--accent-vivid)]/10 border border-[var(--accent-vivid)]/10 font-bold"
+                      className="w-full rounded-2xl bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:bg-[var(--accent-vivid)]/90 border border-[var(--accent-vivid)]/20 font-bold shadow-lg shadow-[var(--accent-vivid)]/15"
                       onClick={onJoin}
                     >
                       <Icons.JoinIcon size={14} className="mr-2" /> Join this Seat
@@ -271,7 +270,7 @@ export function SeatsTab({
                           <div key={owner.userId} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-2">
-                                <div className="h-6 w-6 rounded-lg bg-[var(--accent-vivid)] text-white flex items-center justify-center text-[10px] font-bold">
+                                <div className="h-6 w-6 rounded-lg bg-[var(--accent-vivid)] text-[var(--text-on-accent)] flex items-center justify-center text-[10px] font-bold">
                                   {owner.userName?.[0] || "?"}
                                 </div>
                                 <span className="text-xs font-semibold text-[var(--text-primary)]">

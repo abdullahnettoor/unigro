@@ -37,7 +37,7 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
   const [selectedSeat, setSelectedSeat] = useState<string>("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [share, setShare] = useState(50);
+  const [shareInput, setShareInput] = useState("50");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Auto-select first available co-seat or open seat
@@ -51,6 +51,17 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
 
   const currentSeat = coSeatOptions.find(o => o.seatNumber.toString() === selectedSeat);
   const availableShare = currentSeat?.isCoSeat ? (currentSeat.remainingPercentage ?? 0) : 100;
+  const parsedShare = Number.parseInt(shareInput, 10);
+
+  useEffect(() => {
+    if (!open) {
+      setShareInput("50");
+      return;
+    }
+    if (!Number.isFinite(parsedShare)) return;
+    const clamped = Math.min(Math.max(parsedShare, 1), Math.max(availableShare, 1));
+    if (clamped !== parsedShare) setShareInput(String(clamped));
+  }, [availableShare, open, parsedShare]);
 
   const handleSubmit = async () => {
     if (!selectedSeat) {
@@ -61,18 +72,18 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
       feedback.toast.error("Invalid input", "Please enter a name.");
       return;
     }
-    if (share < 1 || share > availableShare) {
+    if (!Number.isFinite(parsedShare) || parsedShare < 1 || parsedShare > availableShare) {
       feedback.toast.error("Invalid share", `Share must be 1–${availableShare}%.`);
       return;
     }
     setIsSubmitting(true);
     try {
-      await assignCoSeat({ poolId, seatNumber: parseInt(selectedSeat), name, phone, sharePercentage: share });
+      await assignCoSeat({ poolId, seatNumber: parseInt(selectedSeat), name, phone, sharePercentage: parsedShare });
       feedback.toast.success("Co-seat assigned", "Share added successfully.");
       onOpenChange(false);
       setName("");
       setPhone("");
-      setShare(availableShare > 50 ? 50 : availableShare);
+      setShareInput(String(availableShare > 50 ? 50 : availableShare));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to assign co-seat.";
       feedback.toast.error("Failed", message);
@@ -101,7 +112,7 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
                   <SelectTrigger className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm">
                     <SelectValue placeholder="Seat" />
                   </SelectTrigger>
-                  <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)]">
+                  <SelectContent className="glass-3 rounded-[24px] border-[var(--border-subtle)] bg-[var(--surface-2)] text-[var(--text-primary)]">
                     {coSeatOptions.map((seat) => (
                       <SelectItem key={seat.seatNumber} value={seat.seatNumber.toString()} className="rounded-xl">
                         #{seat.seatNumber} {seat.isCoSeat ? `(${seat.remainingPercentage}% left)` : "(Open)"}
@@ -116,9 +127,20 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
                   type="number"
                   min={1}
                   max={availableShare}
-                  value={share}
-                  onChange={(e) => setShare(Number(e.target.value))}
-                  className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm font-mono"
+                  step={1}
+                  inputMode="numeric"
+                  value={shareInput}
+                  onChange={(e) => setShareInput(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                  onBlur={() => {
+                    const raw = Number.parseInt(shareInput, 10);
+                    if (!Number.isFinite(raw)) {
+                      setShareInput("1");
+                      return;
+                    }
+                    const clamped = Math.min(Math.max(raw, 1), Math.max(availableShare, 1));
+                    setShareInput(String(clamped));
+                  }}
+                  className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                   placeholder="%"
                 />
               </div>
@@ -126,12 +148,12 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
 
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)] ml-1">Full Name</label>
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm"
-                placeholder="e.g. Rahul Verma"
-              />
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-[var(--surface-0)]/70 h-12 rounded-full border-[var(--border-subtle)]/80 shadow-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                  placeholder="e.g. Rahul Verma"
+                />
             </div>
 
             <div className="space-y-1.5">
@@ -146,7 +168,7 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats }: Ass
         </div>
 
         <DialogFooter className="p-7 pt-0 flex flex-col items-stretch gap-3 shrink-0 sm:space-x-0">
-          <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 w-full rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-[0_12px_28px_rgba(var(--accent-glow),0.25)] hover:bg-[var(--accent-vivid)]/90 transition-all">
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 w-full rounded-full bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)] shadow-[0_12px_28px_rgba(var(--accent-glow),0.25)] hover:bg-[var(--accent-vivid)]/90 transition-all">
             {isSubmitting ? <Icons.LoadingIcon className="h-4 w-4 animate-spin mr-2" /> : <Icons.LayersIcon size={16} className="mr-2" />}
             Assign share
           </Button>
