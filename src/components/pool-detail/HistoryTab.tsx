@@ -18,6 +18,7 @@ interface HistoryTabProps {
 type FilterType = "all" | "paid" | "pending" | "unpaid" | "payout";
 
 export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, onPay }: HistoryTabProps) {
+  const isActivePool = pool.status === "ACTIVE";
   const [filter, setFilter] = useState<FilterType>("all");
   const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>(() => {
     return { [pool.currentRound]: true };
@@ -159,7 +160,9 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
                         {isFuture ? `Round ${card.roundIndex}` : isCurrent ? "Active Round" : `Round ${card.roundIndex} Summary`}
                       </h3>
                       {isCurrent ? (
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-vivid)] mt-0.5">Live Collection</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-vivid)] mt-0.5">
+                          {isActivePool ? "Live Collection" : "Awaiting activation"}
+                        </p>
                       ) : (
                         <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mt-0.5">
                           {isFuture ? "Awaiting start" : card.isPayoutReleased ? "Payout Released" : "Completed"}
@@ -226,7 +229,7 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
                                       <p className="text-xs font-bold text-[var(--text-primary)]">
                                         {formatCurrency(item.amount, pool.config.currency)}
                                       </p>
-                                      {isUnpaid && isCurrent && (
+                                      {isActivePool && isUnpaid && isCurrent && (
                                         <p className="text-[9px] text-[var(--danger)] font-medium flex items-center gap-1 mt-0.5">
                                           <Icons.InfoIcon size={8} /> Due now
                                         </p>
@@ -236,7 +239,7 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
 
                                   <div className="flex items-center gap-3">
                                     <PaymentStatusBadge status={item.status} />
-                                    {isUnpaid && !isFuture && (
+                                    {isActivePool && isUnpaid && !isFuture && (
                                       <Button
                                         size="sm"
                                         className="h-8 px-3 rounded-full bg-[var(--accent-vivid)] text-[10px] font-bold text-white shadow-lg shadow-[var(--accent-vivid)]/20"

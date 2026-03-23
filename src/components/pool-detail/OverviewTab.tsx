@@ -24,6 +24,7 @@ export function OverviewTab({
   onPay,
   onViewHistory,
 }: OverviewTabProps) {
+  const isActivePool = pool.status === "ACTIVE";
   const winningAmount = pool.config.totalValue - (pool.config.totalValue * (pool.config.commission || 0)) / 100;
 
   const personalStats = useMemo(() => {
@@ -97,9 +98,11 @@ export function OverviewTab({
             <div>
               <p className="text-[10px] uppercase font-bold tracking-[0.4em] text-[var(--accent-vivid)] mb-2">Personal Status</p>
               <h2 className="text-xl font-display font-bold text-[var(--text-primary)]">
-                {personalStats.currentRoundDue > 0
+                {isActivePool && personalStats.currentRoundDue > 0
                   ? `Due: ${formatCurrency(personalStats.currentRoundDue, pool.config.currency)}`
-                  : "All caught up"
+                  : isActivePool
+                    ? "All caught up"
+                    : "Draft pool setup"
                 }
               </h2>
             </div>
@@ -123,7 +126,7 @@ export function OverviewTab({
             </div>
           </div>
 
-          {personalStats.currentRoundDue > 0 && (
+          {isActivePool && personalStats.currentRoundDue > 0 && (
             <div className="flex items-center justify-between rounded-2xl bg-[var(--accent-vivid)]/10 p-4 border border-[var(--accent-vivid)]/20">
               <div className="flex flex-col">
                 <p className="text-xs font-semibold text-[var(--accent-vivid)]">Next payment due</p>
@@ -143,6 +146,12 @@ export function OverviewTab({
               }} className="rounded-full px-5">
                 Pay Current
               </Button>
+            </div>
+          )}
+
+          {!isActivePool && (
+            <div className="rounded-2xl border border-[var(--border-subtle)]/35 bg-[var(--surface-2)]/40 p-4 text-sm text-[var(--text-muted)]">
+              Contributions and payment actions will unlock after the organizer activates this pool.
             </div>
           )}
         </div>
@@ -203,9 +212,10 @@ export function OverviewTab({
                 dueDate={nextDueDate}
                 status={status}
                 currency={pool.config.currency}
-                onPay={() => onPay(seat._id as string, pool.currentRound, dueAmount)}
+                onPay={isActivePool ? () => onPay(seat._id as string, pool.currentRound, dueAmount) : undefined}
                 wonRound={wonRound}
                 wonAmount={wonRound ? winningAmount : undefined}
+                showDueMeta={isActivePool}
               />
             );
           })}

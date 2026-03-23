@@ -77,9 +77,8 @@ export function PoolDetail() {
 
   useEffect(() => {
     if (!pool) return;
-    const ghost = localStorage.getItem("unigro_ghost_memberships");
     const guest = localStorage.getItem("unigro_guest_memberships");
-    const guestIds = JSON.parse(guest || ghost || "[]") as string[];
+    const guestIds = JSON.parse(guest || "[]") as string[];
     if (!currentUser && guestIds.length > 0) {
       const joined = seats.some((seat) => seat.userId && guestIds.includes(seat.userId as string));
       setIsGuestMember(joined);
@@ -100,9 +99,8 @@ export function PoolDetail() {
       );
     }
     if (isGuestMember) {
-      const ghost = localStorage.getItem("unigro_ghost_memberships");
       const guest = localStorage.getItem("unigro_guest_memberships");
-      const guestIds = JSON.parse(guest || ghost || "[]") as string[];
+      const guestIds = JSON.parse(guest || "[]") as string[];
       return seats.filter((seat) => seat.userId && guestIds.includes(seat.userId as string));
     }
     return [];

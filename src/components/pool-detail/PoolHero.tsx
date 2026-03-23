@@ -66,41 +66,40 @@ export function PoolHero({
   }
 
   return (
-    <Surface tier={3} className="grain rounded-3xl p-4 sm:p-7 relative overflow-hidden">
+    <Surface tier={3} className="grain rounded-3xl p-4 sm:p-7 relative overflow-hidden min-w-0">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 w-full">
           <span className="inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface-2)]/60 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--text-muted)]">
             {pool.status}
           </span>
-          <h1 className="mt-3 text-xl sm:text-2xl font-display font-bold text-[var(--text-primary)] break-words leading-tight">
+          <h1 className="mt-3 text-xl sm:text-2xl font-display font-bold text-[var(--text-primary)] break-words leading-tight min-w-0">
             {pool.title}
           </h1>
         </div>
       </div>
 
       {(isMember || isOrganizer || (pool.status === "ACTIVE" && hasOpenSeats)) && (
-        <div className="mt-6 flex flex-col w-full">
-          <div className="w-full min-w-0">
+        <div className="mt-6 flex w-full min-w-0 flex-col">
+          <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-[var(--border-subtle)]/35 bg-[var(--surface-1)]/30 p-2 sm:p-3">
             <OrbitVisualizer pool={pool} seats={seats} transactions={transactions} onSeatClick={onSeatClick} />
           </div>
         </div>
       )}
 
-      {/* Premium Progress Card integrated directly into Hero */}
       <div className="mt-6 border-t border-[var(--border-subtle)] pt-5">
         <div className="bg-[var(--surface-1)] border border-[var(--border-subtle)]/40 rounded-2xl p-4 shadow-sm relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-vivid)]/[0.03] to-transparent pointer-events-none" />
 
-          <div className="relative z-10 flex items-end justify-between mb-3">
+          <div className="relative z-10 mb-3 flex items-end justify-between gap-3">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-bold font-mono tracking-tight text-[var(--accent-vivid)]">
+              <span className="text-base sm:text-xl font-bold font-mono tracking-tight text-[var(--accent-vivid)]">
                 {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(progressCount * (pool.config.contribution || 0))}
               </span>
-              <span className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
+              <span className="text-[10px] sm:text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
                 {pool.status === 'ACTIVE' ? 'collected' : 'committed'}
               </span>
             </div>
-            <div className="flex items-baseline gap-1.5 opacity-80">
+            <div className="hidden sm:flex items-baseline gap-1.5 opacity-80">
               <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
                 of
               </span>
@@ -117,11 +116,11 @@ export function PoolHero({
             />
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-[11px] font-medium text-[var(--text-secondary)] z-10 relative">
+          <div className="mt-3 relative z-10 flex items-center justify-between text-[10px] sm:text-[11px] font-medium text-[var(--text-secondary)] gap-3">
             <span>
               <span className="font-bold text-[var(--accent-vivid)]">{Math.round(progressValue)}%</span> {pool.status === 'ACTIVE' ? 'this round' : 'filled'}
             </span>
-            <span>
+            <span className="truncate text-right">
               {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Math.max(0, progressTotal - progressCount) * (pool.config.contribution || 0))} remaining
             </span>
           </div>

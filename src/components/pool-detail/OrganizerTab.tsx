@@ -134,106 +134,124 @@ export function OrganizerTab({
         </div>
       </Surface>
 
-      {/* Pending Approvals Section */}
-      <Surface tier={2} className="rounded-[32px] p-6 border border-[var(--border-subtle)]">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Icons.ClockIcon size={16} className="text-[var(--warning)]" /> Pending Approvals
-          </h3>
-          {pendingTransactions.length > 0 && (
-            <span className="h-5 px-2 rounded-full bg-[var(--warning)]/10 text-[var(--warning)] text-[10px] font-black border border-[var(--warning)]/20">
-              {pendingTransactions.length}
-            </span>
-          )}
-        </div>
-
-        {pendingTransactions.length === 0 ? (
-          <div className="py-12 flex flex-col items-center justify-center text-center px-6 border-2 border-dashed border-[var(--border-subtle)] rounded-2xl">
-            <div className="h-12 w-12 rounded-full bg-[var(--surface-3)]/60 flex items-center justify-center text-[var(--text-muted)] mb-3">
-              <Icons.CheckIcon size={24} />
+      {isDraft ? (
+        <Surface tier={2} className="rounded-[32px] p-6 border border-[var(--border-subtle)] flex flex-col">
+          <div className="flex items-start gap-3">
+            <div className="h-9 w-9 rounded-xl bg-[var(--surface-3)]/70 text-[var(--text-muted)] flex items-center justify-center border border-[var(--border-subtle)]/40">
+              <Icons.InfoIcon size={16} />
             </div>
-            <p className="text-xs font-bold text-[var(--text-muted)]">Clear for now! No pending requests.</p>
+            <div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Activation required</h3>
+              <p className="mt-1.5 text-[11px] text-[var(--text-muted)] leading-relaxed">
+                Payments, approvals, draw and payout controls unlock after activation.
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className={cn("space-y-3", isArchived && "opacity-60 pointer-events-none")}>
-            {pendingTransactions.map((tx) => (
-              <div key={tx._id} className="group relative flex items-center justify-between rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-2)]/40 p-4 transition-all duration-300 hover:border-[var(--accent-vivid)]/30">
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-[var(--surface-deep)]/60 flex items-center justify-center text-sm font-bold text-[var(--text-primary)] shadow-inner">
-                    #{tx.seat?.seatNumber ?? "•"}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-[var(--text-primary)]">Round {tx.roundIndex}</p>
-                      <span className={cn(
-                        "text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-[0.1em] border",
-                        tx.type === "cash"
-                          ? "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
-                          : "bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] border-[var(--accent-vivid)]/20"
-                      )}>
-                        {tx.type || "online"}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[var(--text-muted)] font-medium">{tx.user?.name || "Member"}</p>
-                  </div>
+        </Surface>
+      ) : (
+        <>
+          {/* Pending Approvals Section */}
+          <Surface tier={2} className="rounded-[32px] p-6 border border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <Icons.ClockIcon size={16} className="text-[var(--warning)]" /> Pending Approvals
+              </h3>
+              {pendingTransactions.length > 0 && (
+                <span className="h-5 px-2 rounded-full bg-[var(--warning)]/10 text-[var(--warning)] text-[10px] font-black border border-[var(--warning)]/20">
+                  {pendingTransactions.length}
+                </span>
+              )}
+            </div>
+
+            {pendingTransactions.length === 0 ? (
+              <div className="py-12 flex flex-col items-center justify-center text-center px-6 border-2 border-dashed border-[var(--border-subtle)] rounded-2xl">
+                <div className="h-12 w-12 rounded-full bg-[var(--surface-3)]/60 flex items-center justify-center text-[var(--text-muted)] mb-3">
+                  <Icons.CheckIcon size={24} />
                 </div>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="rounded-xl h-9 px-4 font-bold text-xs"
-                  disabled={isArchived}
-                  onClick={() => {
-                    setReviewTxId(tx._id);
-                    setRejectNote("");
-                    setReviewDate(new Date().toISOString().split("T")[0]);
-                  }}
-                >
-                  Review
+                <p className="text-xs font-bold text-[var(--text-muted)]">Clear for now! No pending requests.</p>
+              </div>
+            ) : (
+              <div className={cn("space-y-3", isArchived && "opacity-60 pointer-events-none")}>
+                {pendingTransactions.map((tx) => (
+                  <div key={tx._id} className="group relative flex items-center justify-between rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-2)]/40 p-4 transition-all duration-300 hover:border-[var(--accent-vivid)]/30">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-[var(--surface-deep)]/60 flex items-center justify-center text-sm font-bold text-[var(--text-primary)] shadow-inner">
+                        #{tx.seat?.seatNumber ?? "•"}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-[var(--text-primary)]">Round {tx.roundIndex}</p>
+                          <span className={cn(
+                            "text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-[0.1em] border",
+                            tx.type === "cash"
+                              ? "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
+                              : "bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] border-[var(--accent-vivid)]/20"
+                          )}>
+                            {tx.type || "online"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[var(--text-muted)] font-medium">{tx.user?.name || "Member"}</p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="rounded-xl h-9 px-4 font-bold text-xs"
+                      disabled={isArchived}
+                      onClick={() => {
+                        setReviewTxId(tx._id);
+                        setRejectNote("");
+                        setReviewDate(new Date().toISOString().split("T")[0]);
+                      }}
+                    >
+                      Review
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Surface>
+
+          {/* Tool Grid */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Surface tier={2} className="rounded-[32px] p-6 border border-[var(--border-subtle)] flex flex-col">
+              <div className="h-10 w-10 rounded-xl bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] flex items-center justify-center border border-[var(--accent-vivid)]/20 mb-4">
+                <Icons.DrawIcon size={20} />
+              </div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Round management</h3>
+              <p className="mt-1.5 text-[11px] text-[var(--text-muted)] leading-relaxed flex-grow">
+                Run the lottery draw to pick a winner and advance the pool through its cycles.
+              </p>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <Button size="sm" variant="secondary" onClick={onOpenWinnerSelection} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
+                  <Icons.DrawIcon size={14} /> Run draw
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onOpenNextRound} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
+                  <Icons.RoundIcon size={14} /> Next
                 </Button>
               </div>
-            ))}
-          </div>
-        )}
-      </Surface>
+            </Surface>
 
-      {/* Tool Grid */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Surface tier={2} className="rounded-[32px] p-6 border border-[var(--border-subtle)] flex flex-col">
-          <div className="h-10 w-10 rounded-xl bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] flex items-center justify-center border border-[var(--accent-vivid)]/20 mb-4">
-            <Icons.DrawIcon size={20} />
+            <Surface tier={2} className="rounded-[32px] p-6 border border-[var(--border-subtle)] flex flex-col">
+              <div className="h-10 w-10 rounded-xl bg-[var(--warning)]/10 text-[var(--warning)] flex items-center justify-center border border-[var(--warning)]/20 mb-4">
+                <Icons.ContributionIcon size={20} />
+              </div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Payments & payouts</h3>
+              <p className="mt-1.5 text-[11px] text-[var(--text-muted)] leading-relaxed flex-grow">
+                Manually record cash contributions or mark when the winner pool has been paid out.
+              </p>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <Button size="sm" variant="secondary" onClick={onOpenCashPayment} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
+                  <Icons.BankIcon size={14} /> Record cash
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onOpenPayout} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
+                  <Icons.WinnerIcon size={14} /> Payout
+                </Button>
+              </div>
+            </Surface>
           </div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)]">Round management</h3>
-          <p className="mt-1.5 text-[11px] text-[var(--text-muted)] leading-relaxed flex-grow">
-            Run the lottery draw to pick a winner and advance the pool through its cycles.
-          </p>
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <Button size="sm" variant="secondary" onClick={onOpenWinnerSelection} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
-              <Icons.DrawIcon size={14} /> Run draw
-            </Button>
-            <Button size="sm" variant="secondary" onClick={onOpenNextRound} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
-              <Icons.RoundIcon size={14} /> Next
-            </Button>
-          </div>
-        </Surface>
-
-        <Surface tier={2} className="rounded-[32px] p-6 border border-[var(--border-subtle)] flex flex-col">
-          <div className="h-10 w-10 rounded-xl bg-[var(--warning)]/10 text-[var(--warning)] flex items-center justify-center border border-[var(--warning)]/20 mb-4">
-            <Icons.ContributionIcon size={20} />
-          </div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)]">Payments & payouts</h3>
-          <p className="mt-1.5 text-[11px] text-[var(--text-muted)] leading-relaxed flex-grow">
-            Manually record cash contributions or mark when the winner pool has been paid out.
-          </p>
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <Button size="sm" variant="secondary" onClick={onOpenCashPayment} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
-              <Icons.BankIcon size={14} /> Record cash
-            </Button>
-            <Button size="sm" variant="secondary" onClick={onOpenPayout} disabled={isArchived} className="rounded-xl h-10 font-bold text-xs gap-2">
-              <Icons.WinnerIcon size={14} /> Payout
-            </Button>
-          </div>
-        </Surface>
-      </div>
+        </>
+      )}
 
       {/* Danger Zone */}
       <Surface tier={1} className="rounded-[32px] p-6 border border-[var(--danger)]/20 bg-[var(--danger)]/[0.02]">

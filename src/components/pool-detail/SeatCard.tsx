@@ -13,6 +13,7 @@ interface SeatCardProps {
   onPay?: () => void;
   wonRound?: number | null;
   wonAmount?: number;
+  showDueMeta?: boolean;
 }
 
 export function SeatCard({
@@ -25,6 +26,7 @@ export function SeatCard({
   onPay,
   wonRound,
   wonAmount,
+  showDueMeta = true,
 }: SeatCardProps) {
   return (
     <Surface tier={2} className="rounded-2xl border border-[var(--border-subtle)] p-4">
@@ -44,7 +46,7 @@ export function SeatCard({
         <p className="text-lg font-bold font-mono text-[var(--text-primary)]">
           {status === "PAID" ? "Paid" : formatCurrency(dueAmount, currency)}
         </p>
-        {status !== "PAID" && (
+        {status !== "PAID" && showDueMeta && (
           <p className="text-xs text-[var(--text-muted)]">Due by {dueDate}</p>
         )}
       </div>

@@ -68,13 +68,23 @@ function getVisualTokens(payment: PaymentStatus, win: WinStatus) {
     return { color, strokeOpacity, fillOpacity, dasharray, isPulse, showTrophy, trophyColor, trophyOpacity };
 }
 
-function CentralOrb({ pct, round }: { pct: number, round: number }) {
-    const R = 65;   // orb radius
-    const CX = 200;
-    const CY = 200;
+function CentralOrb({
+    pct,
+    round,
+    cx,
+    cy,
+    compact,
+}: {
+    pct: number;
+    round: number;
+    cx: number;
+    cy: number;
+    compact: boolean;
+}) {
+    const R = compact ? 50 : 65;
 
     // liquid fill: clip from bottom
-    const fillY = CY + R - (pct / 100) * (R * 2);
+    const fillY = cy + R - (pct / 100) * (R * 2);
     const fillHeight = (pct / 100) * (R * 2);
 
     // Energy ring: 0-100% arc around the orb
@@ -84,15 +94,15 @@ function CentralOrb({ pct, round }: { pct: number, round: number }) {
     return (
         <g>
             {/* Outer ambient glow */}
-            <circle cx={CX} cy={CY} r={R + 25} fill="var(--accent-vivid)" opacity={0.1} />
+            {!compact && <circle cx={cx} cy={cy} r={R + 25} fill="var(--accent-vivid)" opacity={0.1} />}
 
             {/* Energy ring track */}
-            <circle cx={CX} cy={CY} r={RING_R} fill="none" stroke="var(--border-subtle)" strokeWidth={2} opacity={0.3} strokeDasharray="4 6" />
+            <circle cx={cx} cy={cy} r={RING_R} fill="none" stroke="var(--border-subtle)" strokeWidth={2} opacity={0.3} strokeDasharray="4 6" />
 
             {/* Energy ring fill (progress) */}
             {pct > 0 && (
                 <path
-                    d={arcPath(CX, CY, RING_R, 0, ringEnd)}
+                    d={arcPath(cx, cy, RING_R, 0, ringEnd)}
                     fill="none"
                     stroke="var(--accent-vivid)"
                     strokeWidth={3}
@@ -103,7 +113,7 @@ function CentralOrb({ pct, round }: { pct: number, round: number }) {
 
             {/* Energy ring tip dot */}
             {pct > 1 && (() => {
-                const tip = pointOnCircle(CX, CY, RING_R, ringEnd);
+                const tip = pointOnCircle(cx, cy, RING_R, ringEnd);
                 return (
                     <circle cx={tip.x} cy={tip.y} r={4}
                         fill="var(--accent-vivid)"
@@ -113,29 +123,29 @@ function CentralOrb({ pct, round }: { pct: number, round: number }) {
             })()}
 
             {/* Orb base layers */}
-            <circle cx={CX} cy={CY} r={R} fill="var(--surface-1)" stroke="var(--border-subtle)" strokeWidth={1.5} opacity={0.8} />
+            <circle cx={cx} cy={cy} r={R} fill="var(--surface-1)" stroke="var(--border-subtle)" strokeWidth={1.5} opacity={0.8} />
 
             {/* Liquid fill layer - clipped to orb */}
             <defs>
                 <clipPath id="orb-clip">
-                    <circle cx={CX} cy={CY} r={Math.max(0, R - 1)} />
+                    <circle cx={cx} cy={cy} r={Math.max(0, R - 1)} />
                 </clipPath>
             </defs>
 
             {/* Liquid fill */}
             {pct > 0 && (
                 <rect
-                    x={CX - R} y={fillY}
+                    x={cx - R} y={fillY}
                     width={R * 2} height={fillHeight + 2}
                     fill="var(--accent-vivid)"
                     opacity={0.3}
                     clipPath="url(#orb-clip)"
-                    style={{ filter: `drop-shadow(0 0 8px var(--accent-vivid))` }}
+                    style={{ filter: compact ? "none" : `drop-shadow(0 0 8px var(--accent-vivid))` }}
                 />
             )}
             {pct > 0 && (
                 <rect
-                    x={CX - R} y={fillY}
+                    x={cx - R} y={fillY}
                     width={R * 2} height={4}
                     fill="rgba(255,255,255,0.4)"
                     clipPath="url(#orb-clip)"
@@ -144,28 +154,28 @@ function CentralOrb({ pct, round }: { pct: number, round: number }) {
             )}
 
             {/* Orb glass border */}
-            <circle cx={CX} cy={CY} r={R}
+            <circle cx={cx} cy={cy} r={R}
                 fill="none"
                 stroke="var(--border-subtle)" strokeWidth={2}
                 opacity={0.5}
-                style={{ filter: `drop-shadow(0 0 4px var(--accent-vivid))` }} />
+                style={{ filter: compact ? "none" : `drop-shadow(0 0 4px var(--accent-vivid))` }} />
 
             {/* Center text: % collected */}
-            <text x={CX} y={CY - 12} textAnchor="middle"
+            <text x={cx} y={cy - (compact ? 9 : 12)} textAnchor="middle"
                 fill="var(--text-muted)"
-                style={{ fontSize: 9, letterSpacing: 2, fontWeight: 700 }}
+                style={{ fontSize: compact ? 8 : 9, letterSpacing: compact ? 1 : 2, fontWeight: 700 }}
                 className="font-sans uppercase">
                 ROUND
             </text>
-            <text x={CX} y={CY + 14} textAnchor="middle"
+            <text x={cx} y={cy + (compact ? 10 : 14)} textAnchor="middle"
                 fill="var(--text-primary)"
-                style={{ fontSize: 26, fontWeight: 800 }}
+                style={{ fontSize: compact ? 22 : 26, fontWeight: 800 }}
                 className="font-display">
                 {round}
             </text>
-            <text x={CX} y={CY + 32} textAnchor="middle"
+            <text x={cx} y={cy + (compact ? 26 : 32)} textAnchor="middle"
                 fill="var(--accent-vivid)"
-                style={{ fontSize: 11, fontWeight: 700 }}
+                style={{ fontSize: compact ? 10 : 11, fontWeight: 700 }}
                 className="font-sans">
                 {Math.round(pct)}%
             </text>
@@ -173,10 +183,10 @@ function CentralOrb({ pct, round }: { pct: number, round: number }) {
     );
 }
 
-function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, onSelect, onHover }: any) {
+function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, onSelect, onHover, compact }: any) {
     const pos = pointOnCircle(cx, cy, orbitR, angle);
     const tok = getVisualTokens(payment, win);
-    const R = isHovered ? 18 : 14;
+    const R = compact ? (isHovered ? 14 : 11) : (isHovered ? 18 : 14);
     const subR = R + 8;
 
     const handleClick = (e: React.MouseEvent) => {
@@ -189,6 +199,7 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
 
     // Pulse ticker for co-seat rotation
     useEffect(() => {
+        if (compact) return;
         let frame: number;
         let last = performance.now();
         const tick = (now: number) => {
@@ -199,7 +210,7 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
         };
         frame = requestAnimationFrame(tick);
         return () => cancelAnimationFrame(frame);
-    }, []);
+    }, [compact]);
 
     // Co-seat sub-particle angles (two small nodes orbiting the satellite)
     const sub1 = {
@@ -222,7 +233,7 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
             {/* Co-seat Sub-particles (orbiting around the main seat node) */}
-            {seat.isCoSeat && (
+            {seat.isCoSeat && !compact && (
                 <g>
                     <circle cx={sub1.x} cy={sub1.y} r={3} fill="var(--text-muted)" opacity={0.6} />
                     <circle cx={sub2.x} cy={sub2.y} r={3} fill="var(--warning)" opacity={0.8} />
@@ -314,7 +325,7 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
     );
 }
 
-function SeatTooltip({ seat, payment, win, pos, orbitR, cx, cy }: any) {
+function SeatTooltip({ seat, payment, win, pos, orbitR, cx, cy, size }: any) {
     if (!seat) return null;
     const tok = getVisualTokens(payment, win);
 
@@ -329,10 +340,8 @@ function SeatTooltip({ seat, payment, win, pos, orbitR, cx, cy }: any) {
     const boxX = isRight ? tipX : tipX - tipW;
     const boxY = tipY - tipH / 2;
 
-    // Let's cap the boxX so it doesn't overflow the SVG container 
-    // Container logic: CX=200, CY=200. Max width approx 400.
-    const clampedBoxX = Math.max(10, Math.min(400 - tipW - 10, boxX));
-    const clampedBoxY = Math.max(10, Math.min(400 - tipH - 10, boxY));
+    const clampedBoxX = Math.max(10, Math.min(size - tipW - 10, boxX));
+    const clampedBoxY = Math.max(10, Math.min(size - tipH - 10, boxY));
 
     const displayName = seat.status === "OPEN" || (!seat.userId && !seat.isCoSeat)
         ? "Open Seat"
@@ -411,6 +420,15 @@ interface VisualizerProps {
 
 export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: VisualizerProps) {
     const [hoveredSeat, setHoveredSeat] = useState<PoolSeat | null>(null);
+    const [isCompact, setIsCompact] = useState(false);
+
+    useEffect(() => {
+        const media = window.matchMedia("(max-width: 640px)");
+        const onChange = () => setIsCompact(media.matches);
+        onChange();
+        media.addEventListener("change", onChange);
+        return () => media.removeEventListener("change", onChange);
+    }, []);
 
     const currentRoundIndex = pool.currentRound;
 
@@ -422,20 +440,20 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
 
     const collectionProgress = getCollectionProgress?.(pool, seats, transactions, currentRoundIndex) || 0;
 
-    const SIZE = 400;
-    const CX = 200;
-    const CY = 200;
-    const ORBIT_R = 140;
+    const SIZE = isCompact ? 320 : 400;
+    const CX = SIZE / 2;
+    const CY = SIZE / 2;
+    const ORBIT_R = isCompact ? 112 : 140;
 
     const seatAngles = sortedSeats.map((_, i) => (i / sortedSeats.length) * 360);
 
     return (
-        <div className="flex flex-col items-center justify-center w-full">
-            <div className="relative mx-auto flex w-full max-w-[460px] items-center justify-center overflow-visible">
+        <div className="flex w-full flex-col items-center justify-center overflow-hidden">
+            <div className="relative mx-auto flex w-full max-w-[460px] items-center justify-center overflow-hidden">
                 <svg
                     width="100%"
                     viewBox={`0 0 ${SIZE} ${SIZE}`}
-                    style={{ overflow: "visible", display: "block" }}
+                    style={{ overflow: "hidden", display: "block", contain: "layout paint" }}
                 >
                     {/* Scene ambient glow */}
                     <circle cx={CX} cy={CY} r={190} fill="var(--surface-1)" opacity={0.3} />
@@ -451,10 +469,10 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
                     />
 
                     {/* Central orb */}
-                    <CentralOrb pct={collectionProgress} round={currentRoundIndex} />
+                    <CentralOrb pct={collectionProgress} round={currentRoundIndex} cx={CX} cy={CY} compact={isCompact} />
 
                     {/* Energy beam (hovered seat -> orb) */}
-                    {hoveredSeat && (() => {
+                    {!isCompact && hoveredSeat && (() => {
                         const idx = sortedSeats.findIndex(s => s._id === hoveredSeat._id);
                         const angle = seatAngles[idx];
                         const sPos = pointOnCircle(CX, CY, ORBIT_R, angle);
@@ -509,13 +527,14 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
                                 isHovered={hoveredSeat?._id === seat._id}
                                 onSelect={() => onSeatClick?.(seat, isOpen)}
                                 onHover={(s: PoolSeat | null) => setHoveredSeat(s)}
+                                compact={isCompact}
                             />
                         );
                     })}
 
                     {/* Tooltip */}
                     <AnimatePresence>
-                        {hoveredSeat && (() => {
+                        {!isCompact && hoveredSeat && (() => {
                             const idx = sortedSeats.findIndex(s => s._id === hoveredSeat._id);
                             const angle = seatAngles[idx];
                             const pos = pointOnCircle(CX, CY, ORBIT_R, angle);
@@ -539,6 +558,7 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
                                     pos={pos}
                                     orbitR={ORBIT_R}
                                     cx={CX} cy={CY}
+                                    size={SIZE}
                                 />
                             );
                         })()}
@@ -547,7 +567,7 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
             </div>
 
             {/* Legend mapping to tokens */}
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-4 px-4 pb-2 max-w-[340px] mx-auto opacity-80">
+            <div className="mx-auto mt-4 flex max-w-[340px] flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 pb-2 opacity-80">
                 {(pool.status === "ACTIVE"
                     ? [
                         { label: "Paid", color: "var(--accent-vivid)", opacity: 1, type: "solid" },
