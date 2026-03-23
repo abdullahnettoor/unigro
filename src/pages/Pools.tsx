@@ -1,368 +1,329 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
-import { ArrowDownAZ, ArrowUpAZ, Plus, Search } from "lucide-react";
-import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import { ArrowDownAZ, ArrowUpAZ, Plus, RotateCcw, Search } from "lucide-react";
 
 import { api } from "@convex/api";
-import { LoadingIcon, DraftIcon } from "@/lib/icons";
-import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  ActivePoolIcon,
+  DraftIcon,
+  LoadingIcon,
+} from "@/lib/icons";
+import { getProgressScore } from "@/lib/pool";
 import { cn } from "@/lib/utils";
+import { SectionHeader } from "@/components/common/SectionHeader";
+import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type RoleFilter = "all" | "organizing" | "joined";
 type Status = "draft" | "active" | "completed" | "archived";
 type SortFilter = "most_recent" | "pool_value" | "progress";
 type SortDirection = "desc" | "asc";
 
-const STATUS_CHIPS: { value: Status; label: string }[] = [
-    { value: "active", label: "Active" },
-    { value: "draft", label: "Draft" },
-    { value: "completed", label: "Completed" },
-    { value: "archived", label: "Archived" },
+const STATUS_CHIPS: Array<{ value: Status; label: string }> = [
+  { value: "active", label: "Active" },
+  { value: "draft", label: "Draft" },
+  { value: "completed", label: "Completed" },
+  { value: "archived", label: "Archived" },
 ];
 
-const DEFAULT_STATUSES = new Set<Status>(["active"]);
-
-const getProgressScore = (pool: any) => {
-    if (pool.status === "DRAFT") return 0;
-    if (pool.status === "COMPLETED") return 100;
-    const currentRound = pool.currentRound || 0;
-    const duration = pool.config?.duration || 1;
-    return (currentRound / duration) * 100;
-};
+const DEFAULT_STATUSES = new Set<Status>(["active", "draft", "completed"]);
 
 export function Pools() {
-    const pools = useQuery(api.pools.list);
-    const currentUser = useQuery(api.users.current);
+  const pools = useQuery(api.pools.list);
+  const currentUser = useQuery(api.users.current);
 
-    const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
-    const [selectedStatuses, setSelectedStatuses] = useState<Set<Status>>(DEFAULT_STATUSES);
-    const [sortFilter, setSortFilter] = useState<SortFilter>("most_recent");
-    const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-    const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<Status>>(DEFAULT_STATUSES);
+  const [sortFilter, setSortFilter] = useState<SortFilter>("most_recent");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [search, setSearch] = useState("");
+  const [scrolled, setScrolled] = useState(false);
 
-    const currentUserId = currentUser?._id;
+  const currentUserId = currentUser?._id;
 
-    const toggleStatus = (s: Status) => {
-        setSelectedStatuses((prev) => {
-            const next = new Set(prev);
-            if (next.has(s)) {
-                next.delete(s);
-            } else {
-                next.add(s);
-            }
-            return next;
-        });
+  useEffect(() => {
+    const handleScroll = () => {
+      const next = window.scrollY > 48;
+      setScrolled((prev) => (prev === next ? prev : next));
     };
 
-    const filteredPools = useMemo(() => {
-        if (!pools) return [];
-        const searchLower = search.trim().toLowerCase();
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
-        return [...pools]
-            .filter((pool) => {
-                if (!currentUserId) return true;
-                if (roleFilter === "organizing") return pool.organizerId === currentUserId;
-                if (roleFilter === "joined") return pool.organizerId !== currentUserId;
-                return true;
-            })
-            .filter((pool) => selectedStatuses.size === 0 || selectedStatuses.has(pool.status.toLowerCase() as Status))
-            .filter((pool) => {
-                if (!searchLower) return true;
-                return (
-                    pool.title.toLowerCase().includes(searchLower) ||
-                    (pool.organizer?.name || "").toLowerCase().includes(searchLower)
-                );
-            })
-            .sort((a, b) => {
-                const base = (() => {
-                    if (sortFilter === "pool_value") return (b.config?.totalValue || 0) - (a.config?.totalValue || 0);
-                    if (sortFilter === "progress") return getProgressScore(b) - getProgressScore(a);
-                    return b._creationTime - a._creationTime;
-                })();
-                return sortDirection === "desc" ? base : -base;
-            });
-    }, [currentUserId, pools, roleFilter, search, sortDirection, sortFilter, selectedStatuses]);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    // ── SCROLL DETECTION ─────────────────────────────────────────────────
-    //
-    // BUG FIXED: The original code used useMemo to register a scrollY.on()
-    // listener. useMemo is NOT an effect — React can re-run it at any time,
-    // silently creating duplicate listeners that each call setScrolled on
-    // every pixel. The unsubscribe return value was also discarded, so
-    // listeners accumulated and leaked. Result: cascading re-renders → stutter.
-    //
-    // useMotionValueEvent is Framer's correct API for this pattern. It runs
-    // outside React's render cycle entirely — zero re-renders per pixel.
-    // We also guard setState so React only re-renders on the exact two moments
-    // the boolean flips (crossing 60px down, and back up). Not on every pixel.
-    //
-    // containerRef was also removed: it was created and attached to the page
-    // div but never passed to useScroll(), making it dead code. useScroll()
-    // with no arguments correctly tracks the window.
-    //
-    const { scrollY } = useScroll();
-    const [scrolled, setScrolled] = useState(false);
-
-    useMotionValueEvent(scrollY, "change", (latest) => {
-        const next = latest > 60;
-        setScrolled((prev) => (prev === next ? prev : next));
+  const toggleStatus = (status: Status) => {
+    setSelectedStatuses((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) {
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
+      return next;
     });
+  };
 
-    const activeFilterSummary = useMemo(() => {
-        const roles = { all: "All", organizing: "My Pools", joined: "Joined" };
-        const statusList = Array.from(selectedStatuses)
-            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-            .join(", ");
-        return `${roles[roleFilter]} • ${statusList || "No status"}`;
-    }, [roleFilter, selectedStatuses]);
+  const resetFilters = () => {
+    setRoleFilter("all");
+    setSelectedStatuses(new Set(DEFAULT_STATUSES));
+    setSortFilter("most_recent");
+    setSortDirection("desc");
+    setSearch("");
+  };
 
-    return (
-        <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 pb-32">
+  const filteredPools = useMemo(() => {
+    if (!pools) return [];
+    const searchLower = search.trim().toLowerCase();
 
-            {/* ── STICKY HEADER ───────────────────────────────────────────── */}
-            <div className="sticky top-0 z-50 -mx-4 lg:-mx-8 pointer-events-none px-4 lg:px-8">
-                <div
-                    className={cn(
-                        "pointer-events-auto py-4",
-                        "transition-[background-color,border-color,box-shadow] duration-200 ease-out",
-                        scrolled
-                            ? "glass-3 border-b border-[var(--border-subtle)]/30 shadow-lg -mx-4 lg:-mx-8 px-4 lg:px-8"
-                            : "bg-transparent border-b border-transparent shadow-none"
-                    )}
-                >
-                    <div className="flex flex-col gap-4">
+    return [...pools]
+      .filter((pool) => {
+        if (!currentUserId) return true;
+        if (roleFilter === "organizing") return pool.organizerId === currentUserId;
+        if (roleFilter === "joined") return pool.organizerId !== currentUserId;
+        return true;
+      })
+      .filter(
+        (pool) =>
+          selectedStatuses.size === 0 ||
+          selectedStatuses.has(pool.status.toLowerCase() as Status)
+      )
+      .filter((pool) => {
+        if (!searchLower) return true;
+        return (
+          pool.title.toLowerCase().includes(searchLower) ||
+          (pool.organizer?.name || "").toLowerCase().includes(searchLower)
+        );
+      })
+      .sort((a, b) => {
+        const base = (() => {
+          if (sortFilter === "pool_value") {
+            return (b.config?.totalValue || 0) - (a.config?.totalValue || 0);
+          }
+          if (sortFilter === "progress") {
+            return getProgressScore(b) - getProgressScore(a);
+          }
+          return b._creationTime - a._creationTime;
+        })();
+        return sortDirection === "desc" ? base : -base;
+      });
+  }, [currentUserId, pools, roleFilter, search, selectedStatuses, sortDirection, sortFilter]);
 
-                        {/* Title Row */}
-                        <div className="flex items-center justify-between gap-4">
-                            <div className="flex flex-col min-w-0">
-                                <div className="flex items-center gap-3">
+  const totalPools = pools?.length ?? 0;
+  const filteredOut = pools !== undefined && pools.length > 0 && filteredPools.length === 0;
 
-
-                                    <h1 className={cn(
-                                        "font-display font-bold text-[var(--text-primary)]",
-                                        "transition-[font-size] duration-200 ease-out",
-                                        scrolled ? "text-xl" : "text-2xl"
-                                    )}>
-                                        Your pools
-                                    </h1>
-
-                                    {pools && (
-                                        <span className="rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)]/50 px-2 py-0.5 text-[10px] font-semibold text-[var(--text-muted)] tracking-wider shrink-0">
-                                            {pools.length}
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* Filter summary — animates in when scrolled.*/}
-                                <AnimatePresence initial={false}>
-                                    {scrolled && (
-                                        <motion.div
-                                            key="filter-summary"
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: "auto" }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            transition={{ duration: 0.2, ease: "easeOut" }}
-                                            className="mt-1 flex items-center gap-2 overflow-hidden"
-                                        >
-                                            <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-widest opacity-70">
-                                                {activeFilterSummary}
-                                            </span>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                            {/* ── MORPHING CREATE BUTTON ────────────────────────── */}
-                            <div className="flex-shrink-0">
-                                <Link to="/create">
-                                    <motion.div
-                                        initial={false}
-                                        animate={scrolled ? "sticky" : "normal"}
-                                        variants={{
-                                            normal: {
-                                                width: 118,
-                                                height: 36,
-                                                paddingLeft: 16,
-                                                paddingRight: 14,
-                                                borderRadius: 9999,
-                                                backgroundColor: "var(--surface-deep)",
-                                                color: "var(--accent-vivid)",
-                                                boxShadow: "0 1px 2px rgba(0,0,0,0.06), inset 0 0 0 1px color-mix(in srgb, var(--accent-vivid) 30%, transparent)",
-                                            },
-                                            sticky: {
-                                                width: 32,
-                                                height: 32,
-                                                paddingLeft: 0,
-                                                paddingRight: 0,
-                                                borderRadius: 9999,
-                                                backgroundColor: "var(--accent-vivid)",
-                                                color: "var(--text-on-accent)",
-                                                boxShadow: "0 4px 14px color-mix(in srgb, var(--accent-vivid) 35%, transparent)",
-                                            },
-                                        }}
-                                        transition={{ type: "spring", stiffness: 380, damping: 32, mass: 0.8 }}
-                                        className="flex items-center justify-center overflow-hidden pointer-events-auto"
-                                    >
-                                        <Plus size={15} strokeWidth={2.5} className="shrink-0" />
-
-                                        <AnimatePresence initial={false} mode="popLayout">
-                                            {!scrolled && (
-                                                <motion.span
-                                                    key="label"
-                                                    initial={{ opacity: 0, width: 0 }}
-                                                    animate={{ opacity: 1, width: "auto" }}
-                                                    exit={{ opacity: 0, width: 0 }}
-                                                    transition={{ duration: 0.15, ease: "easeOut" }}
-                                                    className="ml-1.5 text-xs font-semibold whitespace-nowrap overflow-hidden"
-                                                >
-                                                    Create pool
-                                                </motion.span>
-                                            )}
-                                        </AnimatePresence>
-                                    </motion.div>
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Search bar — narrows to max-w-md when scrolled.
-                         * CSS transition is correct here: max-width is a layout
-                         * property, not ideal for Framer. transition-[max-width]
-                         * keeps it specific and won't interfere with other props. */}
-                        <div className={cn(
-                            "relative transition-[max-width] duration-200 ease-out",
-                            scrolled ? "max-w-md mx-auto w-full" : "max-w-full w-full"
-                        )}>
-                            <div className="glass-2 flex items-center rounded-2xl border border-[var(--border-subtle)]/60 p-0.5">
-                                <Search size={16} className="ml-3 shrink-0 text-[var(--text-muted)]" />
-                                <input
-                                    type="text"
-                                    placeholder="Search pools..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full bg-transparent border-none py-2 px-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-0"
-                                />
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            {/* Filter & Control Section */}
-            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                {/* Status Chips (Left/Top) */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
-                    {STATUS_CHIPS.map(({ value, label }) => (
-                        <button
-                            key={value}
-                            type="button"
-                            onClick={() => toggleStatus(value)}
-                            className={cn(
-                                "btn-chip flex h-[30px] items-center shrink-0 rounded-full border px-4 text-[11px] font-semibold leading-none transition-all duration-150",
-                                selectedStatuses.has(value)
-                                    ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[0_2px_10px_rgba(var(--accent-vivid-rgb),0.2)]"
-                                    : "border-[var(--border-subtle)]/40 bg-[var(--surface-2)]/50 text-[var(--text-muted)] hover:border-[var(--border-subtle)] hover:text-[var(--text-primary)]"
-                            )}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Role & Sort Controls (Right/Bottom) */}
-                <div className="glass-2 flex items-center gap-2 rounded-[20px] p-1.5 border border-[var(--border-subtle)]/60 shrink-0">
-                    <div className="flex items-center gap-1 sm:gap-2">
-                        {/* Role Filter */}
-                        <div className="flex bg-[var(--surface-0)]/50 p-0.5 sm:p-1 rounded-[14px] sm:rounded-2xl shrink-0">
-                            {[
-                                { value: "all", label: "All" },
-                                { value: "joined", label: "Joined" },
-                                { value: "organizing", label: "Mine" },
-                            ].map((opt) => (
-                                <button
-                                    key={opt.value}
-                                    onClick={() => setRoleFilter(opt.value as RoleFilter)}
-                                    className={cn(
-                                        "px-2 sm:px-4 py-1 sm:py-1.5 rounded-[10px] sm:rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-widest sm:tracking-wider transition-all",
-                                        roleFilter === opt.value
-                                            ? "bg-[var(--surface-2)] text-[var(--text-primary)] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-                                            : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                                    )}
-                                >
-                                    {opt.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Divider */}
-                        <div className="w-px h-4 sm:h-5 bg-[var(--border-subtle)]/60 mx-1 shrink-0" />
-
-                        {/* Sorting */}
-                        <div className="flex items-center shrink min-w-0">
-                            <Select value={sortFilter} onValueChange={(val: string) => setSortFilter(val as SortFilter)}>
-                                <SelectTrigger className="h-[26px] sm:h-[28px] w-auto max-w-[85px] sm:max-w-[120px] border-none bg-transparent px-1 sm:px-2 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-primary)] shadow-none focus:ring-0 truncate [&>svg]:hidden sm:[&>svg]:block">
-                                    <SelectValue placeholder="Sort by" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="most_recent">Recent</SelectItem>
-                                    <SelectItem value="pool_value">Pool value</SelectItem>
-                                    <SelectItem value="progress">Progress</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <button
-                                type="button"
-                                onClick={() => setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))}
-                                className="flex aspect-square h-[24px] sm:h-[26px] items-center justify-center rounded-full text-[var(--text-muted)] hover:bg-[var(--surface-0)]/50 hover:text-[var(--text-primary)] transition-colors shrink-0"
-                                title={sortDirection === "desc" ? "Descending" : "Ascending"}
-                            >
-                                {sortDirection === "desc" ? <ArrowDownAZ size={13} /> : <ArrowUpAZ size={13} />}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Grid List */}
-            <section className="mt-6">
-                {pools === undefined ? (
-                    <div className="flex justify-center items-center py-20 text-[var(--text-muted)]">
-                        <LoadingIcon size={22} className="animate-spin" />
-                    </div>
-                ) : pools.length === 0 ? (
-                    <div className="glass-2 flex flex-col items-center justify-center rounded-[24px] border border-[var(--border-subtle)]/50 px-6 py-12 text-center">
-                        <div className="mb-4 rounded-full bg-[var(--accent-vivid)]/10 p-3 text-[var(--accent-vivid)]">
-                            <DraftIcon size={24} />
-                        </div>
-                        <h3 className="text-base font-bold text-[var(--text-primary)]">No pools yet</h3>
-                        <p className="mt-1 text-sm text-[var(--text-muted)] max-w-sm">
-                            You haven't joined or created any pools. Get started by organizing your first pool!
-                        </p>
-                        <Link
-                            to="/create"
-                            className="mt-6 inline-flex h-9 items-center justify-center rounded-full bg-[var(--accent-vivid)] px-5 text-sm font-semibold text-[var(--text-on-accent)] shadow-sm transition-all hover:opacity-90 leading-none gap-1.5"
-                        >
-                            <Plus size={16} />
-                            Create pool
-                        </Link>
-                    </div>
-                ) : filteredPools.length === 0 ? (
-                    <div className="glass-2 flex flex-col items-center justify-center rounded-[24px] border border-[var(--border-subtle)]/50 py-12 px-6 text-center">
-                        <Search size={24} className="text-[var(--text-muted)] opacity-50 mb-3" />
-                        <h3 className="text-sm font-semibold text-[var(--text-primary)]">No matches found</h3>
-                        <p className="mt-1 text-xs text-[var(--text-muted)]">
-                            Adjust filters or search term to see more results.
-                        </p>
-                    </div>
-                ) : (
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {filteredPools.map((pool) => (
-                            <PoolCard key={pool._id} pool={pool as unknown as PoolItem} />
-                        ))}
-                    </div>
+  return (
+    <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:px-8">
+      <div className="sticky top-0 z-40 pb-3 pt-1">
+        <div
+          className={cn(
+            "rounded-[28px] transition-[background-color,border-color,box-shadow,padding] duration-200 ease-out",
+            scrolled
+              ? "bg-[rgba(var(--bg-app-rgb),0.84)] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.14)] backdrop-blur-xl supports-[backdrop-filter]:border supports-[backdrop-filter]:border-[var(--border-subtle)]/40"
+              : "bg-transparent px-0 py-0 border border-transparent shadow-none backdrop-blur-0"
+          )}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-3">
+                <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-2)]/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--text-muted)]">
+                  Collection
+                </span>
+                <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-2)]/55 px-2.5 py-1 text-[10px] font-semibold text-[var(--text-muted)]">
+                  {totalPools} pools
+                </span>
+              </div>
+              <h1
+                className={cn(
+                  "mt-3 font-display font-bold leading-none text-[var(--text-primary)] transition-all duration-200 ease-out",
+                  scrolled ? "text-[1.7rem]" : "text-[2.85rem]"
                 )}
-            </section>
+              >
+                Your pools
+              </h1>
+              {!scrolled && (
+                <p className="mt-2 max-w-xl text-sm text-[var(--text-muted)]">
+                  Organize new pools, track joined ones, and filter your collection without
+                  losing context.
+                </p>
+              )}
+            </div>
+
+            <Link to="/create" className="shrink-0">
+              <span
+                className={cn(
+                  "inline-flex h-10 items-center justify-center rounded-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition-all duration-200 ease-out",
+                  scrolled ? "gap-0 px-3" : "gap-2 px-4"
+                )}
+              >
+                <Plus size={16} className="shrink-0" />
+                <span
+                  className={cn(
+                    "overflow-hidden whitespace-nowrap text-sm font-semibold transition-all duration-200 ease-out",
+                    scrolled ? "max-w-0 opacity-0" : "max-w-32 opacity-100"
+                  )}
+                >
+                  Create pool
+                </span>
+              </span>
+            </Link>
+          </div>
+
+          <div className="mt-4">
+            <div className="glass-2 flex items-center rounded-[20px] border border-[var(--border-subtle)]/60 px-3">
+              <Search size={16} className="shrink-0 text-[var(--text-muted)]" />
+              <Input
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search pools or organizers"
+                className="border-0 bg-transparent px-3 shadow-none focus-visible:ring-0"
+              />
+            </div>
+          </div>
         </div>
-    );
+      </div>
+
+      <section className="mt-6 space-y-4">
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="glass-2 rounded-[24px] border border-[var(--border-subtle)] p-2">
+            <div className="flex flex-wrap gap-1.5">
+              {([
+                { value: "all", label: "All" },
+                { value: "joined", label: "Joined" },
+                { value: "organizing", label: "Mine" },
+              ] as const).map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRoleFilter(option.value)}
+                  className={cn(
+                    "btn-chip rounded-full px-3 py-2 text-[11px] font-semibold transition-all",
+                    roleFilter === option.value
+                      ? "bg-[var(--surface-0)] text-[var(--text-primary)] shadow-[0_6px_18px_rgba(0,0,0,0.08)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-2 flex w-full items-center gap-2 rounded-[20px] border border-[var(--border-subtle)] p-2 sm:w-auto">
+            <Select value={sortFilter} onValueChange={(value) => setSortFilter(value as SortFilter)}>
+              <SelectTrigger className="h-9 min-w-0 border-0 bg-transparent px-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] shadow-none focus:ring-0 sm:min-w-[140px]">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="most_recent">Recent</SelectItem>
+                <SelectItem value="pool_value">Pool value</SelectItem>
+                <SelectItem value="progress">Progress</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              type="button"
+              size="icon-sm"
+              variant="ghost"
+              className="btn-chip rounded-full"
+              onClick={() => setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))}
+              title={sortDirection === "desc" ? "Descending" : "Ascending"}
+            >
+              {sortDirection === "desc" ? <ArrowDownAZ size={14} /> : <ArrowUpAZ size={14} />}
+            </Button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto no-scrollbar">
+          <div className="flex min-w-full gap-2 pb-1">
+            {STATUS_CHIPS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => toggleStatus(value)}
+                className={cn(
+                  "btn-chip shrink-0 rounded-full border px-4 py-2 text-[11px] font-semibold transition-all",
+                  selectedStatuses.has(value)
+                    ? "border-[var(--accent-vivid)] bg-[var(--accent-vivid)] text-[var(--text-on-accent)]"
+                    : "border-[var(--border-subtle)]/50 bg-[var(--surface-2)]/55 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <SectionHeader
+          eyebrow="Collection"
+          title="Pool collection"
+          actions={
+            filteredOut ? (
+              <Button variant="outline" size="sm" className="btn-chip rounded-full" onClick={resetFilters}>
+                <RotateCcw size={14} />
+                Reset filters
+              </Button>
+            ) : null
+          }
+        />
+
+        <div className="mt-4">
+        {pools === undefined ? (
+          <div className="flex items-center justify-center py-20 text-[var(--text-muted)]">
+            <LoadingIcon size={22} className="animate-spin" />
+          </div>
+        ) : pools.length === 0 ? (
+          <div className="glass-2 rounded-[28px] border border-[var(--border-subtle)] px-6 py-12 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)]">
+              <DraftIcon size={24} />
+            </div>
+            <h3 className="mt-5 text-lg font-semibold text-[var(--text-primary)]">No pools yet</h3>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-[var(--text-muted)]">
+              Start with your first pool and bring members into a cleaner, more traceable flow.
+            </p>
+            <Link to="/create" className="mt-6 inline-flex">
+              <Button className="rounded-full">
+                <Plus size={16} />
+                Create pool
+              </Button>
+            </Link>
+          </div>
+        ) : filteredPools.length === 0 ? (
+          <div className="glass-2 rounded-[28px] border border-[var(--border-subtle)] px-6 py-12 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-2)]/60 text-[var(--text-muted)]">
+              <Search size={22} />
+            </div>
+            <h3 className="mt-5 text-lg font-semibold text-[var(--text-primary)]">No matching pools</h3>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-[var(--text-muted)]">
+              Your current search or filter combination is too narrow. Reset and broaden the view.
+            </p>
+            <Button variant="outline" className="mt-6 rounded-full" onClick={resetFilters}>
+              <RotateCcw size={14} />
+              Reset filters
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {filteredPools.map((pool) => (
+              <PoolCard key={pool._id} pool={pool as PoolItem} />
+            ))}
+          </div>
+        )}
+        </div>
+      </section>
+    </div>
+  );
 }
