@@ -16,6 +16,7 @@ import { StatTile } from "@/components/dashboard/StatTile";
 import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
 import { EmptyPools } from "@/components/dashboard/EmptyPools";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
 
 export function Dashboard() {
   const { user } = useUser();
@@ -33,7 +34,12 @@ export function Dashboard() {
   const hasPools = Boolean(pools && pools.length > 0);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+    <OfflineStateGate
+      ready={pools !== undefined}
+      offlineTitle="Dashboard unavailable offline"
+      offlineMessage="This screen needs a recent sync before it can render. Once loaded online, it will open from cache later."
+    >
+      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
       <DashboardHero
         firstName={firstName}
         poolsCount={pools?.length ?? 0}
@@ -146,6 +152,7 @@ export function Dashboard() {
           </Link>
         </div>
       )}
-    </div>
+      </div>
+    </OfflineStateGate>
   );
 }

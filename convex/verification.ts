@@ -60,6 +60,26 @@ export const getPending = query({
     },
 });
 
+export const getSummary = query({
+    handler: async (ctx) => {
+        await checkAdmin(ctx);
+
+        const users = await ctx.db.query("users").collect();
+
+        return users.reduce(
+            (summary, user) => {
+                const status = user.verificationStatus || "UNVERIFIED";
+                if (status === "PENDING") summary.pending += 1;
+                if (status === "VERIFIED") summary.verified += 1;
+                if (status === "REJECTED") summary.flagged += 1;
+                if (status === "UNVERIFIED") summary.unverified += 1;
+                return summary;
+            },
+            { pending: 0, verified: 0, flagged: 0, unverified: 0 }
+        );
+    },
+});
+
 // 4. Admin: Review Verification
 export const review = mutation({
     args: {

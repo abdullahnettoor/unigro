@@ -25,6 +25,8 @@ import { ArchivePoolModal } from "@/components/pool-detail/modals/ArchivePoolMod
 import { RecordPayoutModal } from "@/components/pool-detail/modals/RecordPayoutModal";
 import { RecordCashModal } from "@/components/pool-detail/modals/RecordCashModal";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { OfflineFallback } from "@/components/shared/OfflineFallback";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { getNextRoundDate, getPoolDisplayProgress, getSeatStats, getVirtualOpenSeats } from "@/lib/pool";
 import type { PoolDetail as PoolDetailType, PoolSeat, PoolTransaction } from "@/components/pool-detail/types";
 
@@ -35,6 +37,7 @@ export function PoolDetail() {
   const { poolId } = useParams<{ poolId: string }>();
   const navigate = useNavigate();
   const feedback = useFeedback();
+  const { isOnline } = useNetworkStatus();
 
   const pool = useQuery(api.pools.get, { poolId: poolId as Id<"pools"> }) as PoolDetailType | null | undefined;
   const currentUser = useQuery(api.users.current);
@@ -140,7 +143,16 @@ export function PoolDetail() {
     });
   }, [isMember, isOrganizer, pool, currentUser]);
 
-  if (pool === undefined || transactions === undefined) {
+  if ((pool === undefined || transactions === undefined || currentUser === undefined) && !isOnline) {
+    return (
+      <OfflineFallback
+        title="Pool details unavailable offline"
+        message="This page needs the latest pool and transaction data before it can open. Visit it once online to make it available from cache."
+      />
+    );
+  }
+
+  if (pool === undefined || transactions === undefined || currentUser === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <LogoLoader size="lg" />

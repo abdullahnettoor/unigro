@@ -11,6 +11,7 @@ import { PoolRulesStep } from "@/components/create-pool/PoolRulesStep";
 import { StepHeader } from "@/components/create-pool/StepHeader";
 import { StepFooterBar } from "@/components/create-pool/StepFooterBar";
 import { PoolSummaryPanel } from "@/components/create-pool/PoolSummaryPanel";
+import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
@@ -218,7 +219,13 @@ export function CreatePool() {
   const nextLabel = step === 0 ? "Next: Strategy & Dates" : step === 1 ? "Next: Seats & Fees" : "Final step";
 
   return (
-    <div className="min-h-dvh pb-24 relative">
+    <OfflineStateGate
+      ready={!editPoolId || existingPool !== undefined}
+      offlineTitle="Pool editor unavailable offline"
+      offlineMessage="Editing a pool needs its latest configuration first. Open it once online before using this screen offline."
+      minHeightClassName="min-h-[60vh]"
+    >
+      <div className="min-h-dvh pb-24 relative">
       <StepHeader
         title={editPoolId ? "Edit Pool" : "Create Pool"}
         step={step}
@@ -297,6 +304,7 @@ export function CreatePool() {
         onNext={handleNext}
         onSubmit={handleSubmit}
       />
-    </div>
+      </div>
+    </OfflineStateGate>
   );
 }

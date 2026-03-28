@@ -7,12 +7,14 @@ import {
     Eye,
     CheckCircle2,
     AlertCircle,
+    Clock,
     FileText,
     Mail,
     CreditCard
 } from "lucide-react";
 
 import { PageShell } from "@/components/layout/PageShell";
+import { OfflineFallback } from "@/components/shared/OfflineFallback";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { MediaPreviewDialog } from "@/components/shared/MediaPreviewDialog";
 import { Button } from "@/components/ui/button";
@@ -20,13 +22,16 @@ import { Surface } from "@/components/ui/Surface";
 import { Textarea } from "@/components/ui/textarea";
 import { LogoLoader } from "@/components/ui/LogoLoader";
 import * as Icons from "@/lib/icons";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 import { api } from "../../convex/_generated/api";
 
 export function AdminDashboard() {
     const feedback = useFeedback();
     const pendingRequests = useQuery(api.verification.getPending);
+    const verificationSummary = useQuery(api.verification.getSummary);
     const reviewVerification = useMutation(api.verification.review);
+    const { isOnline } = useNetworkStatus();
 
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -61,7 +66,16 @@ export function AdminDashboard() {
         }
     };
 
-    if (pendingRequests === undefined) {
+    if ((pendingRequests === undefined || verificationSummary === undefined) && !isOnline) {
+        return (
+            <OfflineFallback
+                title="Admin dashboard unavailable offline"
+                message="Verification review needs fresh admin data and cannot open from a cold offline start."
+            />
+        );
+    }
+
+    if (pendingRequests === undefined || verificationSummary === undefined) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center">
                 <LogoLoader size="lg" />
@@ -78,7 +92,7 @@ export function AdminDashboard() {
 
                 <div className="relative">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--accent-vivid)] text-white shadow-lg shadow-[var(--accent-vivid)]/20 text-xl font-bold">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-lg shadow-[var(--accent-vivid)]/20 text-xl font-bold">
                             T
                         </div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--accent-vivid)]">Terminal Access</p>
@@ -117,6 +131,27 @@ export function AdminDashboard() {
             </header>
 
             <div className="space-y-10">
+                <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {[
+                        { label: "Pending", value: verificationSummary.pending, icon: Clock, accent: "text-[var(--warning)] bg-[var(--warning)]/10" },
+                        { label: "Verified", value: verificationSummary.verified, icon: ShieldCheck, accent: "text-[var(--success)] bg-[var(--success)]/10" },
+                        { label: "Flagged", value: verificationSummary.flagged, icon: AlertCircle, accent: "text-[var(--danger)] bg-[var(--danger)]/10" },
+                        { label: "Unverified", value: verificationSummary.unverified, icon: FileText, accent: "text-[var(--text-muted)] bg-[var(--surface-2)]" },
+                    ].map((item) => (
+                        <Surface key={item.label} tier={1} className="rounded-[24px] border border-[var(--border-subtle)]/60 p-4">
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">{item.label}</p>
+                                    <p className="mt-2 font-display text-3xl font-bold text-[var(--text-primary)]">{item.value}</p>
+                                </div>
+                                <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${item.accent}`}>
+                                    <item.icon size={18} />
+                                </div>
+                            </div>
+                        </Surface>
+                    ))}
+                </section>
+
                 {/* Pending Requests Section */}
                 <section>
                     <div className="flex items-center justify-between mb-6 px-2">
@@ -233,14 +268,16 @@ export function AdminDashboard() {
                                                         <div className="flex gap-3">
                                                             <Button
                                                                 variant="outline"
-                                                                className="flex-1 rounded-full h-11 border-[var(--border-subtle)]"
+                                                                size="lg"
+                                                                className="flex-1 rounded-full border-[var(--border-subtle)] text-[var(--text-primary)]"
                                                                 onClick={() => { setRejectingId(null); setRejectionNote(""); }}
                                                             >
                                                                 Cancel
                                                             </Button>
                                                             <Button
                                                                 variant="destructive"
-                                                                className="flex-1 rounded-full h-11 shadow-lg shadow-[var(--danger)]/10"
+                                                                size="lg"
+                                                                className="flex-1 rounded-full shadow-lg shadow-[var(--danger)]/10"
                                                                 onClick={() => handleReview(req._id, "REJECTED")}
                                                                 disabled={!rejectionNote.trim() || actionLoading === req._id}
                                                             >
@@ -253,10 +290,11 @@ export function AdminDashboard() {
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <div className="flex flex-col sm:flex-row gap-4">
+                                                    <div className="flex flex-col gap-4 sm:flex-row">
                                                         <Button
                                                             variant="outline"
-                                                            className="flex-1 rounded-full h-12 text-[var(--danger)] border-[var(--danger)]/20 hover:bg-[var(--danger)]/5"
+                                                            size="lg"
+                                                            className="flex-1 rounded-full border-[var(--danger)]/20 text-[var(--danger)] hover:bg-[var(--danger)]/5"
                                                             onClick={() => handleReview(req._id, "REJECTED")}
                                                             disabled={actionLoading !== null}
                                                         >
@@ -264,7 +302,8 @@ export function AdminDashboard() {
                                                             Reject Request
                                                         </Button>
                                                         <Button
-                                                            className="flex-1 rounded-full h-12 shadow-lg shadow-[var(--accent-vivid)]/20"
+                                                            size="lg"
+                                                            className="flex-1 rounded-full shadow-lg shadow-[var(--accent-vivid)]/20"
                                                             onClick={() => handleReview(req._id, "VERIFIED")}
                                                             disabled={actionLoading !== null}
                                                         >

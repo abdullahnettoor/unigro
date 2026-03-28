@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { OfflineFallback } from "@/components/shared/OfflineFallback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
@@ -44,6 +45,7 @@ import {
     type ThemePreference,
     type ThemeVariant
 } from "@/lib/theme";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 import { api } from "../../convex/_generated/api";
 
@@ -118,6 +120,7 @@ function SettingRow({
 
 export function Settings() {
     const user = useQuery(api.users.current);
+    const { isOnline } = useNetworkStatus();
     const generateUploadUrl = useMutation(api.verification.generateUploadUrl);
     const requestVerification = useMutation(api.verification.submit);
     const updateProfile = useMutation(api.users.updateProfile);
@@ -156,6 +159,15 @@ export function Settings() {
             setEditPhone(user.phone || "");
         }
     }, [user, isEditingProfile]);
+
+    if (user === undefined && !isOnline) {
+        return (
+            <OfflineFallback
+                title="Settings unavailable offline"
+                message="Profile and verification settings need a fresh account sync before this page can open."
+            />
+        );
+    }
 
     if (!user) {
         return (

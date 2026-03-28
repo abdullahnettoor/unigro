@@ -12,6 +12,7 @@ import { getProgressScore } from "@/lib/pool";
 import { cn } from "@/lib/utils";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
+import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -122,7 +123,12 @@ export function Pools() {
   const filteredOut = pools !== undefined && pools.length > 0 && filteredPools.length === 0;
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:px-8">
+    <OfflineStateGate
+      ready={pools !== undefined && currentUser !== undefined}
+      offlineTitle="Pool collection unavailable offline"
+      offlineMessage="This list view needs fresh collection data. Previously opened pool pages can still load from cache."
+    >
+      <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:px-8">
       <div className="sticky top-0 z-40 pb-3 pt-1">
         <div
           className={cn(
@@ -323,6 +329,7 @@ export function Pools() {
         )}
         </div>
       </section>
-    </div>
+      </div>
+    </OfflineStateGate>
   );
 }
