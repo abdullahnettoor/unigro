@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { SignInButton } from "@clerk/clerk-react";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 import { useUser } from "@clerk/clerk-react";
@@ -9,9 +9,11 @@ import { UserSync } from "./components/auth/UserSync";
 import { AppShell } from "./components/layout/AppShell";
 import { BottomNav } from "./components/layout/BottomNav";
 import { DesktopRail } from "./components/layout/DesktopRail";
+import { OfflineFallback } from "./components/shared/OfflineFallback";
 import { PWAPrompt } from "./components/shared/PWAPrompt";
 import { Toaster } from "./components/ui/sonner";
 import { LogoLoader } from "./components/ui/LogoLoader";
+import { useNetworkStatus } from "./hooks/useNetworkStatus";
 
 // Lazy page imports
 const loadDashboard = () => import("./pages/Dashboard");
@@ -139,137 +141,157 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AppContent({ showDesign }: { showDesign: boolean }) {
+  const location = useLocation();
+  const { isOnline } = useNetworkStatus();
+  const isPublicRoute =
+    location.pathname === "/" ||
+    /^\/pools\/[^/]+$/.test(location.pathname) ||
+    location.pathname === "/design";
+
+  return (
+    <AppShell>
+      <PWAPrompt />
+      <Toaster />
+
+      <AuthLoading>
+        {isOnline ? (
+          <div className="min-h-dvh flex items-center justify-center">
+            <LogoLoader size="xl" />
+          </div>
+        ) : isPublicRoute ? null : (
+          <OfflineFallback
+            title="Connection needed to restore your session"
+            message="Reconnect once so the app can restore your signed-in session. Cached public screens can still open offline."
+          />
+        )}
+      </AuthLoading>
+
+      <Routes>
+        {/* Root — Landing vs Dashboard */}
+        <Route
+          path="/"
+          element={
+            <>
+              <Unauthenticated>
+                <Landing />
+              </Unauthenticated>
+              <Authenticated>
+                <UserSync />
+                <AuthenticatedPrefetch />
+                <MainLayout>
+                  <Dashboard />
+                </MainLayout>
+              </Authenticated>
+            </>
+          }
+        />
+
+        {/* Pool Detail — publicly accessible */}
+        <Route
+          path="/pools/:poolId"
+          element={
+            <MainLayout>
+              <PoolDetail />
+            </MainLayout>
+          }
+        />
+
+        {/* Protected routes */}
+        <Route
+          path="/pools"
+          element={
+            <ProtectedRoute>
+              <Authenticated>
+                <UserSync />
+              </Authenticated>
+              <MainLayout>
+                <Pools />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Authenticated>
+                <UserSync />
+              </Authenticated>
+              <MainLayout>
+                <SettingsPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create"
+          element={
+            <ProtectedRoute>
+              <Authenticated>
+                <UserSync />
+              </Authenticated>
+              <MainLayout>
+                <CreatePool />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <Authenticated>
+                  <UserSync />
+                </Authenticated>
+                <MainLayout>
+                  <AdminDashboard />
+                </MainLayout>
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Legacy redirect */}
+        <Route path="/pots" element={<Navigate to="/pools" replace />} />
+        <Route path="/pot/:potId" element={<Navigate to="/" replace />} />
+
+        {showDesign && (
+          <Route
+            path="/design"
+            element={
+              <MainLayout>
+                <DesignPage />
+              </MainLayout>
+            }
+          />
+        )}
+
+        {/* Fallback */}
+        <Route
+          path="*"
+          element={
+            <>
+              <Unauthenticated>
+                <Navigate to="/" replace />
+              </Unauthenticated>
+              <Authenticated>
+                <Navigate to="/" replace />
+              </Authenticated>
+            </>
+          }
+        />
+      </Routes>
+    </AppShell>
+  );
+}
+
 function App() {
   const showDesign = import.meta.env.DEV || import.meta.env.VITE_SHOW_DESIGN === "true";
   return (
     <BrowserRouter>
-      <AppShell>
-        <PWAPrompt />
-        <Toaster />
-
-        <AuthLoading>
-          <div className="min-h-dvh flex items-center justify-center">
-            <LogoLoader size="xl" />
-          </div>
-        </AuthLoading>
-
-        <Routes>
-          {/* Root — Landing vs Dashboard */}
-          <Route
-            path="/"
-            element={
-              <>
-                <Unauthenticated>
-                  <Landing />
-                </Unauthenticated>
-                <Authenticated>
-                  <UserSync />
-                  <AuthenticatedPrefetch />
-                  <MainLayout>
-                    <Dashboard />
-                  </MainLayout>
-                </Authenticated>
-              </>
-            }
-          />
-
-          {/* Pool Detail — publicly accessible */}
-          <Route
-            path="/pools/:poolId"
-            element={
-              <MainLayout>
-                <PoolDetail />
-              </MainLayout>
-            }
-          />
-
-          {/* Protected routes */}
-          <Route
-            path="/pools"
-            element={
-              <ProtectedRoute>
-                <Authenticated>
-                  <UserSync />
-                </Authenticated>
-                <MainLayout>
-                  <Pools />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Authenticated>
-                  <UserSync />
-                </Authenticated>
-                <MainLayout>
-                  <SettingsPage />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/create"
-            element={
-              <ProtectedRoute>
-                <Authenticated>
-                  <UserSync />
-                </Authenticated>
-                <MainLayout>
-                  <CreatePool />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <Authenticated>
-                    <UserSync />
-                  </Authenticated>
-                  <MainLayout>
-                    <AdminDashboard />
-                  </MainLayout>
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Legacy redirect */}
-          <Route path="/pots" element={<Navigate to="/pools" replace />} />
-          <Route path="/pot/:potId" element={<Navigate to="/" replace />} />
-
-          {showDesign && (
-            <Route
-              path="/design"
-              element={
-                <MainLayout>
-                  <DesignPage />
-                </MainLayout>
-              }
-            />
-          )}
-
-          {/* Fallback */}
-          <Route
-            path="*"
-            element={
-              <>
-                <Unauthenticated>
-                  <Navigate to="/" replace />
-                </Unauthenticated>
-                <Authenticated>
-                  <Navigate to="/" replace />
-                </Authenticated>
-              </>
-            }
-          />
-        </Routes>
-      </AppShell>
+      <AppContent showDesign={showDesign} />
     </BrowserRouter>
   );
 }

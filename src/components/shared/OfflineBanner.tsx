@@ -6,7 +6,7 @@ export function OfflineBanner() {
   return (
     <Surface
       tier={2}
-      className="fixed left-1/2 top-3 z-50 flex w-[min(460px,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-2xl border border-[var(--warning)]/25 bg-[var(--warning)]/10 px-4 py-2.5 shadow-[0_14px_32px_rgba(0,0,0,0.18)]"
+      className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] left-1/2 z-50 flex w-[min(460px,calc(100vw-1.5rem))] -translate-x-1/2 items-center gap-3 rounded-2xl border border-[var(--warning)]/25 bg-[var(--warning)]/10 px-4 py-2.5 shadow-[0_14px_32px_rgba(0,0,0,0.18)] lg:bottom-4 lg:left-auto lg:right-4 lg:w-[min(420px,calc(100vw-3rem))] lg:translate-x-0"
       role="status"
       aria-live="polite"
     >

@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { RefreshCw, WifiOff } from "lucide-react";
 
+import { useOfflineUI } from "@/components/shared/OfflineUIContext";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
 
@@ -12,6 +14,13 @@ export function OfflineFallback({
   title = "This screen needs internet",
   message = "The app shell is available offline, but this page has not been cached yet or needs fresh data before it can open.",
 }: OfflineFallbackProps) {
+  const offlineUI = useOfflineUI();
+
+  useEffect(() => {
+    offlineUI?.registerBlockingFallback();
+    return () => offlineUI?.unregisterBlockingFallback();
+  }, [offlineUI]);
+
   return (
     <div className="flex min-h-[52vh] items-center justify-center px-4 py-10">
       <Surface tier={3} className="w-full max-w-md rounded-[32px] border border-[var(--border-subtle)] p-6 text-center">

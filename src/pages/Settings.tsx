@@ -50,6 +50,17 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { api } from "../../convex/_generated/api";
 
 const APP_VERSION = "0.0.1";
+const SETTINGS_CACHE_KEY = "unigro_settings_cache";
+
+type SettingsUserSnapshot = {
+    _creationTime?: number;
+    name: string;
+    email: string;
+    phone?: string;
+    pictureUrl: string;
+    verificationStatus?: "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED";
+    adminNotes?: string;
+};
 
 // ── Shared Layout Components ──────────────────────────────────────────────────
 
@@ -119,7 +130,7 @@ function SettingRow({
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export function Settings() {
-    const user = useQuery(api.users.current);
+    const user = useQuery(api.users.current) as SettingsUserSnapshot | null | undefined;
     const { isOnline } = useNetworkStatus();
     const generateUploadUrl = useMutation(api.verification.generateUploadUrl);
     const requestVerification = useMutation(api.verification.submit);
@@ -152,24 +163,51 @@ export function Settings() {
     const [editName, setEditName] = useState("");
     const [editPhone, setEditPhone] = useState("");
     const [isSavingProfile, setIsSavingProfile] = useState(false);
+    const [cachedUser, setCachedUser] = useState<SettingsUserSnapshot | null>(() => {
+        if (typeof window === "undefined") return null;
+        try {
+            const raw = window.localStorage.getItem(SETTINGS_CACHE_KEY);
+            return raw ? JSON.parse(raw) as SettingsUserSnapshot : null;
+        } catch {
+            return null;
+        }
+    });
 
     useEffect(() => {
-        if (user && !isEditingProfile) {
-            setEditName(user.name || "");
-            setEditPhone(user.phone || "");
-        }
-    }, [user, isEditingProfile]);
+        if (!user) return;
+        const snapshot: SettingsUserSnapshot = {
+            _creationTime: user._creationTime,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            pictureUrl: user.pictureUrl,
+            verificationStatus: user.verificationStatus,
+            adminNotes: user.adminNotes,
+        };
+        setCachedUser(snapshot);
+        window.localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(snapshot));
+    }, [user]);
 
-    if (user === undefined && !isOnline) {
+    const effectiveUser = user ?? (!isOnline ? cachedUser : null);
+    const isUsingCachedUser = !isOnline && !user && !!cachedUser;
+
+    useEffect(() => {
+        if (effectiveUser && !isEditingProfile) {
+            setEditName(effectiveUser.name || "");
+            setEditPhone(effectiveUser.phone || "");
+        }
+    }, [effectiveUser, isEditingProfile]);
+
+    if (!effectiveUser && user === undefined && !isOnline) {
         return (
             <OfflineFallback
                 title="Settings unavailable offline"
-                message="Profile and verification settings need a fresh account sync before this page can open."
+                message="Open Settings once while connected so we can cache your account details for offline viewing."
             />
         );
     }
 
-    if (!user) {
+    if (!effectiveUser) {
         return (
             <div className="min-h-[80dvh] grid place-items-center">
                 <LogoLoader size="lg" />
@@ -189,6 +227,10 @@ export function Settings() {
 
     const handleIdSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isOnline) {
+            feedback.toast.info("Offline right now", "Reconnect before sending verification details.");
+            return;
+        }
         if (!file || !idNumber) { setError("Please provide ID Document and Number"); return; }
         setIsUploading(true);
         setError("");
@@ -210,6 +252,10 @@ export function Settings() {
 
     const handleSaveProfile = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isOnline) {
+            feedback.toast.info("Offline right now", "Reconnect to save profile changes.");
+            return;
+        }
         if (!editName.trim()) { feedback.toast.error("Invalid Name", "Name cannot be empty."); return; }
         if (!editPhone || !isValidPhoneNumber(editPhone)) { feedback.toast.error("Invalid Phone", "Please enter a valid phone number."); return; }
         setIsSavingProfile(true);
@@ -225,9 +271,9 @@ export function Settings() {
         }
     };
 
-    const status = (user.verificationStatus as "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED") || "UNVERIFIED";
-    const memberSince = user._creationTime
-        ? new Date(user._creationTime).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
+    const status = (effectiveUser.verificationStatus as "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED") || "UNVERIFIED";
+    const memberSince = effectiveUser._creationTime
+        ? new Date(effectiveUser._creationTime).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
         : null;
 
     return (
@@ -273,6 +319,12 @@ export function Settings() {
                     <p className="mt-2 text-xs text-[var(--text-muted)] font-medium">
                         Personalize your experience and manage your verified identity.
                     </p>
+                    {isUsingCachedUser ? (
+                        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--warning)]/20 bg-[var(--warning)]/10 px-3 py-1.5 text-[11px] font-medium text-[var(--warning)]">
+                            <AlertCircle size={14} />
+                            Viewing cached settings. Live edits need a connection.
+                        </div>
+                    ) : null}
                 </div>
             </header>
 
@@ -283,8 +335,8 @@ export function Settings() {
                         <div className="relative shrink-0">
                             <div className="absolute inset-0 rounded-full bg-[var(--accent-vivid)]/5 animate-pulse" />
                             <img
-                                src={user.pictureUrl}
-                                alt={user.name}
+                                src={effectiveUser.pictureUrl}
+                                alt={effectiveUser.name}
                                 className="relative w-24 h-24 rounded-[32px] border-2 border-white shadow-xl shadow-black/5 object-cover"
                             />
                             {status === "VERIFIED" && (
@@ -340,11 +392,11 @@ export function Settings() {
                                     >
                                         <div className="flex flex-col gap-1 items-center sm:items-start">
                                             <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-                                                {user.name}
+                                                {effectiveUser.name}
                                             </h2>
                                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[13px] font-medium text-[var(--text-muted)] justify-center sm:justify-start">
-                                                <span className="flex items-center gap-1.5"><Mail size={14} className="opacity-60" /> {user.email}</span>
-                                                {user.phone && <span className="flex items-center gap-1.5"><Smartphone size={14} className="opacity-60" /> {user.phone}</span>}
+                                                <span className="flex items-center gap-1.5"><Mail size={14} className="opacity-60" /> {effectiveUser.email}</span>
+                                                {effectiveUser.phone && <span className="flex items-center gap-1.5"><Smartphone size={14} className="opacity-60" /> {effectiveUser.phone}</span>}
                                             </div>
                                             {memberSince && (
                                                 <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-[var(--accent-vivid)]/60">
@@ -353,7 +405,13 @@ export function Settings() {
                                             )}
                                         </div>
                                         <Button
-                                            onClick={() => setIsEditingProfile(true)}
+                                            onClick={() => {
+                                                if (!isOnline) {
+                                                    feedback.toast.info("Offline right now", "Reconnect to edit your profile.");
+                                                    return;
+                                                }
+                                                setIsEditingProfile(true);
+                                            }}
                                             variant="secondary"
                                             size="sm"
                                             className="mt-4 rounded-full bg-[var(--surface-0)] border border-[var(--border-subtle)]/50 sm:px-6 h-8 text-[11px] font-bold uppercase tracking-widest shadow-sm shadow-black/5 active:scale-95 transition-all"
@@ -414,12 +472,12 @@ export function Settings() {
                                 Verify your identity to create or join high-value pools and unlock premium social features.
                             </p>
 
-                            {status === "REJECTED" && user.adminNotes && (
+                            {status === "REJECTED" && effectiveUser.adminNotes && (
                                 <div className="bg-red-500/5 border border-red-500/10 p-4 rounded-2xl mb-6 flex gap-3">
                                     <AlertCircle size={16} className="shrink-0 text-red-500 mt-0.5" />
                                     <div className="text-xs">
                                         <p className="font-bold text-red-600 mb-0.5 uppercase tracking-wider">Reviewer Note</p>
-                                        <p className="text-red-500">{user.adminNotes}</p>
+                                        <p className="text-red-500">{effectiveUser.adminNotes}</p>
                                     </div>
                                 </div>
                             )}
@@ -493,7 +551,7 @@ export function Settings() {
 
                                 {error && <p className="px-2 text-[10px] font-bold text-red-500 uppercase tracking-wider">{error}</p>}
 
-                                <Button type="submit" disabled={isUploading || !file || !idNumber} className="w-full h-12 rounded-[18px] font-bold text-sm shadow-xl shadow-[var(--accent-vivid)]/10">
+                                <Button type="submit" disabled={!isOnline || isUploading || !file || !idNumber} className="w-full h-12 rounded-[18px] font-bold text-sm shadow-xl shadow-[var(--accent-vivid)]/10">
                                     {isUploading ? <LogoLoader size="sm" /> : "Request Verification"}
                                 </Button>
                             </form>
