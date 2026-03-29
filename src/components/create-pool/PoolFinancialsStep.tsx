@@ -84,7 +84,7 @@ export function PoolFinancialsStep({ formData, onChange, disabled }: PoolFinanci
               Add payment details (optional)
             </p>
             <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              Accurate details let us auto-generate UPI payment links in the future.
+              Accurate details let members launch direct UPI payments from the pool.
             </p>
           </div>
           <SelectionControl checked={formData.hasPaymentDetails} variant="checkbox" />

@@ -531,6 +531,15 @@ export function PoolDetail() {
             amount={paymentState.amount}
             currency={pool.config.currency}
             paymentDetails={pool.paymentDetails}
+            poolTitle={pool.title}
+            existingTransaction={
+              transactions.find(
+                (tx) =>
+                  tx.seatId === paymentState.seatId &&
+                  tx.roundIndex === paymentState.roundIndex &&
+                  (currentUser?._id ? tx.userId === currentUser._id : !tx.userId)
+              ) || null
+            }
             isOrganizer={isOrganizer}
           />
         )}

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import * as Icons from "@/lib/icons";
 
@@ -10,8 +10,15 @@ import { formatCurrency, cn } from "@/lib/utils";
 import { api } from "@convex/api";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { Id } from "@convex/dataModel";
-import type { PoolPaymentDetails } from "../types";
+import type { PoolPaymentDetails, PoolTransaction } from "../types";
 import { SelectionControl } from "@/components/ui/selection-control";
+import {
+  buildGenericUpiLink,
+  buildIosUpiOptions,
+  createUpiPayload,
+  detectUpiPlatform,
+  launchUpiLink,
+} from "@/lib/upi";
 
 interface PaymentModalProps {
   open: boolean;
@@ -23,8 +30,13 @@ interface PaymentModalProps {
   currency?: string;
   isOrganizer?: boolean;
   paymentDetails?: PoolPaymentDetails;
+  poolTitle?: string;
+  existingTransaction?: PoolTransaction | null;
   onOrganizerRecord?: (date: number) => Promise<void>;
 }
+
+type PaymentType = "upi" | "online" | "cash" | null;
+type UpiStage = "idle" | "launched";
 
 export function PaymentModal({
   open,
@@ -36,13 +48,28 @@ export function PaymentModal({
   currency,
   isOrganizer,
   paymentDetails,
+  poolTitle,
+  existingTransaction,
   onOrganizerRecord,
 }: PaymentModalProps) {
   const generateUploadUrl = useMutation(api.transactions.generateUploadUrl);
   const submitPayment = useMutation(api.transactions.submitPayment);
   const feedback = useFeedback();
+  const platform = detectUpiPlatform();
+  const hasUpi = !!paymentDetails?.upiId && !isOrganizer;
+  const upiPayload = paymentDetails
+    ? createUpiPayload({
+        paymentDetails,
+        amount,
+        poolTitle: poolTitle || "UniGro pool",
+        roundIndex,
+        currency: currency || "INR",
+      })
+    : null;
+  const iosUpiOptions = upiPayload ? buildIosUpiOptions(upiPayload) : [];
 
-  const [paymentType, setPaymentType] = useState<"online" | "cash" | null>(null);
+  const [paymentType, setPaymentType] = useState<PaymentType>(hasUpi ? "upi" : null);
+  const [upiStage, setUpiStage] = useState<UpiStage>(existingTransaction?.type === "upi" ? "launched" : "idle");
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split("T")[0]);
@@ -51,30 +78,54 @@ export function PaymentModal({
   const [cashConfirmed, setCashConfirmed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (!open) return;
+    setError("");
+    setFile(null);
+    setFilePreview(null);
+    setCashConfirmed(false);
+    if (existingTransaction?.type === "upi") {
+      setPaymentType("upi");
+      setUpiStage("launched");
+      return;
+    }
+    if (existingTransaction?.type === "online") {
+      setPaymentType("online");
+      setUpiStage("idle");
+      return;
+    }
+    if (existingTransaction?.type === "cash") {
+      setPaymentType("cash");
+      setUpiStage("idle");
+      return;
+    }
+    setPaymentType(hasUpi ? "upi" : null);
+    setUpiStage("idle");
+  }, [open, existingTransaction, hasUpi]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
-    if (selected) {
-      if (selected.size > 5 * 1024 * 1024) {
-        setError("File size must be less than 5MB");
-        return;
-      }
-      setFile(selected);
-      setError("");
-
-      const reader = new FileReader();
-      reader.onloadend = () => setFilePreview(reader.result as string);
-      reader.readAsDataURL(selected);
+    if (!selected) return;
+    if (selected.size > 5 * 1024 * 1024) {
+      setError("File size must be less than 5MB");
+      return;
     }
+    setFile(selected);
+    setError("");
+
+    const reader = new FileReader();
+    reader.onloadend = () => setFilePreview(reader.result as string);
+    reader.readAsDataURL(selected);
   };
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    feedback.toast.success(`${label} Copied`);
+    feedback.toast.success(`${label} copied`);
   };
 
-  const handleOnlineSubmit = async () => {
+  const uploadProofAndSubmit = async (type: "online" | "upi") => {
     if (!file) {
-      setError("Please select a file");
+      setError("Please select a screenshot or receipt first.");
       return;
     }
     setIsSubmitting(true);
@@ -87,11 +138,48 @@ export function PaymentModal({
       });
       if (!result.ok) throw new Error("Upload failed");
       const { storageId } = await result.json();
-      await submitPayment({ poolId, seatId, roundIndex, storageId, type: "online" });
+      await submitPayment({
+        poolId,
+        seatId,
+        roundIndex,
+        storageId,
+        type,
+        remarks:
+          type === "upi"
+            ? "UPI payment submitted for organizer approval"
+            : "Online payment submitted for organizer approval",
+      });
       onOpenChange(false);
       feedback.toast.success("Payment submitted", "Waiting for organizer approval.");
-    } catch (err) {
+    } catch {
       setError("Failed to upload proof.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLaunchUpi = async (deepLink: string, paymentApp?: string) => {
+    if (!upiPayload) {
+      setError("UPI details are unavailable for this pool.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await submitPayment({
+        poolId,
+        seatId,
+        roundIndex,
+        type: "upi",
+        remarks: "UPI payment launched. Waiting for organizer approval.",
+        paymentApp,
+        initiatedAt: Date.now(),
+        upiDeepLinkUsed: deepLink,
+      });
+      setUpiStage("launched");
+      feedback.toast.success("UPI app opening", "Return here after payment and upload your screenshot.");
+      launchUpiLink(deepLink);
+    } catch {
+      setError("Could not start the UPI flow.");
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +192,7 @@ export function PaymentModal({
         await onOrganizerRecord(new Date(paymentDate).getTime());
         onOpenChange(false);
         feedback.toast.success("Payment recorded");
-      } catch (err) {
+      } catch {
         setError("Failed to record payment.");
       } finally {
         setIsSubmitting(false);
@@ -117,27 +205,36 @@ export function PaymentModal({
       await submitPayment({ poolId, seatId, roundIndex, type: "cash", remarks: "Cash payment pending approval" });
       feedback.toast.success("Request submitted", "Waiting for organizer confirmation.");
       onOpenChange(false);
-    } catch (err) {
+    } catch {
       setError("Failed to submit request.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const resetToMethodChoice = () => {
+    setPaymentType(hasUpi ? "upi" : null);
+    setUpiStage("idle");
+    setFile(null);
+    setFilePreview(null);
+    setCashConfirmed(false);
+    setError("");
+  };
+
+  const title =
+    !paymentType ? "Select Method" : paymentType === "upi" ? "Pay with UPI" : paymentType === "online" ? "Upload Proof" : "Cash Payment";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-3 border border-[var(--border-subtle)] rounded-[32px] max-w-[400px] p-0 overflow-hidden outline-none flex flex-col max-h-[90vh]">
+      <DialogContent className="glass-3 border border-[var(--border-subtle)] rounded-[32px] max-w-[420px] p-0 overflow-hidden outline-none flex flex-col max-h-[90vh]">
         <DialogHeader className="p-6 pb-2 shrink-0 pr-12">
           <div className="flex flex-col gap-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--accent-vivid)]">Financial</p>
-            <DialogTitle className="font-display text-xl font-bold">
-              {!paymentType ? "Select Method" : "Make Payment"}
-            </DialogTitle>
+            <DialogTitle className="font-display text-xl font-bold">{title}</DialogTitle>
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto min-h-0 px-6 pb-6 space-y-6 scrollbar-hide overscroll-contain">
-          {/* Summary Card - Persistent context */}
           <Surface tier={2} className="grain p-4 rounded-2xl border border-[var(--border-subtle)]/50 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] flex items-center justify-center border border-[var(--accent-vivid)]/20 font-bold text-sm">
@@ -149,9 +246,7 @@ export function PaymentModal({
               </div>
             </div>
             <div className="text-right">
-              <p className="text-lg font-black text-[var(--text-primary)] font-mono">
-                {formatCurrency(amount, currency)}
-              </p>
+              <p className="text-lg font-black text-[var(--text-primary)] font-mono">{formatCurrency(amount, currency)}</p>
             </div>
           </Surface>
 
@@ -186,21 +281,145 @@ export function PaymentModal({
           ) : (
             <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
               <button
-                onClick={() => {
-                  setPaymentType(null);
-                  setFile(null);
-                  setFilePreview(null);
-                  setCashConfirmed(false);
-                }}
+                onClick={resetToMethodChoice}
                 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 disabled={isSubmitting}
               >
                 <Icons.ArrowIcon size={12} className="rotate-180" /> Change Method
               </button>
 
-              {paymentType === "online" ? (
+              {paymentType === "upi" ? (
                 <div className="space-y-5">
-                  {/* Bank Details section if available */}
+                  {upiPayload && (
+                    <Surface tier={1} className="p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-3)]/40 space-y-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[9px] uppercase font-bold text-[var(--text-muted)] leading-none mb-1">UPI ID</p>
+                          <p className="text-xs font-mono font-medium truncate text-[var(--text-primary)]">{upiPayload.payeeVpa}</p>
+                        </div>
+                        <Button type="button" size="sm" variant="ghost" className="h-8 rounded-full px-3" onClick={() => copyToClipboard(upiPayload.payeeVpa, "UPI ID")}>
+                          <Icons.CopyIcon size={14} />
+                        </Button>
+                      </div>
+                      <div className="grid gap-2 text-xs text-[var(--text-muted)] sm:grid-cols-2">
+                        <p><span className="font-semibold text-[var(--text-primary)]">Payee:</span> {upiPayload.payeeName}</p>
+                        <p><span className="font-semibold text-[var(--text-primary)]">Amount:</span> {formatCurrency(amount, currency)}</p>
+                      </div>
+                      <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                        Launch your UPI app, complete the payment, then return here and upload a screenshot for organizer approval.
+                      </p>
+                    </Surface>
+                  )}
+
+                  {upiStage === "idle" ? (
+                    <>
+                      {platform === "ios" ? (
+                        <div className="space-y-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1">Choose UPI app</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            {iosUpiOptions.map((option) => (
+                              <Button
+                                key={option.id}
+                                type="button"
+                                variant="secondary"
+                                className="h-12 rounded-2xl font-bold"
+                                disabled={isSubmitting}
+                                onClick={() => void handleLaunchUpi(option.deepLink, option.id)}
+                              >
+                                {option.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)] shadow-lg shadow-[var(--accent-vivid)]/20"
+                          onClick={() => upiPayload && void handleLaunchUpi(buildGenericUpiLink(upiPayload), "generic")}
+                          disabled={isSubmitting || !upiPayload}
+                        >
+                          {platform === "android" ? "Open UPI App" : "Try UPI Link"}
+                        </Button>
+                      )}
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <button
+                          type="button"
+                          onClick={() => setPaymentType("cash")}
+                          className="rounded-2xl border border-[var(--warning)]/25 bg-[var(--warning)]/8 px-4 py-4 text-left transition-colors hover:bg-[var(--warning)]/12"
+                        >
+                          <p className="text-sm font-semibold text-[var(--text-primary)]">Paid in cash</p>
+                          <p className="mt-1 text-xs text-[var(--text-muted)]">Send a cash approval request instead.</p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPaymentType("online")}
+                          className="rounded-2xl border border-[var(--border-subtle)]/60 bg-[var(--surface-2)]/35 px-4 py-4 text-left transition-colors hover:bg-[var(--surface-2)]/55"
+                        >
+                          <p className="text-sm font-semibold text-[var(--text-primary)]">Upload proof manually</p>
+                          <p className="mt-1 text-xs text-[var(--text-muted)]">Use this if you already paid outside the UPI launch.</p>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-4">
+                      <Surface tier={1} className="p-4 rounded-2xl border border-[var(--accent-vivid)]/25 bg-[var(--accent-vivid)]/8">
+                        <p className="text-sm font-semibold text-[var(--text-primary)]">Waiting for your proof</p>
+                        <p className="mt-1 text-xs text-[var(--text-muted)] leading-relaxed">
+                          Your payment request is now pending. Upload a screenshot to help the organizer verify it faster.
+                        </p>
+                      </Surface>
+
+                      <div className="space-y-2.5">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1">Upload screenshot</p>
+                        <div
+                          onClick={() => !isSubmitting && fileInputRef.current?.click()}
+                          className={cn(
+                            "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-300 p-8 text-center",
+                            file ? "border-[var(--accent-vivid)]/40 bg-[var(--accent-vivid)]/[0.03]" : "border-[var(--border-subtle)] bg-[var(--surface-2)]/40 hover:bg-[var(--surface-3)]/60 cursor-pointer"
+                          )}
+                        >
+                          {filePreview ? (
+                            <div className="space-y-3">
+                              <img src={filePreview} alt="Preview" className="h-24 w-auto rounded-xl border border-[var(--border-subtle)] mx-auto object-cover" />
+                              <p className="text-xs font-mono text-[var(--text-muted)] truncate max-w-[200px] mx-auto">{file?.name}</p>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="h-12 w-12 rounded-full bg-[var(--surface-deep)]/60 flex items-center justify-center text-[var(--text-muted)] mb-3">
+                                <Icons.UploadImageIcon size={24} />
+                              </div>
+                              <p className="text-xs font-bold text-[var(--text-primary)]">Select payment screenshot</p>
+                              <p className="text-[10px] text-[var(--text-muted)] mt-1 tracking-tight">Screenshots or PDFs up to 5MB</p>
+                            </>
+                          )}
+                          <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="h-11 rounded-2xl font-bold"
+                          onClick={() => upiPayload && void handleLaunchUpi(platform === "ios" ? iosUpiOptions[0]?.deepLink || buildGenericUpiLink(upiPayload) : buildGenericUpiLink(upiPayload), platform === "ios" ? iosUpiOptions[0]?.id : "generic")}
+                          disabled={isSubmitting || !upiPayload}
+                        >
+                          Reopen UPI app
+                        </Button>
+                        <Button
+                          type="button"
+                          className="h-11 rounded-2xl bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)]"
+                          onClick={() => void uploadProofAndSubmit("upi")}
+                          disabled={isSubmitting || !file}
+                        >
+                          {isSubmitting ? "Submitting..." : "Submit UPI Proof"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : paymentType === "online" ? (
+                <div className="space-y-5">
                   {paymentDetails && (
                     <div className="space-y-2.5">
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1">Payment Target</p>
@@ -233,7 +452,6 @@ export function PaymentModal({
                     </div>
                   )}
 
-                  {/* Upload Zone */}
                   <div className="space-y-2.5">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1">Upload Receipt</p>
                     <div
@@ -257,20 +475,13 @@ export function PaymentModal({
                           <p className="text-[10px] text-[var(--text-muted)] mt-1 tracking-tight">Screenshots or PDFs up to 5MB</p>
                         </>
                       )}
-
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*,.pdf"
-                        className="hidden"
-                        onChange={handleFileChange}
-                      />
+                      <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
                     </div>
                   </div>
 
                   <Button
-                    className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-white shadow-lg shadow-[var(--accent-vivid)]/20 disabled:opacity-50"
-                    onClick={handleOnlineSubmit}
+                    className="w-full h-12 rounded-full bg-[var(--accent-vivid)] font-bold text-[var(--text-on-accent)] shadow-lg shadow-[var(--accent-vivid)]/20 disabled:opacity-50"
+                    onClick={() => void uploadProofAndSubmit("online")}
                     disabled={isSubmitting || !file}
                   >
                     {isSubmitting ? (
@@ -288,10 +499,7 @@ export function PaymentModal({
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] px-1">Payment Received Date</label>
-                        <DatePicker
-                          value={paymentDate}
-                          onChange={setPaymentDate}
-                        />
+                        <DatePicker value={paymentDate} onChange={setPaymentDate} />
                       </div>
                       <p className="text-[11px] text-[var(--text-muted)] px-1 italic leading-relaxed">
                         Recording as the organizer: This will immediately mark the seat as paid for this round.
@@ -330,12 +538,8 @@ export function PaymentModal({
                       <span className="flex items-start gap-3">
                         <SelectionControl checked={cashConfirmed} variant="checkbox" size="sm" className="mt-0.5" />
                         <span>
-                          <span className="block text-sm font-semibold text-[var(--text-primary)]">
-                            I confirm I handed cash to the organizer
-                          </span>
-                          <span className="mt-1 block text-xs text-[var(--text-muted)]">
-                            This will send an approval request to the organizer.
-                          </span>
+                          <span className="block text-sm font-semibold text-[var(--text-primary)]">I confirm I handed cash to the organizer</span>
+                          <span className="mt-1 block text-xs text-[var(--text-muted)]">This will send an approval request to the organizer.</span>
                         </span>
                       </span>
                     </button>

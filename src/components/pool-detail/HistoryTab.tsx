@@ -216,6 +216,20 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
                           <div className="grid gap-2">
                             {card.myStatuses.map((item) => {
                               const isUnpaid = item.status === "UNPAID";
+                              const tx = transactions.find(
+                                (t) =>
+                                  t.seatId === item.seat._id &&
+                                  t.roundIndex === card.roundIndex &&
+                                  (t.userId === currentUserId || !t.userId)
+                              );
+                              const methodLabel =
+                                tx?.type === "upi"
+                                  ? "UPI initiated"
+                                  : tx?.type === "cash"
+                                    ? "Cash request"
+                                    : tx?.type === "online"
+                                      ? "Online proof"
+                                      : null;
                               return (
                                 <div
                                   key={`${item.seat._id}-${card.roundIndex}`}
@@ -229,11 +243,15 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
                                       <p className="text-xs font-bold text-[var(--text-primary)]">
                                         {formatCurrency(item.amount, pool.config.currency)}
                                       </p>
-                                      {isActivePool && isUnpaid && isCurrent && (
+                                      {methodLabel ? (
+                                        <p className="text-[9px] text-[var(--text-muted)] font-medium mt-0.5">
+                                          {methodLabel}
+                                        </p>
+                                      ) : isActivePool && isUnpaid && isCurrent ? (
                                         <p className="text-[9px] text-[var(--danger)] font-medium flex items-center gap-1 mt-0.5">
                                           <Icons.InfoIcon size={8} /> Due now
                                         </p>
-                                      )}
+                                      ) : null}
                                     </div>
                                   </div>
 

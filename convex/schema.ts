@@ -87,9 +87,12 @@ export default defineSchema({
         userId: v.optional(v.id("users")), // Track who made the payment (crucial for co-seats)
         roundIndex: v.number(),
         status: v.union(v.literal("UNPAID"), v.literal("PENDING"), v.literal("PAID")),
-        type: v.optional(v.union(v.literal("cash"), v.literal("online"), v.literal("payout"))),
+        type: v.optional(v.union(v.literal("cash"), v.literal("online"), v.literal("upi"), v.literal("payout"))),
         paidAt: v.optional(v.number()), // Actual payment date
         proofUrl: v.optional(v.string()),
         remarks: v.optional(v.string()),
+        initiatedAt: v.optional(v.number()),
+        paymentApp: v.optional(v.string()),
+        upiDeepLinkUsed: v.optional(v.string()),
     }).index("by_pool_round", ["poolId", "roundIndex"]),
 });

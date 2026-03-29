@@ -79,10 +79,13 @@ export type PoolTransaction = {
   userId?: Id<"users"> | null;
   roundIndex: number;
   status: "UNPAID" | "PENDING" | "PAID";
-  type?: "cash" | "online" | "payout";
+  type?: "cash" | "online" | "upi" | "payout";
   paidAt?: number;
   proofUrl?: string;
   remarks?: string;
+  initiatedAt?: number;
+  paymentApp?: string;
+  upiDeepLinkUsed?: string;
   seat?: { seatNumber?: number } | null;
   user?: { name?: string; phone?: string; pictureUrl?: string | null } | null;
 };

@@ -12,6 +12,7 @@ import { StepHeader } from "@/components/create-pool/StepHeader";
 import { StepFooterBar } from "@/components/create-pool/StepFooterBar";
 import { PoolSummaryPanel } from "@/components/create-pool/PoolSummaryPanel";
 import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
+import { isValidUpiId } from "@/lib/upi";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
@@ -121,6 +122,9 @@ export function CreatePool() {
   const validateStep = (stepIndex: number) => {
     if (stepIndex === 0) {
       if (!formData.title.trim() || formData.title.trim().length < 3) return "Pool name must be at least 3 characters.";
+      if (formData.hasPaymentDetails && formData.paymentDetails.upiId.trim() && !isValidUpiId(formData.paymentDetails.upiId)) {
+        return "Enter a valid UPI ID, like name@bank.";
+      }
     }
     if (stepIndex === 1) {
       if (!formData.startDate) return "Start date is required.";

@@ -15,7 +15,10 @@ export const submitPayment = mutation({
         roundIndex: v.number(),
         storageId: v.optional(v.id("_storage")),
         remarks: v.optional(v.string()),
-        type: v.optional(v.union(v.literal("cash"), v.literal("online"))),
+        type: v.optional(v.union(v.literal("cash"), v.literal("online"), v.literal("upi"))),
+        paymentApp: v.optional(v.string()),
+        initiatedAt: v.optional(v.number()),
+        upiDeepLinkUsed: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -63,8 +66,11 @@ export const submitPayment = mutation({
             status: "PENDING" as const,
             type: args.type || ("online" as const),
             paidAt: Date.now(),
-            proofUrl,
-            remarks: args.remarks,
+            proofUrl: proofUrl ?? existingTx?.proofUrl,
+            remarks: args.remarks ?? existingTx?.remarks,
+            initiatedAt: args.initiatedAt ?? existingTx?.initiatedAt,
+            paymentApp: args.paymentApp ?? existingTx?.paymentApp,
+            upiDeepLinkUsed: args.upiDeepLinkUsed ?? existingTx?.upiDeepLinkUsed,
         };
 
         if (existingTx) {

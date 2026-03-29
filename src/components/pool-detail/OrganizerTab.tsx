@@ -49,6 +49,12 @@ export function OrganizerTab({
 
   const isArchived = pool.status === "ARCHIVED";
   const isDraft = pool.status === "DRAFT";
+  const getMethodLabel = (type?: PoolTransaction["type"]) => {
+    if (type === "cash") return "Cash Request";
+    if (type === "upi") return "UPI Initiated";
+    if (type === "payout") return "Payout";
+    return "Online Proof";
+  };
 
   const reviewTx = useMemo(
     () => pendingTransactions.find((tx) => tx._id === reviewTxId) || null,
@@ -187,9 +193,11 @@ export function OrganizerTab({
                             "text-[8px] px-2 py-0.5 rounded-full font-black uppercase tracking-[0.1em] border",
                             tx.type === "cash"
                               ? "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
-                              : "bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] border-[var(--accent-vivid)]/20"
+                              : tx.type === "upi"
+                                ? "bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] border-[var(--accent-vivid)]/20"
+                                : "bg-[var(--surface-3)] text-[var(--text-primary)] border-[var(--border-subtle)]"
                           )}>
-                            {tx.type || "online"}
+                            {getMethodLabel(tx.type)}
                           </span>
                         </div>
                         <p className="text-[11px] text-[var(--text-muted)] font-medium">{tx.user?.name || "Member"}</p>
@@ -332,10 +340,12 @@ export function OrganizerTab({
                     "h-9 px-4 rounded-full flex items-center gap-2 font-black text-[9px] uppercase tracking-widest border",
                     reviewTx.type === "cash"
                       ? "bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20"
-                      : "bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] border-[var(--accent-vivid)]/20"
+                      : reviewTx.type === "upi"
+                        ? "bg-[var(--accent-vivid)]/10 text-[var(--accent-vivid)] border-[var(--accent-vivid)]/20"
+                        : "bg-[var(--surface-3)] text-[var(--text-primary)] border-[var(--border-subtle)]"
                   )}>
                     {reviewTx.type === "cash" ? <Icons.ContributionIcon size={14} /> : <Icons.TransactionIcon size={14} />}
-                    <span className="capitalize">{reviewTx.type || "online"}</span>
+                    <span>{getMethodLabel(reviewTx.type)}</span>
                   </div>
                 </Surface>
 
@@ -347,6 +357,14 @@ export function OrganizerTab({
                   >
                     <Icons.UploadImageIcon size={16} /> View Payment Proof
                   </Button>
+                )}
+                {reviewTx.type === "upi" && !reviewTx.proofUrl && (
+                  <Surface tier={1} className="rounded-2xl border border-[var(--warning)]/25 bg-[var(--warning)]/10 p-4">
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">UPI launched, proof not attached yet</p>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">
+                      The member started a UPI payment but has not uploaded a screenshot yet. You can still review it if you have verified the payment separately.
+                    </p>
+                  </Surface>
                 )}
 
                 <div className="space-y-4">
