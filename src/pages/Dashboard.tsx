@@ -77,26 +77,7 @@ export function Dashboard() {
               <LoadingIcon size={22} className="animate-spin" />
             </div>
           ) : pools?.length === 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <PoolCard
-                pool={{
-                  _id: "preview",
-                  title: "Aurora Circle",
-                  status: "ACTIVE",
-                  currentRound: 2,
-                  organizer: { name: "Ayesha" },
-                  config: {
-                    totalSeats: 12,
-                    contribution: 10000,
-                    currency: "INR",
-                    frequency: "Monthly",
-                    duration: 12,
-                    totalValue: 120000,
-                  },
-                } as PoolItem}
-              />
-              <EmptyPools />
-            </div>
+            <EmptyPools />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {pools
