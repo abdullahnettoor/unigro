@@ -419,6 +419,20 @@ export function PaymentModal({
                     </>
                   ) : (
                     <div className="space-y-4">
+                      <Surface tier={2} className="rounded-2xl border border-[var(--accent-vivid)]/25 bg-[var(--accent-vivid)]/10 p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-vivid)]/15 text-[var(--accent-vivid)]">
+                            <Icons.InfoIcon size={16} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-[var(--text-primary)]">Payment done in your UPI app?</p>
+                            <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
+                              Upload the screenshot now so the organizer can verify this round payment quickly.
+                            </p>
+                          </div>
+                        </div>
+                      </Surface>
+
                       <Surface tier={1} className="p-4 rounded-2xl border border-[var(--accent-vivid)]/25 bg-[var(--accent-vivid)]/8">
                         <p className="text-sm font-semibold text-[var(--text-primary)]">Waiting for your proof</p>
                         <p className="mt-1 text-xs text-[var(--text-muted)] leading-relaxed">

@@ -583,7 +583,22 @@ export function PoolDetail() {
           onOpenChange={setShowRecordCash}
           poolId={pool._id}
           roundIndex={pool.currentRound}
-          seatOptions={seats.map((seat) => ({ seatId: seat._id as Id<"seats">, seatNumber: seat.seatNumber }))}
+          contribution={pool.config.contribution}
+          currency={pool.config.currency}
+          seatOptions={seats
+            .filter((seat) => seat.status === "FILLED" || seat.status === "RESERVED")
+            .map((seat) => ({
+              seatId: seat._id as Id<"seats">,
+              seatNumber: seat.seatNumber,
+              userId: seat.userId,
+              userName: seat.user?.name,
+              isCoSeat: seat.isCoSeat,
+              coOwners: seat.coOwners?.map((owner) => ({
+                userId: owner.userId,
+                userName: owner.userName,
+                sharePercentage: owner.sharePercentage,
+              })),
+            }))}
         />
 
         {showRecordPayout && (
