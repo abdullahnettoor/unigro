@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
 import { useEntitlements } from "@/hooks/useEntitlements";
+import { cn } from "@/lib/utils";
 
 interface AdSlotProps {
-  placement: "dashboard" | "pools" | "settings" | "pool-overview" | "pool-history";
+  placement: "dashboard" | "pools" | "settings" | "pool-overview" | "pool-history" | "success-create" | "success-join";
   title?: string;
   body?: string;
   onUpgrade?: () => void;
+  audience?: "organizers" | "all-free";
+  className?: string;
 }
 
 const copyByPlacement: Record<AdSlotProps["placement"], { title: string; body: string }> = {
@@ -30,17 +33,30 @@ const copyByPlacement: Record<AdSlotProps["placement"], { title: string; body: s
     title: "Sponsored round insights",
     body: "A compact sponsorship slot inside history keeps the browsing flow sustainable without interrupting payment actions.",
   },
+  "success-create": {
+    title: "Sponsored organizer launchpad",
+    body: "A larger sponsor card fits naturally into the create-success moment while your next step stays clear and primary.",
+  },
+  "success-join": {
+    title: "Sponsored member companion",
+    body: "A compact sponsor card can sit below the join success summary while the pool actions stay front and center.",
+  },
 };
 
-export function AdSlot({ placement, title, body, onUpgrade }: AdSlotProps) {
+export function AdSlot({ placement, title, body, onUpgrade, audience = "organizers", className }: AdSlotProps) {
   const { entitlements } = useEntitlements();
 
-  if (!entitlements.canShowAds) return null;
+  const shouldShow =
+    audience === "all-free"
+      ? !entitlements.adsDisabled
+      : entitlements.canShowAds;
+
+  if (!shouldShow) return null;
 
   const copy = copyByPlacement[placement];
 
   return (
-    <Surface tier={2} className="rounded-[26px] border border-[var(--border-subtle)]/70 p-4">
+    <Surface tier={2} className={cn("rounded-[26px] border border-[var(--border-subtle)]/70 p-4", className)}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[0.34em] text-[var(--warning)]">Sponsored</p>

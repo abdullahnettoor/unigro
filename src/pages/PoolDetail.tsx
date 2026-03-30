@@ -67,6 +67,7 @@ export function PoolDetail() {
   const [showDeletePool, setShowDeletePool] = useState(false);
   const [showRecordPayout, setShowRecordPayout] = useState(false);
   const [showRecordCash, setShowRecordCash] = useState(false);
+  const [optimisticJoinedSeats, setOptimisticJoinedSeats] = useState<PoolSeat[]>([]);
   const [paymentState, setPaymentState] = useState<{
     seatId: Id<"seats">;
     roundIndex: number;
@@ -77,25 +78,38 @@ export function PoolDetail() {
   const [isGuestMember, setIsGuestMember] = useState(false);
 
   const seats = pool?.seats ?? [];
+  const mergedSeats = useMemo(() => {
+    if (optimisticJoinedSeats.length === 0) return seats;
+    const existingNumbers = new Set(seats.map((seat) => seat.seatNumber));
+    return [...seats, ...optimisticJoinedSeats.filter((seat) => !existingNumbers.has(seat.seatNumber))].sort(
+      (a, b) => a.seatNumber - b.seatNumber
+    );
+  }, [optimisticJoinedSeats, seats]);
 
   useEffect(() => {
     if (!pool) return;
     const guest = localStorage.getItem("unigro_guest_memberships");
     const guestIds = JSON.parse(guest || "[]") as string[];
     if (!currentUser && guestIds.length > 0) {
-      const joined = seats.some((seat) => seat.userId && guestIds.includes(seat.userId as string));
+      const joined = mergedSeats.some((seat) => seat.userId && guestIds.includes(seat.userId as string));
       setIsGuestMember(joined);
     } else {
       setIsGuestMember(false);
     }
-  }, [currentUser, pool, seats]);
+  }, [currentUser, mergedSeats, pool]);
+
+  useEffect(() => {
+    if (optimisticJoinedSeats.length === 0) return;
+    const actualSeatNumbers = new Set(seats.map((seat) => seat.seatNumber));
+    setOptimisticJoinedSeats((prev) => prev.filter((seat) => !actualSeatNumbers.has(seat.seatNumber)));
+  }, [optimisticJoinedSeats.length, seats]);
 
   const isOrganizer = !!currentUser?._id && !!pool?.organizerId && currentUser._id === pool.organizerId;
 
   const mySeats: PoolSeat[] = useMemo(() => {
     if (!pool) return [];
     if (currentUser?._id) {
-      return seats.filter(
+      return mergedSeats.filter(
         (seat) =>
           seat.userId === currentUser._id ||
           (seat.isCoSeat && seat.coOwners?.some((owner) => owner.userId === currentUser._id))
@@ -104,35 +118,35 @@ export function PoolDetail() {
     if (isGuestMember) {
       const guest = localStorage.getItem("unigro_guest_memberships");
       const guestIds = JSON.parse(guest || "[]") as string[];
-      return seats.filter((seat) => seat.userId && guestIds.includes(seat.userId as string));
+      return mergedSeats.filter((seat) => seat.userId && guestIds.includes(seat.userId as string));
     }
     return [];
-  }, [currentUser, isGuestMember, pool, seats]);
+  }, [currentUser, isGuestMember, mergedSeats, pool]);
 
   const isMember = mySeats.length > 0 || isGuestMember;
 
   const memberCount = useMemo(() => {
     const ids = new Set<string>();
-    seats.forEach((seat) => {
+    mergedSeats.forEach((seat) => {
       if (seat.userId) ids.add(seat.userId as string);
       seat.coOwners?.forEach((owner) => ids.add(owner.userId as string));
     });
     return ids.size;
-  }, [seats]);
+  }, [mergedSeats]);
 
   const fullSeats = useMemo(() => {
     if (!pool) return [];
     const virtual = getVirtualOpenSeats(
       { status: pool.status, currentRound: pool.currentRound, config: pool.config, seats },
-      seats
+      mergedSeats
     ).map((seat) => ({
       _id: seat._id,
       seatNumber: seat.seatNumber,
       status: "OPEN" as const,
     } as PoolSeat));
 
-    return [...seats, ...virtual].sort((a, b) => a.seatNumber - b.seatNumber);
-  }, [pool, seats]);
+    return [...mergedSeats, ...virtual].sort((a, b) => a.seatNumber - b.seatNumber);
+  }, [mergedSeats, pool]);
 
   useEffect(() => {
     if (pool === undefined || currentUser === undefined) return;
@@ -169,8 +183,8 @@ export function PoolDetail() {
     );
   }
 
-  const { filledSeats, availableSeats, hasOpenSeats } = getSeatStats(pool, seats);
-  const progressInfo = getPoolDisplayProgress(pool, seats, transactions);
+  const { filledSeats, availableSeats, hasOpenSeats } = getSeatStats(pool, mergedSeats);
+  const progressInfo = getPoolDisplayProgress(pool, mergedSeats, transactions);
   const grace = pool.config.gracePeriodDays ?? 0;
 
   const nextDueDate = getNextRoundDate(pool.startDate, pool.currentRound, pool.config.frequency).dateStr;
@@ -208,7 +222,7 @@ export function PoolDetail() {
       };
     });
 
-  const hasWinnerForCurrentRound = seats.some((seat) => seat.roundWon === pool.currentRound);
+  const hasWinnerForCurrentRound = mergedSeats.some((seat) => seat.roundWon === pool.currentRound);
 
   const handleActivate = async () => {
     if (availableSeats > 0) {
@@ -411,7 +425,7 @@ export function PoolDetail() {
             {activeTab === "seats" && (
               <SeatsTab
                 pool={pool}
-                seats={seats}
+                seats={mergedSeats}
                 currentUserId={currentUser?._id}
                 isOrganizer={isOrganizer}
                 isDraft={pool.status === "DRAFT"}
@@ -430,7 +444,7 @@ export function PoolDetail() {
             {activeTab === "members" && (
               <MembersTab
                 pool={pool}
-                seats={seats}
+                seats={mergedSeats}
                 currentUserId={currentUser?._id}
                 isOrganizer={isOrganizer}
                 transactions={transactions}
@@ -453,7 +467,7 @@ export function PoolDetail() {
             {activeTab === "history" && (
               <HistoryTab
                 pool={pool}
-                seats={seats}
+                seats={mergedSeats}
                 transactions={transactions}
                 mySeats={mySeats}
                 currentUserId={currentUser?._id}
@@ -490,7 +504,38 @@ export function PoolDetail() {
         <JoinPoolModal
           open={showJoinModal}
           onOpenChange={setShowJoinModal}
+          onJoinSuccess={({ isGuest, seatNumbers, userId, guestName, guestPhone }) => {
+            if (isGuest) setIsGuestMember(true);
+            setOptimisticJoinedSeats((prev) => [
+              ...prev,
+              ...seatNumbers.map((seatNumber) => ({
+                _id: `optimistic-${seatNumber}` as Id<"seats">,
+                seatNumber,
+                status: (isGuest ? "RESERVED" : "FILLED") as "RESERVED" | "FILLED",
+                userId: (isGuest ? userId : currentUser?._id) as Id<"users"> | undefined,
+                isGuest,
+                user: isGuest
+                  ? {
+                      _id: (userId || `optimistic-user-${seatNumber}`) as Id<"users">,
+                      name: guestName || "Guest member",
+                      phone: guestPhone || "",
+                      verificationStatus: "UNVERIFIED",
+                    }
+                  : currentUser
+                    ? {
+                        _id: currentUser._id,
+                        name: currentUser.name,
+                        phone: currentUser.phone,
+                        pictureUrl: currentUser.pictureUrl,
+                        verificationStatus: currentUser.verificationStatus,
+                      }
+                    : null,
+              })),
+            ]);
+            setActiveTab("overview");
+          }}
           poolId={pool._id}
+          poolTitle={pool.title}
           totalSeats={pool.config.totalSeats}
           filledSeats={filledSeats}
           contribution={pool.config.contribution}

@@ -212,7 +212,23 @@ export function CreatePool() {
       } else {
         poolId = await createPool({ ...payload, organizerFirst: formData.organizerFirst });
       }
-      navigate(`/pools/${poolId}`, { replace: true });
+      if (editPoolId) {
+        navigate(`/pools/${poolId}`, { replace: true });
+      } else {
+        navigate(`/create/success?poolId=${poolId}`, {
+          replace: true,
+          state: {
+            poolId,
+            title: payload.title,
+            totalSeats: payload.totalSeats,
+            contribution: payload.contribution,
+            currency: payload.currency,
+            frequency: payload.frequency,
+            startDate: payload.startDate,
+            status: "DRAFT",
+          },
+        });
+      }
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "";
       if (message.toLowerCase().includes("you can only create up to")) {

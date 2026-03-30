@@ -19,6 +19,7 @@ import { useNetworkStatus } from "./hooks/useNetworkStatus";
 const loadDashboard = () => import("./pages/Dashboard");
 const loadPools = () => import("./pages/Pools");           // file still called Pots.tsx
 const loadCreatePool = () => import("./pages/CreatePool");
+const loadCreateSuccess = () => import("./pages/CreateSuccess");
 const loadPoolDetail = () => import("./pages/PoolDetail");
 const loadSettings = () => import("./pages/Settings");
 const loadAdminDashboard = () => import("./pages/AdminDashboard");
@@ -27,6 +28,7 @@ const loadDesign = () => import("./pages/Design");
 const Dashboard = lazy(() => loadDashboard().then((m) => ({ default: m.Dashboard })));
 const Pools = lazy(() => loadPools().then((m) => ({ default: m.Pools })));
 const CreatePool = lazy(() => loadCreatePool().then((m) => ({ default: m.CreatePool })));
+const CreateSuccess = lazy(() => loadCreateSuccess().then((m) => ({ default: m.CreateSuccess })));
 const PoolDetail = lazy(() => loadPoolDetail().then((m) => ({ default: m.PoolDetail })));
 const SettingsPage = lazy(() => loadSettings().then((m) => ({ default: m.Settings })));
 const AdminDashboard = lazy(() => loadAdminDashboard().then((m) => ({ default: m.AdminDashboard })));
@@ -116,7 +118,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "User";
 
-  const hideNav = location.pathname.startsWith("/pools/") || location.pathname === "/create";
+  const hideNav = location.pathname.startsWith("/pools/") || location.pathname.startsWith("/create");
 
   return (
     <div className="flex min-h-dvh bg-[var(--bg-app)]">
@@ -140,7 +142,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile + tablet floating bottom nav */}
       <Authenticated>
-        <BottomNav />
+        {!hideNav ? <BottomNav /> : null}
       </Authenticated>
     </div>
   );
@@ -238,6 +240,19 @@ function AppContent({ showDesign }: { showDesign: boolean }) {
               </Authenticated>
               <MainLayout>
                 <CreatePool />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create/success"
+          element={
+            <ProtectedRoute>
+              <Authenticated>
+                <UserSync />
+              </Authenticated>
+              <MainLayout>
+                <CreateSuccess />
               </MainLayout>
             </ProtectedRoute>
           }

@@ -55,7 +55,11 @@ export const join = mutation({
             });
         }
 
-        return availableNumbers[0];
+        return {
+            success: true,
+            seatNumbers: availableNumbers,
+            firstSeat: availableNumbers[0],
+        };
     },
 });
 
@@ -120,7 +124,7 @@ export const joinAsGuest = mutation({
             });
         }
 
-        return { success: true, userId, firstSeat: availableNumbers[0] };
+        return { success: true, userId, seatNumbers: availableNumbers, firstSeat: availableNumbers[0] };
     },
 });
 

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { isValidPhoneNumber } from "react-phone-number-input";
+import { useNavigate } from "react-router-dom";
 import * as Icons from "@/lib/icons";
 import { useMutation } from "convex/react";
 
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { Surface } from "@/components/ui/Surface";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { AdSlot } from "@/components/monetization/AdSlot";
 import { formatCurrency } from "@/lib/utils";
 import { api } from "@convex/api";
 import type { Id } from "@convex/dataModel";
@@ -16,6 +18,7 @@ import type { Id } from "@convex/dataModel";
 interface JoinPoolModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onJoinSuccess?: (payload: { isGuest: boolean; seatNumbers: number[]; userId?: string; guestName?: string; guestPhone?: string }) => void;
   poolId: Id<"pools">;
   totalSeats: number;
   filledSeats: number;
@@ -23,11 +26,13 @@ interface JoinPoolModalProps {
   totalValue: number;
   currency?: string;
   isAuthenticated: boolean;
+  poolTitle: string;
 }
 
 export function JoinPoolModal({
   open,
   onOpenChange,
+  onJoinSuccess,
   poolId,
   totalSeats,
   filledSeats,
@@ -35,20 +40,47 @@ export function JoinPoolModal({
   totalValue,
   currency,
   isAuthenticated,
+  poolTitle,
 }: JoinPoolModalProps) {
   const joinPool = useMutation(api.seats.join);
   const joinAsGuest = useMutation(api.seats.joinAsGuest);
   const feedback = useFeedback();
+  const navigate = useNavigate();
 
   const [selectedSeatCount, setSelectedSeatCount] = useState(1);
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successState, setSuccessState] = useState<{
+    seatNumbers: number[];
+    isGuest: boolean;
+    guestName?: string;
+  } | null>(null);
 
   const availableSeats = Math.max(totalSeats - filledSeats, 0);
   const totalCommitment = contribution * selectedSeatCount;
   const potentialWin = totalValue * selectedSeatCount;
+  const successSummary = useMemo(() => {
+    if (!successState) return null;
+    const seatNumbers = successState.seatNumbers ?? [];
+
+    if (seatNumbers.length === 0) {
+      return selectedSeatCount === 1 ? "Seat reserved" : `${selectedSeatCount} seats reserved`;
+    }
+
+    return seatNumbers.length === 1
+      ? `Seat #${seatNumbers[0]} reserved`
+      : `Seats #${seatNumbers.join(", #")} reserved`;
+  }, [selectedSeatCount, successState]);
+
+  const handleModalClose = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setSuccessState(null);
+      setAuthError(null);
+    }
+    onOpenChange(nextOpen);
+  };
 
   const handleJoin = async () => {
     setIsSubmitting(true);
@@ -56,9 +88,17 @@ export function JoinPoolModal({
 
     try {
       if (isAuthenticated) {
-        await joinPool({ poolId, seatCount: selectedSeatCount });
-        feedback.toast.success("Joined pool", "You're in. Check your dashboard.");
-        onOpenChange(false);
+        const result = await joinPool({ poolId, seatCount: selectedSeatCount });
+        const seatNumbers = Array.isArray(result?.seatNumbers)
+          ? result.seatNumbers
+          : typeof result?.firstSeat === "number"
+            ? [result.firstSeat]
+            : [];
+        setSuccessState({
+          seatNumbers,
+          isGuest: false,
+        });
+        onJoinSuccess?.({ isGuest: false, seatNumbers });
       } else {
         if (!guestName.trim()) {
           feedback.toast.error("Missing info", "Please provide your name.");
@@ -85,8 +125,24 @@ export function JoinPoolModal({
           localStorage.setItem("unigro_guest_memberships", JSON.stringify(existing));
         }
 
-        feedback.toast.success("Joined as guest", "Your seats are reserved. Sign up to secure your account.");
-        onOpenChange(false);
+        const seatNumbers = Array.isArray(result?.seatNumbers)
+          ? result.seatNumbers
+          : typeof result?.firstSeat === "number"
+            ? [result.firstSeat]
+            : [];
+
+        setSuccessState({
+          seatNumbers,
+          isGuest: true,
+          guestName: guestName.trim(),
+        });
+        onJoinSuccess?.({
+          isGuest: true,
+          seatNumbers,
+          userId: result.userId as string,
+          guestName: guestName.trim(),
+          guestPhone: guestPhone,
+        });
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "";
@@ -101,10 +157,75 @@ export function JoinPoolModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleModalClose}>
       <DialogContent className="glass-3 border border-[var(--border-subtle)] p-0 gap-0 overflow-hidden max-w-sm sm:max-w-md flex flex-col max-h-[90vh]">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-vivid)]/[0.03] to-transparent pointer-events-none" />
 
+        {successState ? (
+          <div className="relative z-[1] max-h-[90vh] overflow-y-auto px-6 py-6">
+            <div className="space-y-4">
+              <div className="rounded-[28px] border border-[var(--border-subtle)]/70 bg-[var(--surface-elevated)]/92 p-5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--accent-vivid)]">
+                  {successState.isGuest ? "Guest access confirmed" : "Join confirmed"}
+                </p>
+                <h2 className="mt-3 font-display text-2xl font-bold text-[var(--text-primary)]">
+                  {successState.isGuest ? "Seats reserved successfully" : "You’re in the pool"}
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">
+                  {successState.isGuest
+                    ? "Your guest reservation is active now. Sign in later with the same phone number to fully claim these seats."
+                    : "Your participation is live. Open the pool now or head back to your dashboard."}
+                </p>
+
+                <div className="mt-4 rounded-[22px] border border-[var(--border-subtle)]/50 bg-[var(--surface-2)]/45 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Pool</p>
+                  <p className="mt-1 text-base font-semibold text-[var(--text-primary)]">{poolTitle}</p>
+                  <p className="mt-1 text-sm text-[var(--text-muted)]">{successSummary}</p>
+                  <p className="mt-1 text-sm text-[var(--text-muted)]">
+                    {formatCurrency(totalCommitment, currency)} per round
+                  </p>
+                </div>
+
+                {successState.isGuest ? (
+                  <p className="mt-3 text-xs leading-relaxed text-[var(--text-muted)]">
+                    {successState.guestName || "Your guest account"} will stay linked to these seats until you sign in with the same number.
+                  </p>
+                ) : null}
+
+                <div className="mt-5 flex flex-col gap-3">
+                  <Button
+                    className="h-12 rounded-full"
+                    onClick={() => {
+                      setSuccessState(null);
+                      onOpenChange(false);
+                    }}
+                  >
+                    Open pool
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="h-12 rounded-full"
+                    onClick={() => {
+                      setSuccessState(null);
+                      onOpenChange(false);
+                      navigate("/");
+                    }}
+                  >
+                    Go to dashboard
+                  </Button>
+                </div>
+              </div>
+
+              <AdSlot
+                placement="success-join"
+                audience="all-free"
+                title="Sponsored community tools"
+                body="A compact sponsor block sits in the lower half of this success state while the confirmation stays focused above."
+              />
+            </div>
+          </div>
+        ) : (
+        <>
         <DialogHeader className="p-6 pb-2 relative shrink-0 pr-12">
           <div className="flex items-center gap-3 mb-1">
             <div className="h-10 w-10 rounded-2xl bg-[var(--accent-vivid)]/10 flex items-center justify-center text-[var(--accent-vivid)]">
@@ -263,6 +384,8 @@ export function JoinPoolModal({
             By joining, you agree to the pool rules and verify that you can fulfill your contribution commitment.
           </p>
         </DialogFooter>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   );
