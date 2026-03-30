@@ -113,10 +113,13 @@ function Landing() {
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const { user: clerkUser } = useUser();
+  const location = useLocation();
   const firstName = clerkUser?.firstName || clerkUser?.fullName?.split(" ")[0] || "User";
 
+  const hideNav = location.pathname.startsWith("/pools/") || location.pathname === "/create";
+
   return (
-    <div className="flex min-h-dvh">
+    <div className="flex min-h-dvh bg-[var(--bg-app)]">
       {/* Desktop collapsible rail — only for authenticated users */}
       <Authenticated>
         <DesktopRail
@@ -127,7 +130,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       </Authenticated>
 
       {/* Main content — offset for desktop rail */}
-      <div className="flex-1 min-w-0 lg:pl-[236px] pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0">
+      <div className={`flex-1 min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-0 ${
+        !hideNav ? "lg:pl-[236px]" : ""
+      }`}>
         <Suspense fallback={<RouteLoading />}>
           {children}
         </Suspense>

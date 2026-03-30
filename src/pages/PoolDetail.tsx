@@ -359,7 +359,7 @@ export function PoolDetail() {
         onJoin={showJoinAction ? () => setShowJoinModal(true) : undefined}
       />
 
-      <div className="w-full max-w-full space-y-6 px-4 pb-12 pt-4 sm:px-6">
+      <div className="mx-auto w-full max-w-4xl space-y-6 px-4 pb-12 pt-4 sm:px-6">
         <PoolHero
           pool={pool}
           seats={fullSeats}
