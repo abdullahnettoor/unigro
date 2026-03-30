@@ -1,4 +1,4 @@
-name = "unigro"
+name = "dev-unigro"
 compatibility_date = "2026-03-04"
 main = "src/worker.ts"
 
