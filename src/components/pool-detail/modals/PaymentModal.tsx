@@ -178,8 +178,9 @@ export function PaymentModal({
       setUpiStage("launched");
       feedback.toast.success("UPI app opening", "Return here after payment and upload your screenshot.");
       launchUpiLink(deepLink);
-    } catch {
-      setError("Could not start the UPI flow.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Could not start the UPI flow.";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }

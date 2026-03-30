@@ -208,7 +208,7 @@ export function CreatePool() {
       } else {
         poolId = await createPool({ ...payload, organizerFirst: formData.organizerFirst });
       }
-      navigate(`/pools/${poolId}`);
+      navigate(`/pools/${poolId}`, { replace: true });
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "";
       if (message.toLowerCase().includes("up to 5")) {

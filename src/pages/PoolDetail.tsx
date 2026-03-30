@@ -540,7 +540,7 @@ export function PoolDetail() {
                   (currentUser?._id ? tx.userId === currentUser._id : !tx.userId)
               ) || null
             }
-            isOrganizer={isOrganizer}
+            isOrganizer={paymentState.isOrganizer}
           />
         )}
 

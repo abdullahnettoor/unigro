@@ -19,8 +19,11 @@ export interface UpiAppOption {
 
 export function detectUpiPlatform(): UpiPlatform {
   const userAgent = navigator.userAgent.toLowerCase();
+  const platform = navigator.platform?.toLowerCase?.() || "";
+  const maxTouchPoints = navigator.maxTouchPoints || 0;
   if (/android/.test(userAgent)) return "android";
   if (/iphone|ipad|ipod/.test(userAgent)) return "ios";
+  if (platform === "macintel" && maxTouchPoints > 1) return "ios";
   return "other";
 }
 
