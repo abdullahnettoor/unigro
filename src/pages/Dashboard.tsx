@@ -16,11 +16,18 @@ import { StatTile } from "@/components/dashboard/StatTile";
 import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
 import { EmptyPools } from "@/components/dashboard/EmptyPools";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { PricingModal } from "@/components/monetization/PricingModal";
 import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export function Dashboard() {
   const { user } = useUser();
   const pools = useQuery(api.pools.list);
+  const { entitlements } = useEntitlements();
+  const [pricingOpen, setPricingOpen] = useState(false);
 
   const firstName = user?.firstName || user?.fullName?.split(" ")[0] || "there";
   const isLoading = pools === undefined;
@@ -57,6 +64,27 @@ export function Dashboard() {
         <StatTile icon={SeatCountIcon} label="Total seats" value={totalSeats} hint="Across pools" />
         <StatTile icon={RoundIcon} label="Rounds tracked" value={totalRounds} hint="In progress" />
       </section>
+
+      {entitlements.planTier === "free" && entitlements.organizedPoolsCount > 0 ? (
+        <div className="mt-6 space-y-3">
+          <div className="glass-2 flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-[var(--border-subtle)] p-4">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--accent-vivid)]">Organizer plan</p>
+              <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                You’re on Free with {entitlements.maxPools} pool{entitlements.maxPools > 1 ? "s" : ""}.
+              </p>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                Upgrade when you want more room to organize and an ad-free workspace.
+              </p>
+            </div>
+            <Button variant="secondary" className="rounded-full" onClick={() => setPricingOpen(true)}>
+              Explore Pro
+            </Button>
+          </div>
+
+          <AdSlot placement="dashboard" onUpgrade={() => setPricingOpen(true)} />
+        </div>
+      ) : null}
 
       <section className="mt-8" aria-label="My pools">
         <SectionHeader
@@ -133,6 +161,15 @@ export function Dashboard() {
           </Link>
         </div>
       )}
+
+      {pricingOpen ? (
+        <PricingModal
+          open={pricingOpen}
+          onOpenChange={setPricingOpen}
+          entitlements={entitlements}
+          context="dashboard"
+        />
+      ) : null}
       </div>
     </OfflineStateGate>
   );

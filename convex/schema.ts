@@ -8,6 +8,12 @@ export default defineSchema({
         email: v.optional(v.string()),
         clerkId: v.optional(v.string()), // Null for Guests
         pictureUrl: v.optional(v.string()),
+        planTier: v.optional(v.union(v.literal("free"), v.literal("pro"))),
+        maxPools: v.optional(v.number()),
+        adsDisabled: v.optional(v.boolean()),
+        billingProvider: v.optional(v.string()),
+        billingCustomerId: v.optional(v.string()),
+        billingStatus: v.optional(v.string()),
         verificationStatus: v.union(
             v.literal("UNVERIFIED"),
             v.literal("PENDING"),

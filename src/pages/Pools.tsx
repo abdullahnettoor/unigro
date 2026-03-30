@@ -12,6 +12,8 @@ import { getProgressScore } from "@/lib/pool";
 import { cn } from "@/lib/utils";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { PricingModal } from "@/components/monetization/PricingModal";
 import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEntitlements } from "@/hooks/useEntitlements";
 
 type RoleFilter = "all" | "organizing" | "joined";
 type Status = "draft" | "active" | "completed" | "archived";
@@ -40,6 +43,8 @@ const DEFAULT_STATUSES = new Set<Status>(["active", "draft", "completed"]);
 export function Pools() {
   const pools = useQuery(api.pools.list);
   const currentUser = useQuery(api.users.current);
+  const { entitlements } = useEntitlements();
+  const [pricingOpen, setPricingOpen] = useState(false);
 
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [selectedStatuses, setSelectedStatuses] = useState<Set<Status>>(DEFAULT_STATUSES);
@@ -271,6 +276,12 @@ export function Pools() {
         </div>
       </section>
 
+      {entitlements.planTier === "free" && entitlements.organizedPoolsCount > 0 ? (
+        <div className="mt-6">
+          <AdSlot placement="pools" onUpgrade={() => setPricingOpen(true)} />
+        </div>
+      ) : null}
+
       <section className="mt-8">
         <SectionHeader
           eyebrow="Collection"
@@ -322,13 +333,37 @@ export function Pools() {
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            {filteredPools.map((pool) => (
+            {filteredPools.slice(0, 2).map((pool) => (
+              <PoolCard key={pool._id} pool={pool as PoolItem} />
+            ))}
+
+            {entitlements.planTier === "free" && entitlements.organizedPoolsCount > 0 && filteredPools.length > 2 ? (
+              <div className="sm:col-span-2">
+                <AdSlot
+                  placement="pools"
+                  title="Sponsored finance tools"
+                  body="A wider sponsor placement gives free organizers more breathing room while keeping the workspace sustainable."
+                  onUpgrade={() => setPricingOpen(true)}
+                />
+              </div>
+            ) : null}
+
+            {filteredPools.slice(2).map((pool) => (
               <PoolCard key={pool._id} pool={pool as PoolItem} />
             ))}
           </div>
         )}
         </div>
       </section>
+
+      {pricingOpen ? (
+        <PricingModal
+          open={pricingOpen}
+          onOpenChange={setPricingOpen}
+          entitlements={entitlements}
+          context="pools"
+        />
+      ) : null}
       </div>
     </OfflineStateGate>
   );

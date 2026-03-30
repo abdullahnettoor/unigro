@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { PricingModal } from "@/components/monetization/PricingModal";
 import { OfflineFallback } from "@/components/shared/OfflineFallback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +48,7 @@ import {
     type ThemeVariant
 } from "@/lib/theme";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useEntitlements } from "@/hooks/useEntitlements";
 
 import { api } from "../../convex/_generated/api";
 
@@ -131,10 +134,13 @@ function SettingRow({
 
 export function Settings() {
     const user = useQuery(api.users.current) as SettingsUserSnapshot | null | undefined;
+    const isAdmin = useQuery(api.users.isAdmin);
     const { isOnline } = useNetworkStatus();
+    const { entitlements, isFromCache: entitlementsFromCache } = useEntitlements();
     const generateUploadUrl = useMutation(api.verification.generateUploadUrl);
     const requestVerification = useMutation(api.verification.submit);
     const updateProfile = useMutation(api.users.updateProfile);
+    const setCurrentPlanTierForTesting = useMutation(api.users.setCurrentPlanTierForTesting);
     const { signOut } = useClerk();
     const feedback = useFeedback();
 
@@ -163,6 +169,8 @@ export function Settings() {
     const [editName, setEditName] = useState("");
     const [editPhone, setEditPhone] = useState("");
     const [isSavingProfile, setIsSavingProfile] = useState(false);
+    const [pricingOpen, setPricingOpen] = useState(false);
+    const [isUpdatingPlanTier, setIsUpdatingPlanTier] = useState(false);
     const [cachedUser, setCachedUser] = useState<SettingsUserSnapshot | null>(() => {
         if (typeof window === "undefined") return null;
         try {
@@ -222,6 +230,23 @@ export function Settings() {
             if (selected.size > 5 * 1024 * 1024) { setError("File size must be less than 5MB"); return; }
             setFile(selected);
             setError("");
+        }
+    };
+
+    const handleTestPlanSwitch = async (planTier: "free" | "pro") => {
+        setIsUpdatingPlanTier(true);
+        try {
+            await setCurrentPlanTierForTesting({ planTier });
+            feedback.toast.success(
+                "Plan updated",
+                planTier === "pro" ? "Pro entitlements enabled for testing." : "Free organizer state restored."
+            );
+        } catch (err) {
+            console.error(err);
+            const message = err instanceof Error ? err.message : "Could not switch the testing plan tier.";
+            feedback.toast.error("Plan update failed", message);
+        } finally {
+            setIsUpdatingPlanTier(false);
         }
     };
 
@@ -634,6 +659,48 @@ export function Settings() {
             {/* Application & About Section */}
             <Section title="Application">
                 <div className="glass-2 overflow-hidden rounded-[24px] border border-[var(--border-subtle)]/70 divide-y divide-[var(--border-subtle)]/40">
+                    <div className="px-4 py-4">
+                        <div className="rounded-[20px] border border-[var(--border-subtle)]/60 bg-[var(--surface-2)]/45 p-4">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--accent-vivid)]">Organizer plan</p>
+                                    <h3 className="mt-1 text-sm font-bold text-[var(--text-primary)] capitalize">
+                                        {entitlements.planTier} plan
+                                    </h3>
+                                    <p className="mt-1 text-[11px] leading-snug text-[var(--text-muted)]">
+                                        {entitlements.planTier === "pro"
+                                            ? `Ad-free with room for ${entitlements.maxPools} pools.`
+                                            : `Free tier includes up to ${entitlements.maxPools} pools and light sponsorship on browse surfaces.`}
+                                    </p>
+                                    {(isUsingCachedUser || entitlementsFromCache) && (
+                                        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--warning)]">
+                                            Cached plan details while offline
+                                        </p>
+                                    )}
+                                </div>
+                                <Button
+                                    variant={entitlements.planTier === "pro" ? "secondary" : "default"}
+                                    className="rounded-full"
+                                    onClick={() => setPricingOpen(true)}
+                                >
+                                    {entitlements.planTier === "pro" ? "Manage plan" : "Upgrade"}
+                                </Button>
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-2 gap-3">
+                                <div className="rounded-2xl border border-[var(--border-subtle)]/50 bg-[var(--surface-1)]/55 p-3">
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Pool cap</p>
+                                    <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">{entitlements.maxPools} pools</p>
+                                </div>
+                                <div className="rounded-2xl border border-[var(--border-subtle)]/50 bg-[var(--surface-1)]/55 p-3">
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Browse ads</p>
+                                    <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                                        {entitlements.adsDisabled ? "Disabled" : entitlements.organizedPoolsCount > 0 ? "Enabled" : "Not active yet"}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* PWA / App Row */}
                     {isStandalone ? (
@@ -685,6 +752,53 @@ export function Settings() {
                 </div>
             </Section>
 
+            {entitlements.planTier === "free" && entitlements.organizedPoolsCount > 0 ? (
+                <div className="mt-4">
+                    <AdSlot placement="settings" onUpgrade={() => setPricingOpen(true)} />
+                </div>
+            ) : null}
+
+            {import.meta.env.DEV && isAdmin ? (
+                <Section title="Developer">
+                    <div className="glass-2 overflow-hidden rounded-[24px] border border-[var(--border-subtle)]/70">
+                        <div className="px-4 py-4">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--warning)]">Testing entitlements</p>
+                                    <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
+                                        Switch between Free and Pro without wiring billing yet.
+                                    </p>
+                                </div>
+                                <span className="rounded-full bg-[var(--surface-2)]/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                                    {entitlements.planTier}
+                                </span>
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-2 gap-3">
+                                <Button
+                                    type="button"
+                                    variant={entitlements.planTier === "free" ? "default" : "secondary"}
+                                    className="rounded-full"
+                                    disabled={isUpdatingPlanTier || entitlements.planTier === "free"}
+                                    onClick={() => handleTestPlanSwitch("free")}
+                                >
+                                    Switch to Free
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant={entitlements.planTier === "pro" ? "default" : "secondary"}
+                                    className="rounded-full"
+                                    disabled={isUpdatingPlanTier || entitlements.planTier === "pro"}
+                                    onClick={() => handleTestPlanSwitch("pro")}
+                                >
+                                    Switch to Pro
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </Section>
+            ) : null}
+
             {/* Logout Section */}
             <div className="mt-8">
                 <Button
@@ -696,6 +810,15 @@ export function Settings() {
                     Sign Out of Account
                 </Button>
             </div>
+
+            {pricingOpen ? (
+                <PricingModal
+                    open={pricingOpen}
+                    onOpenChange={setPricingOpen}
+                    entitlements={entitlements}
+                    context="settings"
+                />
+            ) : null}
 
         </div>
     );

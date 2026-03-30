@@ -11,7 +11,9 @@ import { PoolRulesStep } from "@/components/create-pool/PoolRulesStep";
 import { StepHeader } from "@/components/create-pool/StepHeader";
 import { StepFooterBar } from "@/components/create-pool/StepFooterBar";
 import { PoolSummaryPanel } from "@/components/create-pool/PoolSummaryPanel";
+import { PricingModal } from "@/components/monetization/PricingModal";
 import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { isValidUpiId } from "@/lib/upi";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -27,6 +29,7 @@ const STEPS = [
 export function CreatePool() {
   const createPool = useMutation(api.pools.create);
   const updatePool = useMutation(api.pools.updatePool);
+  const { entitlements } = useEntitlements();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editPoolId = searchParams.get("edit") as Id<"pools"> | null;
@@ -35,6 +38,7 @@ export function CreatePool() {
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [pricingOpen, setPricingOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     terms: "",
@@ -211,8 +215,9 @@ export function CreatePool() {
       navigate(`/pools/${poolId}`, { replace: true });
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "";
-      if (message.toLowerCase().includes("up to 5")) {
-        setError("You have reached the 5 pool limit. Archive or delete a pool to create a new one.");
+      if (message.toLowerCase().includes("you can only create up to")) {
+        setError(`You have reached your current limit of ${entitlements.maxPools} pools. Upgrade to Pro, or archive an older pool to make room.`);
+        setPricingOpen(true);
       } else {
         setError("Failed to save pool. Please try again.");
       }
@@ -308,6 +313,15 @@ export function CreatePool() {
         onNext={handleNext}
         onSubmit={handleSubmit}
       />
+
+      {pricingOpen ? (
+        <PricingModal
+          open={pricingOpen}
+          onOpenChange={setPricingOpen}
+          entitlements={entitlements}
+          context="create-limit"
+        />
+      ) : null}
       </div>
     </OfflineStateGate>
   );

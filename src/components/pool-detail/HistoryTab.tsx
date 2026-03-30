@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import * as Icons from "@/lib/icons";
+import { AdSlot } from "@/components/monetization/AdSlot";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
@@ -114,6 +115,12 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
           ))}
         </div>
       </div>
+
+      <AdSlot
+        placement="pool-history"
+        title="Sponsored round companion"
+        body="A compact sponsor card sits between filters and timeline so the history review flow stays readable."
+      />
 
       <div className="space-y-4">
         {filteredCards.length === 0 ? (

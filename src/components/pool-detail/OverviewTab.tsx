@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { AdSlot } from "@/components/monetization/AdSlot";
 import { Surface } from "@/components/ui/Surface";
 import { formatCurrency } from "@/lib/utils";
 import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
@@ -194,6 +195,12 @@ export function OverviewTab({
           </div>
         </div>
       )}
+
+      <AdSlot
+        placement="pool-overview"
+        title="Sponsored savings tools"
+        body="Free member views can carry a compact sponsored slot here while payment flows remain focused and ad-free."
+      />
 
       <div className="space-y-4">
         <p className="text-[10px] uppercase font-bold tracking-[0.4em] text-[var(--text-muted)] px-1">My Managed Seats</p>

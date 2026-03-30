@@ -2,6 +2,7 @@ import { v } from "convex/values";
 
 import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
+import { resolveEntitlements } from "./lib/entitlements";
 
 declare const process: any;
 
@@ -86,6 +87,23 @@ export const current = query({
             .query("users")
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
+    },
+});
+
+export const getEntitlements = query({
+    args: {},
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return await resolveEntitlements(ctx, null);
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        return await resolveEntitlements(ctx, user);
     },
 });
 // 3. Update Profile & Claim Ghost Accounts
@@ -176,6 +194,41 @@ export const isAdmin = query({
     },
 });
 
+export const setCurrentPlanTierForTesting = mutation({
+    args: {
+        planTier: v.union(v.literal("free"), v.literal("pro")),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        if (!user) throw new Error("User not found");
+
+        const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+        const normalizedAdmins = adminEmails.map((e: string) => e.trim());
+        const effectiveEmail = identity.email || user.email || "";
+
+        if (!normalizedAdmins.includes(effectiveEmail)) {
+            throw new Error("Only admin accounts can change plan tier for testing.");
+        }
+
+        await ctx.db.patch(user._id, {
+            planTier: args.planTier,
+            maxPools: args.planTier === "pro" ? 25 : 5,
+            adsDisabled: args.planTier === "pro",
+            billingStatus: args.planTier === "pro" ? "testing_active" : "testing_free",
+            billingProvider: "testing",
+        });
+
+        return { ok: true };
+    },
+});
+
 export const get = query({
     args: { userId: v.union(v.id("users"), v.string(), v.null()) },
     handler: async (ctx, args) => {
@@ -224,5 +277,3 @@ export const editGuest = mutation({
         });
     }
 });
-
-

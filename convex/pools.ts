@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
+import { resolveEntitlements } from "./lib/entitlements";
 
 export const create = mutation({
     args: {
@@ -42,11 +43,10 @@ export const create = mutation({
             .unique();
         if (!user) throw new Error("User not found");
 
-        const userPoolsCount = await ctx.db
-            .query("pools")
-            .filter((q) => q.eq(q.field("organizerId"), user._id))
-            .collect();
-        if (userPoolsCount.length >= 5) throw new Error("You can only create up to 5 pools.");
+        const entitlements = await resolveEntitlements(ctx, user);
+        if (entitlements.organizedPoolsCount >= entitlements.maxPools) {
+            throw new Error(`You can only create up to ${entitlements.maxPools} pools.`);
+        }
 
         if (args.totalSeats < 1 || args.totalSeats > 50)
             throw new Error("Number of seats must be between 1 and 50.");
