@@ -213,6 +213,7 @@ export function OverviewTab({
 
             const status = (tx?.status as "PAID" | "PENDING" | "UNPAID") || "UNPAID";
             const wonRound = seat.roundWon || null;
+            const needsProofUpload = tx?.type === "upi" && !tx.proofUrl;
 
             return (
               <SeatCard
@@ -224,6 +225,9 @@ export function OverviewTab({
                 status={status}
                 currency={pool.config.currency}
                 onPay={isActivePool ? () => onPay(seat._id as string, pool.currentRound, dueAmount) : undefined}
+                onPendingAction={needsProofUpload ? () => onPay(seat._id as string, pool.currentRound, dueAmount) : undefined}
+                pendingActionLabel={needsProofUpload ? "Upload Proof" : undefined}
+                pendingMessage={needsProofUpload ? "UPI launched. Screenshot still needed." : undefined}
                 wonRound={wonRound}
                 wonAmount={wonRound ? winningAmount : undefined}
                 showDueMeta={isActivePool}

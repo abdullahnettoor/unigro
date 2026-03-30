@@ -230,6 +230,7 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
                                     : tx?.type === "online"
                                       ? "Online proof"
                                       : null;
+                              const needsProofUpload = tx?.type === "upi" && !tx?.proofUrl;
                               return (
                                 <div
                                   key={`${item.seat._id}-${card.roundIndex}`}
@@ -257,6 +258,16 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
 
                                   <div className="flex items-center gap-3">
                                     <PaymentStatusBadge status={item.status} />
+                                    {needsProofUpload && (
+                                      <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        className="h-8 px-3 rounded-full text-[10px] font-bold"
+                                        onClick={() => onPay(item.seat._id as string, card.roundIndex, item.amount)}
+                                      >
+                                        Upload Proof
+                                      </Button>
+                                    )}
                                     {isActivePool && isUnpaid && !isFuture && (
                                       <Button
                                         size="sm"

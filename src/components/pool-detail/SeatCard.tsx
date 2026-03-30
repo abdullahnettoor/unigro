@@ -11,6 +11,9 @@ interface SeatCardProps {
   status: "UNPAID" | "PENDING" | "PAID";
   currency?: string;
   onPay?: () => void;
+  onPendingAction?: () => void;
+  pendingActionLabel?: string;
+  pendingMessage?: string;
   wonRound?: number | null;
   wonAmount?: number;
   showDueMeta?: boolean;
@@ -24,6 +27,9 @@ export function SeatCard({
   status,
   currency,
   onPay,
+  onPendingAction,
+  pendingActionLabel,
+  pendingMessage,
   wonRound,
   wonAmount,
   showDueMeta = true,
@@ -58,8 +64,15 @@ export function SeatCard({
       )}
 
       {status === "PENDING" && (
-        <div className="mt-4 rounded-xl border border-[var(--warning)]/30 bg-[var(--warning)]/10 px-3 py-2 text-xs font-semibold text-[var(--warning)]">
-          Payment pending approval
+        <div className="mt-4 space-y-3">
+          <div className="rounded-xl border border-[var(--warning)]/30 bg-[var(--warning)]/10 px-3 py-2 text-xs font-semibold text-[var(--warning)]">
+            {pendingMessage || "Payment pending approval"}
+          </div>
+          {onPendingAction && pendingActionLabel ? (
+            <Button size="sm" variant="secondary" className="w-full rounded-full" onClick={onPendingAction}>
+              {pendingActionLabel}
+            </Button>
+          ) : null}
         </div>
       )}
 

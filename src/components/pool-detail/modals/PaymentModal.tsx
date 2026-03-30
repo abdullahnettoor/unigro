@@ -20,6 +20,8 @@ import {
   launchUpiLink,
 } from "@/lib/upi";
 
+const PENDING_UPI_RETURN_KEY = "unigro_pending_upi_return";
+
 interface PaymentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -78,6 +80,26 @@ export function PaymentModal({
   const [cashConfirmed, setCashConfirmed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const persistPendingReturn = () => {
+    sessionStorage.setItem(
+      PENDING_UPI_RETURN_KEY,
+      JSON.stringify({ poolId, seatId, roundIndex, at: Date.now() })
+    );
+  };
+
+  const clearPendingReturn = () => {
+    const raw = sessionStorage.getItem(PENDING_UPI_RETURN_KEY);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as { poolId: string; seatId: string; roundIndex: number };
+      if (parsed.poolId === poolId && parsed.seatId === seatId && parsed.roundIndex === roundIndex) {
+        sessionStorage.removeItem(PENDING_UPI_RETURN_KEY);
+      }
+    } catch {
+      sessionStorage.removeItem(PENDING_UPI_RETURN_KEY);
+    }
+  };
+
   useEffect(() => {
     if (!open) return;
     setError("");
@@ -89,19 +111,50 @@ export function PaymentModal({
       setUpiStage("launched");
       return;
     }
-    if (existingTransaction?.type === "online") {
-      setPaymentType("online");
-      setUpiStage("idle");
-      return;
-    }
     if (existingTransaction?.type === "cash") {
       setPaymentType("cash");
       setUpiStage("idle");
       return;
     }
-    setPaymentType(hasUpi ? "upi" : null);
+    if (hasUpi) {
+      setPaymentType("upi");
+      setUpiStage("idle");
+      return;
+    }
+    if (existingTransaction?.type === "online") {
+      setPaymentType("online");
+      setUpiStage("idle");
+      return;
+    }
+    setPaymentType(null);
     setUpiStage("idle");
   }, [open, existingTransaction, hasUpi]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleReturn = () => {
+      if (document.visibilityState === "hidden") return;
+      const raw = sessionStorage.getItem(PENDING_UPI_RETURN_KEY);
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw) as { poolId: string; seatId: string; roundIndex: number };
+        if (parsed.poolId === poolId && parsed.seatId === seatId && parsed.roundIndex === roundIndex) {
+          setPaymentType("upi");
+          setUpiStage("launched");
+          feedback.toast.info("Back in UniGro", "Upload your screenshot so the organizer can verify the payment.");
+        }
+      } catch {
+        sessionStorage.removeItem(PENDING_UPI_RETURN_KEY);
+      }
+    };
+
+    window.addEventListener("focus", handleReturn);
+    document.addEventListener("visibilitychange", handleReturn);
+    return () => {
+      window.removeEventListener("focus", handleReturn);
+      document.removeEventListener("visibilitychange", handleReturn);
+    };
+  }, [open, poolId, seatId, roundIndex, feedback]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -149,6 +202,7 @@ export function PaymentModal({
             ? "UPI payment submitted for organizer approval"
             : "Online payment submitted for organizer approval",
       });
+      clearPendingReturn();
       onOpenChange(false);
       feedback.toast.success("Payment submitted", "Waiting for organizer approval.");
     } catch {
@@ -175,6 +229,7 @@ export function PaymentModal({
         initiatedAt: Date.now(),
         upiDeepLinkUsed: deepLink,
       });
+      persistPendingReturn();
       setUpiStage("launched");
       feedback.toast.success("UPI app opening", "Return here after payment and upload your screenshot.");
       launchUpiLink(deepLink);
@@ -204,6 +259,7 @@ export function PaymentModal({
     setIsSubmitting(true);
     try {
       await submitPayment({ poolId, seatId, roundIndex, type: "cash", remarks: "Cash payment pending approval" });
+      clearPendingReturn();
       feedback.toast.success("Request submitted", "Waiting for organizer confirmation.");
       onOpenChange(false);
     } catch {
