@@ -2,6 +2,29 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Google Ads setup
+
+`AdSlot` now supports real Google AdSense rendering in production builds.
+
+Add these variables to your local env and deployment envs:
+
+```bash
+VITE_ADSENSE_CLIENT_ID=ca-pub-XXXXXXXXXXXXXXXX
+VITE_ADSENSE_SLOT_DASHBOARD=1234567890
+VITE_ADSENSE_SLOT_POOLS=1234567890
+VITE_ADSENSE_SLOT_SETTINGS=1234567890
+VITE_ADSENSE_SLOT_POOL_OVERVIEW=1234567890
+VITE_ADSENSE_SLOT_POOL_HISTORY=1234567890
+VITE_ADSENSE_SLOT_SUCCESS_CREATE=1234567890
+VITE_ADSENSE_SLOT_SUCCESS_JOIN=1234567890
+```
+
+Notes:
+
+- In development, `AdSlot` intentionally renders a safe placeholder instead of requesting live inventory.
+- In production, if the client ID or slot ID is missing for a placement, that placement falls back to the placeholder copy instead of crashing.
+- You should also add your AdSense `ads.txt` file in `public/` before going live.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
