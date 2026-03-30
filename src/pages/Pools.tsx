@@ -190,7 +190,7 @@ export function Pools() {
               <Input
                 type="text"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearch(event.target.value)}
                 placeholder="Search pools or organizers"
                 className="border-0 bg-transparent px-3 shadow-none focus-visible:ring-0"
               />
@@ -226,7 +226,7 @@ export function Pools() {
           </div>
 
           <div className="glass-2 flex w-full items-center gap-2 rounded-[20px] border border-[var(--border-subtle)] p-2 sm:w-auto">
-            <Select value={sortFilter} onValueChange={(value) => setSortFilter(value as SortFilter)}>
+            <Select value={sortFilter} onValueChange={(value: string) => setSortFilter(value as SortFilter)}>
               <SelectTrigger className="h-9 min-w-0 border-0 bg-transparent px-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] shadow-none focus:ring-0 sm:min-w-[140px]">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
