@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
+import { SignInButton } from "@clerk/clerk-react";
 
 import { LogoLoader } from "@/components/ui/LogoLoader";
 import { DetailHeader } from "@/components/layout/DetailHeader";
@@ -123,7 +124,9 @@ export function PoolDetail() {
     return [];
   }, [currentUser, isGuestMember, mergedSeats, pool]);
 
-  const isMember = mySeats.length > 0 || isGuestMember;
+  const isSignedInMember = !!currentUser?._id && mySeats.length > 0;
+  const hasParticipation = isSignedInMember || isGuestMember;
+  const canAccessMemberTabs = isOrganizer || isSignedInMember;
 
   const memberCount = useMemo(() => {
     const ids = new Set<string>();
@@ -153,9 +156,14 @@ export function PoolDetail() {
     setActiveTab((prev) => {
       if (prev !== "rules") return prev;
       if (isOrganizer) return "organizer";
-      return isMember ? "overview" : "rules";
+      return isSignedInMember ? "overview" : "rules";
     });
-  }, [isMember, isOrganizer, pool, currentUser]);
+  }, [isOrganizer, isSignedInMember, pool, currentUser]);
+
+  useEffect(() => {
+    if (canAccessMemberTabs || activeTab === "rules" || activeTab === "organizer") return;
+    setActiveTab("rules");
+  }, [activeTab, canAccessMemberTabs]);
 
   if ((pool === undefined || transactions === undefined || currentUser === undefined) && !isOnline) {
     return (
@@ -359,7 +367,7 @@ export function PoolDetail() {
   };
 
 
-  const isRestricted = pool.status === "ACTIVE" && !isMember && !isOrganizer;
+  const isRestricted = pool.status === "ACTIVE" && !hasParticipation && !isOrganizer;
   const showJoinAction = hasOpenSeats && !isOrganizer && !isRestricted;
 
   return (
@@ -381,7 +389,7 @@ export function PoolDetail() {
           isOrganizer={isOrganizer}
           isDraft={pool.status === "DRAFT"}
           hasOpenSeats={hasOpenSeats}
-          isMember={isMember}
+          isMember={hasParticipation}
           filledCount={filledSeats}
           progressLabel={progressInfo.label}
           progressValue={progressInfo.percent}
@@ -397,12 +405,32 @@ export function PoolDetail() {
           } : undefined}
         />
 
+        {isGuestMember && !currentUser ? (
+          <div className="rounded-[28px] border border-[var(--border-subtle)] bg-[var(--surface-2)]/70 px-5 py-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.32em] text-[var(--accent-vivid)]">
+                  Guest Access
+                </p>
+                <p className="mt-1 text-sm text-[var(--text-primary)]">
+                  Your seat reservation is saved. Sign in to unlock Overview, Seats, Members, and History.
+                </p>
+              </div>
+              <SignInButton mode="modal">
+                <button className="h-11 shrink-0 rounded-full bg-[var(--accent-vivid)] px-5 text-sm font-semibold text-[var(--text-on-accent)] transition-opacity hover:opacity-90">
+                  Sign in to continue
+                </button>
+              </SignInButton>
+            </div>
+          </div>
+        ) : null}
+
         {!isRestricted && (
           <PoolTabNav
             activeTab={activeTab}
             onChange={setActiveTab}
             showOrganizer={isOrganizer}
-            showMemberTabs={isMember || isOrganizer}
+            showMemberTabs={canAccessMemberTabs}
             memberCount={memberCount}
             pendingApprovals={pendingApprovals.length}
           />
@@ -410,7 +438,7 @@ export function PoolDetail() {
 
         {isRestricted ? null : (
           <>
-            {activeTab === "overview" && (
+            {activeTab === "overview" && canAccessMemberTabs && (
               <OverviewTab
                 pool={pool}
                 mySeats={mySeats}
@@ -422,14 +450,14 @@ export function PoolDetail() {
               />
             )}
 
-            {activeTab === "seats" && (
+            {activeTab === "seats" && canAccessMemberTabs && (
               <SeatsTab
                 pool={pool}
                 seats={mergedSeats}
                 currentUserId={currentUser?._id}
                 isOrganizer={isOrganizer}
                 isDraft={pool.status === "DRAFT"}
-                isMember={isMember}
+                isMember={canAccessMemberTabs}
                 onAddMember={() => setShowAddMember(true)}
                 onAssignCoSeat={() => setShowAssignCoSeat(true)}
                 onDeleteSeat={handleDeleteSeat}
@@ -441,7 +469,7 @@ export function PoolDetail() {
               />
             )}
 
-            {activeTab === "members" && (
+            {activeTab === "members" && canAccessMemberTabs && (
               <MembersTab
                 pool={pool}
                 seats={mergedSeats}
@@ -459,12 +487,12 @@ export function PoolDetail() {
               <RulesTab
                 pool={pool}
                 nextDrawDate={nextDrawDate}
-                isMember={isMember}
-                onJoin={() => setShowJoinModal(true)}
+                isMember={canAccessMemberTabs}
+                onJoin={showJoinAction ? () => setShowJoinModal(true) : undefined}
               />
             )}
 
-            {activeTab === "history" && (
+            {activeTab === "history" && canAccessMemberTabs && (
               <HistoryTab
                 pool={pool}
                 seats={mergedSeats}
@@ -516,23 +544,23 @@ export function PoolDetail() {
                 isGuest,
                 user: isGuest
                   ? {
-                      _id: (userId || `optimistic-user-${seatNumber}`) as Id<"users">,
-                      name: guestName || "Guest member",
-                      phone: guestPhone || "",
-                      verificationStatus: "UNVERIFIED",
-                    }
+                    _id: (userId || `optimistic-user-${seatNumber}`) as Id<"users">,
+                    name: guestName || "Guest member",
+                    phone: guestPhone || "",
+                    verificationStatus: "UNVERIFIED",
+                  }
                   : currentUser
                     ? {
-                        _id: currentUser._id,
-                        name: currentUser.name,
-                        phone: currentUser.phone,
-                        pictureUrl: currentUser.pictureUrl,
-                        verificationStatus: currentUser.verificationStatus,
-                      }
+                      _id: currentUser._id,
+                      name: currentUser.name,
+                      phone: currentUser.phone,
+                      pictureUrl: currentUser.pictureUrl,
+                      verificationStatus: currentUser.verificationStatus,
+                    }
                     : null,
               })),
             ]);
-            setActiveTab("overview");
+            setActiveTab(isGuest ? "rules" : "overview");
           }}
           poolId={pool._id}
           poolTitle={pool.title}
