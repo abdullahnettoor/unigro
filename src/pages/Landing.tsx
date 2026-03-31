@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { SignInButton, SignUpButton } from "@clerk/clerk-react";
+import { SignInButton, SignUpButton, SignedIn, SignedOut, SignOutButton } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
 import {
   motion,
   useInView,
@@ -141,11 +142,28 @@ export function Landing() {
           </span>
         </div>
 
-        <SignInButton mode="modal">
-          <button className="landing-cta-btn rounded-full bg-[var(--accent-vivid)] px-5 py-2 text-sm font-semibold text-[var(--text-on-accent)] shadow-lg transition-all hover:shadow-xl hover:brightness-110 active:scale-[0.97] sm:px-6 sm:py-2.5">
-            Sign In
-          </button>
-        </SignInButton>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="landing-cta-btn rounded-full bg-[var(--accent-vivid)] px-5 py-2 text-sm font-semibold text-[var(--text-on-accent)] shadow-lg transition-all hover:shadow-xl hover:brightness-110 active:scale-[0.97] sm:px-6 sm:py-2.5">
+                Sign In
+              </button>
+            </SignInButton>
+          </SignedOut>
+          <SignedIn>
+            <Link
+              to="/pools"
+              className="text-sm font-semibold text-[var(--text-primary)] transition-colors hover:text-[var(--accent-vivid)] sm:text-base hidden sm:mr-1 sm:block"
+            >
+              Dashboard
+            </Link>
+            <SignOutButton>
+              <button className="landing-cta-btn rounded-full border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/50 px-5 py-2 text-sm font-semibold text-[var(--text-primary)] backdrop-blur-md transition-all hover:bg-[var(--surface-elevated)] active:scale-[0.97] sm:px-6 sm:py-2.5">
+                Sign Out
+              </button>
+            </SignOutButton>
+          </SignedIn>
+        </div>
       </motion.nav>
 
       {/* ══════════════════════════════════════════════════════════════════
@@ -228,14 +246,26 @@ export function Landing() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 1.4, ease: [0.22, 1, 0.36, 1] }}
         >
-          <SignUpButton mode="modal">
-            <button className="landing-cta-btn group relative rounded-full bg-[var(--accent-vivid)] px-8 py-3.5 text-base font-semibold text-[var(--text-on-accent)] shadow-xl transition-all hover:shadow-2xl hover:brightness-110 active:scale-[0.97] sm:px-10 sm:py-4 sm:text-lg">
-              Get Started — It's Free
-              <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">
-                →
-              </span>
-            </button>
-          </SignUpButton>
+          <SignedOut>
+            <SignUpButton mode="modal">
+              <button className="landing-cta-btn group relative rounded-full bg-[var(--accent-vivid)] px-8 py-3.5 text-base font-semibold text-[var(--text-on-accent)] shadow-xl transition-all hover:shadow-2xl hover:brightness-110 active:scale-[0.97] sm:px-10 sm:py-4 sm:text-lg">
+                Get Started — It's Free
+                <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <Link to="/pools">
+              <button className="landing-cta-btn group relative rounded-full bg-[var(--accent-vivid)] px-8 py-3.5 text-base font-semibold text-[var(--text-on-accent)] shadow-xl transition-all hover:shadow-2xl hover:brightness-110 active:scale-[0.97] sm:px-10 sm:py-4 sm:text-lg">
+                Go to Dashboard
+                <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </button>
+            </Link>
+          </SignedIn>
           <span className="text-xs text-[var(--text-muted)]">
             No credit card required
           </span>
@@ -430,14 +460,26 @@ export function Landing() {
           </p>
 
           <div className="relative mt-10">
-            <SignUpButton mode="modal">
-              <button className="landing-cta-btn group rounded-full bg-[var(--accent-vivid)] px-10 py-4 text-base font-semibold text-[var(--text-on-accent)] shadow-xl transition-all hover:shadow-2xl hover:brightness-110 active:scale-[0.97] sm:text-lg">
-                Create Your First Pool
-                <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">
-                  →
-                </span>
-              </button>
-            </SignUpButton>
+            <SignedOut>
+              <SignUpButton mode="modal">
+                <button className="landing-cta-btn group rounded-full bg-[var(--accent-vivid)] px-10 py-4 text-base font-semibold text-[var(--text-on-accent)] shadow-xl transition-all hover:shadow-2xl hover:brightness-110 active:scale-[0.97] sm:text-lg">
+                  Create Your First Pool
+                  <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <Link to="/pools">
+                <button className="landing-cta-btn group rounded-full bg-[var(--accent-vivid)] px-10 py-4 text-base font-semibold text-[var(--text-on-accent)] shadow-xl transition-all hover:shadow-2xl hover:brightness-110 active:scale-[0.97] sm:text-lg">
+                  Go to Dashboard
+                  <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </button>
+              </Link>
+            </SignedIn>
           </div>
         </Reveal>
       </section>

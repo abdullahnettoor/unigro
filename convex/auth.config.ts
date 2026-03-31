@@ -1,7 +1,7 @@
 export default {
     providers: [
         {
-            domain: "https://clerk.unigro.abdullahnettoor.com",
+            domain: process.env.CLERK_ISSUER_URL,
             applicationID: "convex",
         },
     ],
