@@ -21,14 +21,14 @@ export const compressImage = async (
     mimeType = "image/jpeg",
   } = options;
 
-  // Skip if file is already small (e.g. < 200KB)
-  if (file.size < 200 * 1024) {
+  // Skip if file is already small (e.g. < 100KB)
+  if (file.size < 100 * 1024) {
     console.log(`[Compression] Skipping ${file instanceof File ? file.name : 'blob'}: already small (${formatBytes(file.size)})`);
-    
+
     if (file instanceof File) {
       return file;
     }
-    
+
     return new File([file], `upload_${Date.now()}.jpg`, {
       type: mimeType,
       lastModified: Date.now(),
@@ -80,7 +80,7 @@ export const compressImage = async (
             if (!blob) {
               return reject(new Error("Failed to compress image"));
             }
-            
+
             // Reconstruct File object from Blob
             const fileName = (file as File).name || `upload_${Date.now()}.jpg`;
             const compressedFile = new File([blob], fileName, {
