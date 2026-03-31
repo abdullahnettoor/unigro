@@ -8,3 +8,7 @@ not_found_handling = "single-page-application"
 
 [env.prod]
 name = "unigro"
+routes = [
+  { pattern = "unigro.abdullahnettoor.com", custom_domain = true }
+]
+

@@ -7,8 +7,11 @@
     "dev": "vite",
     "prebuild": "npx convex codegen",
     "build": "tsc -b && vite build",
+    "build:prod": "tsc -b && vite build --mode prod",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npx wrangler deploy",
+    "deploy:prod": "npm run build:prod && npx wrangler deploy --env prod"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.60.0",
