@@ -28,6 +28,8 @@ interface JoinPoolModalProps {
   isAuthenticated: boolean;
   poolTitle: string;
   isOrganizerVerified: boolean;
+  userPhone?: string;
+  userName?: string;
 }
 
 export function JoinPoolModal({
@@ -43,15 +45,20 @@ export function JoinPoolModal({
   isAuthenticated,
   poolTitle,
   isOrganizerVerified,
+  userPhone,
+  userName,
 }: JoinPoolModalProps) {
   const joinPool = useMutation(api.seats.join);
   const joinAsGuest = useMutation(api.seats.joinAsGuest);
+  const updateProfile = useMutation(api.users.updateProfile);
   const feedback = useFeedback();
   const navigate = useNavigate();
 
   const [selectedSeatCount, setSelectedSeatCount] = useState(1);
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
+  const [localName, setLocalName] = useState(userName || "");
+  const [localPhone, setLocalPhone] = useState(userPhone || "");
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successState, setSuccessState] = useState<{
@@ -90,6 +97,21 @@ export function JoinPoolModal({
 
     try {
       if (isAuthenticated) {
+        // Check if phone number is missing
+        if (!userPhone) {
+          if (!localPhone || !isValidPhoneNumber(localPhone)) {
+            feedback.toast.error("Phone required", "Please enter a valid phone number to continue.");
+            setIsSubmitting(false);
+            return;
+          }
+
+          // Update profile first
+          await updateProfile({
+            name: localName || "Anonymous",
+            phone: localPhone,
+          });
+        }
+
         const result = await joinPool({ poolId, seatCount: selectedSeatCount });
         const seatNumbers = Array.isArray(result?.seatNumbers)
           ? result.seatNumbers
@@ -241,7 +263,7 @@ export function JoinPoolModal({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto min-h-0 px-6 py-2 space-y-6 scrollbar-hide overscroll-contain">
-          {!isAuthenticated && (
+          {!isAuthenticated ? (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
               <Surface tier={1} className="rounded-2xl border border-[var(--border-subtle)]/60 p-4 bg-[var(--surface-1)]/40">
                 <div className="flex gap-3">
@@ -249,7 +271,7 @@ export function JoinPoolModal({
                     <Icons.OrganizerIcon size={16} />
                   </div>
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-primary)] mb-1">Guest Entry</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-bitest text-[var(--text-primary)] mb-1">Guest Entry</h4>
                     <p className="text-xs leading-relaxed text-[var(--text-muted)]">Reserve your seats now. You can link them to a permanent account anytime.</p>
                   </div>
                 </div>
@@ -276,7 +298,42 @@ export function JoinPoolModal({
                 </div>
               </div>
             </div>
-          )}
+          ) : !userPhone ? (
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <Surface tier={1} className="rounded-2xl border border-[var(--border-subtle)]/60 p-4 bg-[var(--accent-vivid)]/[0.03]">
+                <div className="flex gap-3">
+                  <div className="shrink-0 text-[var(--accent-vivid)] mt-0.5">
+                    <Icons.ShieldCheckIcon size={16} />
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-bold uppercase tracking-bitest text-[var(--text-primary)] mb-1">Complete Profile</h4>
+                    <p className="text-xs leading-relaxed text-[var(--text-muted)]">Please add your phone number to join pools and participate.</p>
+                  </div>
+                </div>
+              </Surface>
+
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] ml-1">Your Name</label>
+                  <Input
+                    value={localName}
+                    onChange={(e) => setLocalName(e.target.value)}
+                    placeholder="Full name"
+                    className="h-12 rounded-2xl bg-[var(--surface-2)]/50 border-[var(--border-subtle)]/40 focus:bg-[var(--surface-2)] transition-all"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] ml-1">Phone Number</label>
+                  <PhoneInputField
+                    value={localPhone}
+                    onChange={setLocalPhone}
+                    error={!!authError}
+                  />
+                  {authError && <p className="text-[10px] font-bold text-[var(--danger)] animate-pulse ml-1">{authError}</p>}
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="flex flex-col items-center">
             <div className="w-full flex items-center justify-between mb-4">

@@ -575,6 +575,8 @@ export function PoolDetail() {
           currency={pool.config.currency}
           isAuthenticated={!!currentUser}
           isOrganizerVerified={pool.organizer?.verificationStatus === "VERIFIED"}
+          userPhone={currentUser?.phone}
+          userName={currentUser?.name}
         />
 
         <AddMemberModal
