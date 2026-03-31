@@ -26,6 +26,7 @@ import { ArchivePoolModal } from "@/components/pool-detail/modals/ArchivePoolMod
 import { RecordPayoutModal } from "@/components/pool-detail/modals/RecordPayoutModal";
 import { RecordCashModal } from "@/components/pool-detail/modals/RecordCashModal";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { VerificationGuard } from "@/components/shared/VerificationGuard";
 import { OfflineFallback } from "@/components/shared/OfflineFallback";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { getNextRoundDate, getPoolDisplayProgress, getSeatStats, getVirtualOpenSeats } from "@/lib/pool";
@@ -382,6 +383,9 @@ export function PoolDetail() {
       />
 
       <div className="mx-auto w-full max-w-4xl space-y-6 px-4 pb-12 pt-4 sm:px-6">
+        {isOrganizer && (
+          <VerificationGuard status={(pool.organizer?.verificationStatus as any) || "UNVERIFIED"} />
+        )}
         <PoolHero
           pool={pool}
           seats={fullSeats}
@@ -532,7 +536,7 @@ export function PoolDetail() {
         <JoinPoolModal
           open={showJoinModal}
           onOpenChange={setShowJoinModal}
-          onJoinSuccess={({ isGuest, seatNumbers, userId, guestName, guestPhone }) => {
+          onJoinSuccess={({ isGuest, seatNumbers, userId, guestName, guestPhone }: { isGuest: boolean; seatNumbers: number[]; userId?: string; guestName?: string; guestPhone?: string }) => {
             if (isGuest) setIsGuestMember(true);
             setOptimisticJoinedSeats((prev) => [
               ...prev,
@@ -570,6 +574,7 @@ export function PoolDetail() {
           totalValue={pool.config.totalValue}
           currency={pool.config.currency}
           isAuthenticated={!!currentUser}
+          isOrganizerVerified={pool.organizer?.verificationStatus === "VERIFIED"}
         />
 
         <AddMemberModal
@@ -577,6 +582,7 @@ export function PoolDetail() {
           onOpenChange={setShowAddMember}
           poolId={pool._id}
           fullSeats={fullSeats}
+          isVerified={pool.organizer?.verificationStatus === "VERIFIED"}
         />
 
         <AssignCoSeatModal
@@ -584,6 +590,7 @@ export function PoolDetail() {
           onOpenChange={setShowAssignCoSeat}
           poolId={pool._id}
           fullSeats={fullSeats}
+          isVerified={pool.organizer?.verificationStatus === "VERIFIED"}
         />
 
         <EditGuestModal

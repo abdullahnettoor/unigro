@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
 import { resolveEntitlements } from "./lib/entitlements";
@@ -45,11 +45,11 @@ export const create = mutation({
 
         const entitlements = await resolveEntitlements(ctx, user);
         if (entitlements.organizedPoolsCount >= entitlements.maxPools) {
-            throw new Error(`You can only create up to ${entitlements.maxPools} pools.`);
+            throw new ConvexError(`You can only create up to ${entitlements.maxPools} pools.`);
         }
 
         if (args.totalSeats < 1 || args.totalSeats > 50)
-            throw new Error("Number of seats must be between 1 and 50.");
+            throw new ConvexError("Number of seats must be between 1 and 50.");
 
         const poolId = await ctx.db.insert("pools", {
             title: args.title,
@@ -202,11 +202,11 @@ export const activate = mutation({
     handler: async (ctx, args) => {
         const pool = await ctx.db.get(args.poolId);
         if (!pool) throw new Error("Pool not found");
-        if (pool.status !== "DRAFT") throw new Error("Pool already active");
+        if (pool.status !== "DRAFT") throw new ConvexError("Pool already active");
 
         const organizer = await ctx.db.get(pool.organizerId);
         if (!organizer || organizer.verificationStatus !== "VERIFIED")
-            throw new Error("You must be a Verified User to activate a pool.");
+            throw new ConvexError("You must be a Verified User to activate a pool.");
 
         const seats = await ctx.db
             .query("seats")
@@ -214,7 +214,7 @@ export const activate = mutation({
             .collect();
         const emptySeats = seats.filter((s) => s.status === "OPEN");
         if (emptySeats.length > 0)
-            throw new Error(`Cannot activate: ${emptySeats.length} seats are still OPEN.`);
+            throw new ConvexError(`Cannot activate: ${emptySeats.length} seats are still OPEN.`);
 
         await ctx.db.patch(args.poolId, { status: "ACTIVE", currentRound: 1 });
     },
@@ -255,7 +255,7 @@ export const updatePool = mutation({
             .query("users")
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
-        if (!user || user._id !== pool.organizerId) throw new Error("Unauthorized");
+        if (!user || user._id !== pool.organizerId) throw new ConvexError("Unauthorized to update this pool.");
 
         if (pool.status === "DRAFT") {
             const joinedMembers = await ctx.db

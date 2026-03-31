@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 
 import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
@@ -214,7 +214,7 @@ export const setCurrentPlanTierForTesting = mutation({
         const effectiveEmail = identity.email || user.email || "";
 
         if (!normalizedAdmins.includes(effectiveEmail)) {
-            throw new Error("Only admin accounts can change plan tier for testing.");
+            throw new ConvexError("Only admin accounts can change plan tier for testing.");
         }
 
         await ctx.db.patch(user._id, {
@@ -255,7 +255,7 @@ export const editGuest = mutation({
         if (!targetUser) throw new Error("Guest user not found");
 
         if (targetUser.verificationStatus !== "UNVERIFIED" || targetUser.clerkId) {
-            throw new Error("This user is a registered account and manages their own profile.");
+            throw new ConvexError("This user is a registered account and manages their own profile.");
         }
 
         // Technically, a Foreman *could* check if this ghost is actually in one of their Pots to enforce pot-level privacy,
@@ -267,7 +267,7 @@ export const editGuest = mutation({
                 .withIndex("by_phone", q => q.eq("phone", args.phone))
                 .unique();
             if (existingPhone) {
-                throw new Error("Another user is already registered with this phone number.");
+                throw new ConvexError("Another user is already registered with this phone number.");
             }
         }
 

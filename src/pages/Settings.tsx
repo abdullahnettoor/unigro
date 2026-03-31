@@ -256,10 +256,20 @@ export function Settings() {
             feedback.toast.info("Offline right now", "Reconnect before sending verification details.");
             return;
         }
-        if (!file || !idNumber) { setError("Please provide ID Document and Number"); return; }
+        if (!editPhone || !isValidPhoneNumber(editPhone)) {
+            setError("Please provide a valid phone number for identity matching.");
+            return;
+        }
+        if (!file || !idNumber) {
+            setError("Please provide ID Document and Number");
+            return;
+        }
         setIsUploading(true);
         setError("");
         try {
+            // Ensure profile is updated with the phone number first
+            await updateProfile({ name: editName.trim() || effectiveUser.name, phone: editPhone });
+            
             const postUrl = await generateUploadUrl();
             const result = await fetch(postUrl, { method: "POST", headers: { "Content-Type": file.type }, body: file });
             if (!result.ok) throw new Error("Upload failed");
@@ -267,7 +277,7 @@ export function Settings() {
             await requestVerification({ storageId, idType, idNumber });
             setFile(null);
             setIsUploading(false);
-            feedback.toast.success("Verification Submitted", "Your ID has been sent for review.");
+            feedback.toast.success("Verification Submitted", "Your ID and phone have been sent for review.");
         } catch (err) {
             console.error(err);
             setError("Failed to submit. Please try again.");
@@ -536,6 +546,16 @@ export function Settings() {
                                             placeholder={idType === "Aadhaar" ? "0000 0000 0000" : "ABCDE1234F"}
                                         />
                                     </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="px-1 text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Phone Number</label>
+                                    <PhoneInputField
+                                        className="rounded-full h-11"
+                                        value={editPhone}
+                                        onChange={setEditPhone}
+                                    />
+                                    <p className="px-1 text-[9px] text-[var(--text-muted)] italic leading-relaxed font-medium">We link all your past contributions and winnings using this number.</p>
                                 </div>
 
                                 <div className="space-y-1.5">

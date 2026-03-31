@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
 import { checkAdmin } from "./auth";
@@ -30,6 +30,9 @@ export const submit = mutation({
             .unique();
 
         if (!user) throw new Error("User not found");
+        if (!user.phone) {
+            throw new ConvexError("Phone number is required before identity verification can be submitted.");
+        }
 
         await ctx.db.patch(user._id, {
             verificationDocId: args.storageId,

@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
 
@@ -44,8 +44,8 @@ export const submitPayment = mutation({
             if (ownership) isOwner = true;
         }
 
-        if (!isOwner) throw new Error("You do not own this seat");
-        if (seat.poolId !== args.poolId) throw new Error("Seat does not belong to this pool");
+        if (!isOwner) throw new ConvexError("You do not own this seat");
+        if (seat.poolId !== args.poolId) throw new ConvexError("Seat does not belong to this pool");
 
         // Check if transaction exists (Unique per user for co-seats)
         let existingTxQuery = ctx.db
@@ -109,7 +109,7 @@ export const recordCashPayment = mutation({
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
 
-        if (!organizer || organizer._id !== pool.organizerId) throw new Error("Only the Organizer can record cash payments");
+        if (!organizer || organizer._id !== pool.organizerId) throw new ConvexError("Only the Organizer can record cash payments");
 
         // Check if transaction exists
         let existingTxQuery = ctx.db
@@ -172,7 +172,7 @@ export const approvePayment = mutation({
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
 
-        if (!user || user._id !== pool.organizerId) throw new Error("Only the Organizer can approve");
+        if (!user || user._id !== pool.organizerId) throw new ConvexError("Only the Organizer can approve");
 
         await ctx.db.patch(args.transactionId, {
             status: "PAID",
@@ -202,7 +202,7 @@ export const rejectPayment = mutation({
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
 
-        if (!user || user._id !== pool.organizerId) throw new Error("Only the Organizer can reject");
+        if (!user || user._id !== pool.organizerId) throw new ConvexError("Only the Organizer can reject");
 
         await ctx.db.patch(args.transactionId, {
             status: "UNPAID",
@@ -232,7 +232,7 @@ export const recordPayout = mutation({
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
 
-        if (!user || user._id !== pool.organizerId) throw new Error("Only the Organizer can record payouts");
+        if (!user || user._id !== pool.organizerId) throw new ConvexError("Only the Organizer can record payouts");
 
         await ctx.db.insert("transactions", {
             poolId: args.poolId,

@@ -27,6 +27,7 @@ interface JoinPoolModalProps {
   currency?: string;
   isAuthenticated: boolean;
   poolTitle: string;
+  isOrganizerVerified: boolean;
 }
 
 export function JoinPoolModal({
@@ -41,6 +42,7 @@ export function JoinPoolModal({
   currency,
   isAuthenticated,
   poolTitle,
+  isOrganizerVerified,
 }: JoinPoolModalProps) {
   const joinPool = useMutation(api.seats.join);
   const joinAsGuest = useMutation(api.seats.joinAsGuest);
@@ -365,7 +367,7 @@ export function JoinPoolModal({
         <DialogFooter className="p-6 pt-0 sm:flex-col gap-3 shrink-0 sm:space-x-0">
           <Button
             onClick={handleJoin}
-            disabled={isSubmitting || availableSeats === 0}
+            disabled={isSubmitting || availableSeats === 0 || !isOrganizerVerified}
             className="w-full h-14 rounded-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] hover:opacity-90 active:scale-[0.98] transition-all font-black text-sm uppercase tracking-widest shadow-xl shadow-[var(--accent-vivid)]/20 disabled:opacity-50"
           >
             {isSubmitting ? (
@@ -375,11 +377,16 @@ export function JoinPoolModal({
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                Confirm & Join
+                {isOrganizerVerified ? "Confirm & Join" : "Organizer Not Verified"}
                 <Icons.CheckIcon size={16} strokeWidth={3} />
               </span>
             )}
           </Button>
+          {!isOrganizerVerified && (
+             <p className="text-[10px] text-center text-[var(--danger)] font-bold px-4">
+               Joining is currently paused while the organizer completes verification.
+             </p>
+          )}
           <p className="text-[10px] text-center text-[var(--text-muted)] font-medium leading-relaxed px-4">
             By joining, you agree to the pool rules and verify that you can fulfill your contribution commitment.
           </p>

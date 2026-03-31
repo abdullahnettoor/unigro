@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 
 import { mutation } from "./_generated/server";
 
@@ -23,7 +23,7 @@ export const join = mutation({
 
         const organizer = await ctx.db.get(pool.organizerId);
         if (!organizer || organizer.verificationStatus !== "VERIFIED") {
-            throw new Error("Cannot join: Pool Organizer is unverified.");
+            throw new ConvexError("Cannot join: Pool Organizer is unverified.");
         }
 
         const count = args.seatCount || 1;
@@ -76,7 +76,7 @@ export const joinAsGuest = mutation({
 
         const organizer = await ctx.db.get(pool.organizerId);
         if (!organizer || organizer.verificationStatus !== "VERIFIED") {
-            throw new Error("Cannot join: Pool Organizer is unverified.");
+            throw new ConvexError("Cannot join: Pool Organizer is unverified.");
         }
 
         let userId;
@@ -148,9 +148,9 @@ export const assignSeat = mutation({
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
         if (!organizer || organizer._id !== pool.organizerId)
-            throw new Error("Only the Organizer can assign seats");
+            throw new ConvexError("Only the Organizer can assign seats");
         if (organizer.verificationStatus !== "VERIFIED")
-            throw new Error("You must be a Verified User to invite members.");
+            throw new ConvexError("You must be a Verified User to invite members.");
 
         const seat = await ctx.db
             .query("seats")
@@ -250,9 +250,9 @@ export const assignCoSeat = mutation({
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
         if (!organizer || organizer._id !== pool.organizerId)
-            throw new Error("Only the Organizer can assign seats");
+            throw new ConvexError("Only the Organizer can assign seats");
         if (organizer.verificationStatus !== "VERIFIED")
-            throw new Error("You must be a Verified User to invite members.");
+            throw new ConvexError("You must be a Verified User to invite members.");
         if (args.sharePercentage <= 0 || args.sharePercentage > 100)
             throw new Error("Invalid share percentage");
 
