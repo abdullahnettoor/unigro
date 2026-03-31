@@ -7,6 +7,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@convex/*": [
+        "./convex/_generated/*"
       ]
     },
     "lib": [
@@ -37,5 +40,8 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "src/_legacy"
   ]
 }

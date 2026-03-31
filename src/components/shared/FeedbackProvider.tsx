@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/Button";
-import { Surface } from "@/components/ui/Surface";
+import { Button } from "@/components/ui/button";
 
 type ToastVariant = "success" | "error" | "info";
 
@@ -89,26 +88,26 @@ function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 p-3 sm:items-center sm:p-4">
-      <Surface tier={3} rounded="2xl" className="w-full border border-[var(--border-subtle)] p-6 sm:max-w-md">
+      <div className="w-full rounded-2xl border border-white/10 backdrop-blur-xl bg-[var(--surface-elevated)]/90 p-6 sm:max-w-md">
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">{options.title}</h3>
         {options.message && <p className="mt-2 text-sm text-[var(--text-muted)]">{options.message}</p>}
         <div className="mt-6 flex gap-2">
           <Button
-            variant="secondary"
+            variant="outline"
             onClick={onCancel}
             className="flex-1 py-2.5 text-sm font-semibold hover:border-transparent"
           >
             {options.cancelText || "Cancel"}
           </Button>
           <Button
-            variant={options.danger ? "danger" : "primary"}
+            variant={options.danger ? "destructive" : "default"}
             onClick={onConfirm}
             className="flex-1 py-2.5 text-sm font-semibold"
           >
             {options.confirmText || "Confirm"}
           </Button>
         </div>
-      </Surface>
+      </div>
     </div>
   );
 }

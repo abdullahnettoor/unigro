@@ -2,13 +2,14 @@ import { v } from "convex/values";
 
 import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
+import { resolveEntitlements } from "./lib/entitlements";
 
 declare const process: any;
 
 /**
  * Stores a user in the database after Clerk authentication.
- * Implements the "Ghost Claim" logic:
- * 1. Checks if a user with the same phone number exists (Ghost).
+ * Implements the "Guest Claim" logic:
+ * 1. Checks if a user with the same phone number exists (Guest).
  * 2. If yes, upgrades them to a registered user by setting clerkId.
  * 3. If no, creates a new user record.
  */
@@ -20,13 +21,6 @@ export const store = mutation({
             throw new Error("Called storeUser without authentication present");
         }
 
-        // Clerk stores phone number in a specific format in the JWT, or we might need to fetch it from the identity object
-        // For this implementation, we assume the claims include phone_number or we extract it.
-        // NOTE: In a real Clerk setup, you need to ensure "phone_number" is in the session token claims.
-        // If it's not directly there, we might fallback or rely on the user to provide it, 
-        // but the PRD mandates phone number for ghost syncing.
-
-        // For MVP/Dev, we'll try to use the "phone_number" claim if available.
         const identityAny = identity as any;
         const phoneNumber = identityAny.phoneNumber || identityAny.phone_number || identityAny.phone;
 
@@ -37,7 +31,6 @@ export const store = mutation({
             .unique();
 
         if (user !== null) {
-            // User already exists and is linked. Update profile info if needed.
             if (user.name !== identity.name || user.pictureUrl !== identity.pictureUrl) {
                 await ctx.db.patch(user._id, {
                     name: identity.name || "Anonymous",
@@ -48,41 +41,40 @@ export const store = mutation({
             return user._id;
         }
 
-        // If we have a phone number, check for a Ghost record
+        // If we have a phone number, check for a Guest record
         if (phoneNumber) {
-            const ghostUser = await ctx.db
+            const guestUser = await ctx.db
                 .query("users")
                 .withIndex("by_phone", (q) => q.eq("phone", phoneNumber))
                 .unique();
 
-            if (ghostUser) {
-                // Claim the Ghost Account!
-                await ctx.db.patch(ghostUser._id, {
+            if (guestUser) {
+                // Claim the Guest Account!
+                await ctx.db.patch(guestUser._id, {
                     clerkId: identity.subject,
-                    name: identity.name || ghostUser.name, // Prefer real name over ghost name? Or vice versa? Using Real name.
+                    name: identity.name || guestUser.name,
                     pictureUrl: identity.pictureUrl,
                     email: identity.email,
-                    verificationStatus: ghostUser.verificationStatus, // Keep existing verification status if any
+                    verificationStatus: guestUser.verificationStatus,
                 });
-                return ghostUser._id;
+                return guestUser._id;
             }
         }
 
         // Create new user
-        // We assume phone number is vital. If missing from Clerk, we might want to throw or handle it.
-        // For now, we'll allow creation but they won't match ghosts without a phone.
         const newUserId = await ctx.db.insert("users", {
             name: identity.name || "Anonymous",
             clerkId: identity.subject,
             pictureUrl: identity.pictureUrl,
             email: identity.email,
-            phone: phoneNumber || "", // Empty string if not provided, but PRD says mandatory.
+            phone: phoneNumber || "",
             verificationStatus: "UNVERIFIED",
         });
 
         return newUserId;
     },
 });
+
 
 export const current = query({
     args: {},
@@ -95,6 +87,23 @@ export const current = query({
             .query("users")
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
+    },
+});
+
+export const getEntitlements = query({
+    args: {},
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return await resolveEntitlements(ctx, null);
+        }
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        return await resolveEntitlements(ctx, user);
     },
 });
 // 3. Update Profile & Claim Ghost Accounts
@@ -120,60 +129,55 @@ export const updateProfile = mutation({
             phone: args.phone,
         });
 
-        // --- GHOST CLAIM LOGIC ---
-        // Find any "Ghost" users with this phone number (no clerkId)
-        const ghosts = await ctx.db
+        // --- GUEST CLAIM LOGIC ---
+        // Find any "Guest" users with this phone number (no clerkId)
+        const guests = await ctx.db
             .query("users")
             .withIndex("by_phone", (q) => q.eq("phone", args.phone))
             .filter((q) => q.eq(q.field("clerkId"), undefined))
             .collect();
 
-        for (const ghost of ghosts) {
-            if (ghost._id === user._id) continue;
+        for (const guest of guests) {
+            if (guest._id === user._id) continue;
 
-            // 1. Migrate Slots (Ownership)
-            const slots = await ctx.db
-                .query("slots")
-                .withIndex("by_user_pot", (q) => q.eq("userId", ghost._id))
+            // 1. Migrate Seats (Ownership)
+            const userSeats = await ctx.db
+                .query("seats")
+                .withIndex("by_user_pool", (q) => q.eq("userId", guest._id))
                 .collect();
 
-            for (const slot of slots) {
+            for (const seat of userSeats) {
                 // Transfer ownership to current user
-                // In Slot-First, one user can hold multiple slots, so no conflict check needed.
-                await ctx.db.patch(slot._id, {
+                await ctx.db.patch(seat._id, {
                     userId: user._id,
-                    isGhost: false
+                    isGuest: false
                 });
             }
 
             // 2. Migrate Transactions
-            // Update any transactions made by this ghost user to the actual user
-            // We can only query transactions by pot_month, so we might need a full table scan or add an index later.
-            // For now, let's collect all transactions and filter, or just query if there's an index.
-            // Actually, there's no ideal index for transactions by user. Let's do a full scan since it's a rare operation for a specific ghost.
             const allTransactions = await ctx.db.query("transactions").collect();
             for (const tx of allTransactions) {
-                if (tx.userId === ghost._id) {
+                if (tx.userId === guest._id) {
                     await ctx.db.patch(tx._id, {
                         userId: user._id
                     });
                 }
             }
 
-            // 3. Migrate Split Ownership
-            const splitOwnerships = await ctx.db
-                .query("split_ownership")
-                .withIndex("by_user", (q) => q.eq("userId", ghost._id))
+            // 3. Migrate Seat Shares
+            const seatShares = await ctx.db
+                .query("seat_shares")
+                .withIndex("by_user", (q) => q.eq("userId", guest._id))
                 .collect();
 
-            for (const split of splitOwnerships) {
-                await ctx.db.patch(split._id, {
+            for (const share of seatShares) {
+                await ctx.db.patch(share._id, {
                     userId: user._id
                 });
             }
 
-            // 3. Delete Ghost User
-            await ctx.db.delete(ghost._id);
+            // 4. Delete Guest User
+            await ctx.db.delete(guest._id);
         }
     },
 });
@@ -190,6 +194,41 @@ export const isAdmin = query({
     },
 });
 
+export const setCurrentPlanTierForTesting = mutation({
+    args: {
+        planTier: v.union(v.literal("free"), v.literal("pro")),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        if (!user) throw new Error("User not found");
+
+        const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+        const normalizedAdmins = adminEmails.map((e: string) => e.trim());
+        const effectiveEmail = identity.email || user.email || "";
+
+        if (!normalizedAdmins.includes(effectiveEmail)) {
+            throw new Error("Only admin accounts can change plan tier for testing.");
+        }
+
+        await ctx.db.patch(user._id, {
+            planTier: args.planTier,
+            maxPools: args.planTier === "pro" ? 25 : 5,
+            adsDisabled: args.planTier === "pro",
+            billingStatus: args.planTier === "pro" ? "testing_active" : "testing_free",
+            billingProvider: "testing",
+        });
+
+        return { ok: true };
+    },
+});
+
 export const get = query({
     args: { userId: v.union(v.id("users"), v.string(), v.null()) },
     handler: async (ctx, args) => {
@@ -202,7 +241,7 @@ export const get = query({
     },
 });
 
-export const editGhost = mutation({
+export const editGuest = mutation({
     args: {
         userId: v.id("users"),
         name: v.string(),
@@ -213,7 +252,7 @@ export const editGhost = mutation({
         if (!identity) throw new Error("Unauthorized");
 
         const targetUser = await ctx.db.get(args.userId);
-        if (!targetUser) throw new Error("Ghost user not found");
+        if (!targetUser) throw new Error("Guest user not found");
 
         if (targetUser.verificationStatus !== "UNVERIFIED" || targetUser.clerkId) {
             throw new Error("This user is a registered account and manages their own profile.");
@@ -238,5 +277,3 @@ export const editGhost = mutation({
         });
     }
 });
-
-
