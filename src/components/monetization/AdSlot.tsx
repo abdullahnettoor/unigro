@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { cn } from "@/lib/utils";
+import * as Icons from "@/lib/icons";
 
 declare global {
   interface Window {
@@ -214,14 +215,13 @@ export function AdSlot({ placement, title, body, onUpgrade, audience = "organize
     );
   }
 
-  if (status === "error" || status === "unfilled") {
-    return null;
-  }
+  const isBlocked = status === "error";
+  const isUnfilled = status === "unfilled";
 
   return (
     <Surface
       tier={2}
-      className={cn("relative rounded-[26px] border border-[var(--border-subtle)]/70 p-3", className)}
+      className={cn("relative rounded-[26px] border border-[var(--border-subtle)]/70 p-2.5", className)}
       style={{ minHeight: copy.minHeight }}
     >
       <div className="mb-2 flex items-center justify-between gap-3 px-1">
@@ -233,16 +233,42 @@ export function AdSlot({ placement, title, body, onUpgrade, audience = "organize
         ) : null}
       </div>
 
-      <ins
-        ref={adRef}
-        className="adsbygoogle block w-full overflow-hidden rounded-[22px]"
-        style={{ display: "block", minHeight: `calc(${copy.minHeight} - 24px)` }}
-        data-ad-client={clientId}
-        data-ad-slot={slotId}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-        data-adtest={import.meta.env.DEV ? "on" : undefined}
-      />
+      <div className="relative">
+        <ins
+          ref={adRef}
+          className="adsbygoogle block w-full overflow-hidden rounded-[22px]"
+          style={{
+            display: status === "ready" ? "block" : "none",
+            minHeight: `calc(${copy.minHeight} - 24px)`,
+            margin: 0,
+            padding: 0,
+          }}
+          data-ad-client={clientId}
+          data-ad-slot={slotId}
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+          data-adtest={import.meta.env.DEV ? "on" : undefined}
+        />
+
+        {(isBlocked || isUnfilled) ? (
+          <div
+            className="flex flex-col items-center justify-center text-center px-4 animate-in fade-in duration-500"
+            style={{ minHeight: `calc(${copy.minHeight} - 24px)` }}
+          >
+            <div className="h-10 w-10 rounded-2xl bg-[var(--surface-1)] flex items-center justify-center text-[var(--text-muted)] opacity-40 mb-3">
+              <Icons.ShieldAlertIcon size={20} />
+            </div>
+            <p className="text-[11px] font-bold text-[var(--text-primary)] mb-1">
+              {isBlocked ? "Ad Content Blocked" : "Sponsorship Pending"}
+            </p>
+            <p className="text-[10px] leading-relaxed text-[var(--text-muted)] max-w-[200px]">
+              {isBlocked
+                ? "Browser settings are limiting ad delivery. Support UniGro by upgrading to Pro."
+                : "Live inventory is loading. We keep browse surfaces light and accessible."}
+            </p>
+          </div>
+        ) : null}
+      </div>
 
       {status === "loading" ? (
         <div className="pointer-events-none absolute inset-x-6 bottom-6 top-12 rounded-[22px] border border-[var(--border-subtle)]/35 bg-[var(--surface-1)]/35" />

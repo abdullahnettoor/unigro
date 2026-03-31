@@ -102,6 +102,7 @@ export const InfoIcon = Info;               // Informational tooltip / hint
 export const BellIcon = Bell;               // Notification / alert
 export const HistoryIcon = History;          // Historical / past data view
 export const ShieldCheckIcon = BadgeCheck;   // Success / verified shield
+export const ShieldAlertIcon = ShieldAlert;   // Warning / error shield
 
 // ─── Actions ─────────────────────────────────────────────────────────────────
 export const CreateIcon = Plus;              // Create a new item
