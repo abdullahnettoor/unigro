@@ -460,10 +460,10 @@ export function PaymentModal({
                                 <Icons.UploadImageIcon size={24} />
                               </div>
                               <p className="text-xs font-bold text-[var(--text-primary)]">Select payment screenshot</p>
-                              <p className="text-[10px] text-[var(--text-muted)] mt-1 tracking-tight">Screenshots or PDFs up to 5MB</p>
+                              <p className="text-[10px] text-[var(--text-muted)] mt-1 tracking-tight">JPEG or PNG up to 5MB</p>
                             </>
                           )}
-                          <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
+                          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                         </div>
                       </div>
 
@@ -543,10 +543,10 @@ export function PaymentModal({
                             <Icons.UploadImageIcon size={24} />
                           </div>
                           <p className="text-xs font-bold text-[var(--text-primary)]">Select payment proof</p>
-                          <p className="text-[10px] text-[var(--text-muted)] mt-1 tracking-tight">Screenshots or PDFs up to 5MB</p>
+                          <p className="text-[10px] text-[var(--text-muted)] mt-1 tracking-tight">JPEG or PNG up to 5MB</p>
                         </>
                       )}
-                      <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
+                      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                     </div>
                   </div>
 

@@ -67,31 +67,41 @@ export function MediaPreviewDialog({ url, onClose, alt = "Preview" }: MediaPrevi
                 </Button>
               </div>
             </div>
-            <div className="max-h-[70vh] overflow-auto rounded-xl border border-white/10 bg-[var(--surface-deep)]/60 p-3">
-              <div
-                className={`origin-top-left ${clampedZoom > 1 ? "cursor-grab" : ""} ${isPanning ? "cursor-grabbing" : ""}`}
-                style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${clampedZoom})` }}
-                onPointerDown={(e) => {
-                  if (clampedZoom <= 1) return;
-                  (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-                  setIsPanning(true);
-                  setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-                }}
-                onPointerMove={(e) => {
-                  if (!isPanning) return;
-                  setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
-                }}
-                onPointerUp={(e) => {
-                  if (!isPanning) return;
-                  (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-                  setIsPanning(false);
-                }}
-                onPointerLeave={() => {
-                  if (isPanning) setIsPanning(false);
-                }}
-              >
-                <img src={url} alt={alt} className="max-w-full h-auto object-contain" />
-              </div>
+            <div className="max-h-[70vh] overflow-hidden rounded-xl border border-white/10 bg-[var(--surface-deep)]/60">
+              {url.toLowerCase().endsWith(".pdf") ? (
+                <iframe
+                  src={`${url}#toolbar=0&navpanes=0`}
+                  className="w-full h-[70vh] border-0"
+                  title="PDF Preview"
+                />
+              ) : (
+                <div className="overflow-auto p-3 h-full">
+                  <div
+                    className={`origin-top-left ${clampedZoom > 1 ? "cursor-grab" : ""} ${isPanning ? "cursor-grabbing" : ""}`}
+                    style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${clampedZoom})` }}
+                    onPointerDown={(e) => {
+                      if (clampedZoom <= 1) return;
+                      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                      setIsPanning(true);
+                      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+                    }}
+                    onPointerMove={(e) => {
+                      if (!isPanning) return;
+                      setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
+                    }}
+                    onPointerUp={(e) => {
+                      if (!isPanning) return;
+                      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+                      setIsPanning(false);
+                    }}
+                    onPointerLeave={() => {
+                      if (isPanning) setIsPanning(false);
+                    }}
+                  >
+                    <img src={url} alt={alt} className="max-w-full h-auto object-contain" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : null}
