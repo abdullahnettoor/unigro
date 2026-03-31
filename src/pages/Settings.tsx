@@ -39,6 +39,7 @@ import {
     SelectValue
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { formatBytes, compressImage } from "@/lib/image-compression";
 import {
     getThemePreference,
     getThemeVariant,
@@ -158,6 +159,7 @@ export function Settings() {
     const [idType, setIdType] = useState("Aadhaar");
     const [idNumber, setIdNumber] = useState("");
     const [error, setError] = useState("");
+    const [isCompressing, setIsCompressing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // ── Theme state ──
@@ -224,12 +226,36 @@ export function Settings() {
     }
 
     // ── Handlers ──
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
-        if (selected) {
-            if (selected.size > 5 * 1024 * 1024) { setError("File size must be less than 5MB"); return; }
-            setFile(selected);
-            setError("");
+        if (!selected) return;
+
+        if (selected.size > 10 * 1024 * 1024) {
+            setError("File size must be less than 10MB");
+            return;
+        }
+
+        setIsCompressing(true);
+        setError("");
+
+        try {
+            const originalSize = selected.size;
+            // Target 100-200kb with 0.5 quality and 1000px max dimension
+            const compressed = await compressImage(selected, { 
+                quality: 0.5,
+                maxWidth: 1000,
+                maxHeight: 1000 
+            });
+            const compressedSize = compressed.size;
+
+            console.log(`[Compression Profile] ${selected.name}: ${formatBytes(originalSize)} -> ${formatBytes(compressedSize)} (${Math.round((1 - compressedSize / originalSize) * 100)}% reduction)`);
+
+            setFile(compressed);
+        } catch (err) {
+            console.error("Compression failed:", err);
+            setFile(selected); // Fallback
+        } finally {
+            setIsCompressing(false);
         }
     };
 
@@ -568,7 +594,17 @@ export function Settings() {
                                         )}
                                     >
                                         <div className="flex flex-col items-center justify-center gap-3 text-center px-4 relative z-10">
-                                            {file ? (
+                                            {isCompressing ? (
+                                                <>
+                                                    <div className="h-12 w-12 rounded-2xl bg-[var(--surface-1)] flex items-center justify-center text-[var(--accent-vivid)]">
+                                                        <Icons.LoadingIcon className="h-6 w-6 animate-spin" />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-xs font-bold text-[var(--accent-vivid)] uppercase tracking-widest">Optimizing...</p>
+                                                        <p className="text-[10px] text-[var(--text-muted)] font-medium">Reducing size for faster upload</p>
+                                                    </div>
+                                                </>
+                                            ) : file ? (
                                                 <>
                                                     <div className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-black/5 flex items-center justify-center text-[var(--accent-vivid)]">
                                                         <FileText size={24} />
@@ -596,7 +632,7 @@ export function Settings() {
 
                                 {error && <p className="px-2 text-[10px] font-bold text-red-500 uppercase tracking-wider">{error}</p>}
 
-                                <Button type="submit" disabled={!isOnline || isUploading || !file || !idNumber} className="w-full h-12 rounded-[18px] font-bold text-sm shadow-xl shadow-[var(--accent-vivid)]/10">
+                                <Button type="submit" disabled={!isOnline || isUploading || isCompressing || !file || !idNumber} className="w-full h-12 rounded-[18px] font-bold text-sm shadow-xl shadow-[var(--accent-vivid)]/10">
                                     {isUploading ? <LogoLoader size="sm" /> : "Request Verification"}
                                 </Button>
                             </form>

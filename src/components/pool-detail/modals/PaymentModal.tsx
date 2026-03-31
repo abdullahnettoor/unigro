@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { formatCurrency, cn } from "@/lib/utils";
+import { formatBytes, compressImage } from "@/lib/image-compression";
 import { api } from "@convex/api";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { Id } from "@convex/dataModel";
@@ -75,6 +76,7 @@ export function PaymentModal({
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split("T")[0]);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [cashConfirmed, setCashConfirmed] = useState(false);
@@ -156,19 +158,49 @@ export function PaymentModal({
     };
   }, [open, poolId, seatId, roundIndex, feedback]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
-    if (selected.size > 5 * 1024 * 1024) {
-      setError("File size must be less than 5MB");
+
+    if (selected.size > 10 * 1024 * 1024) {
+      setError("File size must be less than 10MB");
       return;
     }
-    setFile(selected);
+
+    setIsCompressing(true);
     setError("");
 
-    const reader = new FileReader();
-    reader.onloadend = () => setFilePreview(reader.result as string);
-    reader.readAsDataURL(selected);
+    try {
+      const originalSize = selected.size;
+      // Target 100-200kb with 0.5 quality and 1000px max dimension
+      const compressed = await compressImage(selected, { 
+        quality: 0.5,
+        maxWidth: 1000,
+        maxHeight: 1000 
+      });
+      const compressedSize = compressed.size;
+
+      console.log(`[Compression] ${selected.name}: ${formatBytes(originalSize)} -> ${formatBytes(compressedSize)} (${Math.round((1 - compressedSize / originalSize) * 100)}% reduction)`);
+
+      setFile(compressed);
+
+      if (compressed.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onloadend = () => setFilePreview(reader.result as string);
+        reader.readAsDataURL(compressed);
+      } else {
+        setFilePreview(null);
+      }
+    } catch (err) {
+      console.error("Compression failed:", err);
+      // Fallback to original if compression fails
+      setFile(selected);
+      const reader = new FileReader();
+      reader.onloadend = () => setFilePreview(reader.result as string);
+      reader.readAsDataURL(selected);
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -443,13 +475,18 @@ export function PaymentModal({
                       <div className="space-y-2.5">
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1">Upload screenshot</p>
                         <div
-                          onClick={() => !isSubmitting && fileInputRef.current?.click()}
+                          onClick={() => !isSubmitting && !isCompressing && fileInputRef.current?.click()}
                           className={cn(
                             "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-300 p-8 text-center",
                             file ? "border-[var(--accent-vivid)]/40 bg-[var(--accent-vivid)]/[0.03]" : "border-[var(--border-subtle)] bg-[var(--surface-2)]/40 hover:bg-[var(--surface-3)]/60 cursor-pointer"
                           )}
                         >
-                          {filePreview ? (
+                          {isCompressing ? (
+                            <div className="flex flex-col items-center gap-3">
+                                <Icons.LoadingIcon className="h-6 w-6 animate-spin text-[var(--accent-vivid)]" />
+                                <span className="text-[10px] font-bold text-[var(--accent-vivid)] uppercase tracking-widest">Optimizing...</span>
+                            </div>
+                          ) : filePreview ? (
                             <div className="space-y-3">
                               <img src={filePreview} alt="Preview" className="h-24 w-auto rounded-xl border border-[var(--border-subtle)] mx-auto object-cover" />
                               <p className="text-xs font-mono text-[var(--text-muted)] truncate max-w-[200px] mx-auto">{file?.name}</p>
@@ -463,7 +500,7 @@ export function PaymentModal({
                               <p className="text-[10px] text-[var(--text-muted)] mt-1 tracking-tight">JPEG or PNG up to 5MB</p>
                             </>
                           )}
-                          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isCompressing} />
                         </div>
                       </div>
 
@@ -526,13 +563,18 @@ export function PaymentModal({
                   <div className="space-y-2.5">
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1">Upload Receipt</p>
                     <div
-                      onClick={() => !isSubmitting && fileInputRef.current?.click()}
+                      onClick={() => !isSubmitting && !isCompressing && fileInputRef.current?.click()}
                       className={cn(
                         "relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-300 p-8 text-center",
                         file ? "border-[var(--accent-vivid)]/40 bg-[var(--accent-vivid)]/[0.03]" : "border-[var(--border-subtle)] bg-[var(--surface-2)]/40 hover:bg-[var(--surface-3)]/60 cursor-pointer"
                       )}
                     >
-                      {filePreview ? (
+                      {isCompressing ? (
+                        <div className="flex flex-col items-center gap-3">
+                            <Icons.LoadingIcon className="h-6 w-6 animate-spin text-[var(--accent-vivid)]" />
+                            <span className="text-[10px] font-bold text-[var(--accent-vivid)] uppercase tracking-widest">Optimizing...</span>
+                        </div>
+                      ) : filePreview ? (
                         <div className="space-y-3">
                           <img src={filePreview} alt="Preview" className="h-24 w-auto rounded-xl border border-[var(--border-subtle)] mx-auto object-cover" />
                           <p className="text-xs font-mono text-[var(--text-muted)] truncate max-w-[200px] mx-auto">{file?.name}</p>
@@ -546,7 +588,7 @@ export function PaymentModal({
                           <p className="text-[10px] text-[var(--text-muted)] mt-1 tracking-tight">JPEG or PNG up to 5MB</p>
                         </>
                       )}
-                      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isCompressing} />
                     </div>
                   </div>
 
