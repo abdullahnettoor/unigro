@@ -18,8 +18,10 @@ import {
     CircleDollarSign,
     Clock,
     Coins,
+    Contact,
     Copy,
     CreditCard,
+
     Download,
     Edit2,
     Filter,
@@ -113,7 +115,9 @@ export const DownloadIcon = Download;        // Export / download PDF
 export const SearchIcon = Search;           // Search in lists
 export const FilterIcon = Filter;           // Filter results
 export const SortIcon = SlidersHorizontal;  // Sort / sort options
+export const ContactIcon = Contact;         // Web Contact Picker trigger
 export const StartDateIcon = CalendarDays;  // Pool start date picker
+
 export const CloseIcon = X;                 // Dismiss / close a sheet or modal
 
 // ─── Navigation helpers ───────────────────────────────────────────────────────

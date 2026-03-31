@@ -12,7 +12,9 @@ import { Surface } from "@/components/ui/Surface";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { formatCurrency } from "@/lib/utils";
+import { isContactPickerSupported, selectContact } from "@/lib/contact-picker";
 import { api } from "@convex/api";
+
 import type { Id } from "@convex/dataModel";
 
 interface JoinPoolModalProps {
@@ -66,6 +68,20 @@ export function JoinPoolModal({
     isGuest: boolean;
     guestName?: string;
   } | null>(null);
+
+  const handleContactPicker = async (isGuest: boolean) => {
+    const result = await selectContact();
+    if (result) {
+      if (isGuest) {
+        if (result.name) setGuestName(result.name);
+        if (result.phone) setGuestPhone(result.phone);
+      } else {
+        if (result.name) setLocalName(result.name);
+        if (result.phone) setLocalPhone(result.phone);
+      }
+    }
+  };
+
 
   const availableSeats = Math.max(totalSeats - filledSeats, 0);
   const totalCommitment = contribution * selectedSeatCount;
@@ -279,7 +295,20 @@ export function JoinPoolModal({
 
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] ml-1">Your Name</label>
+                  <div className="flex items-center justify-between ml-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Your Name</label>
+                    {isContactPickerSupported() && (
+                      <button
+                        type="button"
+                        onClick={() => handleContactPicker(true)}
+                        className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-vivid)] hover:opacity-80 transition-opacity flex items-center gap-1.5 py-0.5"
+                      >
+                        <Icons.ContactIcon size={12} className="text-[var(--accent-vivid)]" />
+                        <span>Select Contact</span>
+                      </button>
+                    )}
+                  </div>
+
                   <Input
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
@@ -314,7 +343,20 @@ export function JoinPoolModal({
 
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] ml-1">Your Name</label>
+                  <div className="flex items-center justify-between ml-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Your Name</label>
+                    {isContactPickerSupported() && (
+                      <button
+                        type="button"
+                        onClick={() => handleContactPicker(false)}
+                        className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-vivid)] hover:opacity-80 transition-opacity flex items-center gap-1.5 py-0.5"
+                      >
+                        <Icons.ContactIcon size={12} className="text-[var(--accent-vivid)]" />
+                        <span>Select Contact</span>
+                      </button>
+                    )}
+                  </div>
+
                   <Input
                     value={localName}
                     onChange={(e) => setLocalName(e.target.value)}

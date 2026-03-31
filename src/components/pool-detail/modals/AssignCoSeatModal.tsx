@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/select";
 import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { isContactPickerSupported, selectContact } from "@/lib/contact-picker";
 import { api } from "@convex/api";
+
 import type { Id } from "@convex/dataModel";
 import type { PoolSeat } from "../types";
 
@@ -40,6 +42,15 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats, isVer
   const [phone, setPhone] = useState("");
   const [shareInput, setShareInput] = useState("50");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleContactPicker = async () => {
+    const result = await selectContact();
+    if (result) {
+      if (result.name) setName(result.name);
+      if (result.phone) setPhone(result.phone);
+    }
+  };
+
 
   // Auto-select first available co-seat or open seat
   useEffect(() => {
@@ -148,7 +159,20 @@ export function AssignCoSeatModal({ open, onOpenChange, poolId, fullSeats, isVer
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)] ml-1">Full Name</label>
+                <div className="flex items-center justify-between ml-1">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)]">Full Name</label>
+                  {isContactPickerSupported() && (
+                    <button
+                      type="button"
+                      onClick={handleContactPicker}
+                      className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-vivid)] hover:opacity-80 transition-opacity flex items-center gap-1.5 py-0.5"
+                    >
+                      <Icons.ContactIcon size={12} className="text-[var(--accent-vivid)]" />
+                      <span>Select Contact</span>
+                    </button>
+                  )}
+                </div>
+
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}

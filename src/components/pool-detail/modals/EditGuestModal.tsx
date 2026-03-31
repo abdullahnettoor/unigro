@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { isContactPickerSupported, selectContact } from "@/lib/contact-picker";
 import { api } from "@convex/api";
+
 import type { Id } from "@convex/dataModel";
 
 interface EditGuestModalProps {
@@ -24,6 +26,15 @@ export function EditGuestModal({ open, onOpenChange, guestId, initialName, initi
   const [name, setName] = useState(initialName || "");
   const [phone, setPhone] = useState(initialPhone || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleContactPicker = async () => {
+    const result = await selectContact();
+    if (result) {
+      if (result.name) setName(result.name);
+      if (result.phone) setPhone(result.phone);
+    }
+  };
+
 
   useEffect(() => {
     if (open) {
@@ -66,7 +77,20 @@ export function EditGuestModal({ open, onOpenChange, guestId, initialName, initi
           <div className="flex-1 overflow-y-auto min-h-0 px-7 pb-7 space-y-5 scrollbar-hide overscroll-contain">
             <div className="mt-6 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)] ml-1">Full Name</label>
+                <div className="flex items-center justify-between ml-1">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--text-muted)]">Full Name</label>
+                  {isContactPickerSupported() && (
+                    <button
+                      type="button"
+                      onClick={handleContactPicker}
+                      className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-vivid)] hover:opacity-80 transition-opacity flex items-center gap-1.5 py-0.5"
+                    >
+                      <Icons.ContactIcon size={12} className="text-[var(--accent-vivid)]" />
+                      <span>Select Contact</span>
+                    </button>
+                  )}
+                </div>
+
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
