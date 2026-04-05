@@ -53,7 +53,9 @@ import { useEntitlements } from "@/hooks/useEntitlements";
 
 import { api } from "../../convex/_generated/api";
 
-const APP_VERSION = "0.0.1";
+import pkg from "../../package.json";
+
+const APP_VERSION = pkg.version;
 const SETTINGS_CACHE_KEY = "unigro_settings_cache";
 
 type SettingsUserSnapshot = {

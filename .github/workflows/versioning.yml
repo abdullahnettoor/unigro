@@ -1,0 +1,54 @@
+name: Semantic Versioning and Tagging
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump-version:
+    # Protect against infinite loops if "skip ci" fails for any reason
+    if: "!startsWith(github.event.head_commit.message, 'Bump version')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # A token is needed to push back to the repository
+          # We need fetch-depth 0 to let the git tools work properly
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configure Git Variables
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run version bump
+        run: |
+          # Check the commit message for major or minor keywords. Default to patch.
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          
+          if [[ "$COMMIT_MSG" == *"[major]"* ]]; then
+            echo "Major bump detected in commit message"
+            BUMP_TYPE="major"
+          elif [[ "$COMMIT_MSG" == *"[minor]"* ]]; then
+            echo "Minor bump detected in commit message"
+            BUMP_TYPE="minor"
+          else
+            echo "Defaulting to patch bump"
+            BUMP_TYPE="patch"
+          fi
+          
+          # npm version automatically creates a git commit and a git tag
+          npm version $BUMP_TYPE -m "Bump version to %s [skip ci]"
+          
+          # Push the commit and the tags back to main
+          git push origin main --follow-tags
