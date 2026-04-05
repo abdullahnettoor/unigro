@@ -5,11 +5,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Surface } from "@/components/ui/Surface";
+import { SelectionControl } from "@/components/ui/selection-control";
 
 interface NextRoundModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdvance: (nextDrawDate: number) => Promise<void>;
+  onAdvance: (nextDrawDate: number, markAllAsPaid: boolean) => Promise<void>;
   canAdvance?: boolean;
   advanceHint?: string;
 }
@@ -22,17 +23,19 @@ export function NextRoundModal({
   advanceHint,
 }: NextRoundModalProps) {
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [markAllAsPaid, setMarkAllAsPaid] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAdvance = async () => {
     setIsSubmitting(true);
     try {
-      await onAdvance(new Date(date).getTime());
+      await onAdvance(new Date(date).getTime(), markAllAsPaid);
       onOpenChange(false);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -66,6 +69,21 @@ export function NextRoundModal({
               <DatePicker value={date} onChange={setDate} />
             </div>
 
+            <div 
+              className="flex items-center gap-3 p-3.5 rounded-2xl bg-[var(--surface-deep)]/40 border border-[var(--border-subtle)]/30 cursor-pointer active:scale-[0.98] transition-all group"
+              onClick={() => setMarkAllAsPaid(!markAllAsPaid)}
+            >
+              <SelectionControl checked={markAllAsPaid} variant="checkbox" size="sm" />
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-vivid)] transition-colors">
+                  Mark all as paid
+                </span>
+                <span className="text-[10px] text-[var(--text-muted)] leading-tight">
+                  Record online payments for all members for this round.
+                </span>
+              </div>
+            </div>
+
             <Button
               onClick={handleAdvance}
               disabled={isSubmitting || !canAdvance}
@@ -93,5 +111,6 @@ export function NextRoundModal({
         </div>
       </DialogContent>
     </Dialog>
+
   );
 }

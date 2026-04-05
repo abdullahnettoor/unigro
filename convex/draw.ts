@@ -53,6 +53,7 @@ export const advanceRound = mutation({
     args: {
         poolId: v.id("pools"),
         nextDrawDate: v.number(),
+        markAllAsPaid: v.optional(v.boolean()),
     },
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -75,6 +76,45 @@ export const advanceRound = mutation({
 
         if (!winner) throw new Error("No winner selected for current round");
 
+        // 1. Optional Bulk Payment Recording
+        if (args.markAllAsPaid) {
+            const recordDate = pool.nextDrawDate ?? pool.startDate ?? Date.now();
+            const seats = await ctx.db
+                .query("seats")
+                .withIndex("by_pool", (q) => q.eq("poolId", args.poolId))
+                .collect();
+
+            const existingTxs = await ctx.db
+                .query("transactions")
+                .withIndex("by_pool_round", (q) =>
+                    q.eq("poolId", args.poolId).eq("roundIndex", pool.currentRound)
+                )
+                .collect();
+
+            const paidSeatIds = new Set(
+                existingTxs.filter((tx) => tx.status === "PAID").map((tx) => tx.seatId)
+            );
+
+            for (const seat of seats) {
+                // If the seat is occupied and hasn't paid yet for this round
+                if (
+                    (seat.status === "FILLED" || seat.status === "RESERVED") &&
+                    !paidSeatIds.has(seat._id)
+                ) {
+                    await ctx.db.insert("transactions", {
+                        poolId: args.poolId,
+                        seatId: seat._id,
+                        roundIndex: pool.currentRound,
+                        userId: seat.userId ?? undefined,
+                        status: "PAID",
+                        type: "online",
+                        paidAt: recordDate,
+                        remarks: "Auto-marked by Organizer during round advancement",
+                    });
+                }
+            }
+        }
+
         const isLast = pool.currentRound >= pool.config.duration;
 
         await ctx.db.patch(args.poolId, {
@@ -84,3 +124,4 @@ export const advanceRound = mutation({
         });
     },
 });
+

@@ -264,19 +264,20 @@ export function PoolDetail() {
     }
   };
 
-  const handleAdvanceRound = async (nextDraw: number) => {
+  const handleAdvanceRound = async (nextDraw: number, markAllAsPaid: boolean) => {
     if (!hasWinnerForCurrentRound) {
       feedback.toast.info("Winner required", "Pick a winner for this round before advancing.");
       return;
     }
     try {
-      await advanceRound({ poolId: pool._id, nextDrawDate: nextDraw });
+      await advanceRound({ poolId: pool._id, nextDrawDate: nextDraw, markAllAsPaid });
       feedback.toast.success("Round advanced", "Next round has started.");
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "Failed to advance round.";
       feedback.toast.error("Advance failed", msg);
     }
   };
+
 
   const handleDeleteSeat = async (seatNumber: number) => {
     try {
@@ -648,6 +649,7 @@ export function PoolDetail() {
           canAdvance={hasWinnerForCurrentRound}
           advanceHint="Pick a winner for the current round before advancing."
         />
+
 
         {showDrawAnimation && (
           <RunDrawAnimationModal
