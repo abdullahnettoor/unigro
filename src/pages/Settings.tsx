@@ -486,33 +486,49 @@ export function Settings() {
 
                     {/* Verification Status Banner */}
                     <div className={cn(
-                        "mx-4 mb-4 flex items-center gap-4 rounded-2xl border p-4",
+                        "mx-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border p-4",
                         status === "VERIFIED" ? "bg-green-500/5 border-green-500/10 text-green-600" :
                             status === "PENDING" ? "bg-[var(--warning)]/5 border-[var(--warning)]/10 text-[var(--warning)]" :
                                 status === "REJECTED" ? "bg-red-500/5 border-red-500/10 text-red-500" :
                                     "bg-[var(--surface-3)]/40 border-[var(--border-subtle)]/50 text-[var(--text-muted)]"
                     )}>
-                        <div className={cn(
-                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                            status === "VERIFIED" ? "bg-green-500/10" :
-                                status === "PENDING" ? "bg-[var(--warning)]/10" :
-                                    status === "REJECTED" ? "bg-red-500/10" :
-                                        "bg-[var(--surface-1)]"
-                        )}>
-                            {status === "VERIFIED" ? <ShieldCheck size={20} /> :
-                                status === "PENDING" ? <Clock size={20} /> :
-                                    status === "REJECTED" ? <AlertCircle size={20} /> :
-                                        <Icons.HistoryIcon size={20} />}
+                        <div className="flex items-center gap-4 flex-1">
+                            <div className={cn(
+                                "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+                                status === "VERIFIED" ? "bg-green-500/10" :
+                                    status === "PENDING" ? "bg-[var(--warning)]/10" :
+                                        status === "REJECTED" ? "bg-red-500/10" :
+                                            "bg-[var(--surface-1)]"
+                            )}>
+                                {status === "VERIFIED" ? <ShieldCheck size={20} /> :
+                                    status === "PENDING" ? <Clock size={20} /> :
+                                        status === "REJECTED" ? <AlertCircle size={20} /> :
+                                            <Icons.HistoryIcon size={20} />}
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-xs font-bold uppercase tracking-wider mb-0.5 opacity-80">Identity Status</p>
+                                <p className="text-sm font-bold tracking-tight">
+                                    {status === "VERIFIED" ? "Fully Verified Member" :
+                                        status === "PENDING" ? "Verification In Progress" :
+                                            status === "REJECTED" ? "Verification Flagged" :
+                                                "Identity Unverified"}
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <p className="text-xs font-bold uppercase tracking-wider mb-0.5 opacity-80">Identity Status</p>
-                            <p className="text-sm font-bold tracking-tight">
-                                {status === "VERIFIED" ? "Fully Verified Member" :
-                                    status === "PENDING" ? "Verification In Progress" :
-                                        status === "REJECTED" ? "Verification Flagged" :
-                                            "Identity Unverified"}
-                            </p>
-                        </div>
+
+                        {status === "PENDING" && (
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="shrink-0 w-full sm:w-auto rounded-xl bg-transparent border-[var(--warning)]/30 text-[var(--warning)] hover:bg-[var(--warning)]/10 hover:text-[var(--warning)] text-[10px] uppercase font-bold tracking-widest shadow-sm px-4 h-9 transition-colors"
+                                onClick={() => {
+                                    const text = encodeURIComponent(`Hi UniGro team,\n\nI have submitted my verification documents.\nName: ${effectiveUser.name}\nPhone: ${effectiveUser.phone}\n\nPlease review my application.`);
+                                    window.open(`https://wa.me/919061904860?text=${text}`, "_blank", "noopener,noreferrer");
+                                }}
+                            >
+                                Notify Admin
+                            </Button>
+                        )}
                     </div>
                 </div>
 
