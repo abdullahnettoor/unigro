@@ -5,6 +5,7 @@ import { useUser } from "@clerk/clerk-react";
 
 import { AdminRoute } from "./components/auth/AdminRoute";
 import { UserSync } from "./components/auth/UserSync";
+import { OnboardingGuard } from "./components/auth/OnboardingGuard";
 import { AppShell } from "./components/layout/AppShell";
 import { BottomNav } from "./components/layout/BottomNav";
 import { DesktopRail } from "./components/layout/DesktopRail";
@@ -151,9 +152,11 @@ function AppContent({ showDesign }: { showDesign: boolean }) {
               <Authenticated>
                 <UserSync />
                 <AuthenticatedPrefetch />
-                <MainLayout>
-                  <Dashboard />
-                </MainLayout>
+                <OnboardingGuard>
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
+                </OnboardingGuard>
               </Authenticated>
             </>
           }
@@ -177,9 +180,11 @@ function AppContent({ showDesign }: { showDesign: boolean }) {
               <Authenticated>
                 <UserSync />
               </Authenticated>
-              <MainLayout>
-                <Pools />
-              </MainLayout>
+              <OnboardingGuard>
+                <MainLayout>
+                  <Pools />
+                </MainLayout>
+              </OnboardingGuard>
             </ProtectedRoute>
           }
         />
@@ -190,9 +195,11 @@ function AppContent({ showDesign }: { showDesign: boolean }) {
               <Authenticated>
                 <UserSync />
               </Authenticated>
-              <MainLayout>
-                <SettingsPage />
-              </MainLayout>
+              <OnboardingGuard>
+                <MainLayout>
+                  <SettingsPage />
+                </MainLayout>
+              </OnboardingGuard>
             </ProtectedRoute>
           }
         />
@@ -203,9 +210,11 @@ function AppContent({ showDesign }: { showDesign: boolean }) {
               <Authenticated>
                 <UserSync />
               </Authenticated>
-              <MainLayout>
-                <CreatePool />
-              </MainLayout>
+              <OnboardingGuard>
+                <MainLayout>
+                  <CreatePool />
+                </MainLayout>
+              </OnboardingGuard>
             </ProtectedRoute>
           }
         />
@@ -216,9 +225,11 @@ function AppContent({ showDesign }: { showDesign: boolean }) {
               <Authenticated>
                 <UserSync />
               </Authenticated>
-              <MainLayout>
-                <CreateSuccess />
-              </MainLayout>
+              <OnboardingGuard>
+                <MainLayout>
+                  <CreateSuccess />
+                </MainLayout>
+              </OnboardingGuard>
             </ProtectedRoute>
           }
         />
@@ -230,9 +241,11 @@ function AppContent({ showDesign }: { showDesign: boolean }) {
                 <Authenticated>
                   <UserSync />
                 </Authenticated>
-                <MainLayout>
-                  <AdminDashboard />
-                </MainLayout>
+                <OnboardingGuard>
+                  <MainLayout>
+                    <AdminDashboard />
+                  </MainLayout>
+                </OnboardingGuard>
               </AdminRoute>
             </ProtectedRoute>
           }
