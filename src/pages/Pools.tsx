@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "convex/react";
 import { ArrowDownAZ, ArrowUpAZ, Plus, RotateCcw, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { api } from "@convex/api";
 import {
@@ -135,61 +136,81 @@ export function Pools() {
     >
       <div className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:px-8">
       <div className="sticky top-0 z-40 pb-3 pt-1">
-        <div
+        <motion.div
+          layout
+          initial={false}
+          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
           className={cn(
-            "rounded-[28px] transition-[background-color,border-color,box-shadow,padding] duration-200 ease-out",
+            "rounded-[28px] transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ease-out",
             scrolled
-              ? "bg-[rgba(var(--bg-app-rgb),0.84)] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.14)] backdrop-blur-xl supports-[backdrop-filter]:border supports-[backdrop-filter]:border-[var(--border-subtle)]/40"
+              ? "bg-[rgba(var(--bg-app-rgb),0.84)] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.14)] backdrop-blur-xl border border-[var(--border-subtle)]/40"
               : "bg-transparent px-0 py-0 border border-transparent shadow-none backdrop-blur-0"
           )}
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex items-center gap-3">
+          <motion.div layout className="flex items-start justify-between gap-4">
+            <motion.div layout className="min-w-0">
+              <motion.div layout className="flex items-center gap-3">
                 <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-2)]/55 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--text-muted)]">
                   Collection
                 </span>
                 <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-2)]/55 px-2.5 py-1 text-[10px] font-semibold text-[var(--text-muted)]">
                   {totalPools} pools
                 </span>
-              </div>
-              <h1
+              </motion.div>
+              <motion.h1
+                layout
                 className={cn(
-                  "mt-3 font-display font-bold leading-none text-[var(--text-primary)] transition-all duration-200 ease-out",
+                  "mt-3 font-display font-bold leading-none text-[var(--text-primary)]",
                   scrolled ? "text-[1.7rem]" : "text-[2.85rem]"
                 )}
+                style={{ transformOrigin: "top left" }}
               >
                 Your pools
-              </h1>
-              {!scrolled && (
-                <p className="mt-2 max-w-xl text-sm text-[var(--text-muted)]">
-                  Organize new pools, track joined ones, and filter your collection without
-                  losing context.
-                </p>
-              )}
-            </div>
-
-            <Link to="/create" className="shrink-0">
-              <span
-                className={cn(
-                  "inline-flex h-10 items-center justify-center rounded-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition-all duration-200 ease-out",
-                  scrolled ? "gap-0 px-3" : "gap-2 px-4"
+              </motion.h1>
+              
+              <AnimatePresence initial={false}>
+                {!scrolled && (
+                  <motion.p
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: "auto", marginTop: 8 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+                    className="max-w-xl text-sm text-[var(--text-muted)] overflow-hidden"
+                  >
+                    Organize new pools, track joined ones, and filter your collection without
+                    losing context.
+                  </motion.p>
                 )}
-              >
-                <Plus size={16} className="shrink-0" />
-                <span
-                  className={cn(
-                    "overflow-hidden whitespace-nowrap text-sm font-semibold transition-all duration-200 ease-out",
-                    scrolled ? "max-w-0 opacity-0" : "max-w-32 opacity-100"
-                  )}
-                >
-                  Create pool
-                </span>
-              </span>
-            </Link>
-          </div>
+              </AnimatePresence>
+            </motion.div>
 
-          <div className="mt-4">
+            <Link to="/create" className="shrink-0 flex items-start">
+              <motion.span
+                layout
+                className="inline-flex h-10 items-center justify-center rounded-full bg-[var(--accent-vivid)] text-[var(--text-on-accent)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] px-3"
+              >
+                <motion.div layout className="shrink-0 flex items-center justify-center">
+                  <Plus size={16} />
+                </motion.div>
+                <AnimatePresence initial={false}>
+                  {!scrolled && (
+                    <motion.span
+                      layout
+                      initial={{ width: 0, opacity: 0, marginLeft: 0 }}
+                      animate={{ width: "auto", opacity: 1, marginLeft: 8 }}
+                      exit={{ width: 0, opacity: 0, marginLeft: 0 }}
+                      transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+                      className="overflow-hidden whitespace-nowrap text-sm font-semibold inline-block"
+                    >
+                      Create pool
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.span>
+            </Link>
+          </motion.div>
+
+          <motion.div layout className="mt-4">
             <div className="glass-2 flex items-center rounded-[20px] border border-[var(--border-subtle)]/60 px-3">
               <Search size={16} className="shrink-0 text-[var(--text-muted)]" />
               <Input
@@ -200,8 +221,8 @@ export function Pools() {
                 className="border-0 bg-transparent px-3 shadow-none focus-visible:ring-0"
               />
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       <section className="mt-6 space-y-4">
