@@ -191,7 +191,14 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        onSelect(seat);
+        if (compact && !isHovered) {
+            // Mobile: Tap once to hover/show tooltip
+            onHover(seat);
+        } else {
+            // Mobile: Tap twice or Desktop: Click to select
+            onSelect(seat);
+            if (compact) onHover(null);
+        }
     };
 
     const [pulsePhase, setPulsePhase] = useState(0);
@@ -224,8 +231,8 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
     return (
         <motion.g
             onClick={handleClick}
-            onMouseEnter={() => onHover(seat)}
-            onMouseLeave={() => onHover(null)}
+            onMouseEnter={() => { if (!compact) onHover(seat); }}
+            onMouseLeave={() => { if (!compact) onHover(null); }}
             style={{ cursor: "pointer" }}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -461,6 +468,7 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
                     width="100%"
                     viewBox={`0 0 ${SIZE} ${SIZE}`}
                     style={{ overflow: "hidden", display: "block", contain: "layout paint" }}
+                    onClick={() => { if (isCompact) setHoveredSeat(null); }}
                 >
                     {/* Scene ambient glow */}
                     <circle cx={CX} cy={CY} r={190} fill="var(--surface-1)" opacity={0.3} />
@@ -481,7 +489,7 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
                     <CentralOrb pct={collectionProgress} round={currentRoundIndex} cx={CX} cy={CY} compact={isCompact} />
 
                     {/* Energy beam (hovered seat -> orb) */}
-                    {!isCompact && hoveredSeat && (() => {
+                    {hoveredSeat && (() => {
                         const idx = sortedSeats.findIndex(s => s._id === hoveredSeat._id);
                         const angle = seatAngles[idx];
                         const sPos = pointOnCircle(CX, CY, ORBIT_R, angle);
@@ -543,7 +551,7 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
 
                     {/* Tooltip */}
                     <AnimatePresence>
-                        {!isCompact && hoveredSeat && (() => {
+                        {hoveredSeat && (() => {
                             const idx = sortedSeats.findIndex(s => s._id === hoveredSeat._id);
                             const angle = seatAngles[idx];
                             const pos = pointOnCircle(CX, CY, ORBIT_R, angle);
