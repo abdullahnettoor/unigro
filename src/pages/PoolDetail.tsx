@@ -504,6 +504,7 @@ export function PoolDetail() {
                 transactions={transactions}
                 mySeats={mySeats}
                 currentUserId={currentUser?._id}
+                isOrganizer={isOrganizer}
                 onPay={(seatId, roundIndex, amount) => setPaymentState({ seatId: seatId as Id<"seats">, roundIndex, amount })}
               />
             )}

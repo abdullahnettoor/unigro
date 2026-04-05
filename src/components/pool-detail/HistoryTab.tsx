@@ -13,12 +13,13 @@ interface HistoryTabProps {
   transactions: PoolTransaction[];
   mySeats: PoolSeat[];
   currentUserId?: string;
+  isOrganizer?: boolean;
   onPay: (seatId: string, roundIndex: number, amount: number) => void;
 }
 
 type FilterType = "all" | "paid" | "pending" | "unpaid" | "payout";
 
-export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, onPay }: HistoryTabProps) {
+export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, isOrganizer, onPay }: HistoryTabProps) {
   const isActivePool = pool.status === "ACTIVE";
   const [filter, setFilter] = useState<FilterType>("all");
   const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>(() => {
@@ -61,12 +62,30 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
         (tx) => tx.roundIndex === roundIndex && tx.type === "payout" && tx.status === "PAID"
       );
 
+      const allStatuses = seats
+        .filter((seat) => seat.status === "FILLED" || seat.status === "RESERVED")
+        .sort((a, b) => a.seatNumber - b.seatNumber)
+        .map((seat) => {
+          const tx = transactions.find(
+            (t) => t.seatId === seat._id && t.roundIndex === roundIndex && t.type !== "payout"
+          );
+          
+          let seatName = seat.user?.name;
+          if (!seatName && seat.isCoSeat && seat.coOwners) {
+            seatName = seat.coOwners.map(co => co.userName).join(" & ");
+          }
+
+          const status = (tx?.status as "PAID" | "PENDING" | "UNPAID") || "UNPAID";
+          return { seat, status, tx, name: seatName || "Member" };
+        });
+
       return {
         roundIndex,
         winnerSeat,
         paidCount,
         activeSeatCount: totalEligibleShares,
         myStatuses,
+        allStatuses,
         isPayoutReleased,
       };
     });
@@ -74,10 +93,17 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
 
   const filteredCards = roundCards.filter((card) => {
     if (filter === "all") return true;
-    if (filter === "paid") return card.myStatuses.some((s) => s.status === "PAID");
-    if (filter === "pending") return card.myStatuses.some((s) => s.status === "PENDING");
-    if (filter === "unpaid") return card.myStatuses.some((s) => s.status === "UNPAID");
     if (filter === "payout") return card.isPayoutReleased;
+
+    if (isOrganizer) {
+      if (filter === "paid") return card.allStatuses.some((s) => s.status === "PAID");
+      if (filter === "pending") return card.allStatuses.some((s) => s.status === "PENDING");
+      if (filter === "unpaid") return card.allStatuses.some((s) => s.status === "UNPAID");
+    } else {
+      if (filter === "paid") return card.myStatuses.some((s) => s.status === "PAID");
+      if (filter === "pending") return card.myStatuses.some((s) => s.status === "PENDING");
+      if (filter === "unpaid") return card.myStatuses.some((s) => s.status === "UNPAID");
+    }
     return true;
   });
 
@@ -284,6 +310,54 @@ export function HistoryTab({ pool, seats, transactions, mySeats, currentUserId, 
                                         Pay
                                       </Button>
                                     )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {isOrganizer && (
+                        <div className={cn("space-y-2", card.myStatuses.length > 0 && "mt-6 pt-5 border-t border-[var(--border-subtle)]/40")}>
+                          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] px-1">Ledger • All Members</p>
+                          <div className="grid gap-2">
+                            {card.allStatuses.map((item) => {
+                              const methodLabel =
+                                item.tx?.type === "upi"
+                                  ? "UPI"
+                                  : item.tx?.type === "cash"
+                                    ? "Cash"
+                                    : item.tx?.type === "online"
+                                      ? "Online"
+                                      : null;
+                                      
+                              const isPaid = item.status === "PAID";
+                              
+                              return (
+                                <div
+                                  key={`ledger-${item.seat._id}-${card.roundIndex}`}
+                                  className="flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-3)]/40 border border-[var(--border-subtle)]/30 shadow-sm"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="h-8 w-8 rounded-lg bg-[var(--surface-deep)]/60 flex items-center justify-center text-[10px] font-bold text-[var(--text-muted)] border border-[var(--border-subtle)]/40">
+                                      #{item.seat.seatNumber}
+                                    </div>
+                                    <div className="flex flex-col max-w-[140px] sm:max-w-xs">
+                                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                                        {item.name}
+                                      </p>
+                                      {isPaid && methodLabel && (
+                                        <p className="text-[9px] text-[var(--text-muted)] font-medium mt-0.5 truncate flex items-center gap-1">
+                                          {item.tx?.type === "cash" ? <Icons.ContributionIcon size={8} /> : <Icons.TransactionIcon size={8} />}
+                                          <span>{methodLabel}</span>
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-3">
+                                    <PaymentStatusBadge status={item.status} />
                                   </div>
                                 </div>
                               );
