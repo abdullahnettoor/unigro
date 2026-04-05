@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { isValidPhoneNumber } from "react-phone-number-input";
+
 import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
 import { useRegisterSW } from "virtual:pwa-register/react";
@@ -30,7 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { LogoLoader } from "@/components/ui/LogoLoader";
-import { PhoneInputField } from "@/components/ui/PhoneInputField";
+
 import {
     Select,
     SelectContent,
@@ -169,7 +169,6 @@ export function Settings() {
     // ── Profile edit state ──
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [editName, setEditName] = useState("");
-    const [editPhone, setEditPhone] = useState("");
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [pricingOpen, setPricingOpen] = useState(false);
     const [isUpdatingPlanTier, setIsUpdatingPlanTier] = useState(false);
@@ -204,7 +203,6 @@ export function Settings() {
     useEffect(() => {
         if (effectiveUser && !isEditingProfile) {
             setEditName(effectiveUser.name || "");
-            setEditPhone(effectiveUser.phone || "");
         }
     }, [effectiveUser, isEditingProfile]);
 
@@ -282,10 +280,7 @@ export function Settings() {
             feedback.toast.info("Offline right now", "Reconnect before sending verification details.");
             return;
         }
-        if (!editPhone || !isValidPhoneNumber(editPhone)) {
-            setError("Please provide a valid phone number for identity matching.");
-            return;
-        }
+
         if (!file || !idNumber) {
             setError("Please provide ID Document and Number");
             return;
@@ -293,9 +288,7 @@ export function Settings() {
         setIsUploading(true);
         setError("");
         try {
-            // Ensure profile is updated with the phone number first
-            await updateProfile({ name: editName.trim() || effectiveUser.name, phone: editPhone });
-            
+
             const postUrl = await generateUploadUrl();
             const result = await fetch(postUrl, { method: "POST", headers: { "Content-Type": file.type }, body: file });
             if (!result.ok) throw new Error("Upload failed");
@@ -318,10 +311,10 @@ export function Settings() {
             return;
         }
         if (!editName.trim()) { feedback.toast.error("Invalid Name", "Name cannot be empty."); return; }
-        if (!editPhone || !isValidPhoneNumber(editPhone)) { feedback.toast.error("Invalid Phone", "Please enter a valid phone number."); return; }
+
         setIsSavingProfile(true);
         try {
-            await updateProfile({ name: editName.trim(), phone: editPhone });
+            await updateProfile({ name: editName.trim(), phone: effectiveUser.phone || "" });
             feedback.toast.success("Profile Updated", "Changes saved.");
             setIsEditingProfile(false);
         } catch (err) {
@@ -426,12 +419,16 @@ export function Settings() {
                                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
                                                 />
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <label className="px-1 text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Phone Number</label>
-                                                <PhoneInputField
-                                                    className="rounded-full"
-                                                    value={editPhone}
-                                                    onChange={setEditPhone}
+                                            <div className="space-y-1.5 relative group">
+                                                <label className="px-1 text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-between">
+                                                    Phone Number
+                                                    <span className="text-[9px] text-[var(--warning)] normal-case tracking-normal">Verification required to change</span>
+                                                </label>
+                                                <Input
+                                                    className="bg-[var(--surface-2)]/20 border-[var(--border-subtle)]/40 rounded-full h-11 px-5 text-[var(--text-muted)] cursor-not-allowed opacity-70"
+                                                    value={effectiveUser.phone || ""}
+                                                    disabled
+                                                    readOnly
                                                 />
                                             </div>
                                         </div>
@@ -572,16 +569,6 @@ export function Settings() {
                                             placeholder={idType === "Aadhaar" ? "0000 0000 0000" : "ABCDE1234F"}
                                         />
                                     </div>
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <label className="px-1 text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Phone Number</label>
-                                    <PhoneInputField
-                                        className="rounded-full h-11"
-                                        value={editPhone}
-                                        onChange={setEditPhone}
-                                    />
-                                    <p className="px-1 text-[9px] text-[var(--text-muted)] italic leading-relaxed font-medium">We link all your past contributions and winnings using this number.</p>
                                 </div>
 
                                 <div className="space-y-1.5">
