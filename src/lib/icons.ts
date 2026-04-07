@@ -21,7 +21,6 @@ import {
     Contact,
     Copy,
     CreditCard,
-
     Download,
     Edit2,
     Filter,
@@ -47,9 +46,9 @@ import {
     Shuffle,
     SlidersHorizontal,
     Ticket,
+    Trash2,
     TrendingUp,
     Trophy,
-    Trash2,
     UserPlus,
     Users,
     Wallet,

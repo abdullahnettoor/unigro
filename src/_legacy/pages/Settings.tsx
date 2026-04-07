@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
-import { useRegisterSW } from "virtual:pwa-register/react";
 import {
     AlertCircle,
     Bell,
@@ -24,6 +23,7 @@ import {
     Upload,
     X,
 } from "lucide-react";
+import { useRegisterSW } from "virtual:pwa-register/react";
 
 import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";

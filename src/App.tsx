@@ -1,18 +1,18 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 import { useUser } from "@clerk/clerk-react";
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 
 import { AdminRoute } from "./components/auth/AdminRoute";
-import { UserSync } from "./components/auth/UserSync";
 import { OnboardingGuard } from "./components/auth/OnboardingGuard";
+import { UserSync } from "./components/auth/UserSync";
 import { AppShell } from "./components/layout/AppShell";
 import { BottomNav } from "./components/layout/BottomNav";
 import { DesktopRail } from "./components/layout/DesktopRail";
 import { OfflineFallback } from "./components/shared/OfflineFallback";
 import { PWAPrompt } from "./components/shared/PWAPrompt";
-import { Toaster } from "./components/ui/sonner";
 import { LogoLoader } from "./components/ui/LogoLoader";
+import { Toaster } from "./components/ui/sonner";
 import { useNetworkStatus } from "./hooks/useNetworkStatus";
 
 // Lazy page imports

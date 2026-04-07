@@ -1,4 +1,4 @@
-import { v, ConvexError } from "convex/values";
+import { ConvexError,v } from "convex/values";
 
 import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
@@ -275,5 +275,86 @@ export const editGuest = mutation({
             name: args.name,
             phone: args.phone
         });
+    }
+});
+
+export const getAllAdmin = query({
+    args: {},
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new ConvexError("Unauthorized");
+        const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+        const normalizedAdmins = adminEmails.map((e: string) => e.trim());
+        if (!normalizedAdmins.includes(identity.email || "")) {
+            throw new ConvexError("Only admin accounts can perform this action.");
+        }
+        
+        const users = await ctx.db.query("users").order("desc").collect();
+        return await Promise.all(
+            users.map(async (u) => ({
+                ...u,
+                docUrl: u.verificationDocId ? await ctx.storage.getUrl(u.verificationDocId) : null,
+            }))
+        );
+    }
+});
+
+export const adminUpdateStatus = mutation({
+    args: {
+        userId: v.id("users"),
+        verificationStatus: v.union(v.literal("UNVERIFIED"), v.literal("PENDING"), v.literal("VERIFIED"), v.literal("REJECTED")),
+        adminNotes: v.optional(v.string())
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new ConvexError("Unauthorized");
+        const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+        const normalizedAdmins = adminEmails.map((e: string) => e.trim());
+        if (!normalizedAdmins.includes(identity.email || "")) {
+            throw new ConvexError("Only admin accounts can perform this action.");
+        }
+
+        await ctx.db.patch(args.userId, {
+            verificationStatus: args.verificationStatus,
+            adminNotes: args.adminNotes,
+        });
+    }
+});
+
+export const adminDeleteUser = mutation({
+    args: { userId: v.id("users") },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new ConvexError("Unauthorized");
+        const adminEmails = process.env.ADMIN_EMAILS?.split(",") || [];
+        const normalizedAdmins = adminEmails.map((e: string) => e.trim());
+        if (!normalizedAdmins.includes(identity.email || "")) {
+            throw new ConvexError("Only admin accounts can perform this action.");
+        }
+
+        const user = await ctx.db.get(args.userId);
+        if (!user) throw new ConvexError("User not found");
+
+        const organizedPools = await ctx.db
+            .query("pools")
+            .filter(q => q.eq(q.field("organizerId"), args.userId))
+            .collect();
+            
+        const seats = await ctx.db
+            .query("seats")
+            .withIndex("by_user", q => q.eq("userId", args.userId))
+            .collect();
+            
+        if (organizedPools.length > 0 || seats.length > 0) {
+            await ctx.db.patch(args.userId, {
+                clerkId: undefined,
+                email: undefined,
+                pictureUrl: undefined,
+                planTier: "free",
+                verificationStatus: "UNVERIFIED"
+            });
+        } else {
+            await ctx.db.delete(args.userId);
+        }
     }
 });

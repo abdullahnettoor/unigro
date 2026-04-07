@@ -1,9 +1,9 @@
-import { ArrowLeft, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Share2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { OrganizerBadge } from "@/components/pool-detail/OrganizerBadge";
 import type { PoolOrganizer } from "@/components/pool-detail/types";
+import { Button } from "@/components/ui/button";
 
 interface DetailHeaderProps {
     title: string;

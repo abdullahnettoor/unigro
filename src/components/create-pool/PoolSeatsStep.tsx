@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Percent } from "lucide-react";
 import CurrencyInput from "react-currency-input-field";
 // @ts-ignore
 import { getEmojiByCurrencyCode } from "country-currency-emoji-flags";
 import cc from "currency-codes";
+import { Percent } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SelectionControl } from "@/components/ui/selection-control";
-import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 import { SeatCountIcon } from "@/lib/icons";
+import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 
 type Frequency = "monthly" | "weekly" | "biweekly" | "quarterly" | "occasional";
 

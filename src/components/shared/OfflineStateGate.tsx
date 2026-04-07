@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { OfflineFallback } from "@/components/shared/OfflineFallback";
 import { LogoLoader } from "@/components/ui/LogoLoader";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 interface OfflineStateGateProps {
   ready: boolean;

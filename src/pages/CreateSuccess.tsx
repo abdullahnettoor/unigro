@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery } from "convex/react";
-
 import { api } from "@convex/api";
 import type { Id } from "@convex/dataModel";
-import { SuccessShell } from "@/components/shared/SuccessShell";
-import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
+import { useQuery } from "convex/react";
+
 import { useFeedback } from "@/components/shared/FeedbackProvider";
+import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
+import { SuccessShell } from "@/components/shared/SuccessShell";
 import { formatCurrency } from "@/lib/utils";
 
 type CreateSuccessState = {

@@ -1,5 +1,6 @@
-import { cn } from "@/lib/utils";
 import { getVirtualOpenSeats } from "@/lib/pool";
+import { cn } from "@/lib/utils";
+
 import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
 
 interface SeatGridProps {

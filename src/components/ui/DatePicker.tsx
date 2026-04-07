@@ -1,8 +1,8 @@
 import { format } from "date-fns";
-import * as Icons from "@/lib/icons";
 
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import * as Icons from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface DatePickerProps {

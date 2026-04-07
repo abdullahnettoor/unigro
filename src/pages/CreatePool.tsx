@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { api } from "@convex/api";
+import type { Id } from "@convex/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import { api } from "@convex/api";
-import type { Id } from "@convex/dataModel";
 import { PoolFinancialsStep } from "@/components/create-pool/PoolFinancialsStep";
-import { PoolSeatsStep } from "@/components/create-pool/PoolSeatsStep";
 import { PoolRulesStep } from "@/components/create-pool/PoolRulesStep";
-import { StepHeader } from "@/components/create-pool/StepHeader";
-import { StepFooterBar } from "@/components/create-pool/StepFooterBar";
+import { PoolSeatsStep } from "@/components/create-pool/PoolSeatsStep";
 import { PoolSummaryPanel } from "@/components/create-pool/PoolSummaryPanel";
+import { StepFooterBar } from "@/components/create-pool/StepFooterBar";
+import { StepHeader } from "@/components/create-pool/StepHeader";
 import { PricingModal } from "@/components/monetization/PricingModal";
 import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
 import { useEntitlements } from "@/hooks/useEntitlements";

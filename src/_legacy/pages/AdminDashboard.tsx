@@ -6,9 +6,9 @@ import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { MediaPreviewDialog } from "@/components/shared/MediaPreviewDialog";
 import { Button } from "@/components/ui/button";
+import { LogoLoader } from "@/components/ui/LogoLoader";
 import { Surface } from "@/components/ui/Surface";
 import { Textarea } from "@/components/ui/Textarea";
-import { LogoLoader } from "@/components/ui/LogoLoader";
 
 import { api } from "../../convex/_generated/api";
 

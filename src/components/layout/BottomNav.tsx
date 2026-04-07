@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
+
 import { NavHomeIcon, NavPoolsIcon, NavSettingsIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 

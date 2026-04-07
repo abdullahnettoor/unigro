@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { CheckCircle2, Mail, MessageCircle, ShieldCheck, WalletCards } from "lucide-react";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Surface } from "@/components/ui/Surface";
 import { startUpgrade } from "@/lib/billing";
 import type { EntitlementSnapshot } from "@/lib/entitlements";

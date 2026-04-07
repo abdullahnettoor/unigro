@@ -1,6 +1,7 @@
-import { Surface } from "@/components/ui/Surface";
 import { Button } from "@/components/ui/button";
+import { Surface } from "@/components/ui/Surface";
 import * as Icons from "@/lib/icons";
+
 import { OrbitVisualizer } from "./visualizers/OrbitVisualizer";
 import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
 

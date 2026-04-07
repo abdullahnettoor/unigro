@@ -1,7 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
+import { useEffect,useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { TrophyIcon } from "lucide-react";
+
 import { getCollectionProgress } from "@/lib/pool";
+
 import type { PoolDetail, PoolSeat, PoolTransaction } from "../types";
 
 export function seatIsUnallocated(seat: PoolSeat) {

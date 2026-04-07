@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { cn, formatCurrency } from "@/lib/utils";
-import { ArrowIcon } from "@/lib/icons";
+
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { ArrowIcon } from "@/lib/icons";
+import { cn, formatCurrency } from "@/lib/utils";
 
 export type PoolItem = {
   _id: string;

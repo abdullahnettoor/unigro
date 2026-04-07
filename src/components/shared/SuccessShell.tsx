@@ -1,8 +1,8 @@
 import * as React from "react";
 
-import { Surface } from "@/components/ui/Surface";
-import { Button } from "@/components/ui/button";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { Button } from "@/components/ui/button";
+import { Surface } from "@/components/ui/Surface";
 import { cn } from "@/lib/utils";
 
 type SuccessPlacement = "success-create" | "success-join";

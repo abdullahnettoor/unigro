@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
 import { formatCurrency } from "@/lib/utils";
+
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
 
 interface SeatCardProps {

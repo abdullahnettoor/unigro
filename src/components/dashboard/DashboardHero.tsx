@@ -1,5 +1,5 @@
-import { formatCurrency } from "@/lib/utils";
 import { TrendIcon } from "@/lib/icons";
+import { formatCurrency } from "@/lib/utils";
 
 function getGreeting() {
   const h = new Date().getHours();

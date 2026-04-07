@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { ShieldAlert, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { ArrowRight,ShieldAlert } from "lucide-react";
 
 interface VerificationGuardProps {
     status: "UNVERIFIED" | "PENDING" | "REJECTED" | "VERIFIED";

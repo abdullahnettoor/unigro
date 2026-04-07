@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useQuery } from "convex/react";
+
 import { LogoLoader } from "@/components/ui/LogoLoader";
 
 import { api } from "../../../convex/_generated/api";

@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
-import * as Icons from "@/lib/icons";
-import { Surface } from "@/components/ui/Surface";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
 import type { Id } from "@convex/dataModel";
+
+import { Button } from "@/components/ui/button";
+import { Surface } from "@/components/ui/Surface";
+import * as Icons from "@/lib/icons";
+import { cn } from "@/lib/utils";
+
+import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
 
 interface MembersTabProps {
   pool: PoolDetail;

@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { SelectionControl } from "@/components/ui/selection-control";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface PoolFinancialsStepProps {

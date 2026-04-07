@@ -1,21 +1,20 @@
 import { useMemo, useState } from "react";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { useNavigate } from "react-router-dom";
-import * as Icons from "@/lib/icons";
+import { api } from "@convex/api";
+import type { Id } from "@convex/dataModel";
 import { useMutation } from "convex/react";
 
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { PhoneInputField } from "@/components/ui/PhoneInputField";
 import { Surface } from "@/components/ui/Surface";
-import { useFeedback } from "@/components/shared/FeedbackProvider";
-import { AdSlot } from "@/components/monetization/AdSlot";
-import { formatCurrency } from "@/lib/utils";
 import { isContactPickerSupported, selectContact } from "@/lib/contact-picker";
-import { api } from "@convex/api";
-
-import type { Id } from "@convex/dataModel";
+import * as Icons from "@/lib/icons";
+import { formatCurrency } from "@/lib/utils";
 
 interface JoinPoolModalProps {
   open: boolean;

@@ -1,10 +1,12 @@
 import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
+
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
 import { formatCurrency } from "@/lib/utils";
-import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
+
 import { SeatCard } from "./SeatCard";
+import type { PoolDetail, PoolSeat, PoolTransaction } from "./types";
 
 interface OverviewTabProps {
   pool: PoolDetail;

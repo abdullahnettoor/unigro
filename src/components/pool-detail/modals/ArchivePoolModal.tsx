@@ -1,6 +1,6 @@
-import * as Icons from "@/lib/icons";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import * as Icons from "@/lib/icons";
 
 interface ArchivePoolModalProps {
     open: boolean;

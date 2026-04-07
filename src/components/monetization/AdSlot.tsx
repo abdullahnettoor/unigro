@@ -3,8 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
 import { useEntitlements } from "@/hooks/useEntitlements";
-import { cn } from "@/lib/utils";
 import * as Icons from "@/lib/icons";
+import { cn } from "@/lib/utils";
 
 declare global {
   interface Window {

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import * as Icons from "@/lib/icons";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Surface } from "@/components/ui/Surface";
+import * as Icons from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface WinnerSelectionModalProps {

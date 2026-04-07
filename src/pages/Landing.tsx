@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, SignOutButton } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
+import { SignedIn, SignedOut, SignInButton, SignOutButton,SignUpButton } from "@clerk/clerk-react";
 import {
   motion,
   useInView,

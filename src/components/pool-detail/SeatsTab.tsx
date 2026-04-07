@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
-import * as Icons from "@/lib/icons";
+import type { Id } from "@convex/dataModel";
+
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
+import * as Icons from "@/lib/icons";
 import { getVirtualOpenSeats } from "@/lib/pool";
 import { cn } from "@/lib/utils";
+
 import type { PoolDetail, PoolSeat } from "./types";
-import type { Id } from "@convex/dataModel";
 
 interface SeatsTabProps {
   pool: PoolDetail;

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
+import { api } from "@convex/api";
 import { useQuery } from "convex/react";
 
-import { api } from "@convex/api";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { ENTITLEMENTS_CACHE_KEY, FREE_ENTITLEMENTS, type EntitlementSnapshot } from "@/lib/entitlements";
+import { ENTITLEMENTS_CACHE_KEY, type EntitlementSnapshot,FREE_ENTITLEMENTS } from "@/lib/entitlements";
 
 export function useEntitlements() {
   const queryValue = useQuery(api.users.getEntitlements) as EntitlementSnapshot | undefined;

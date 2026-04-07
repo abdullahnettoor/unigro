@@ -1,16 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "convex/react";
-import { ArrowDownAZ, ArrowUpAZ, Plus, RotateCcw, Search } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-
 import { api } from "@convex/api";
-import {
-  DraftIcon,
-  LoadingIcon,
-} from "@/lib/icons";
-import { getProgressScore } from "@/lib/pool";
-import { cn } from "@/lib/utils";
+import { useQuery } from "convex/react";
+import { AnimatePresence,motion } from "framer-motion";
+import { ArrowDownAZ, ArrowUpAZ, Plus, RotateCcw, Search } from "lucide-react";
+
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
 import { AdSlot } from "@/components/monetization/AdSlot";
@@ -26,6 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEntitlements } from "@/hooks/useEntitlements";
+import {
+  DraftIcon,
+  LoadingIcon,
+} from "@/lib/icons";
+import { getProgressScore } from "@/lib/pool";
+import { cn } from "@/lib/utils";
 
 type RoleFilter = "all" | "organizing" | "joined";
 type Status = "draft" | "active" | "completed" | "archived";

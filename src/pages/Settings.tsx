@@ -1,36 +1,32 @@
 import { useEffect, useRef, useState } from "react";
-
 import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
-import { useRegisterSW } from "virtual:pwa-register/react";
-import { motion, AnimatePresence } from "framer-motion";
-import * as Icons from "@/lib/icons";
+import { AnimatePresence,motion } from "framer-motion";
 import {
+    AlertCircle,
+    CheckCircle2,
     ChevronRight,
+    Clock,
     FileText,
     LogOut,
     Mail,
-    Smartphone,
-    Upload,
+    Monitor,
+    Moon,
     ShieldCheck,
-    AlertCircle,
-    CheckCircle2,
-    Clock,
+    Smartphone,
     SmartphoneIcon,
     Sun,
-    Moon,
-    Monitor
-} from "lucide-react";
+    Upload} from "lucide-react";
+import { useRegisterSW } from "virtual:pwa-register/react";
 
-import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { PricingModal } from "@/components/monetization/PricingModal";
+import { useFeedback } from "@/components/shared/FeedbackProvider";
 import { OfflineFallback } from "@/components/shared/OfflineFallback";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { LogoLoader } from "@/components/ui/LogoLoader";
-
 import {
     Select,
     SelectContent,
@@ -38,8 +34,10 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { formatBytes, compressImage } from "@/lib/image-compression";
+import { useEntitlements } from "@/hooks/useEntitlements";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import * as Icons from "@/lib/icons";
+import { compressImage,formatBytes } from "@/lib/image-compression";
 import {
     getThemePreference,
     getThemeVariant,
@@ -48,11 +46,9 @@ import {
     type ThemePreference,
     type ThemeVariant
 } from "@/lib/theme";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { useEntitlements } from "@/hooks/useEntitlements";
+import { cn } from "@/lib/utils";
 
 import { api } from "../../convex/_generated/api";
-
 import pkg from "../../package.json";
 
 const APP_VERSION = pkg.version;

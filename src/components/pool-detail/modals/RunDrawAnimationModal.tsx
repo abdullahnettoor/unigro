@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import * as Icons from "@/lib/icons";
 import type { Id } from "@convex/dataModel";
+import { AnimatePresence, motion } from "framer-motion";
+
+import * as Icons from "@/lib/icons";
 
 interface Slot {
   seatId: Id<"seats">;

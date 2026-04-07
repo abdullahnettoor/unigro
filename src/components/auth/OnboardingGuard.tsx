@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/api";
+import { useMutation,useQuery } from "convex/react";
+import { AnimatePresence,motion } from "framer-motion";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { ContactIcon, LoadingIcon, ZapIcon } from "@/lib/icons";
-import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
 
 export function OnboardingGuard({ children }: { children: React.ReactNode }) {
     const currentUser = useQuery(api.users.current);

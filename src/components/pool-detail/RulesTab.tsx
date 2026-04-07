@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/Surface";
-import { formatCurrency, cn } from "@/lib/utils";
 import * as Icons from "@/lib/icons";
+import { cn,formatCurrency } from "@/lib/utils";
+
 import type { PoolDetail } from "./types";
 
 interface RulesTabProps {

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { NavAdminIcon, NavHomeIcon, NavPoolsIcon, NavSettingsIcon } from "@/lib/icons";
 
+import { NavAdminIcon, NavHomeIcon, NavPoolsIcon, NavSettingsIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 interface DesktopRailProps {

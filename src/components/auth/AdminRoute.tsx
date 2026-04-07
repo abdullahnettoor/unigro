@@ -1,10 +1,10 @@
 import { Navigate } from "react-router-dom";
+import { api } from "@convex/api";
 import { useQuery } from "convex/react";
+
 import { OfflineFallback } from "@/components/shared/OfflineFallback";
 import { LogoLoader } from "@/components/ui/LogoLoader";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-
-import { api } from "@convex/api";
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
     const isAdmin = useQuery(api.users.isAdmin);

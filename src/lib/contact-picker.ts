@@ -36,7 +36,7 @@ export async function selectContact(): Promise<ContactResult | null> {
 
     const contact = contacts[0];
     const name = contact.name?.[0] || "";
-    let rawPhone = contact.tel?.[0] || "";
+    const rawPhone = contact.tel?.[0] || "";
 
     if (!rawPhone) return { name, phone: "" };
 

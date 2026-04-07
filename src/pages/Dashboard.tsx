@@ -1,7 +1,19 @@
-import { useQuery } from "convex/react";
-import { useUser } from "@clerk/clerk-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import { api } from "@convex/api";
+import { useQuery } from "convex/react";
+
+import { SectionHeader } from "@/components/common/SectionHeader";
+import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { EmptyPools } from "@/components/dashboard/EmptyPools";
+import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
+import { StatTile } from "@/components/dashboard/StatTile";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { PricingModal } from "@/components/monetization/PricingModal";
+import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
+import { Button } from "@/components/ui/button";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import {
   ActivePoolIcon,
   ContributionIcon,
@@ -11,17 +23,6 @@ import {
   SeatCountIcon,
   TrendIcon,
 } from "@/lib/icons";
-import { SectionHeader } from "@/components/common/SectionHeader";
-import { StatTile } from "@/components/dashboard/StatTile";
-import { PoolCard, type PoolItem } from "@/components/dashboard/PoolCard";
-import { EmptyPools } from "@/components/dashboard/EmptyPools";
-import { DashboardHero } from "@/components/dashboard/DashboardHero";
-import { AdSlot } from "@/components/monetization/AdSlot";
-import { PricingModal } from "@/components/monetization/PricingModal";
-import { OfflineStateGate } from "@/components/shared/OfflineStateGate";
-import { useEntitlements } from "@/hooks/useEntitlements";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 export function Dashboard() {
   const { user } = useUser();
