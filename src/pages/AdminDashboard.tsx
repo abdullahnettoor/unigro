@@ -257,152 +257,91 @@ export function AdminDashboard() {
                         ) : (
                             <div className="grid grid-cols-1 gap-6">
                                 {pendingRequests.map((req) => (
-                                    <Surface key={req._id} tier={2} className="group relative overflow-hidden rounded-[32px] border border-[var(--border-subtle)]/60 transition-all hover:shadow-xl hover:shadow-black/5 hover:border-[var(--accent-vivid)]/20">
-                                        <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-[var(--border-subtle)]/30">
-
-                                            <div className="lg:w-[320px] shrink-0 p-6 bg-[var(--surface-0)]/30 group-hover:bg-[var(--surface-0)]/50 transition-colors">
-                                                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[20px] border border-[var(--border-subtle)] bg-black/5 shadow-inner">
-                                                    {req.docUrl ? (
-                                                        <button
-                                                            onClick={() => setPreviewUrl(req.docUrl)}
-                                                            className="group/img relative h-full w-full"
-                                                        >
-                                                            <img
-                                                                src={req.docUrl}
-                                                                alt="ID Document"
-                                                                className="h-full w-full object-cover transition-transform duration-500 group-hover/img:scale-105"
-                                                            />
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover/img:opacity-100">
-                                                                <div className="flex flex-col items-center gap-2">
-                                                                    <Eye className="text-white" size={24} />
-                                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-white">Full Screen</span>
-                                                                </div>
-                                                            </div>
-                                                        </button>
-                                                    ) : (
-                                                        <div className="flex h-full flex-col items-center justify-center gap-3 text-[var(--text-muted)]">
-                                                            <CreditCard size={40} className="opacity-20" />
-                                                            <p className="text-xs font-bold uppercase tracking-widest">No Document</p>
-                                                        </div>
-                                                    )}
-
-                                                    {/* ID Type Badge */}
-                                                    {(req as any).idType && (
-                                                        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur shadow-sm border border-black/5">
-                                                            <p className="text-[9px] font-bold text-black uppercase tracking-wider">{(req as any).idType}</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="flex-1 p-8 flex flex-col justify-between min-w-0">
-                                                <div>
-                                                    <div className="flex items-start justify-between gap-4 mb-6">
-                                                        <div className="min-w-0">
-                                                            <h3 className="text-[20px] font-bold text-[var(--text-primary)] truncate tracking-tight">{req.name}</h3>
-                                                            <div className="flex items-center gap-2 mt-1 text-[var(--text-muted)]">
-                                                                <Smartphone size={12} className="shrink-0" />
-                                                                <p className="font-mono text-xs truncate">{req.phone}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="hidden sm:block shrink-0 px-3 py-1 rounded-full bg-[var(--surface-2)]/50 text-[var(--text-muted)] text-[9px] font-bold uppercase tracking-wider h-fit">
-                                                            Pending
-                                                        </div>
+                                    <Surface key={req._id} tier={2} className="group relative overflow-hidden rounded-[24px] border border-[var(--border-subtle)]/60 p-4 sm:p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center transition-shadow hover:shadow-lg hover:shadow-black/5">
+                                        
+                                        {/* Thumbnail Area */}
+                                        <div className="w-full sm:w-[140px] aspect-[4/3] shrink-0 rounded-[14px] overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-3)] relative">
+                                            {req.docUrl ? (
+                                                <button
+                                                    onClick={() => setPreviewUrl(req.docUrl)}
+                                                    className="group/img relative h-full w-full block"
+                                                >
+                                                    <img
+                                                        src={req.docUrl}
+                                                        alt="ID Document"
+                                                        className="h-full w-full object-cover transition-transform duration-500 group-hover/img:scale-110"
+                                                    />
+                                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 transition-opacity duration-300 group-hover/img:opacity-100">
+                                                        <Eye className="text-white mb-1" size={20} />
+                                                        <span className="text-[9px] font-bold uppercase tracking-widest text-white">Full Screen</span>
                                                     </div>
-
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                        <div className="glass-2 border border-[var(--border-subtle)]/40 rounded-[20px] p-4 flex items-center gap-4">
-                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-vivid)]/5 text-[var(--accent-vivid)]">
-                                                                <Mail size={18} />
-                                                            </div>
-                                                            <div className="min-w-0">
-                                                                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Email Address</p>
-                                                                <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{req.email || "N/A"}</p>
-                                                            </div>
-                                                        </div>
-
-                                                        {(req as any).idNumber && (
-                                                            <div className="glass-2 border border-[var(--border-subtle)]/40 rounded-[20px] p-4 flex items-center gap-4">
-                                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--gold)]/5 text-[var(--gold)]">
-                                                                    <FileText size={18} />
-                                                                </div>
-                                                                <div className="min-w-0">
-                                                                    <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-wider">{(req as any).idType || "ID"} Number</p>
-                                                                    <p className="text-xs font-mono font-bold text-[var(--text-primary)] truncate tracking-[0.1em]">{(req as any).idNumber}</p>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                </button>
+                                            ) : (
+                                                <div className="flex h-full flex-col items-center justify-center gap-2 text-[var(--text-muted)]">
+                                                    <CreditCard size={24} className="opacity-30" />
+                                                    <p className="text-[9px] font-bold uppercase tracking-widest">No Doc</p>
                                                 </div>
-
-                                                <div className="mt-8 pt-6 border-t border-[var(--border-subtle)]/30">
-                                                    {rejectingId === req._id ? (
-                                                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                            <div className="relative">
-                                                                <Textarea
-                                                                    value={rejectionNote}
-                                                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRejectionNote(e.target.value)}
-                                                                    placeholder="Please provide a clear reason for rejecting this verification..."
-                                                                    className="glass-1 border-[var(--danger)]/30 min-h-[100px] rounded-[20px] p-4 text-xs font-medium resize-none focus:ring-[var(--danger)]/10"
-                                                                />
-                                                                <AlertCircle className="absolute top-4 right-4 text-[var(--danger)]/40" size={16} />
-                                                            </div>
-                                                            <div className="flex gap-3">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="lg"
-                                                                    className="flex-1 rounded-full border-[var(--border-subtle)] text-[var(--text-primary)]"
-                                                                    onClick={() => { setRejectingId(null); setRejectionNote(""); }}
-                                                                >
-                                                                    Cancel
-                                                                </Button>
-                                                                <Button
-                                                                    variant="destructive"
-                                                                    size="lg"
-                                                                    className="flex-1 rounded-full shadow-lg shadow-[var(--danger)]/10"
-                                                                    onClick={() => handleReview(req._id, "REJECTED")}
-                                                                    disabled={!rejectionNote.trim() || actionLoading === req._id}
-                                                                >
-                                                                    {actionLoading === req._id ? (
-                                                                        <Loader2 className="animate-spin" size={16} />
-                                                                    ) : (
-                                                                        "Confirm Rejection"
-                                                                    )}
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex flex-col gap-4 sm:flex-row">
-                                                            <Button
-                                                                variant="outline"
-                                                                size="lg"
-                                                                className="flex-1 rounded-full border-[var(--danger)]/20 text-[var(--danger)] hover:bg-[var(--danger)]/5"
-                                                                onClick={() => handleReview(req._id, "REJECTED")}
-                                                                disabled={actionLoading !== null}
-                                                            >
-                                                                <Icons.CloseIcon className="mr-2" size={16} />
-                                                                Reject Request
-                                                            </Button>
-                                                            <Button
-                                                                size="lg"
-                                                                className="flex-1 rounded-full shadow-lg shadow-[var(--accent-vivid)]/20"
-                                                                onClick={() => handleReview(req._id, "VERIFIED")}
-                                                                disabled={actionLoading !== null}
-                                                            >
-                                                                {actionLoading === req._id ? (
-                                                                    <Loader2 className="animate-spin" size={20} />
-                                                                ) : (
-                                                                    <>
-                                                                        <Icons.CheckIcon className="mr-2" size={20} />
-                                                                        Approve Identity
-                                                                    </>
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
+                                            )}
                                         </div>
+
+                                        {/* User Info Details */}
+                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                <h3 className="font-bold text-[16px] text-[var(--text-primary)] truncate">{req.name}</h3>
+                                                <span className="px-2.5 py-[3px] rounded-full bg-[var(--warning)]/10 text-[var(--warning)] text-[9px] font-bold uppercase tracking-[0.15em]">Pending Review</span>
+                                            </div>
+                                            
+                                            <div className="text-[12px] text-[var(--text-muted)] font-medium mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+                                                <span className="flex items-center gap-1.5"><Smartphone size={12}/>{req.phone}</span>
+                                                {req.email && <span className="flex items-center gap-1.5"><Mail size={12}/>{req.email}</span>}
+                                            </div>
+                                            
+                                            {(req as any).idNumber && (
+                                                <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-[var(--text-primary)] tracking-wider">
+                                                    <FileText size={12} className="text-[var(--text-muted)]"/>
+                                                    <span className="text-[var(--text-muted)] uppercase">{(req as any).idType || 'ID'} NO:</span> {(req as any).idNumber}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Action Controls */}
+                                        {rejectingId === req._id ? (
+                                            <div className="w-full sm:w-[240px] shrink-0 flex flex-col gap-2 mt-2 sm:mt-0 animate-in fade-in slide-in-from-right-4 duration-300">
+                                                <div className="relative">
+                                                    <Textarea
+                                                        value={rejectionNote}
+                                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRejectionNote(e.target.value)}
+                                                        placeholder="Reason for rejection..."
+                                                        className="glass-1 border-[var(--danger)]/30 min-h-[64px] rounded-[16px] p-3 text-[11px] font-medium resize-none focus:ring-[var(--danger)]/10"
+                                                    />
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <Button variant="outline" size="sm" className="flex-1 h-8 rounded-[12px] bg-white border-[var(--border-subtle)] text-[10px] uppercase font-bold tracking-wider" onClick={() => { setRejectingId(null); setRejectionNote(""); }}>
+                                                        Cancel
+                                                    </Button>
+                                                    <Button variant="destructive" size="sm" className="flex-1 h-8 rounded-[12px] text-[10px] uppercase font-bold tracking-wider shadow-sm" onClick={() => handleReview(req._id, "REJECTED")} disabled={!rejectionNote.trim() || actionLoading === req._id}>
+                                                        {actionLoading === req._id ? <Loader2 className="animate-spin" size={14} /> : "Reject"}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="w-full sm:w-[130px] shrink-0 flex sm:flex-col gap-2 mt-2 sm:mt-0">
+                                                <Button size="sm" className="flex-1 sm:w-full h-10 rounded-[14px] shadow-sm bg-[var(--text-primary)] text-[var(--surface-0)] hover:bg-[var(--text-primary)]/90 text-[11px] font-bold uppercase tracking-wider relative overflow-hidden group/btn" onClick={() => handleReview(req._id, "VERIFIED")} disabled={actionLoading !== null}>
+                                                    {actionLoading === req._id ? (
+                                                        <Loader2 className="animate-spin" size={16} />
+                                                    ) : (
+                                                        <>
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite]" />
+                                                            <CheckCircle2 size={14} className="mr-1.5" /> Approve
+                                                        </>
+                                                    )}
+                                                </Button>
+                                                <Button variant="ghost" size="sm" className="flex-1 sm:w-full h-10 rounded-[14px] border border-transparent text-[var(--danger)] text-[11px] font-bold uppercase tracking-wider hover:bg-[var(--danger)]/10 hover:border-[var(--danger)]/20 transition-all" onClick={() => { setRejectingId(req._id); setRejectionNote(""); }} disabled={actionLoading !== null}>
+                                                    Reject ID
+                                                </Button>
+                                            </div>
+                                        )}
+                                        
                                     </Surface>
                                 ))}
                             </div>
