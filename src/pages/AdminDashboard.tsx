@@ -53,7 +53,7 @@ export function AdminDashboard() {
 
     // Directory Filters
     const [searchQuery, setSearchQuery] = useState("");
-    const [roleFilter, setRoleFilter] = useState<"all" | "registered" | "guest">("all");
+    const [roleFilter, setRoleFilter] = useState<"all" | "registered" | "guest">("registered");
 
     const filteredUsers = useMemo(() => {
         if (!allAdminUsers) return [];
@@ -106,7 +106,13 @@ export function AdminDashboard() {
     };
 
     const handleDeleteUser = async (userId: string) => {
-        if (!window.confirm("Are you sure you want to delete this user? If they hold active seats or organize pools, they will be demoted to a Guest to preserve pool history. Otherwise, they will be permanently scrubbed.")) return;
+        const confirmed = await feedback.confirm({
+            title: "Delete User",
+            message: "Are you sure you want to delete this user? If they hold active seats or organize pools, they will be demoted to a Guest to preserve pool history. Otherwise, they will be permanently scrubbed.",
+            confirmText: "Delete User",
+            danger: true
+        });
+        if (!confirmed) return;
         
         setActionLoading(userId);
         try {
@@ -121,7 +127,12 @@ export function AdminDashboard() {
     };
 
     const handleForceStatus = async (userId: string, newStatus: string) => {
-        if (!window.confirm(`Are you sure you want to force status to ${newStatus}?`)) return;
+        const confirmed = await feedback.confirm({
+            title: "Update Verification Status",
+            message: `Are you sure you want to force the user's status to ${newStatus}?`,
+            confirmText: "Update Status"
+        });
+        if (!confirmed) return;
         
         setActionLoading(userId + "_status");
         try {
@@ -223,10 +234,10 @@ export function AdminDashboard() {
 
                 <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as "verifications" | "users")} className="w-full">
                     <TabsList className="mb-6 grid w-full grid-cols-2 rounded-2xl p-1 bg-[var(--surface-1)]/50 border border-[var(--border-subtle)]/40 h-14">
-                        <TabsTrigger value="verifications" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] h-full transition-all">
+                        <TabsTrigger value="verifications" className="rounded-xl data-[state=active]:bg-[var(--surface-3)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] h-full transition-all">
                             Pending Reviews
                         </TabsTrigger>
-                        <TabsTrigger value="users" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] h-full transition-all">
+                        <TabsTrigger value="users" className="rounded-xl data-[state=active]:bg-[var(--surface-3)] data-[state=active]:text-[var(--text-primary)] data-[state=active]:shadow-sm text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] h-full transition-all">
                             User Directory
                         </TabsTrigger>
                     </TabsList>
@@ -402,12 +413,12 @@ export function AdminDashboard() {
                     <TabsContent value="users" className="focus-visible:outline-none space-y-6 mt-0">
                         <div className="flex flex-col sm:flex-row gap-3 bg-[var(--surface-0)] p-3 rounded-[24px] border border-[var(--border-subtle)]/50 shadow-sm">
                             <div className="relative flex-1">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
                                 <Input
                                     placeholder="Search by name, phone, or email..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-11 h-12 rounded-[18px] bg-white border border-[var(--border-subtle)] focus-visible:ring-[var(--accent-vivid)] focus-visible:ring-offset-0 text-sm"
+                                    className="pl-11 h-12 rounded-[18px] bg-[var(--surface-1)] border border-[var(--border-subtle)] focus-visible:ring-[var(--accent-vivid)] focus-visible:ring-offset-0 text-sm"
                                 />
                             </div>
                             <div className="flex gap-2 p-1.5 rounded-[18px] bg-black/5 border border-[var(--border-subtle)]/30 shrink-0 overflow-x-auto no-scrollbar">
@@ -422,7 +433,7 @@ export function AdminDashboard() {
                                         className={cn(
                                             "px-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap",
                                             roleFilter === role.id 
-                                                ? "bg-white text-[var(--text-primary)] shadow-sm h-full"
+                                                ? "bg-[var(--surface-3)] text-[var(--text-primary)] shadow-sm h-full"
                                                 : "text-[var(--text-muted)] hover:text-[var(--text-primary)] py-2"
                                         )}
                                     >
@@ -465,7 +476,7 @@ export function AdminDashboard() {
                                         
                                         <div className="flex flex-wrap items-center gap-3 shrink-0">
                                             {u.docUrl && (
-                                                <Button variant="outline" size="sm" onClick={() => setPreviewUrl(u.docUrl)} className="h-10 rounded-xl bg-white border-[var(--border-subtle)] text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                                                <Button variant="outline" size="sm" onClick={() => setPreviewUrl(u.docUrl)} className="h-10 rounded-xl border-[var(--border-subtle)] text-[10px] font-bold uppercase tracking-widest shadow-sm">
                                                     <FileText size={14} className="mr-1.5" /> ID Doc
                                                 </Button>
                                             )}
