@@ -14,6 +14,7 @@ import {
     ShieldCheck,
     Smartphone,
     User,
+    UserCheck,
     Users,
     UserMinus} from "lucide-react";
 
@@ -215,8 +216,8 @@ export function AdminDashboard() {
                     {[
                         { label: "Pending", value: verificationSummary.pending, icon: Clock, accent: "text-[var(--warning)] bg-[var(--warning)]/10" },
                         { label: "Verified", value: verificationSummary.verified, icon: ShieldCheck, accent: "text-[var(--success)] bg-[var(--success)]/10" },
-                        { label: "Flagged", value: verificationSummary.flagged, icon: AlertCircle, accent: "text-[var(--danger)] bg-[var(--danger)]/10" },
-                        { label: "Total Users", value: allAdminUsers.length, icon: Users, accent: "text-[var(--text-muted)] bg-[var(--surface-2)]" },
+                        { label: "Members", value: (allAdminUsers || []).filter(u => !!u.clerkId).length, icon: UserCheck, accent: "text-[var(--accent-vivid)] bg-[var(--accent-vivid)]/10" },
+                        { label: "Guests", value: (allAdminUsers || []).filter(u => !u.clerkId).length, icon: Users, accent: "text-[var(--text-muted)] bg-[var(--surface-2)]" },
                     ].map((item) => (
                         <Surface key={item.label} tier={1} className="rounded-[24px] border border-[var(--border-subtle)]/60 p-4">
                             <div className="flex items-start justify-between gap-3">
@@ -316,7 +317,7 @@ export function AdminDashboard() {
                                                     />
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <Button variant="outline" size="sm" className="flex-1 h-8 rounded-[12px] bg-white border-[var(--border-subtle)] text-[10px] uppercase font-bold tracking-wider" onClick={() => { setRejectingId(null); setRejectionNote(""); }}>
+                                                    <Button variant="outline" size="sm" className="flex-1 h-8 rounded-[12px] text-[var(--text-primary)] border border-[var(--border-subtle)] bg-[var(--surface-3)] hover:bg-[var(--surface-2)] text-[10px] uppercase font-bold tracking-wider" onClick={() => { setRejectingId(null); setRejectionNote(""); }}>
                                                         Cancel
                                                     </Button>
                                                     <Button variant="destructive" size="sm" className="flex-1 h-8 rounded-[12px] text-[10px] uppercase font-bold tracking-wider shadow-sm" onClick={() => handleReview(req._id, "REJECTED")} disabled={!rejectionNote.trim() || actionLoading === req._id}>
@@ -362,9 +363,9 @@ export function AdminDashboard() {
                             </div>
                             <div className="flex gap-2 p-1.5 rounded-[18px] bg-black/5 border border-[var(--border-subtle)]/30 shrink-0 overflow-x-auto no-scrollbar">
                                 {[
-                                    { id: "all", label: "All Users" },
-                                    { id: "registered", label: "Members" },
-                                    { id: "guest", label: "Guests" },
+                                    { id: "all", label: `All Users (${allAdminUsers?.length || 0})` },
+                                    { id: "registered", label: `Members (${allAdminUsers?.filter(u => !!u.clerkId).length || 0})` },
+                                    { id: "guest", label: `Guests (${allAdminUsers?.filter(u => !u.clerkId).length || 0})` },
                                 ].map((role) => (
                                     <button
                                         key={role.id}
