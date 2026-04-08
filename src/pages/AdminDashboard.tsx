@@ -1,4 +1,4 @@
-import { useMemo,useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import {
     AlertCircle,
@@ -16,7 +16,8 @@ import {
     User,
     UserCheck,
     Users,
-    UserMinus} from "lucide-react";
+    UserMinus
+} from "lucide-react";
 
 import { PageShell } from "@/components/layout/PageShell";
 import { useFeedback } from "@/components/shared/FeedbackProvider";
@@ -39,11 +40,11 @@ export function AdminDashboard() {
     const pendingRequests = useQuery(api.verification.getPending);
     const verificationSummary = useQuery(api.verification.getSummary);
     const allAdminUsers = useQuery(api.users.getAllAdmin);
-    
+
     const reviewVerification = useMutation(api.verification.review);
     const forceUpdateStatus = useMutation(api.users.adminUpdateStatus);
     const deleteUser = useMutation(api.users.adminDeleteUser);
-    
+
     const { isOnline } = useNetworkStatus();
 
     const [activeTab, setActiveTab] = useState<"verifications" | "users">("verifications");
@@ -59,7 +60,7 @@ export function AdminDashboard() {
     const filteredUsers = useMemo(() => {
         if (!allAdminUsers) return [];
         let list = allAdminUsers;
-        
+
         if (roleFilter === "registered") {
             list = list.filter((u: any) => !!u.clerkId);
         } else if (roleFilter === "guest") {
@@ -68,9 +69,9 @@ export function AdminDashboard() {
 
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
-            list = list.filter((u: any) => 
-                u.name.toLowerCase().includes(q) || 
-                u.phone.includes(q) || 
+            list = list.filter((u: any) =>
+                u.name.toLowerCase().includes(q) ||
+                u.phone.includes(q) ||
                 (u.email && u.email.toLowerCase().includes(q))
             );
         }
@@ -114,7 +115,7 @@ export function AdminDashboard() {
             danger: true
         });
         if (!confirmed) return;
-        
+
         setActionLoading(userId);
         try {
             await deleteUser({ userId: userId as any });
@@ -134,7 +135,7 @@ export function AdminDashboard() {
             confirmText: "Update Status"
         });
         if (!confirmed) return;
-        
+
         setActionLoading(userId + "_status");
         try {
             await forceUpdateStatus({ userId: userId as any, verificationStatus: newStatus as any });
@@ -259,7 +260,7 @@ export function AdminDashboard() {
                             <div className="grid grid-cols-1 gap-6">
                                 {pendingRequests.map((req) => (
                                     <Surface key={req._id} tier={2} className="group relative overflow-hidden rounded-[24px] border border-[var(--border-subtle)]/60 p-4 sm:p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center transition-shadow hover:shadow-lg hover:shadow-black/5">
-                                        
+
                                         {/* Thumbnail Area */}
                                         <div className="w-full sm:w-[140px] aspect-[4/3] shrink-0 rounded-[14px] overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-3)] relative">
                                             {req.docUrl ? (
@@ -291,15 +292,15 @@ export function AdminDashboard() {
                                                 <h3 className="font-bold text-[16px] text-[var(--text-primary)] truncate">{req.name}</h3>
                                                 <span className="px-2.5 py-[3px] rounded-full bg-[var(--warning)]/10 text-[var(--warning)] text-[9px] font-bold uppercase tracking-[0.15em]">Pending Review</span>
                                             </div>
-                                            
+
                                             <div className="text-[12px] text-[var(--text-muted)] font-medium mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-                                                <span className="flex items-center gap-1.5"><Smartphone size={12}/>{req.phone}</span>
-                                                {req.email && <span className="flex items-center gap-1.5"><Mail size={12}/>{req.email}</span>}
+                                                <span className="flex items-center gap-1.5"><Smartphone size={12} />{req.phone}</span>
+                                                {req.email && <span className="flex items-center gap-1.5"><Mail size={12} />{req.email}</span>}
                                             </div>
-                                            
+
                                             {(req as any).idNumber && (
                                                 <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-[var(--text-primary)] tracking-wider">
-                                                    <FileText size={12} className="text-[var(--text-muted)]"/>
+                                                    <FileText size={12} className="text-[var(--text-muted)]" />
                                                     <span className="text-[var(--text-muted)] uppercase">{(req as any).idType || 'ID'} NO:</span> {(req as any).idNumber}
                                                 </div>
                                             )}
@@ -342,7 +343,7 @@ export function AdminDashboard() {
                                                 </Button>
                                             </div>
                                         )}
-                                        
+
                                     </Surface>
                                 ))}
                             </div>
@@ -353,7 +354,7 @@ export function AdminDashboard() {
                     <TabsContent value="users" className="focus-visible:outline-none space-y-6 mt-0">
                         <div className="flex flex-col sm:flex-row gap-3 bg-[var(--surface-0)] p-3 rounded-[24px] border border-[var(--border-subtle)]/50 shadow-sm">
                             <div className="relative flex-1">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
                                 <Input
                                     placeholder="Search by name, phone, or email..."
                                     value={searchQuery}
@@ -372,7 +373,7 @@ export function AdminDashboard() {
                                         onClick={() => setRoleFilter(role.id as any)}
                                         className={cn(
                                             "px-4 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap",
-                                            roleFilter === role.id 
+                                            roleFilter === role.id
                                                 ? "bg-[var(--surface-3)] text-[var(--text-primary)] shadow-sm h-full"
                                                 : "text-[var(--text-muted)] hover:text-[var(--text-primary)] py-2"
                                         )}
@@ -396,9 +397,9 @@ export function AdminDashboard() {
                                         <div className="flex items-center gap-4 flex-1">
                                             <div className="w-14 h-14 rounded-[20px] bg-[var(--surface-3)] shrink-0 overflow-hidden flex items-center justify-center border border-[var(--border-subtle)]/50">
                                                 {u.pictureUrl ? (
-                                                    <img src={u.pictureUrl} alt="" className="w-full h-full object-cover"/>
+                                                    <img src={u.pictureUrl} alt="" className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <User className="w-6 h-6 text-[var(--text-muted)] opacity-50"/>
+                                                    <User className="w-6 h-6 text-[var(--text-muted)] opacity-50" />
                                                 )}
                                             </div>
                                             <div className="min-w-0">
@@ -408,12 +409,12 @@ export function AdminDashboard() {
                                                     {u.verificationStatus === "VERIFIED" && <ShieldCheck size={14} className="text-[var(--success)]" />}
                                                 </div>
                                                 <div className="flex items-center gap-3 text-xs text-[var(--text-muted)] font-medium">
-                                                    <span className="flex items-center gap-1.5"><Smartphone size={12}/>{u.phone || "No Phone"}</span>
-                                                    {u.email && <span className="flex items-center gap-1.5 hidden sm:flex"><Mail size={12}/>{u.email}</span>}
+                                                    <span className="flex items-center gap-1.5"><Smartphone size={12} />{u.phone || "No Phone"}</span>
+                                                    {u.email && <span className="flex items-center gap-1.5 hidden sm:flex"><Mail size={12} />{u.email}</span>}
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="flex flex-wrap items-center gap-3 shrink-0">
                                             {u.docUrl && (
                                                 <Button variant="outline" size="sm" onClick={() => setPreviewUrl(u.docUrl)} className="h-10 rounded-xl border-[var(--border-subtle)] text-[10px] font-bold uppercase tracking-widest shadow-sm">
@@ -421,14 +422,14 @@ export function AdminDashboard() {
                                                 </Button>
                                             )}
                                             <div className="relative">
-                                                <select 
+                                                <select
                                                     value={u.verificationStatus}
                                                     onChange={(e) => handleForceStatus(u._id, e.target.value)}
                                                     className={cn(
                                                         "h-10 rounded-xl border border-[var(--border-subtle)] px-4 pr-8 text-[10px] font-bold uppercase tracking-widest outline-none cursor-pointer appearance-none shadow-sm",
                                                         u.verificationStatus === "VERIFIED" ? "bg-green-500/10 text-green-700 border-green-500/20" :
-                                                        u.verificationStatus === "REJECTED" ? "bg-red-500/10 text-red-700 border-red-500/20" :
-                                                        "bg-[var(--surface-1)] text-[var(--text-primary)]"
+                                                            u.verificationStatus === "REJECTED" ? "bg-red-500/10 text-red-700 border-red-500/20" :
+                                                                "bg-[var(--surface-1)] text-[var(--text-primary)]"
                                                     )}
                                                     disabled={actionLoading === u._id + "_status"}
                                                 >

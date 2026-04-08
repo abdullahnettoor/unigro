@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery } from "convex/react";
-import { AnimatePresence,motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
     AlertCircle,
     CheckCircle2,
@@ -16,7 +17,8 @@ import {
     Smartphone,
     SmartphoneIcon,
     Sun,
-    Upload} from "lucide-react";
+    Upload
+} from "lucide-react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
@@ -37,7 +39,7 @@ import {
 import { useEntitlements } from "@/hooks/useEntitlements";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import * as Icons from "@/lib/icons";
-import { compressImage,formatBytes } from "@/lib/image-compression";
+import { compressImage, formatBytes } from "@/lib/image-compression";
 import {
     getThemePreference,
     getThemeVariant,
@@ -237,10 +239,10 @@ export function Settings() {
         try {
             const originalSize = selected.size;
             // Target 100-200kb with 0.5 quality and 1000px max dimension
-            const compressed = await compressImage(selected, { 
+            const compressed = await compressImage(selected, {
                 quality: 0.5,
                 maxWidth: 1000,
-                maxHeight: 1000 
+                maxHeight: 1000
             });
             const compressedSize = compressed.size;
 
@@ -513,9 +515,9 @@ export function Settings() {
                         </div>
 
                         {status === "PENDING" && (
-                            <Button 
-                                variant="outline" 
-                                size="sm" 
+                            <Button
+                                variant="outline"
+                                size="sm"
                                 className="shrink-0 w-full sm:w-auto rounded-xl bg-transparent border-[var(--warning)]/30 text-[var(--warning)] hover:bg-[var(--warning)]/10 hover:text-[var(--warning)] text-[10px] uppercase font-bold tracking-widest shadow-sm px-4 h-9 transition-colors"
                                 onClick={() => {
                                     const text = encodeURIComponent(`Hi UniGro team,\n\nI have submitted my verification documents.\nName: ${effectiveUser.name}\nPhone: ${effectiveUser.phone}\n\nPlease review my application.`);
@@ -802,7 +804,7 @@ export function Settings() {
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-pink-500/10 text-pink-500">
                                 <Icons.WinnerIcon size={18} />
                             </div>
-                            <p className="text-xs font-bold text-[var(--text-primary)]">Made in Kerala, Bharat</p>
+                            <p className="text-xs font-bold text-[var(--text-primary)]">Made with ❤️ in Kerala, India</p>
                         </div>
                         <span className="text-[10px] font-bold tracking-widest text-[var(--text-muted)] uppercase">v{APP_VERSION}</span>
                     </div>
@@ -854,6 +856,21 @@ export function Settings() {
                         </div>
                     </div>
                 </Section>
+            ) : null}
+            {isAdmin ? (
+                <div className="mt-8">
+                    <Link to="/admin" className="w-full block">
+                        <Button
+                            variant="default"
+                            className="w-full h-14 rounded-[20px] bg-[var(--text-primary)] text-[var(--surface-0)] hover:bg-[var(--text-primary)]/90 font-bold shadow-lg group relative overflow-hidden"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-[150%] skew-x-[-20deg] group-hover:animate-[shimmer_1.5s_infinite]" />
+                            <ShieldCheck size={20} className="mr-3" />
+                            Admin Terminal
+                            <ChevronRight size={18} className="absolute right-6 opacity-50 group-hover:opacity-100 transition-opacity" />
+                        </Button>
+                    </Link>
+                </div>
             ) : null}
 
             {/* Logout Section */}
