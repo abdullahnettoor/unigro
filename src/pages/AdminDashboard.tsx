@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import {
-    AlertCircle,
     CheckCircle2,
     Clock,
     CreditCard,
@@ -30,7 +29,7 @@ import { Surface } from "@/components/ui/Surface";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import * as Icons from "@/lib/icons";
+
 import { cn } from "@/lib/utils";
 
 import { api } from "../../convex/_generated/api";
