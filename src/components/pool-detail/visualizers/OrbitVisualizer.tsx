@@ -1,6 +1,6 @@
 import { useEffect,useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { TrophyIcon } from "lucide-react";
+import { TrophyIcon, UserCircleIcon, UsersIcon } from "lucide-react";
 
 import { getCollectionProgress } from "@/lib/pool";
 
@@ -8,6 +8,14 @@ import type { PoolDetail, PoolSeat, PoolTransaction } from "../types";
 
 export function seatIsUnallocated(seat: PoolSeat) {
     return seat.status === "OPEN" || (!seat.userId && !seat.isCoSeat);
+}
+
+function getInitials(name: string) {
+    if (!name) return "";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 0) return "";
+    if (parts.length === 1) return parts[0].substring(0, 1).toUpperCase();
+    return (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase();
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -279,7 +287,7 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
                 <motion.circle
                     cx={pos.x} cy={pos.y}
                     fill={tok.color}
-                    fillOpacity={tok.fillOpacity}
+                    fillOpacity={seat.isGuest ? 0.12 : tok.fillOpacity}
                     stroke={tok.color}
                     strokeOpacity={tok.strokeOpacity}
                     strokeWidth={isHovered ? 2.5 : 1.5}
@@ -311,22 +319,61 @@ function SatelliteNode({ seat, payment, win, angle, cx, cy, orbitR, isHovered, o
                 </g>
             )}
 
-            {/* Seat number */}
+            {/* Content: Icon or Seat number */}
             {(!seat.user?.pictureUrl || payment === "open") && (
-                <text
-                    x={pos.x} y={pos.y + (R > 13 ? 4 : 3)}
-                    textAnchor="middle"
-                    fill={tok.color}
-                    opacity={tok.strokeOpacity}
-                    style={{
-                        fontSize: R > 13 ? 10 : 9,
-                        fontWeight: 800,
-                        pointerEvents: "none",
-                    }}
-                    className="font-mono"
-                >
-                    {seat.seatNumber < 10 ? `0${seat.seatNumber}` : seat.seatNumber}
-                </text>
+                <g>
+                    {seat.isCoSeat ? (
+                        <g transform={`translate(${pos.x - (R * 0.5)}, ${pos.y - (R * 0.5)})`}>
+                            <foreignObject width={R} height={R}>
+                                <UsersIcon className="w-full h-full" style={{ color: tok.color, opacity: tok.strokeOpacity }} />
+                            </foreignObject>
+                        </g>
+                    ) : seat.isGuest ? (
+                        <text
+                            x={pos.x} y={pos.y + (R > 13 ? 4 : 3)}
+                            textAnchor="middle"
+                            fill={tok.color}
+                            opacity={tok.strokeOpacity}
+                            style={{
+                                fontSize: R > 13 ? 11 : 10,
+                                fontWeight: 800,
+                                pointerEvents: "none",
+                            }}
+                            className="font-sans"
+                        >
+                            {getInitials(seat.user?.name || "Guest")}
+                        </text>
+                    ) : (
+                        <text
+                            x={pos.x} y={pos.y + (R > 13 ? 4 : 3)}
+                            textAnchor="middle"
+                            fill={tok.color}
+                            opacity={tok.strokeOpacity}
+                            style={{
+                                fontSize: R > 13 ? 10 : 9,
+                                fontWeight: 800,
+                                pointerEvents: "none",
+                            }}
+                            className="font-mono"
+                        >
+                            {seat.seatNumber < 10 ? `0${seat.seatNumber}` : seat.seatNumber}
+                        </text>
+                    )}
+                </g>
+            )}
+
+            {/* Guest/Co-seat Badge for Picture Nodes */}
+            {seat.user?.pictureUrl && payment !== "open" && (seat.isGuest || seat.isCoSeat) && (
+                <g transform={`translate(${pos.x + (R * 0.4)}, ${pos.y - (R * 1.0)})`}>
+                    <circle cx={4} cy={4} r={6} fill="var(--surface-0)" stroke="var(--border-subtle)" strokeWidth={0.5} />
+                    <foreignObject x={-0.5} y={-0.5} width={9} height={9}>
+                        {seat.isCoSeat ? (
+                            <UsersIcon className="w-full h-full" style={{ color: "var(--warning)" }} />
+                        ) : (
+                            <UserCircleIcon className="w-full h-full" style={{ color: "var(--accent-vivid)" }} />
+                        )}
+                    </foreignObject>
+                </g>
             )}
 
             {/* Trophy icon */}
@@ -363,7 +410,7 @@ function SeatTooltip({ seat, payment, win, pos, orbitR, cx, cy, size }: any) {
         ? "Open Seat"
         : seat.isCoSeat
             ? seat.coOwners?.map((o: any) => o.userName?.split(" ")[0]).join(" & ")
-            : seat.user?.name || "Member";
+            : (seat.user?.name || "Member") + (seat.isGuest ? " (Guest)" : "");
 
     const tooltipName = `#${seat.seatNumber < 10 ? '0' + seat.seatNumber : seat.seatNumber} · ${displayName}`;
 
@@ -592,25 +639,37 @@ export function OrbitVisualizer({ pool, seats, transactions, onSeatClick }: Visu
                         { label: "Paid", color: "var(--accent-vivid)", opacity: 1, type: "solid" },
                         { label: "Winner", color: "var(--gold)", opacity: 1, type: "solid" },
                         { label: "Pending", color: "var(--warning)", opacity: 1, type: "solid" },
-                        { label: "Unpaid", color: "var(--accent-vivid)", opacity: 0.4, type: "solid" }
+                        { label: "Unpaid", color: "var(--accent-vivid)", opacity: 0.4, type: "solid" },
+                        { label: "Guest", color: "var(--accent-vivid)", opacity: 0.8, type: "guest" },
+                        { label: "Co-seat", color: "var(--warning)", opacity: 0.8, type: "coseat" }
                     ]
                     : [
                         { label: "Paid", color: "var(--accent-vivid)", opacity: 1, type: "solid" },
                         { label: "Winner", color: "var(--gold)", opacity: 1, type: "solid" },
                         { label: "Pending", color: "var(--warning)", opacity: 1, type: "solid" },
                         { label: "Unpaid", color: "var(--accent-vivid)", opacity: 0.4, type: "solid" },
-                        { label: "Open", color: "var(--text-muted)", opacity: 0.3, type: "dashed" }
+                        { label: "Open", color: "var(--text-muted)", opacity: 0.3, type: "dashed" },
+                        { label: "Guest", color: "var(--accent-vivid)", opacity: 0.8, type: "guest" },
+                        { label: "Co-seat", color: "var(--warning)", opacity: 0.8, type: "coseat" }
                     ]
                 ).map((item) => (
                     <div key={item.label} className="flex items-center gap-1.5">
-                        <div
-                            className="w-2.5 h-2.5 rounded-full"
-                            style={{
-                                backgroundColor: item.type === "dashed" ? "transparent" : item.color,
-                                border: item.type === "dashed" ? `1px dashed ${item.color}` : "none",
-                                opacity: item.opacity
-                            }}
-                        />
+                        {item.type === "guest" ? (
+                            <span className="w-2.5 h-2.5 flex items-center justify-center text-[7px] font-bold border rounded-sm" style={{ color: item.color, borderColor: item.color, opacity: item.opacity }}>
+                                AA
+                            </span>
+                        ) : item.type === "coseat" ? (
+                            <UsersIcon className="w-2.5 h-2.5" style={{ color: item.color, opacity: item.opacity }} />
+                        ) : (
+                            <div
+                                className="w-2.5 h-2.5 rounded-full"
+                                style={{
+                                    backgroundColor: item.type === "dashed" ? "transparent" : item.color,
+                                    border: item.type === "dashed" ? `1px dashed ${item.color}` : "none",
+                                    opacity: item.opacity
+                                }}
+                            />
+                        )}
                         <span className="text-[10px] text-[var(--text-secondary)] font-medium font-sans">
                             {item.label}
                         </span>
