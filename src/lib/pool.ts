@@ -64,7 +64,7 @@ export interface SeatStats {
 export function getSeatStats(pool: SlimPool, seats: SlimSeat[] = []): SeatStats {
     const totalSeats = Math.max(pool.config.totalSeats, 1);
     const filledSeats = seats.filter(
-        (s) => s.status === "FILLED" || s.status === "RESERVED"
+        (s) => s.status === "FILLED"
     ).length;
     const availableSeats = Math.max(totalSeats - filledSeats, 0);
     return {
@@ -117,7 +117,7 @@ export function getProgressScore(pool: SlimPool): number {
     if (pool.status === "DRAFT") {
         const seats = pool.seats || [];
         const filled = seats.filter(
-            (s) => s.status === "FILLED" || s.status === "RESERVED"
+            (s) => s.status === "FILLED"
         ).length;
         return filled / Math.max(pool.config.totalSeats, 1);
     }
@@ -140,7 +140,7 @@ export function getPoolDisplayProgress(
     const isActive = pool.status === "ACTIVE";
     if (isActive) {
         const activeSeats = seats.filter(
-            (s) => s.status === "FILLED" || s.status === "RESERVED"
+            (s) => s.status === "FILLED"
         );
         const roundTxs = transactions.filter(
             (t) => t.roundIndex === pool.currentRound

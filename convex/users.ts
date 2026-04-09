@@ -57,6 +57,20 @@ export const store = mutation({
                     email: identity.email,
                     verificationStatus: guestUser.verificationStatus,
                 });
+
+                // Finalize all seats associated with this user
+                const userSeats = await ctx.db
+                    .query("seats")
+                    .withIndex("by_user", (q) => q.eq("userId", guestUser._id))
+                    .collect();
+
+                for (const seat of userSeats) {
+                    await ctx.db.patch(seat._id, {
+                        isGuest: false,
+                        status: "FILLED"
+                    });
+                }
+
                 return guestUser._id;
             }
         }
@@ -147,10 +161,11 @@ export const updateProfile = mutation({
                 .collect();
 
             for (const seat of userSeats) {
-                // Transfer ownership to current user
+                // Transfer ownership to current user and finalize status
                 await ctx.db.patch(seat._id, {
                     userId: user._id,
-                    isGuest: false
+                    isGuest: false,
+                    status: "FILLED"
                 });
             }
 

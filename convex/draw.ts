@@ -27,9 +27,9 @@ export const runDraw = mutation({
             .withIndex("by_pool_seatNumber", (q) => q.eq("poolId", args.poolId))
             .collect();
 
-        // Eligible: Filled, Has User OR is a co-seat, no roundWon yet
+        // Eligible: Filled (or Reserved Guest), Has User OR is a co-seat, no roundWon yet
         const eligibleSeats = seats.filter(
-            (s) => s.status === "FILLED" && (s.userId || s.isCoSeat) && !s.roundWon
+            (s) => (s.status === "FILLED" || (s.status === "RESERVED" && s.isGuest)) && (s.userId || s.isCoSeat) && !s.roundWon
         );
 
         if (eligibleSeats.length === 0) throw new Error("No eligible seats left");

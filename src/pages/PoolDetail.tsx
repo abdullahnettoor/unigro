@@ -201,7 +201,7 @@ export function PoolDetail() {
   const pendingApprovals = transactions.filter((tx) => tx.status === "PENDING");
 
   const eligibleDrawSeats = seats
-    .filter((seat) => seat.status === "FILLED" && (seat.userId || seat.isCoSeat) && !seat.roundWon)
+    .filter((seat) => (seat.status === "FILLED" || (seat.status === "RESERVED" && seat.isGuest)) && (seat.userId || seat.isCoSeat) && !seat.roundWon)
     .map((seat) => {
       let displayName = seat.user?.name;
       if (!displayName && seat.isCoSeat && seat.coOwners) {

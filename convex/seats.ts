@@ -119,7 +119,7 @@ export const joinAsGuest = mutation({
                 poolId: args.poolId,
                 seatNumber: num,
                 userId,
-                status: "RESERVED",
+                status: "FILLED",
                 isGuest: true,
             });
         }

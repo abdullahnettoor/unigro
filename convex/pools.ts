@@ -212,9 +212,14 @@ export const activate = mutation({
             .query("seats")
             .withIndex("by_pool", (q) => q.eq("poolId", args.poolId))
             .collect();
-        const emptySeats = seats.filter((s) => s.status === "OPEN");
-        if (emptySeats.length > 0)
-            throw new ConvexError(`Cannot activate: ${emptySeats.length} seats are still OPEN.`);
+
+        const notFilledSeats = seats.filter((s) => s.status !== "FILLED");
+        const missingCount = pool.config.totalSeats - seats.length;
+
+        if (notFilledSeats.length > 0 || missingCount > 0)
+            throw new ConvexError(
+                `Cannot activate: ${notFilledSeats.length + missingCount} seats are not fully filled.`
+            );
 
         await ctx.db.patch(args.poolId, { status: "ACTIVE", currentRound: 1 });
     },
